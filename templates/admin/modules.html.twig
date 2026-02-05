@@ -1,0 +1,27 @@
+{% extends 'layouts/admin.html.twig' %}
+
+{% block title %}Modules & Blog - AutiCare Admin{% endblock %}
+
+{% block admin_content %}
+<h1 class="text-2xl font-semibold text-auticare-text-strong mb-6">Modules de sensibilisation & Blog collaboratif</h1>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <section class="bg-auticare-card rounded-xl border border-auticare-border p-6">
+        <h2 class="text-lg font-medium text-auticare-text-strong mb-4">Modules de sensibilisation</h2>
+        <p class="text-auticare-text mb-4">Gestion des contenus de sensibilisation à l’autisme.</p>
+        <ul class="space-y-2 text-auticare-text">
+            <li>• Liste et édition des modules</li>
+            <li>• Ordre et visibilité</li>
+        </ul>
+        <button type="button" class="mt-4 px-4 py-2 rounded-lg border border-auticare-border bg-auticare-bg text-auticare-text-strong hover:bg-auticare-border focus:outline focus:ring-2 focus:ring-auticare-accent">Gérer les modules</button>
+    </section>
+    <section class="bg-auticare-card rounded-xl border border-auticare-border p-6">
+        <h2 class="text-lg font-medium text-auticare-text-strong mb-4">Blog collaboratif</h2>
+        <p class="text-auticare-text mb-4">Articles et publications du blog.</p>
+        <ul class="space-y-2 text-auticare-text">
+            <li>• Création et modification d’articles</li>
+            <li>• Modération et commentaires</li>
+        </ul>
+        <button type="button" class="mt-4 px-4 py-2 rounded-lg border border-auticare-border bg-auticare-bg text-auticare-text-strong hover:bg-auticare-border focus:outline focus:ring-2 focus:ring-auticare-accent">Gérer le blog</button>
+    </section>
+</div>
+{% endblock %}

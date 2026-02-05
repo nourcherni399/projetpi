@@ -1,0 +1,27 @@
+{% extends 'layouts/admin.html.twig' %}
+
+{% block title %}Événements - AutiCare Admin{% endblock %}
+
+{% block admin_content %}
+<h1 class="text-2xl font-semibold text-auticare-text-strong mb-6">Gestion des événements</h1>
+<div class="bg-auticare-card rounded-xl border border-auticare-border overflow-hidden">
+    <div class="p-4 border-b border-auticare-border flex justify-end">
+        <button type="button" class="px-4 py-2 rounded-lg bg-auticare-accent text-auticare-card font-medium hover:bg-auticare-accent-soft focus:outline focus:ring-2 focus:ring-auticare-accent">Nouvel événement</button>
+    </div>
+    <div class="p-6">
+        <ul class="space-y-4">
+            <li class="flex items-center justify-between p-4 rounded-lg border border-auticare-border bg-auticare-bg">
+                <div>
+                    <span class="font-medium text-auticare-text-strong">Titre de l’événement</span>
+                    <span class="text-auticare-text ml-2">— Date (template)</span>
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" class="px-3 py-1 rounded border border-auticare-border text-auticare-text-strong hover:bg-auticare-border">Modifier</button>
+                    <button type="button" class="px-3 py-1 rounded border border-auticare-border text-auticare-text-strong hover:bg-auticare-border">Supprimer</button>
+                </div>
+            </li>
+        </ul>
+        <p class="mt-4 text-sm text-auticare-text">Template : les événements seront chargés dynamiquement.</p>
+    </div>
+</div>
+{% endblock %}

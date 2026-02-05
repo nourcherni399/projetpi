@@ -1,0 +1,28 @@
+{% extends 'layouts/admin.html.twig' %}
+
+{% block title %}Produits - AutiCare Admin{% endblock %}
+
+{% block admin_content %}
+<h1 class="text-2xl font-semibold text-auticare-text-strong mb-6">Gestion des produits</h1>
+<div class="bg-auticare-card rounded-xl border border-auticare-border overflow-hidden">
+    <div class="p-4 border-b border-auticare-border flex flex-wrap gap-4 justify-between">
+        <input type="search" placeholder="Rechercher un produit…" class="px-4 py-2 rounded-lg border border-auticare-border bg-auticare-bg text-auticare-text placeholder-gray-400 focus:outline focus:ring-2 focus:ring-auticare-accent max-w-xs">
+        <button type="button" class="px-4 py-2 rounded-lg bg-auticare-accent text-auticare-card font-medium hover:bg-auticare-accent-soft focus:outline focus:ring-2 focus:ring-auticare-accent">Nouveau produit</button>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead class="bg-auticare-bg border-b border-auticare-border">
+                <tr>
+                    <th class="px-6 py-4 font-medium text-auticare-text-strong">Produit</th>
+                    <th class="px-6 py-4 font-medium text-auticare-text-strong">Référence</th>
+                    <th class="px-6 py-4 font-medium text-auticare-text-strong">Prix</th>
+                    <th class="px-6 py-4 font-medium text-auticare-text-strong">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-auticare-border">
+                <tr class="hover:bg-auticare-bg/50"><td class="px-6 py-4">—</td><td class="px-6 py-4">—</td><td class="px-6 py-4">—</td><td class="px-6 py-4"><span class="text-auticare-text">Template (données à connecter)</span></td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

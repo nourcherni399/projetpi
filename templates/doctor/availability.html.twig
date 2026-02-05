@@ -1,0 +1,41 @@
+{% extends 'layouts/doctor.html.twig' %}
+
+{% block title %}Disponibilités - AutiCare Médecin{% endblock %}
+
+{% block doctor_content %}
+<h1 class="text-2xl font-semibold text-auticare-text-strong mb-6">Horaires de disponibilité</h1>
+<p class="text-auticare-text mb-6">Visualisez et définissez vos créneaux de manière claire et intuitive. (Template — à connecter aux données.)</p>
+<div class="bg-auticare-card rounded-xl border border-auticare-border overflow-hidden">
+    <div class="p-6 border-b border-auticare-border">
+        <h2 class="text-lg font-medium text-auticare-text-strong mb-4">Semaine type</h2>
+        <div class="space-y-4">
+            {% for day in ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'] %}
+            <div class="flex flex-wrap items-center gap-4 p-4 rounded-lg bg-auticare-bg border border-auticare-border">
+                <span class="w-28 font-medium text-auticare-text-strong">{{ day }}</span>
+                <label class="flex items-center gap-2 text-auticare-text">
+                    <input type="checkbox" class="rounded border-auticare-border text-auticare-accent focus:ring-auticare-accent">
+                    Disponible
+                </label>
+                <div class="flex gap-2 items-center">
+                    <input type="time" class="px-3 py-2 rounded-lg border border-auticare-border bg-auticare-card text-auticare-text focus:outline focus:ring-2 focus:ring-auticare-accent" value="09:00">
+                    <span class="text-auticare-text">à</span>
+                    <input type="time" class="px-3 py-2 rounded-lg border border-auticare-border bg-auticare-card text-auticare-text focus:outline focus:ring-2 focus:ring-auticare-accent" value="18:00">
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="p-6">
+        <h2 class="text-lg font-medium text-auticare-text-strong mb-4">Exceptions (dates spécifiques)</h2>
+        <p class="text-auticare-text mb-4">Ajouter des indisponibilités ou créneaux exceptionnels (template).</p>
+        <div class="flex gap-4 flex-wrap">
+            <input type="date" class="px-4 py-2 rounded-lg border border-auticare-border bg-auticare-bg text-auticare-text focus:outline focus:ring-2 focus:ring-auticare-accent">
+            <input type="time" class="px-4 py-2 rounded-lg border border-auticare-border bg-auticare-bg text-auticare-text focus:outline focus:ring-2 focus:ring-auticare-accent">
+            <span class="self-center text-auticare-text">à</span>
+            <input type="time" class="px-4 py-2 rounded-lg border border-auticare-border bg-auticare-bg text-auticare-text focus:outline focus:ring-2 focus:ring-auticare-accent">
+            <button type="button" class="px-4 py-2 rounded-lg bg-auticare-accent text-auticare-card font-medium hover:bg-auticare-accent-soft focus:outline focus:ring-2 focus:ring-auticare-accent">Ajouter</button>
+        </div>
+        <button type="button" class="mt-6 px-4 py-2 rounded-lg bg-auticare-accent text-auticare-card font-medium hover:bg-auticare-accent-soft focus:outline focus:ring-2 focus:ring-auticare-accent">Enregistrer les disponibilités</button>
+    </div>
+</div>
+{% endblock %}

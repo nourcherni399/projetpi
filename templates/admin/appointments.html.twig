@@ -1,0 +1,16 @@
+{% extends 'layouts/admin.html.twig' %}
+
+{% block title %}Rendez-vous - AutiCare Admin{% endblock %}
+
+{% block admin_content %}
+<h1 class="text-2xl font-semibold text-auticare-text-strong mb-6">Gestion des rendez-vous</h1>
+<div class="bg-auticare-card rounded-xl border border-auticare-border p-6">
+    <div class="flex flex-wrap gap-4 mb-6">
+        <button type="button" class="px-4 py-2 rounded-lg bg-auticare-accent text-auticare-card font-medium hover:bg-auticare-accent-soft focus:outline focus:ring-2 focus:ring-auticare-accent">Vue calendrier</button>
+        <button type="button" class="px-4 py-2 rounded-lg border border-auticare-border bg-auticare-bg text-auticare-text-strong hover:bg-auticare-border focus:outline focus:ring-2 focus:ring-auticare-accent">Vue liste</button>
+    </div>
+    <div class="border border-auticare-border rounded-lg p-8 text-center text-auticare-text">
+        Zone calendrier / liste des rendez-vous (template — à connecter aux données).
+    </div>
+</div>
+{% endblock %}
