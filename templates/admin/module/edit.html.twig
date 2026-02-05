@@ -1,6 +1,6 @@
 {% extends 'layouts/admin.html.twig' %}
 
-{% block title %}Nouveau module - AutiCare Admin{% endblock %}
+{% block title %}Modifier le module - AutiCare Admin{% endblock %}
 
 {% block admin_content %}
 <div class="max-w-2xl">
@@ -10,7 +10,7 @@
             Retour aux modules
         </a>
     </div>
-    <h1 class="text-2xl font-semibold text-[#4B5563] mb-6">Nouveau module</h1>
+    <h1 class="text-2xl font-semibold text-[#4B5563] mb-6">Modifier le module</h1>
 
     <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8">
         {{ form_start(form, {
@@ -34,7 +34,7 @@
         </div>
         <div class="flex flex-wrap gap-3 pt-4">
             <button type="submit" class="px-5 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
-                Enregistrer le module
+                Enregistrer les modifications
             </button>
             <a href="{{ path('admin_module_index') }}" class="px-5 py-2.5 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
                 Annuler

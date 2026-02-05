@@ -1,0 +1,88 @@
+{% extends "form_div_layout.html.twig" %}
+
+{# Personnalisation de l'affichage des erreurs #}
+{% block form_errors %}
+    {% if errors|length > 0 %}
+        {% if compound %}
+            <div class="alert alert-danger">
+                {{ block('form_errors_compound') }}
+            </div>
+        {% else %}
+            <div class="mt-1 text-sm text-red-600">
+                {% for error in errors %}
+                    <span>{{ error.message }}</span>
+                    {% if not loop.last %}<br>{% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endif %}
+{% endblock form_errors %}
+
+{# Personnalisation des champs de formulaire #}
+{% block form_row %}
+    <div class="form-group">
+        {{ form_label(form) }}
+        {{ form_widget(form) }}
+        {{ form_errors(form) }}
+    </div>
+{% endblock form_row %}
+
+{# Personnalisation des labels #}
+{% block form_label %}
+    {% if label is not same as(false) %}
+        {% if required %}
+            {% set label_attr = label_attr|merge({class: (label_attr.class|default('') ~ ' required')|trim}) %}
+        {% endif %}
+        {% if label is empty %}
+            {% set label = name|humanize %}
+        {% endif %}
+        <label{% for attrname, attrvalue in label_attr %} {{ attrname }}="{{ attrvalue }}"{% endfor %}>
+            {{ label|trans({}, translation_domain) }}
+            {% if required %}
+                <span class="text-red-500">*</span>
+            {% endif %}
+        </label>
+    {% endif %}
+{% endblock form_label %}
+
+{# Personnalisation des widgets #}
+{% block form_widget_simple %}
+    {% set type = type|default('text') %}
+    {% if attr.class is defined %}
+        {% set attr = attr|merge({class: attr.class ~ ' is-invalid'}) %}
+    {% endif %}
+    <input type="{{ type }}" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}"{% endif %} />
+{% endblock form_widget_simple %}
+
+{# Personnalisation des textarea #}
+{% block textarea_widget %}
+    {% set attr = attr|merge({class: (attr.class|default('') ~ ' form-control')|trim}) %}
+    <textarea {{ block('widget_attributes') }}>{{ value }}</textarea>
+{% endblock textarea_widget %}
+
+{# Personnalisation des select #}
+{% block choice_widget %}
+    {% if expanded %}
+        {{ block('choice_widget_expanded') }}
+    {% else %}
+        {{ block('choice_widget_collapsed') }}
+    {% endif %}
+{% endblock choice_widget %}
+
+{% block choice_widget_collapsed %}
+    {% set attr = attr|merge({class: (attr.class|default('') ~ ' form-control')|trim}) %}
+    <select {{ block('widget_attributes') }}{% if multiple %} multiple="multiple"{% endif %}>
+        {% if placeholder is not none %}
+            <option value=""{% if required and value is empty %} selected="selected"{% endif %}>{{ placeholder|trans({}, translation_domain) }}</option>
+        {% endif %}
+        {% if preferred_choices|length > 0 %}
+            {% set options = preferred_choices %}
+            {{ block('choice_widget_options') }}
+            {% if choices|length > 0 and separator is not none %}
+                <option disabled="disabled">{{ separator }}</option>
+            {% endif %}
+        {% endif %}
+        {% set options = choices %}
+        {{ block('choice_widget_options') }}
+    </select>
+{% endblock choice_widget_collapsed %}

@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\CategorieModule;
 use App\Repository\ModuleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -51,9 +52,14 @@ class Module
     #[ORM\OneToMany(targetEntity: Blog::class, mappedBy: 'module')]
     private Collection $blogs;
 
+    #[ORM\Column(type: 'string', enumType: CategorieModule::class, columnDefinition: "ENUM('', 'COMPRENDRE_TSA', 'AUTONOMIE', 'COMMUNICATION', 'EMOTIONS', 'VIE_QUOTIDIENNE', 'ACCOMPAGNEMENT') NOT NULL")]
+    private CategorieModule $categorie;
+
+
     public function __construct()
     {
         $this->blogs = new ArrayCollection();
+        $this->categorie = CategorieModule::EMPTY;
     }
 
     public function getId(): ?int
@@ -195,6 +201,18 @@ class Module
                 $blog->setModule(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCategorie(): CategorieModule
+    {
+        return $this->categorie;
+    }
+
+    public function setCategorie(CategorieModule $categorie): static
+    {
+        $this->categorie = $categorie;
 
         return $this;
     }
