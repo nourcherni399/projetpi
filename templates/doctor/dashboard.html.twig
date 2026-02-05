@@ -1,0 +1,19 @@
+{% extends 'layouts/doctor.html.twig' %}
+
+{% block title %}Tableau de bord - AutiCare Médecin{% endblock %}
+
+{% block doctor_content %}
+<h1 class="text-2xl font-semibold text-[#4B5563] mb-6">Tableau de bord médecin</h1>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <section class="bg-white rounded-xl border border-[#E5E0D8] p-6">
+        <h2 class="text-lg font-medium text-[#4B5563] mb-2">Rendez-vous à venir</h2>
+        <p class="text-[#6B7280]">Vue d'ensemble des prochains rendez-vous (à connecter).</p>
+        <a href="{{ path('doctor_availability') }}" class="mt-4 inline-block text-[#A7C7E7] hover:underline font-medium">Gérer les disponibilités →</a>
+    </section>
+    <section class="bg-white rounded-xl border border-[#E5E0D8] p-6">
+        <h2 class="text-lg font-medium text-[#4B5563] mb-2">Mes disponibilités</h2>
+        <p class="text-[#6B7280]">Définir et visualiser vos créneaux de disponibilité.</p>
+        <a href="{{ path('doctor_availability') }}" class="mt-4 inline-block text-[#A7C7E7] hover:underline font-medium">Voir / modifier →</a>
+    </section>
+</div>
+{% endblock %}
