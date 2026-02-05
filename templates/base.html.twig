@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AutiCare{% endblock %}</title>
+    <link rel="icon" href="{{ asset('images/logo.png') }}">
+    {% block stylesheets %}
+        <style>
+            :root {
+                --auticare-bg: #F5F1EB;
+                --auticare-text: #6B7280;
+                --auticare-text-strong: #4B5563;
+                --auticare-border: #E5E0D8;
+                --auticare-accent: #A7C7E7;
+                --auticare-accent-soft: #B8D4ED;
+                --auticare-card: #FFFFFF;
+                --auticare-tag-green: #95d7b5;
+                --auticare-tag-blue: #A7C7E7;
+                --auticare-tag-purple: #D8B4FE;
+                --auticare-alert: #F87171;
+            }
+        </style>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        colors: {
+                            autocare: {
+                                bg: '#F5F1EB',
+                                text: '#6B7280',
+                                'text-strong': '#4B5563',
+                                border: '#E5E0D8',
+                                accent: '#A7C7E7',
+                                'accent-soft': '#B8D4ED',
+                                card: '#FFFFFF',
+                                'tag-green': '#95d7b5',
+                                'tag-blue': '#A7C7E7',
+                                'tag-purple': '#D8B4FE',
+                                alert: '#F87171',
+                            }
+                        }
+                    }
+                }
+            }
+        </script>
+    {% endblock %}
+    {% block javascripts %}
+        {% block importmap %}{{ importmap('app') }}{% endblock %}
+    {% endblock %}
+</head>
+<body class="bg-[#F5F1EB] text-[#6B7280] antialiased">
+    {% block body %}{% endblock %}
+</body>
+</html>
