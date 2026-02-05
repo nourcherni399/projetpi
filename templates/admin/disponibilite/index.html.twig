@@ -1,0 +1,40 @@
+{% extends 'layouts/admin.html.twig' %}
+
+{% block title %}Disponibilités - AutiCare Admin{% endblock %}
+
+{% block admin_content %}
+<h1 class="text-2xl font-semibold text-[#4B5563] mb-6">Gestion des disponibilités</h1>
+<div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
+    <div class="p-4 border-b border-[#E5E0D8] flex flex-wrap gap-4 justify-between">
+        <button type="button" class="px-4 py-2 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Nouvelle disponibilité</button>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead class="bg-[#F5F1EB] border-b border-[#E5E0D8]">
+                <tr>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Médecin</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Jour</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Heure début</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Heure fin</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Disponible</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-[#E5E0D8]">
+                {% for dispo in disponibilites %}
+                <tr class="hover:bg-[#F5F1EB]/50">
+                    <td class="px-6 py-4 text-[#4B5563]">{% if dispo.medecin %}{{ dispo.medecin.prenom }} {{ dispo.medecin.nom }}{% else %}—{% endif %}</td>
+                    <td class="px-6 py-4 text-[#6B7280]">{{ dispo.jour ? dispo.jour.value : '—' }}</td>
+                    <td class="px-6 py-4 text-[#6B7280]">{{ dispo.heureDebut ? dispo.heureDebut|date('H:i') : '—' }}</td>
+                    <td class="px-6 py-4 text-[#6B7280]">{{ dispo.heureFin ? dispo.heureFin|date('H:i') : '—' }}</td>
+                    <td class="px-6 py-4 text-[#6B7280]">{{ dispo.estDispo ? 'Oui' : 'Non' }}</td>
+                    <td class="px-6 py-4"><span class="text-[#6B7280] text-sm">—</span></td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="px-6 py-8 text-center text-[#6B7280]">Aucune disponibilité.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

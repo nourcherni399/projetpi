@@ -1,0 +1,39 @@
+/**
+ * AutiCare - Design system inclusif
+ * Fond beige chaud, texte gris doux, contrastes modérés
+ */
+:root {
+  --auticare-bg: #F5F1EB;
+  --auticare-text: #6B7280;
+  --auticare-text-strong: #4B5563;
+  --auticare-border: #E5E0D8;
+  --auticare-accent: #8B7355;
+  --auticare-accent-soft: #A89882;
+  --auticare-card: #FDFBF7;
+  --auticare-focus: #9CA3AF;
+}
+
+body {
+  background-color: var(--auticare-bg);
+  color: var(--auticare-text);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.6;
+}
+
+/* Réduction de la surcharge sensorielle */
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--auticare-focus);
+  outline-offset: 2px;
+}
+
+/* Liens apaisants */
+a {
+  color: var(--auticare-accent);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--auticare-accent-soft);
+  text-decoration: underline;
+}

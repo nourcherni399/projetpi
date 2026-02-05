@@ -1,0 +1,145 @@
+{% extends 'layouts/user.html.twig' %}
+
+{% block title %}Blog & Témoignages - AutiCare{% endblock %}
+
+{% block user_content %}
+<section class="text-center mb-10">
+    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full border-2 border-[#A7C7E7] bg-[#A7C7E7]/10 text-[#A7C7E7] mb-4">
+        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.256A8.967 8.967 0 016 18c2.295 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.256A8.967 8.967 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+    </div>
+    <h1 class="text-3xl font-bold text-[#4B5563] mb-3">Blog & Témoignages</h1>
+    <p class="text-[#6B7280] max-w-2xl mx-auto">
+        Partagez vos expériences, découvrez des conseils pratiques et rejoignez les discussions de notre communauté bienveillante.
+    </p>
+</section>
+
+<div class="flex flex-col lg:flex-row gap-8">
+    <div class="flex-1 min-w-0 space-y-8">
+        <article class="bg-[#A7C7E7]/15 rounded-2xl border border-[#A7C7E7]/30 overflow-hidden">
+            <div class="p-6 md:p-8">
+                <div class="flex flex-col md:flex-row gap-6 md:gap-8">
+                    <div class="md:w-2/5 shrink-0 flex items-center justify-center">
+                        <div class="w-full aspect-square max-w-xs bg-white/80 rounded-xl flex items-center justify-center text-[#6B7280] text-sm text-center px-4">Illustration TSA</div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h2 class="text-xl font-bold text-[#4B5563] mb-2">{{ featured.infographic_title }}</h2>
+                        <p class="text-[#6B7280] text-sm mb-4">{{ featured.infographic_description }}</p>
+                        <p class="text-sm text-[#6B7280] mb-3">Pas de cause unique identifiée</p>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#A7C7E7]/30 text-[#4B5563] text-sm font-medium">
+                            TOUCHE 1 personne sur 100 • 3 garçons pour 1 fille
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <article class="bg-white rounded-2xl shadow-sm border border-[#E5E0D8] overflow-hidden grid grid-rows-[60fr_40fr] min-h-[400px]">
+            <div class="w-full min-h-0 flex items-center justify-center bg-[#A7C7E7]/15 text-[#6B7280] text-sm text-center px-4">
+                Illustration — {{ featured.title }}
+            </div>
+            <div class="w-full min-h-0 flex flex-col p-5 md:p-6">
+                <div class="flex flex-wrap gap-2 mb-2">
+                    <span class="px-2 py-1 rounded-md text-xs font-medium bg-[#E5E0D8] text-[#4B5563]">Témoignages</span>
+                    <span class="px-2 py-1 rounded-md text-xs font-medium bg-[#E5E0D8] text-[#4B5563]">Article à la une</span>
+                </div>
+                <h3 class="text-lg font-bold text-[#4B5563] mb-1 line-clamp-2">{{ featured.title }}</h3>
+                <p class="text-[#6B7280] text-sm mb-2 line-clamp-2 flex-1 min-h-0">{{ featured.excerpt }}</p>
+                <p class="text-[#6B7280] text-xs mb-2">{{ featured.author_initials }} {{ featured.author }} • {{ featured.date }}</p>
+                <div class="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-[#E5E0D8]">
+                    <div class="flex items-center gap-4 text-sm text-[#6B7280]">
+                        <span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg> {{ featured.likes }}</span>
+                        <span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg> {{ featured.comments }}</span>
+                    </div>
+                    {% if featured.id > 0 %}
+                    <a href="{{ path('user_blog_module', { id: featured.id }) }}" class="text-[#A7C7E7] font-medium hover:underline inline-flex items-center gap-1 text-sm">Lire la suite <span>→</span></a>
+                    {% else %}
+                    <a href="#" class="text-[#A7C7E7] font-medium hover:underline inline-flex items-center gap-1 text-sm">Lire la suite <span>→</span></a>
+                    {% endif %}
+                </div>
+            </div>
+        </article>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% for article in articles %}
+            <article class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] overflow-hidden flex flex-col">
+                <div class="aspect-[4/3] w-full shrink-0 overflow-hidden bg-[#E5E0D8]">
+                    {% if article.image_url is defined and article.image_url %}
+                    <img src="{{ asset(article.image_url) }}" alt="{{ article.image_label }}" class="w-full h-full object-cover">
+                    {% else %}
+                    <div class="w-full h-full flex items-center justify-center text-[#4B5563] font-semibold text-center px-4 {% if loop.index == 1 %}bg-[#A7C7E7]/20{% else %}bg-[#95d7b5]/30{% endif %}">
+                        {{ article.image_label }}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="p-6 flex flex-col flex-1">
+                    <div class="flex flex-wrap gap-2 mb-2">
+                        {% for tag in article.tags %}
+                        <span class="px-2 py-1 rounded-md text-xs font-medium bg-[#E5E0D8] text-[#4B5563]">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                    <h3 class="text-lg font-bold text-[#4B5563] mb-2">{{ article.title }}</h3>
+                    <p class="text-[#6B7280] text-sm mb-3 flex-1 line-clamp-4">{{ article.excerpt }}</p>
+                    {% if article.highlight %}
+                    <p class="text-[#4B5563] text-sm font-medium mb-3">• {{ article.highlight }}</p>
+                    {% endif %}
+                    <p class="text-[#6B7280] text-xs mb-3 flex items-center gap-2">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-[#E5E0D8] text-[#4B5563] text-xs font-semibold">{{ article.author_initials }}</span>
+                        {{ article.author }} • {{ article.date }}
+                    </p>
+                    <div class="flex items-center justify-between pt-2 border-t border-[#E5E0D8]">
+                        <div class="flex items-center gap-4 text-sm text-[#6B7280]">
+                            <span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg> {{ article.likes }}</span>
+                            <span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg> {{ article.comments }}</span>
+                        </div>
+                        <a href="{{ path('user_blog_module', { id: article.id }) }}" class="text-[#A7C7E7] font-medium hover:underline">Lire</a>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+
+    <aside class="lg:w-80 shrink-0 space-y-6">
+        <div class="bg-white rounded-xl shadow-sm p-5 border border-[#E5E0D8]">
+            <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+                </span>
+                <input type="search" placeholder="Rechercher un article..." class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#6B7280] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+            </div>
+        </div>
+        <div id="ecrire-article" class="bg-white rounded-xl shadow-sm p-5 border border-[#E5E0D8]">
+            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full border-2 border-[#A7C7E7] bg-[#A7C7E7]/10 text-[#A7C7E7] mb-3">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+            </div>
+            <h2 class="font-semibold text-[#4B5563] mb-2">Partagez votre histoire</h2>
+            <p class="text-[#6B7280] text-sm mb-4">Votre expérience peut aider d'autres familles. Écrivez votre témoignage.</p>
+            <a href="#ecrire-article" class="inline-block px-4 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Écrire un article</a>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm p-5 border border-[#E5E0D8]">
+            <h2 class="font-semibold text-[#4B5563] mb-4">Catégories</h2>
+            <ul class="space-y-2 text-[#6B7280]">
+                {% for cat in categories %}
+                <li><a href="#" class="hover:text-[#A7C7E7]">{{ cat.name }} ({{ cat.count }})</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm p-5 border border-[#E5E0D8]">
+            <h2 class="font-semibold text-[#4B5563] mb-4">Articles populaires</h2>
+            <ul class="space-y-3 text-sm">
+                {% for pop in popular_articles %}
+                <li><a href="{{ path('user_blog_module', { id: pop.id }) }}" class="text-[#6B7280] hover:text-[#A7C7E7] line-clamp-2">{{ pop.title }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm p-5 border border-[#E5E0D8]">
+            <h2 class="font-semibold text-[#4B5563] mb-4">Tags populaires</h2>
+            <div class="flex flex-wrap gap-2">
+                {% for tag in popular_tags %}
+                <a href="#" class="px-3 py-1.5 rounded-full bg-[#E5E0D8]/80 text-[#A7C7E7] text-sm font-medium hover:bg-[#A7C7E7]/20">{{ tag }}</a>
+                {% endfor %}
+            </div>
+        </div>
+    </aside>
+</div>
+{% endblock %}

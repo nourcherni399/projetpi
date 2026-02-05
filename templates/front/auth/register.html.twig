@@ -1,0 +1,65 @@
+{% extends 'layouts/user.html.twig' %}
+
+{% block title %}Créer un compte - AutiCare{% endblock %}
+
+{% block user_content %}
+<div class="max-w-lg mx-auto py-12">
+    <div class="bg-white rounded-2xl shadow-lg border border-[#E5E0D8] p-8">
+        <div class="flex justify-center mb-4">
+            <span class="flex items-center justify-center w-14 h-14 rounded-full bg-[#A7C7E7] text-white">
+                <svg class="w-7 h-7" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>
+            </span>
+        </div>
+        <h1 class="text-2xl font-bold text-[#4B5563] text-center mb-1">Créer un compte</h1>
+        <p class="text-[#6B7280] text-center text-sm mb-6">Rejoignez la communauté AutiCare</p>
+
+        <form class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="reg-firstname" class="block text-[#4B5563] font-medium mb-1">Prénom</label>
+                    <input type="text" id="reg-firstname" placeholder="Votre prénom" class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#6B7280] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                </div>
+                <div>
+                    <label for="reg-lastname" class="block text-[#4B5563] font-medium mb-1">Nom</label>
+                    <input type="text" id="reg-lastname" placeholder="Votre nom" class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#6B7280] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                </div>
+            </div>
+            <div>
+                <label for="reg-email" class="block text-[#4B5563] font-medium mb-1">Adresse e-mail</label>
+                <input type="email" id="reg-email" placeholder="exemple@email.com" class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#6B7280] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+            </div>
+            <div>
+                <label for="reg-password" class="block text-[#4B5563] font-medium mb-1">Mot de passe</label>
+                <div class="relative">
+                    <input type="password" id="reg-password" placeholder="Créez un mot de passe" class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#6B7280] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7] pr-10">
+                    <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280]" aria-label="Afficher le mot de passe">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" /></svg>
+                    </button>
+                </div>
+                <p class="mt-1 text-xs text-[#6B7280]">Minimum 8 caractères, avec au moins une majuscule et un chiffre</p>
+            </div>
+            <div>
+                <label for="reg-profile" class="block text-[#4B5563] font-medium mb-1">Vous êtes</label>
+                <select id="reg-profile" class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                    <option value="">Sélectionnez votre profil</option>
+                    <option>Parent / Proche</option>
+                    <option>Professionnel</option>
+                    <option>Personne autiste</option>
+                </select>
+            </div>
+            <div class="flex items-start gap-2">
+                <input type="checkbox" id="reg-cgu" class="mt-1 rounded border-[#E5E0D8] text-[#A7C7E7] focus:ring-[#A7C7E7]">
+                <label for="reg-cgu" class="text-[#6B7280] text-sm">J'accepte les <a href="#" class="text-[#A7C7E7] hover:underline">conditions générales</a> et <a href="#" class="text-[#A7C7E7] hover:underline">politique de confidentialité</a>.</label>
+            </div>
+            <div class="flex items-center gap-2">
+                <input type="checkbox" id="reg-news" class="rounded border-[#E5E0D8] text-[#A7C7E7] focus:ring-[#A7C7E7]">
+                <label for="reg-news" class="text-[#6B7280] text-sm">Je souhaite recevoir les actualités et offres d'AutiCare.</label>
+            </div>
+            <button type="submit" class="w-full py-3 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Créer mon compte</button>
+        </form>
+        <p class="mt-6 text-center text-[#6B7280] text-sm">
+            Déjà un compte ? <a href="{{ path('login') }}" class="text-[#A7C7E7] hover:underline font-medium">Se connecter</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
