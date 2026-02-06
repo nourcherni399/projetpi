@@ -15,11 +15,95 @@
 
 <div class="flex flex-col lg:flex-row gap-8">
     <div class="flex-1 min-w-0 space-y-8">
-        <article class="bg-[#A7C7E7]/15 rounded-2xl border border-[#A7C7E7]/30 overflow-hidden">
+        <!-- Section Modules par Catégorie -->
+        <div class="bg-gradient-to-br from-[#A7C7E7]/10 to-[#95d7b5]/10 rounded-2xl border border-[#A7C7E7]/20 p-6">
+            <h2 class="text-2xl font-bold text-[#4B5563] mb-6 flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-[#A7C7E7]/20 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-[#A7C7E7]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                </div>
+                Modules d'apprentissage
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for module in modules %}
+                <article class="bg-white rounded-xl shadow-lg border border-[#E5E0D8]/50 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                    <!-- Image du module -->
+                    <div class="aspect-[16/10] w-full overflow-hidden bg-gradient-to-br from-[#A7C7E7]/20 to-[#95d7b5]/20 relative">
+                        {% if module.image %}
+                            <img src="{{ asset(module.image) }}" alt="{{ module.titre }}" class="w-full h-full object-cover">
+                        {% else %}
+                            <div class="w-full h-full flex flex-col items-center justify-center text-[#4B5563] p-4">
+                                <div class="w-12 h-12 rounded-full bg-white/50 flex items-center justify-center mb-2">
+                                    <svg class="w-6 h-6 text-[#A7C7E7]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                    </svg>
+                                </div>
+                                <span class="text-sm font-medium">Module</span>
+                            </div>
+                        {% endif %}
+
+                        <!-- Badge de niveau -->
+                        <div class="absolute top-3 right-3">
+                            <span class="px-2 py-1 rounded-full text-xs font-medium
+                                {% if module.niveau == 'facile' %}bg-green-100 text-green-800
+                                {% elseif module.niveau == 'moyen' %}bg-yellow-100 text-yellow-800
+                                {% else %}bg-red-100 text-red-800{% endif %}">
+                                {{ module.niveau|capitalize }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Contenu du module -->
+                    <div class="p-5">
+                        <div class="flex flex-wrap gap-2 mb-3">
+                            <span class="px-2 py-1 rounded-md text-xs font-medium bg-[#E5E0D8]/60 text-[#4B5563]">Module</span>
+                            {% if module.categorie.label() %}
+                                <span class="px-2 py-1 rounded-md text-xs font-medium bg-[#A7C7E7]/20 text-[#4B5563]">{{ module.categorie.label() }}</span>
+                            {% endif %}
+                        </div>
+
+                        <h3 class="text-lg font-bold text-[#4B5563] mb-3 line-clamp-2">{{ module.titre }}</h3>
+                        <p class="text-[#6B7280] text-sm mb-4 line-clamp-3">{{ module.description }}</p>
+
+                        <!-- Métadonnées -->
+                        <div class="flex items-center justify-between pt-3 border-t border-[#E5E0D8]/50">
+                            <div class="flex items-center gap-3 text-xs text-[#6B7280]">
+                                <div class="flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    {{ module.dateCreation ? module.dateCreation|date('d F Y') : 'Date inconnue' }}
+                                </div>
+                            </div>
+                            <a href="{{ path('user_blog_module', { id: module.id }) }}"
+                               class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#A7C7E7] text-white text-sm font-medium hover:bg-[#B8D4ED] transition-colors">
+                                <span>Explorer</span>
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Article en vedette -->
+        <article class="bg-white rounded-2xl shadow-sm border border-[#E5E0D8] overflow-hidden">
             <div class="p-6 md:p-8">
                 <div class="flex flex-col md:flex-row gap-6 md:gap-8">
                     <div class="md:w-2/5 shrink-0 flex items-center justify-center">
-                        <div class="w-full aspect-square max-w-xs bg-white/80 rounded-xl flex items-center justify-center text-[#6B7280] text-sm text-center px-4">Illustration TSA</div>
+                        <div class="w-full aspect-square max-w-xs bg-gradient-to-br from-[#A7C7E7]/20 to-[#95d7b5]/20 rounded-xl flex items-center justify-center text-[#6B7280] text-sm text-center px-4">
+                            <div class="text-center">
+                                <svg class="w-12 h-12 mx-auto mb-2 text-[#A7C7E7]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                </svg>
+                                Illustration TSA
+                            </div>
+                        </div>
                     </div>
                     <div class="flex-1 min-w-0">
                         <h2 class="text-xl font-bold text-[#4B5563] mb-2">{{ featured.infographic_title }}</h2>
@@ -32,71 +116,6 @@
                 </div>
             </div>
         </article>
-
-        <article class="bg-white rounded-2xl shadow-sm border border-[#E5E0D8] overflow-hidden grid grid-rows-[60fr_40fr] min-h-[400px]">
-            <div class="w-full min-h-0 flex items-center justify-center bg-[#A7C7E7]/15 text-[#6B7280] text-sm text-center px-4">
-                Illustration — {{ featured.title }}
-            </div>
-            <div class="w-full min-h-0 flex flex-col p-5 md:p-6">
-                <div class="flex flex-wrap gap-2 mb-2">
-                    <span class="px-2 py-1 rounded-md text-xs font-medium bg-[#E5E0D8] text-[#4B5563]">Témoignages</span>
-                    <span class="px-2 py-1 rounded-md text-xs font-medium bg-[#E5E0D8] text-[#4B5563]">Article à la une</span>
-                </div>
-                <h3 class="text-lg font-bold text-[#4B5563] mb-1 line-clamp-2">{{ featured.title }}</h3>
-                <p class="text-[#6B7280] text-sm mb-2 line-clamp-2 flex-1 min-h-0">{{ featured.excerpt }}</p>
-                <p class="text-[#6B7280] text-xs mb-2">{{ featured.author_initials }} {{ featured.author }} • {{ featured.date }}</p>
-                <div class="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-[#E5E0D8]">
-                    <div class="flex items-center gap-4 text-sm text-[#6B7280]">
-                        <span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg> {{ featured.likes }}</span>
-                        <span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg> {{ featured.comments }}</span>
-                    </div>
-                    {% if featured.id > 0 %}
-                    <a href="{{ path('user_blog_module', { id: featured.id }) }}" class="text-[#A7C7E7] font-medium hover:underline inline-flex items-center gap-1 text-sm">Lire la suite <span>→</span></a>
-                    {% else %}
-                    <a href="#" class="text-[#A7C7E7] font-medium hover:underline inline-flex items-center gap-1 text-sm">Lire la suite <span>→</span></a>
-                    {% endif %}
-                </div>
-            </div>
-        </article>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {% for article in articles %}
-            <article class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] overflow-hidden flex flex-col">
-                <div class="aspect-[4/3] w-full shrink-0 overflow-hidden bg-[#E5E0D8]">
-                    {% if article.image_url is defined and article.image_url %}
-                    <img src="{{ asset(article.image_url) }}" alt="{{ article.image_label }}" class="w-full h-full object-cover">
-                    {% else %}
-                    <div class="w-full h-full flex items-center justify-center text-[#4B5563] font-semibold text-center px-4 {% if loop.index == 1 %}bg-[#A7C7E7]/20{% else %}bg-[#95d7b5]/30{% endif %}">
-                        {{ article.image_label }}
-                    </div>
-                    {% endif %}
-                </div>
-                <div class="p-6 flex flex-col flex-1">
-                    <div class="flex flex-wrap gap-2 mb-2">
-                        {% for tag in article.tags %}
-                        <span class="px-2 py-1 rounded-md text-xs font-medium bg-[#E5E0D8] text-[#4B5563]">{{ tag }}</span>
-                        {% endfor %}
-                    </div>
-                    <h3 class="text-lg font-bold text-[#4B5563] mb-2">{{ article.title }}</h3>
-                    <p class="text-[#6B7280] text-sm mb-3 flex-1 line-clamp-4">{{ article.excerpt }}</p>
-                    {% if article.highlight %}
-                    <p class="text-[#4B5563] text-sm font-medium mb-3">• {{ article.highlight }}</p>
-                    {% endif %}
-                    <p class="text-[#6B7280] text-xs mb-3 flex items-center gap-2">
-                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-[#E5E0D8] text-[#4B5563] text-xs font-semibold">{{ article.author_initials }}</span>
-                        {{ article.author }} • {{ article.date }}
-                    </p>
-                    <div class="flex items-center justify-between pt-2 border-t border-[#E5E0D8]">
-                        <div class="flex items-center gap-4 text-sm text-[#6B7280]">
-                            <span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg> {{ article.likes }}</span>
-                            <span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg> {{ article.comments }}</span>
-                        </div>
-                        <a href="{{ path('user_blog_module', { id: article.id }) }}" class="text-[#A7C7E7] font-medium hover:underline">Lire la suite <span>→</span></a>
-                    </div>
-                </div>
-            </article>
-            {% endfor %}
-        </div>
     </div>
 
     <aside class="lg:w-80 shrink-0 space-y-6">
@@ -118,11 +137,17 @@
         </div>
         <div class="bg-white rounded-xl shadow-sm p-5 border border-[#E5E0D8]">
             <h2 class="font-semibold text-[#4B5563] mb-4">Catégories</h2>
-            <ul class="space-y-2 text-[#6B7280]">
+            <div class="space-y-3">
                 {% for cat in categories %}
-                <li><a href="#" class="hover:text-[#A7C7E7]">{{ cat.name }} ({{ cat.count }})</a></li>
+                <a href="{{ path('user_blog_categorie', {'categorie': cat.slug}) }}" class="flex items-center gap-3 p-2 rounded-lg hover:bg-[#A7C7E7]/10 transition-colors">
+                    <img src="{{ asset(cat.image) }}" alt="{{ cat.name }}" class="w-10 h-10 rounded-lg object-cover">
+                    <div class="flex-1">
+                        <div class="font-medium text-[#4B5563]">{{ cat.name }}</div>
+                        <div class="text-sm text-[#6B7280]">{{ cat.count }} modules</div>
+                    </div>
+                </a>
                 {% endfor %}
-            </ul>
+            </div>
         </div>
         <div class="bg-white rounded-xl shadow-sm p-5 border border-[#E5E0D8]">
             <h2 class="font-semibold text-[#4B5563] mb-4">Articles populaires</h2>

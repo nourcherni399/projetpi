@@ -33,6 +33,7 @@ final class BlogController extends AbstractController
         return $this->render('front/blog/index.html.twig', [
             'featured' => $data['featured'],
             'articles' => $data['articles'],
+            'modules' => $modules, // Ajout des modules pour le template
             'categories' => $data['categories'],
             'popular_articles' => $data['popular_articles'],
             'popular_tags' => $data['popular_tags'],
@@ -144,6 +145,23 @@ final class BlogController extends AbstractController
         return $this->redirectToRoute('user_blog_module', ['id' => $blog->getModule()->getId()]);
     }
 
+    #[Route('/categorie/{categorie}', name: 'user_blog_categorie', requirements: ['categorie' => '[A-Z_]+'], methods: ['GET'])]
+    public function categorie(string $categorie): Response
+    {
+        try {
+            $catEnum = \App\Enum\CategorieModule::from($categorie);
+        } catch (\ValueError $e) {
+            throw $this->createNotFoundException('Catégorie introuvable.');
+        }
+
+        $modules = $this->moduleRepository->findBy(['categorie' => $catEnum, 'isPublished' => true], ['dateCreation' => 'DESC']);
+
+        return $this->render('front/blog/categorie.html.twig', [
+            'categorie' => $catEnum,
+            'modules' => $modules,
+        ]);
+    }
+
     /**
      * @param list<Module> $modules
      * @return array{
@@ -216,14 +234,35 @@ final class BlogController extends AbstractController
             }
         }
 
+        $categories = [];
+        $categoryCounts = [];
+        foreach ($modules as $module) {
+            $cat = $module->getCategorie();
+            if ($cat !== \App\Enum\CategorieModule::EMPTY) {
+                $label = $cat->label();
+                if (!isset($categoryCounts[$label])) {
+                    $categoryCounts[$label] = 0;
+                }
+                $categoryCounts[$label]++;
+                if (!isset($categories[$label])) {
+                    $categories[$label] = [
+                        'name' => $label,
+                        'count' => 0,
+                        'image' => $module->getImage() ?: 'images/logo.png',
+                        'slug' => $cat->value,
+                    ];
+                }
+            }
+        }
+        foreach ($categories as $key => $cat) {
+            $categories[$key]['count'] = $categoryCounts[$key] ?? 0;
+        }
+        $categories = array_values($categories);
+
         return [
             'featured' => $featured,
             'articles' => $articles,
-            'categories' => [
-                ['name' => 'Facile', 'count' => \count(array_filter($modules, fn (Module $m) => $m->getNiveau() === 'facile'))],
-                ['name' => 'Moyen', 'count' => \count(array_filter($modules, fn (Module $m) => $m->getNiveau() === 'moyen'))],
-                ['name' => 'Difficile', 'count' => \count(array_filter($modules, fn (Module $m) => $m->getNiveau() === 'difficile'))],
-            ],
+            'categories' => $categories,
             'popular_articles' => $popular_articles,
             'popular_tags' => ['Module', 'Autisme', 'TSA', 'Éducation', 'Communication'],
         ];
