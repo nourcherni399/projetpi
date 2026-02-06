@@ -24,7 +24,15 @@
                 </span>
             </div>
         </div>
-        <a href="{{ path('admin_module_new') }}" class="px-4 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Nouveau module</a>
+        <div class="flex gap-3">
+            <a href="{{ path('admin_module_new') }}" class="px-4 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Nouveau module</a>
+            <button onclick="exportToPDF()" class="px-4 py-2.5 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 focus:outline focus:ring-2 focus:ring-red-500 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-6-4m6 4l6-4m6 6v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6a2 2 0 012-2h6a2 2 0 012 2v6z" />
+                </svg>
+                Exporter PDF
+            </button>
+        </div>
     </div>
     <div class="overflow-x-auto">
         <table class="w-full text-left">
@@ -346,8 +354,109 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+
+    // Fonction d'export PDF
+    window.exportToPDF = function() {
+        // Récupérer les données depuis le tableau HTML
+        const rows = document.querySelectorAll('#modulesTableBody tr:not([style*="display: none"])');
+        const modules = [];
+        
+        rows.forEach(row => {
+            const cells = row.getElementsByTagName('td');
+            if (cells.length >= 8) {
+                const module = {
+                    titre: cells[1].textContent.trim(),
+                    description: cells[2].textContent.trim(),
+                    niveau: cells[3].textContent.trim(),
+                    categorie: cells[4].textContent.trim(),
+                    publie: cells[5].textContent.trim(),
+                    articles: cells[6].textContent.trim()
+                };
+                modules.push(module);
+            }
+        });
+        
+        // Création du document PDF
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        // Titre
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Liste des Modules', 105, 20, { align: 'center' });
+        
+        // Date d'export
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Généré le: ${new Date().toLocaleDateString('fr-FR')}`, 105, 30, { align: 'center' });
+        
+        // Ligne de séparation
+        doc.setLineWidth(0.5);
+        doc.line(20, 35, 190, 35);
+        
+        // En-têtes du tableau
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Titre', 20, 45);
+        doc.text('Description', 60, 45);
+        doc.text('Niveau', 120, 45);
+        doc.text('Catégorie', 140, 45);
+        doc.text('Publié', 170, 45);
+        doc.text('Articles', 190, 45);
+        
+        // Ligne de séparation
+        doc.setLineWidth(0.3);
+        doc.line(20, 50, 190, 50);
+        
+        // Données des modules
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        
+        let yPosition = 55;
+        modules.forEach((module, index) => {
+            // Vérifier si on dépasse la page
+            if (yPosition > 270) {
+                doc.addPage();
+                yPosition = 20;
+            }
+            
+            // Titre
+            doc.text(module.titre.substring(0, 25), 20, yPosition);
+            
+            // Description
+            doc.text(module.description.substring(0, 30), 60, yPosition);
+            
+            // Niveau
+            doc.text(module.niveau, 120, yPosition);
+            
+            // Catégorie
+            doc.text(module.categorie.substring(0, 15), 140, yPosition);
+            
+            // Publié
+            doc.text(module.publie, 170, yPosition);
+            
+            // Articles
+            doc.text(module.articles, 190, yPosition);
+            
+            yPosition += 8;
+        });
+        
+        // Pied de page
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'italic');
+        doc.text(`Total: ${modules.length} modules`, 105, 280, { align: 'center' });
+        
+        // Sauvegarde du PDF
+        doc.save('liste_modules.pdf');
+        
+        // Notification
+        alert('Le PDF a été généré et téléchargé avec succès !');
+    };
 });
 </script>
+
+<!-- Inclusion de jsPDF pour l'export PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <!-- Inclusion de Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
