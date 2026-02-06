@@ -19,9 +19,9 @@ class Blog
     #[ORM\Column(length: 255)]
     private ?string $titre = null;
 
-#[ORM\Column(
-    columnDefinition: "ENUM('recommandation', 'plainte', 'question', 'experience') NOT NULL"
-)]
+    #[ORM\Column(
+        columnDefinition: "ENUM('recommandation', 'plainte', 'question', 'experience') NOT NULL"
+    )]
 private string $type;
 
     #[ORM\Column]

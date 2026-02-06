@@ -158,18 +158,19 @@ final class BlogController extends AbstractController
     {
         $defaultFeatured = [
             'id' => 0,
-            'title' => 'Blog & Témoignages',
-            'excerpt' => 'Découvrez les modules et articles de la communauté.',
+            'title' => 'Comprendre l\'autisme',
+            'excerpt' => 'Découvrez les ressources et conseils pour mieux comprendre le trouble du spectre de l\'autisme et accompagner au mieux les personnes concernées.',
             'author' => 'AutiCare',
             'author_initials' => 'AG',
-            'date' => (new \DateTime())->format('d F Y'),
-            'likes' => 0,
-            'comments' => 0,
-            'tags' => ['Blog'],
+            'date' => date('d F Y'),
+            'likes' => 42,
+            'comments' => 8,
+            'tags' => ['Témoignages', 'Article à la une'],
             'has_infographic' => true,
             'infographic_title' => 'Troubles du spectre de l\'autisme (TSA)',
             'infographic_description' => 'Ce trouble neuro-développemental peut altérer le comportement social, la communication et le langage.',
             'infographic_stats' => ['Pas de cause unique identifiée', 'TOUCHE 1 personne sur 100 • 3 garçons pour 1 fille'],
+            'image_url' => 'images/logo.png',
         ];
 
         $featured = $defaultFeatured;
@@ -195,6 +196,7 @@ final class BlogController extends AbstractController
                     'infographic_title' => $module->getTitre() ?? 'Troubles du spectre de l\'autisme (TSA)',
                     'infographic_description' => $module->getDescription() ?? 'Ce trouble neuro-développemental peut altérer le comportement social, la communication et le langage.',
                     'infographic_stats' => ['Niveau : ' . ($niveauLabels[$module->getNiveau()] ?? $module->getNiveau())],
+                    'image_url' => $module->getImage() ? $module->getImage() : 'images/logo.png',
                 ];
             } else {
                 $articles[] = [
@@ -209,7 +211,7 @@ final class BlogController extends AbstractController
                     'tags' => ['Module', $niveauLabels[$module->getNiveau()] ?? $module->getNiveau()],
                     'highlight' => null,
                     'image_label' => 'Module',
-                    'image_url' => $module->getImage() ?? null,
+                    'image_url' => $module->getImage() ? $module->getImage() : 'images/logo.png',
                 ];
             }
         }

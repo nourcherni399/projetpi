@@ -21,18 +21,21 @@
     <!-- Contenu du module -->
     <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8 mb-8">
         <header class="mb-8">
-            <span class="inline-block px-3 py-1 rounded-lg bg-[#A7C7E7]/30 text-[#4B5563] text-sm font-medium mb-3">{{ module.niveau|capitalize }}</span>
-            <h1 class="text-3xl font-bold text-[#4B5563] mb-3">{{ module.titre }}</h1>
+            <!-- Image en petit avant le titre -->
+            {% if module.image %}
+                <div class="mb-4">
+                    <img src="{{ asset(module.image) }}" alt="{{ module.titre }}" class="w-12 h-12 object-cover rounded-lg">
+                </div>
+            {% endif %}
+            
+            <div class="flex items-center gap-4 mb-3">
+                <span class="inline-block px-3 py-1 rounded-lg bg-[#A7C7E7]/30 text-[#4B5563] text-sm font-medium">{{ module.niveau|capitalize }}</span>
+                <h1 class="text-3xl font-bold text-[#4B5563]">{{ module.titre }}</h1>
+            </div>
             {% if module.dateCreation %}
             <p class="text-[#6B7280] text-sm">Publié le {{ module.dateCreation|date('d/m/Y') }}</p>
             {% endif %}
         </header>
-
-        {% if module.image %}
-        <div class="aspect-video w-full rounded-xl overflow-hidden bg-[#E5E0D8] mb-8">
-            <img src="{{ asset(module.image) }}" alt="{{ module.titre }}" class="w-full h-full object-cover">
-        </div>
-        {% endif %}
 
         {% if module.description %}
         <p class="text-lg text-[#6B7280] mb-6">{{ module.description }}</p>
@@ -80,7 +83,13 @@
                         </div>
 
                         <div class="pr-16">
-                            <div class="flex items-start justify-between mb-3">
+                            <div class="flex items-start gap-3 mb-3">
+                                <!-- Image de l'article en petit -->
+                                {% if article.image %}
+                                    <div class="flex-shrink-0">
+                                        <img src="{{ asset(article.image) }}" alt="{{ article.titre }}" class="w-12 h-12 object-cover rounded-lg">
+                                    </div>
+                                {% endif %}
                                 <div class="flex-1">
                                     <h3 class="text-lg font-semibold text-[#4B5563] mb-2">{{ article.titre }}</h3>
                                     <div class="flex items-center gap-4 text-sm text-[#6B7280] mb-3">
@@ -103,11 +112,6 @@
                         <div class="prose prose-[#4B5563] max-w-none">
                             <p class="text-[#4B5563] break-words">{{ article.contenu|u.truncate(200, '...') }}</p>
                         </div>
-                        {% if article.image %}
-                        <div class="mt-4">
-                            <img src="{{ asset(article.image) }}" alt="{{ article.titre }}" class="rounded-lg max-w-full h-auto">
-                        </div>
-                        {% endif %}
                     </div>
                 {% endfor %}
             </div>
