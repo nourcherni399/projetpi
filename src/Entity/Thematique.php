@@ -47,6 +47,10 @@ class Thematique
     #[ORM\Column(type: 'string', enumType: NiveauDifficulte::class, columnDefinition: "ENUM('Débutant', 'Intermédiaire', 'Avancé')", nullable: true)]
     private ?NiveauDifficulte $niveauDifficulte = null;
 
+    /** Image illustrant la thématique (chemin ou URL). Affichée sur les cartes événements. */
+    #[ORM\Column(length: 500, nullable: true)]
+    private ?string $image = null;
+
     /** @var Collection<int, Evenement> */
     #[ORM\OneToMany(targetEntity: Evenement::class, mappedBy: 'thematique')]
     private Collection $evenements;
@@ -157,6 +161,17 @@ class Thematique
     public function setNiveauDifficulte(?NiveauDifficulte $niveauDifficulte): static
     {
         $this->niveauDifficulte = $niveauDifficulte;
+        return $this;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): static
+    {
+        $this->image = $image;
         return $this;
     }
 

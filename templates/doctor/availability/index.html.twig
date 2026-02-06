@@ -17,7 +17,7 @@
         <p class="text-sm text-[#6B7280] mt-1">Champs correspondant à l'entité Disponibilité : jour, heure de début, heure de fin, durée (minutes), disponible.</p>
     </div>
     <div class="p-6">
-        {{ form_start(form, { attr: { class: 'space-y-4' }, label_attr: { class: 'block text-[#4B5563] font-medium mb-1' } }) }}
+        {{ form_start(form, { attr: { class: 'space-y-4', novalidate: 'novalidate' }, label_attr: { class: 'block text-[#4B5563] font-medium mb-1' } }) }}
         {{ form_errors(form) }}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>

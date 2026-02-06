@@ -9,12 +9,14 @@ use App\Entity\Enum\PublicCible;
 use App\Entity\Thematique;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Range;
@@ -46,8 +48,10 @@ final class ThematiqueType extends AbstractType
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Description',
-                'required' => false,
-                'constraints' => [new Length(['max' => 65535, 'maxMessage' => 'La description ne peut pas dépasser {{ limit }} caractères.'])],
+                'constraints' => [
+                    new NotBlank(message: 'La description est obligatoire.'),
+                    new Length(['min' => 1, 'max' => 65535, 'maxMessage' => 'La description ne peut pas dépasser {{ limit }} caractères.']),
+                ],
                 'attr' => $attr + ['rows' => 3, 'placeholder' => 'Description…'],
             ])
             ->add('couleur', TextType::class, [
@@ -84,7 +88,7 @@ final class ThematiqueType extends AbstractType
                     PublicCible::AUTRE => 'Autre',
                 },
                 'placeholder' => 'Choisir un public',
-                'required' => false,
+                'constraints' => [new NotBlank(message: 'Le public cible est obligatoire.')],
                 'attr' => $attr,
             ])
             ->add('niveauDifficulte', EnumType::class, [
@@ -96,7 +100,21 @@ final class ThematiqueType extends AbstractType
                     NiveauDifficulte::AVANCE => 'Avancé',
                 },
                 'placeholder' => 'Choisir un niveau',
-                'required' => false,
+                'constraints' => [new NotBlank(message: 'Le niveau de difficulté est obligatoire.')],
+                'attr' => $attr,
+            ])
+            ->add('imageFile', FileType::class, [
+                'label' => 'Image de la thématique',
+                'mapped' => false,
+                'required' => !$options['is_edit'],
+                'constraints' => [
+                    new File([
+                        'maxSize' => '2M',
+                        'mimeTypes' => ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+                        'mimeTypesMessage' => 'Choisissez une image (JPG, PNG, WebP ou GIF).',
+                    ]),
+                    ...($options['is_edit'] ? [] : [new NotBlank(message: 'L\'image est obligatoire.')]),
+                ],
                 'attr' => $attr,
             ]);
     }
@@ -105,6 +123,8 @@ final class ThematiqueType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Thematique::class,
+            'is_edit' => false,
         ]);
+        $resolver->setAllowedTypes('is_edit', 'bool');
     }
 }

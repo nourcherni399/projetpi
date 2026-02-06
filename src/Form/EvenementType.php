@@ -59,11 +59,9 @@ final class EvenementType extends AbstractType
             ])
             ->add('lieu', TextType::class, [
                 'label' => 'Lieu',
-                'constraints' => [
-                    new NotBlank(message: 'Le lieu est obligatoire.'),
-                    new Length(['min' => 1, 'max' => 255, 'maxMessage' => 'Le lieu ne peut pas dépasser {{ limit }} caractères.']),
-                ],
-                'attr' => $attr + ['placeholder' => 'Ex. Salle principale'],
+                'required' => false,
+                'constraints' => [new Length(['max' => 255, 'maxMessage' => 'Le lieu ne peut pas dépasser {{ limit }} caractères.'])],
+                'attr' => $attr + ['placeholder' => 'Ex. Salle principale (optionnel)'],
             ])
             ->add('thematique', EntityType::class, [
                 'label' => 'Thématique',

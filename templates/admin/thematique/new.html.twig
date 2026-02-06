@@ -12,9 +12,15 @@
     </div>
     <h1 class="text-2xl font-semibold text-[#4B5563] mb-6">Nouvelle thématique</h1>
 
+    {% if form.vars.submitted and not form.vars.valid %}
+        <div class="mb-4 p-4 rounded-lg bg-red-50 border border-red-200 text-red-800 text-sm">
+            <p class="font-medium">Veuillez remplir tous les champs obligatoires (nom, description, image, public cible, niveau) et corriger les erreurs ci-dessous.</p>
+        </div>
+    {% endif %}
+
     <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8">
         {{ form_start(form, {
-            attr: { class: 'space-y-6' },
+            attr: { class: 'space-y-6', novalidate: 'novalidate' },
             label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }
         }) }}
         <div class="grid grid-cols-1 gap-6">
@@ -28,6 +34,7 @@
             {{ form_row(form.ordre) }}
             {{ form_row(form.publicCible) }}
             {{ form_row(form.niveauDifficulte) }}
+            {{ form_row(form.imageFile) }}
         </div>
         <div class="flex flex-wrap gap-3 pt-4">
             <button type="submit" class="px-5 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">

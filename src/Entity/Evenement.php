@@ -33,7 +33,7 @@ class Evenement
     #[ORM\Column(type: Types::TIME_MUTABLE)]
     private ?\DateTimeInterface $heureFin = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $lieu = null;
 
     /** Agrégation : un événement appartient à une thématique (sans cascade delete). */
@@ -82,7 +82,7 @@ class Evenement
         return $this->dateEvent;
     }
 
-    public function setDateEvent(\DateTimeInterface $dateEvent): static
+    public function setDateEvent(?\DateTimeInterface $dateEvent): static
     {
         $this->dateEvent = $dateEvent;
         return $this;
@@ -93,7 +93,7 @@ class Evenement
         return $this->heureDebut;
     }
 
-    public function setHeureDebut(\DateTimeInterface $heureDebut): static
+    public function setHeureDebut(?\DateTimeInterface $heureDebut): static
     {
         $this->heureDebut = $heureDebut;
         return $this;
@@ -104,7 +104,7 @@ class Evenement
         return $this->heureFin;
     }
 
-    public function setHeureFin(\DateTimeInterface $heureFin): static
+    public function setHeureFin(?\DateTimeInterface $heureFin): static
     {
         $this->heureFin = $heureFin;
         return $this;
@@ -115,7 +115,7 @@ class Evenement
         return $this->lieu;
     }
 
-    public function setLieu(string $lieu): static
+    public function setLieu(?string $lieu): static
     {
         $this->lieu = $lieu;
         return $this;
