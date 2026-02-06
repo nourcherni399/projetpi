@@ -54,10 +54,10 @@
 </div>
 
 <div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
-    <div class="p-4 border-b border-[#E5E0D8] flex flex-wrap gap-4 justify-between">
-        <input type="search" placeholder="Rechercher un créneau…" class="px-4 py-2 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#4B5563] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7] max-w-xs">
+    <form method="get" action="{{ path('doctor_availability') }}" class="p-4 border-b border-[#E5E0D8] flex flex-wrap gap-4 justify-between items-center">
+        <input type="search" name="q" value="{{ search|default('') }}" placeholder="Rechercher par jour, heure ou durée…" class="px-4 py-2 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#4B5563] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7] max-w-xs">
         <button type="button" id="btn-nouvelle-dispo" class="px-4 py-2 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Nouvelle disponibilité</button>
-    </div>
+    </form>
     <div class="overflow-x-auto">
         <table class="w-full text-left">
             <thead class="bg-[#F5F1EB] border-b border-[#E5E0D8]">
@@ -79,10 +79,17 @@
                     <td class="px-6 py-4 text-[#6B7280]">{{ dispo.duree }} min</td>
                     <td class="px-6 py-4 text-[#6B7280]">{{ dispo.estDispo ? 'Oui' : 'Non' }}</td>
                     <td class="px-6 py-4">
-                        <form action="{{ path('doctor_availability_delete', { id: dispo.id }) }}" method="post" class="inline" onsubmit="return confirm('Supprimer ce créneau ?');">
-                            <input type="hidden" name="_token" value="{{ csrf_token('doctor_availability_delete_' ~ dispo.id) }}">
-                            <button type="submit" class="px-3 py-1.5 text-sm rounded-lg border border-[#E5E0D8] text-[#6B7280] hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Supprimer</button>
-                        </form>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <a href="{{ path('doctor_availability_edit', { id: dispo.id }) }}" class="px-3 py-1.5 text-sm rounded-lg bg-[#A7C7E7] text-white hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                                Modifier
+                            </a>
+                            <form action="{{ path('doctor_availability_delete', { id: dispo.id }) }}" method="post" class="inline" onsubmit="return confirm('Supprimer ce créneau ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('doctor_availability_delete_' ~ dispo.id) }}">
+                                <button type="submit" class="px-3 py-1.5 text-sm rounded-lg border border-[#E5E0D8] text-[#6B7280] hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                                    Supprimer
+                                </button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
                 {% else %}

@@ -8,68 +8,68 @@
         <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
     </div>
     <h1 class="text-3xl font-bold text-[#4B5563] mb-3">Événements & Ateliers</h1>
-    <p class="text-[#6B7280] max-w-2xl mx-auto mb-2">Découvrez nos ateliers et rencontres pour les familles et les professionnels.</p>
-    <p class="text-[#6B7280]">{{ events|length }} événements à venir</p>
+    <p class="text-[#6B7280] max-w-2xl mx-auto">Découvrez nos ateliers et rencontres par thématique.</p>
 </section>
 
-<div class="flex flex-col lg:flex-row gap-8">
-    <aside class="lg:w-72 shrink-0 space-y-6">
-        <div class="bg-white rounded-xl shadow-sm p-5 border border-[#E5E0D8]">
-            <h2 class="font-semibold text-[#4B5563] mb-4">Date</h2>
-            <div class="text-center">
-                <div class="flex items-center justify-between mb-4">
-                    <button type="button" class="text-[#6B7280] hover:text-[#A7C7E7]">&larr;</button>
-                    <span class="font-semibold text-[#4B5563]">Janvier 2026</span>
-                    <button type="button" class="text-[#6B7280] hover:text-[#A7C7E7]">&rarr;</button>
-                </div>
-                <div class="grid grid-cols-7 gap-1 text-[#6B7280] text-sm">
-                    <span class="font-medium">Su</span><span class="font-medium">Mo</span><span class="font-medium">Tu</span><span class="font-medium">We</span><span class="font-medium">Th</span><span class="font-medium">Fr</span><span class="font-medium">Sa</span>
-                    {% for i in 1..31 %}<span class="p-1 text-center{% if i == 24 %} rounded-full bg-[#95d7b5] text-[#4B5563]{% endif %}">{{ i }}</span>{% endfor %}
-                </div>
-            </div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for item in grouped %}
+    {% set thematique = item.thematique %}
+    {% set evenements = item.evenements %}
+    <div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden flex flex-col {{ thematique.couleur ? 'border-l-4' : '' }}" {% if thematique.couleur %}style="border-left-color: {{ thematique.couleur }};"{% endif %}>
+        <div class="p-5 border-b border-[#E5E0D8]">
+            {% if thematique.couleur %}
+            <span class="inline-block w-10 h-10 rounded-lg border border-[#E5E0D8] mb-3" style="background-color: {{ thematique.couleur }};" title="Couleur"></span>
+            {% endif %}
+            <h2 class="text-lg font-semibold text-[#4B5563] mb-1">{{ thematique.nomThematique }}</h2>
+            {% if thematique.sousTitre %}
+            <p class="text-[#6B7280] text-sm mb-2">{{ thematique.sousTitre }}</p>
+            {% elseif thematique.publicCible %}
+            <p class="text-[#6B7280] text-sm mb-2">{{ thematique.publicCible.value }}</p>
+            {% endif %}
+            <p class="text-[#A7C7E7] font-medium text-sm">{{ evenements|length }} événement{{ evenements|length != 1 ? 's' : '' }}</p>
         </div>
-        <div class="bg-white rounded-xl shadow-sm p-5 border border-[#E5E0D8]">
-            <h2 class="font-semibold text-[#4B5563] mb-4">Type d'événement</h2>
-            <ul class="space-y-3 text-[#6B7280]">
-                <li class="flex items-center gap-2"><input type="checkbox" id="ev1" class="rounded border-[#E5E0D8] text-[#A7C7E7] focus:ring-[#A7C7E7]"><label for="ev1">Ateliers sensoriels (12)</label></li>
-                <li class="flex items-center gap-2"><input type="checkbox" id="ev2" class="rounded border-[#E5E0D8] text-[#A7C7E7] focus:ring-[#A7C7E7]"><label for="ev2">Rencontres familles (8)</label></li>
-            </ul>
+        <div class="p-4 flex-1 space-y-3">
+            {% for event in evenements %}
+            <a href="{{ path('user_event_show', { id: event.id }) }}" class="block rounded-lg border border-[#E5E0D8] p-3 hover:bg-[#F5F1EB] hover:border-[#A7C7E7] transition-colors focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                <h3 class="font-semibold text-[#4B5563] text-sm mb-1">{{ event.title }}</h3>
+                <p class="text-[#6B7280] text-xs">
+                    {{ event.dateEvent ? event.dateEvent|date('d/m/Y') : '—' }}
+                    {{ event.heureDebut ? event.heureDebut|date('H:i') : '' }}
+                    · {{ event.lieu }}
+                </p>
+                <span class="inline-flex items-center gap-1 mt-2 text-[#A7C7E7] text-xs font-medium">En savoir plus →</span>
+            </a>
+            {% else %}
+            <p class="text-[#6B7280] text-sm py-2">Aucun événement pour le moment.</p>
+            {% endfor %}
         </div>
-    </aside>
-
-    <div class="flex-1 space-y-6">
-        {% for event in events %}
-        <article class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6 flex flex-col sm:flex-row gap-6">
-            <div class="shrink-0 text-center w-20">
-                <span class="block text-2xl font-bold text-[#4B5563]">{{ event.day }}</span>
-                <span class="block text-sm text-[#6B7280]">{{ event.month_year }}</span>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="flex flex-wrap gap-2 mb-2">
-                    <span class="px-2 py-1 rounded-md text-xs font-medium bg-[#95d7b5]/40 text-[#4B5563]">{{ event.type_tag }}</span>
-                    {% for tag in event.public_tags %}
-                    <span class="px-2 py-1 rounded-md text-xs font-medium bg-[#FEF3C7] text-[#4B5563]">{{ tag }}</span>
-                    {% endfor %}
-                    {% if event.urgency_tag %}
-                    <span class="px-2 py-1 rounded-md text-xs font-medium bg-[#F87171] text-white font-bold">{{ event.urgency_tag }}</span>
-                    {% endif %}
-                </div>
-                <h2 class="text-xl font-semibold text-[#4B5563] mb-2">{{ event.title }}</h2>
-                <p class="text-[#6B7280] text-sm mb-4">{{ event.description_short }}</p>
-                <div class="flex flex-wrap gap-4 text-sm text-[#6B7280] mb-4">
-                    <span class="flex items-center gap-1"><svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> {{ event.time_range }}</span>
-                    <span class="flex items-center gap-1"><svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg> {{ event.location }}</span>
-                    <span class="flex items-center gap-1"><svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg> {{ event.capacity }}</span>
-                    <span class="flex items-center gap-1"><svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg> {{ event.animator }}</span>
-                </div>
-                <div class="flex flex-wrap items-center gap-3">
-                    <span class="font-medium text-[#4B5563]">{{ event.price_display }}</span>
-                    <a href="{{ path('user_event_show', { id: loop.index }) }}" class="px-4 py-2 rounded-full border border-[#E5E7EB] bg-[#F5F1EB] text-[#4B5563] text-sm font-medium hover:bg-[#E5E0D8] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">En savoir plus</a>
-                    <a href="#" class="px-4 py-2 rounded-full bg-[#A7C7E7] text-white text-sm font-medium hover:bg-[#B8D4ED]">S'inscrire</a>
-                </div>
-            </div>
-        </article>
-        {% endfor %}
     </div>
+    {% endfor %}
+
+    {% if sansThematique|length > 0 %}
+    <div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden flex flex-col md:col-span-2 lg:col-span-3">
+        <div class="p-5 border-b border-[#E5E0D8]">
+            <h2 class="text-lg font-semibold text-[#4B5563]">Autres événements</h2>
+            <p class="text-[#A7C7E7] font-medium text-sm">{{ sansThematique|length }} événement{{ sansThematique|length != 1 ? 's' : '' }}</p>
+        </div>
+        <div class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {% for event in sansThematique %}
+            <a href="{{ path('user_event_show', { id: event.id }) }}" class="block rounded-lg border border-[#E5E0D8] p-3 hover:bg-[#F5F1EB] hover:border-[#A7C7E7] transition-colors focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                <h3 class="font-semibold text-[#4B5563] text-sm mb-1">{{ event.title }}</h3>
+                <p class="text-[#6B7280] text-xs">
+                    {{ event.dateEvent ? event.dateEvent|date('d/m/Y') : '—' }}
+                    {{ event.heureDebut ? event.heureDebut|date('H:i') : '' }}
+                    · {{ event.lieu }}
+                </p>
+                <span class="inline-flex items-center gap-1 mt-2 text-[#A7C7E7] text-xs font-medium">En savoir plus →</span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
 </div>
+
+{% if grouped is empty and (sansThematique|default([])) is empty %}
+<p class="text-center text-[#6B7280] py-12">Aucun événement à venir pour le moment.</p>
+{% endif %}
 {% endblock %}

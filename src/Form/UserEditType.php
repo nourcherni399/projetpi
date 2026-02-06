@@ -16,6 +16,7 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Constraints\Length;
@@ -23,8 +24,10 @@ use Symfony\Component\Validator\Constraints\LessThanOrEqual;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Range;
 use Symfony\Component\Validator\Constraints\Regex;
+use Symfony\Component\Validator\Constraints\When;
+use App\Entity\User;
 
-final class UserCreateType extends AbstractType
+final class UserEditType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -66,30 +69,35 @@ final class UserCreateType extends AbstractType
                 ],
                 'attr' => $attr + ['placeholder' => '612345678'],
             ])
-            ->add('password', RepeatedType::class, [
+            ->add('plainPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
+                'mapped' => false,
+                'required' => false,
                 'first_options' => [
-                    'label' => 'Mot de passe',
-                    'attr' => $attr + ['placeholder' => 'Mot de passe'],
+                    'label' => 'Nouveau mot de passe',
+                    'attr' => $attr + ['placeholder' => 'Laisser vide pour ne pas changer'],
                 ],
                 'second_options' => [
-                    'label' => 'Confirmer le mot de passe',
+                    'label' => 'Confirmer',
                     'attr' => $attr + ['placeholder' => 'Confirmer'],
                 ],
                 'constraints' => [
-                    new NotBlank(message: 'Le mot de passe est obligatoire.'),
-                    new Length([
-                        'min' => 6,
-                        'max' => 4096,
-                        'minMessage' => 'Le mot de passe doit contenir au moins {{ limit }} caractères.',
-                        'maxMessage' => 'Le mot de passe ne peut pas dépasser {{ limit }} caractères.',
-                    ]),
+                    new When(
+                        expression: 'value != null and value != ""',
+                        constraints: [
+                            new Length([
+                                'min' => 6,
+                                'max' => 4096,
+                                'minMessage' => 'Le mot de passe doit contenir au moins {{ limit }} caractères.',
+                                'maxMessage' => 'Le mot de passe ne peut pas dépasser {{ limit }} caractères.',
+                            ]),
+                        ]
+                    ),
                 ],
                 'invalid_message' => 'Les deux mots de passe doivent être identiques.',
             ])
             ->add('isActive', CheckboxType::class, [
                 'label' => 'Compte actif',
-                'data' => true,
                 'required' => false,
                 'attr' => ['class' => 'rounded border-[#E5E0D8] text-[#A7C7E7] focus:ring-[#A7C7E7]'],
                 'label_attr' => ['class' => 'text-[#4B5563]'],
@@ -104,77 +112,94 @@ final class UserCreateType extends AbstractType
                     UserRole::MEDECIN => 'Médecin',
                     UserRole::USER => 'Utilisateur',
                 },
-                'placeholder' => 'Choisir un rôle',
-                'constraints' => [new NotBlank(message: 'Le rôle est obligatoire.')],
                 'attr' => $attr + ['data-role-select' => '1'],
             ])
-            // — Attributs Médecin
             ->add('specialite', TextType::class, [
                 'label' => 'Spécialité',
                 'required' => false,
+                'mapped' => false,
                 'constraints' => [new Length(['max' => 255, 'maxMessage' => 'La spécialité ne peut pas dépasser {{ limit }} caractères.'])],
-                'attr' => $attr + ['placeholder' => 'Ex. Pédopsychiatrie', 'data-role-fields' => 'ROLE_MEDECIN'],
+                'attr' => $attr + ['data-role-fields' => 'ROLE_MEDECIN'],
             ])
             ->add('nomCabinet', TextType::class, [
                 'label' => 'Nom du cabinet',
                 'required' => false,
+                'mapped' => false,
                 'constraints' => [new Length(['max' => 255, 'maxMessage' => 'Le nom du cabinet ne peut pas dépasser {{ limit }} caractères.'])],
-                'attr' => $attr + ['placeholder' => 'Nom du cabinet', 'data-role-fields' => 'ROLE_MEDECIN'],
+                'attr' => $attr + ['data-role-fields' => 'ROLE_MEDECIN'],
             ])
             ->add('adresseCabinet', TextType::class, [
                 'label' => 'Adresse du cabinet',
                 'required' => false,
+                'mapped' => false,
                 'constraints' => [new Length(['max' => 500, 'maxMessage' => 'L\'adresse ne peut pas dépasser {{ limit }} caractères.'])],
-                'attr' => $attr + ['placeholder' => 'Adresse', 'data-role-fields' => 'ROLE_MEDECIN'],
+                'attr' => $attr + ['data-role-fields' => 'ROLE_MEDECIN'],
             ])
             ->add('telephoneCabinet', TextType::class, [
                 'label' => 'Téléphone du cabinet',
                 'required' => false,
-                'constraints' => [
-                    new Length(['max' => 30]),
-                    new Regex(['pattern' => '/^[\d\s\-\+\.\(\)]*$/', 'message' => 'Le téléphone ne doit contenir que des chiffres et espaces.']),
-                ],
-                'attr' => $attr + ['placeholder' => '01 23 45 67 89', 'data-role-fields' => 'ROLE_MEDECIN'],
+                'mapped' => false,
+                'constraints' => [new Length(['max' => 30]), new Regex(['pattern' => '/^[\d\s\-\+\.\(\)]*$/', 'message' => 'Le téléphone ne doit contenir que des chiffres et espaces.'])],
+                'attr' => $attr + ['data-role-fields' => 'ROLE_MEDECIN'],
             ])
             ->add('tarifConsultation', NumberType::class, [
                 'label' => 'Tarif consultation (€)',
                 'required' => false,
+                'mapped' => false,
+                'html5' => true,
                 'constraints' => [new Range(['min' => 0, 'max' => 99999.99, 'notInRangeMessage' => 'Le tarif doit être entre {{ min }} et {{ max }}.'])],
-                'attr' => $attr + ['placeholder' => '0', 'step' => '0.01', 'min' => 0, 'data-role-fields' => 'ROLE_MEDECIN'],
+                'attr' => $attr + ['data-role-fields' => 'ROLE_MEDECIN'],
             ])
-            // — Attributs Parent
             ->add('relationAvecPatient', TextType::class, [
                 'label' => 'Relation avec le patient',
                 'required' => false,
+                'mapped' => false,
                 'constraints' => [new Length(['max' => 100, 'maxMessage' => 'Ce champ ne peut pas dépasser {{ limit }} caractères.'])],
-                'attr' => $attr + ['placeholder' => 'Ex. Père, Mère, Tuteur', 'data-role-fields' => 'ROLE_PARENT'],
+                'attr' => $attr + ['data-role-fields' => 'ROLE_PARENT'],
             ])
-            // — Attributs Patient / Utilisateur
             ->add('dateNaissance', DateType::class, [
                 'label' => 'Date de naissance',
                 'widget' => 'single_text',
                 'required' => false,
+                'mapped' => false,
                 'constraints' => [new LessThanOrEqual(new \DateTimeImmutable('today'), message: 'La date de naissance ne peut pas être dans le futur.')],
                 'attr' => $attr + ['data-role-fields' => 'ROLE_PATIENT'],
             ])
             ->add('adresse', TextType::class, [
                 'label' => 'Adresse',
                 'required' => false,
+                'mapped' => false,
                 'constraints' => [new Length(['max' => 500, 'maxMessage' => 'L\'adresse ne peut pas dépasser {{ limit }} caractères.'])],
-                'attr' => $attr + ['placeholder' => 'Adresse', 'data-role-fields' => 'ROLE_PATIENT'],
+                'attr' => $attr + ['data-role-fields' => 'ROLE_PATIENT'],
             ])
             ->add('sexe', TextType::class, [
                 'label' => 'Sexe',
                 'required' => false,
+                'mapped' => false,
                 'constraints' => [new Length(['max' => 20, 'maxMessage' => 'Ce champ ne peut pas dépasser {{ limit }} caractères.'])],
-                'attr' => $attr + ['placeholder' => 'Ex. M, F', 'data-role-fields' => 'ROLE_PATIENT'],
+                'attr' => $attr + ['data-role-fields' => 'ROLE_PATIENT'],
             ]);
+
+        $builder->addEventListener(FormEvents::PRE_SUBMIT, function ($event): void {
+            $data = $event->getData();
+            if (!\is_array($data) || !isset($data['plainPassword'])) {
+                return;
+            }
+            $pwd = $data['plainPassword'];
+            if (!\is_array($pwd)) {
+                return;
+            }
+            $first = isset($pwd['first']) ? trim((string) $pwd['first']) : '';
+            $second = isset($pwd['second']) ? trim((string) $pwd['second']) : '';
+            if ($first === '' && $second === '') {
+                $data['plainPassword'] = ['first' => '', 'second' => ''];
+                $event->setData($data);
+            }
+        });
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults([
-            'data_class' => null,
-        ]);
+        $resolver->setDefaults(['data_class' => User::class]);
     }
 }

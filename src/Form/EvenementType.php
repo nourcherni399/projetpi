@@ -13,6 +13,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
 final class EvenementType extends AbstractType
@@ -26,12 +27,16 @@ final class EvenementType extends AbstractType
         $builder
             ->add('title', TextType::class, [
                 'label' => 'Titre',
-                'constraints' => [new NotBlank(message: 'Le titre est obligatoire.')],
+                'constraints' => [
+                    new NotBlank(message: 'Le titre est obligatoire.'),
+                    new Length(['min' => 1, 'max' => 255, 'maxMessage' => 'Le titre ne peut pas dépasser {{ limit }} caractères.']),
+                ],
                 'attr' => $attr + ['placeholder' => 'Ex. Atelier sensoriel'],
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Description',
                 'required' => false,
+                'constraints' => [new Length(['max' => 65535, 'maxMessage' => 'La description ne peut pas dépasser {{ limit }} caractères.'])],
                 'attr' => $attr + ['rows' => 4, 'placeholder' => 'Description de l\'événement…'],
             ])
             ->add('dateEvent', DateType::class, [
@@ -54,7 +59,10 @@ final class EvenementType extends AbstractType
             ])
             ->add('lieu', TextType::class, [
                 'label' => 'Lieu',
-                'constraints' => [new NotBlank(message: 'Le lieu est obligatoire.')],
+                'constraints' => [
+                    new NotBlank(message: 'Le lieu est obligatoire.'),
+                    new Length(['min' => 1, 'max' => 255, 'maxMessage' => 'Le lieu ne peut pas dépasser {{ limit }} caractères.']),
+                ],
                 'attr' => $attr + ['placeholder' => 'Ex. Salle principale'],
             ])
             ->add('thematique', EntityType::class, [

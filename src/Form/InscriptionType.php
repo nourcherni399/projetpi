@@ -6,14 +6,13 @@ namespace App\Form;
 
 use App\Enum\UserRole;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -22,9 +21,13 @@ use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\LessThanOrEqual;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Range;
-use Symfony\Component\Validator\Constraints\Regex;
 
-final class UserCreateType extends AbstractType
+/**
+ * Formulaire d'inscription publique.
+ * Seuls les rôles Patient, Parent et Utilisateur sont proposés.
+ * Les comptes Admin et Médecin ne peuvent être créés que par un administrateur (interface /admin/utilisateurs/new).
+ */
+final class InscriptionType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -50,13 +53,13 @@ final class UserCreateType extends AbstractType
                 'attr' => $attr + ['placeholder' => 'Prénom'],
             ])
             ->add('email', EmailType::class, [
-                'label' => 'Email',
+                'label' => 'Adresse e-mail',
                 'constraints' => [
                     new NotBlank(message: 'L\'email est obligatoire.'),
                     new Email(message: 'L\'adresse email "{{ value }}" n\'est pas valide.'),
                     new Length(['max' => 180, 'maxMessage' => 'L\'email ne peut pas dépasser {{ limit }} caractères.']),
                 ],
-                'attr' => $attr + ['placeholder' => 'email@exemple.fr'],
+                'attr' => $attr + ['placeholder' => 'exemple@email.com'],
             ])
             ->add('telephone', IntegerType::class, [
                 'label' => 'Téléphone',
@@ -70,7 +73,7 @@ final class UserCreateType extends AbstractType
                 'type' => PasswordType::class,
                 'first_options' => [
                     'label' => 'Mot de passe',
-                    'attr' => $attr + ['placeholder' => 'Mot de passe'],
+                    'attr' => $attr + ['placeholder' => 'Minimum 6 caractères'],
                 ],
                 'second_options' => [
                     'label' => 'Confirmer le mot de passe',
@@ -87,94 +90,54 @@ final class UserCreateType extends AbstractType
                 ],
                 'invalid_message' => 'Les deux mots de passe doivent être identiques.',
             ])
-            ->add('isActive', CheckboxType::class, [
-                'label' => 'Compte actif',
-                'data' => true,
-                'required' => false,
-                'attr' => ['class' => 'rounded border-[#E5E0D8] text-[#A7C7E7] focus:ring-[#A7C7E7]'],
-                'label_attr' => ['class' => 'text-[#4B5563]'],
-            ])
             ->add('role', EnumType::class, [
-                'label' => 'Rôle',
+                'label' => 'Vous êtes',
                 'class' => UserRole::class,
                 'choice_label' => fn (UserRole $r) => match ($r) {
-                    UserRole::ADMIN => 'Administrateur',
-                    UserRole::PARENT => 'Parent',
-                    UserRole::PATIENT => 'Patient',
-                    UserRole::MEDECIN => 'Médecin',
+                    UserRole::PARENT => 'Parent / Proche',
+                    UserRole::PATIENT => 'Personne concernée (patient)',
                     UserRole::USER => 'Utilisateur',
+                    default => $r->value,
                 },
-                'placeholder' => 'Choisir un rôle',
-                'constraints' => [new NotBlank(message: 'Le rôle est obligatoire.')],
-                'attr' => $attr + ['data-role-select' => '1'],
+                'choices' => [UserRole::PATIENT, UserRole::PARENT, UserRole::USER],
+                'placeholder' => 'Sélectionnez votre profil',
+                'constraints' => [new NotBlank(message: 'Veuillez sélectionner un profil.')],
+                'attr' => $attr,
             ])
-            // — Attributs Médecin
-            ->add('specialite', TextType::class, [
-                'label' => 'Spécialité',
-                'required' => false,
-                'constraints' => [new Length(['max' => 255, 'maxMessage' => 'La spécialité ne peut pas dépasser {{ limit }} caractères.'])],
-                'attr' => $attr + ['placeholder' => 'Ex. Pédopsychiatrie', 'data-role-fields' => 'ROLE_MEDECIN'],
-            ])
-            ->add('nomCabinet', TextType::class, [
-                'label' => 'Nom du cabinet',
-                'required' => false,
-                'constraints' => [new Length(['max' => 255, 'maxMessage' => 'Le nom du cabinet ne peut pas dépasser {{ limit }} caractères.'])],
-                'attr' => $attr + ['placeholder' => 'Nom du cabinet', 'data-role-fields' => 'ROLE_MEDECIN'],
-            ])
-            ->add('adresseCabinet', TextType::class, [
-                'label' => 'Adresse du cabinet',
-                'required' => false,
-                'constraints' => [new Length(['max' => 500, 'maxMessage' => 'L\'adresse ne peut pas dépasser {{ limit }} caractères.'])],
-                'attr' => $attr + ['placeholder' => 'Adresse', 'data-role-fields' => 'ROLE_MEDECIN'],
-            ])
-            ->add('telephoneCabinet', TextType::class, [
-                'label' => 'Téléphone du cabinet',
-                'required' => false,
-                'constraints' => [
-                    new Length(['max' => 30]),
-                    new Regex(['pattern' => '/^[\d\s\-\+\.\(\)]*$/', 'message' => 'Le téléphone ne doit contenir que des chiffres et espaces.']),
-                ],
-                'attr' => $attr + ['placeholder' => '01 23 45 67 89', 'data-role-fields' => 'ROLE_MEDECIN'],
-            ])
-            ->add('tarifConsultation', NumberType::class, [
-                'label' => 'Tarif consultation (€)',
-                'required' => false,
-                'constraints' => [new Range(['min' => 0, 'max' => 99999.99, 'notInRangeMessage' => 'Le tarif doit être entre {{ min }} et {{ max }}.'])],
-                'attr' => $attr + ['placeholder' => '0', 'step' => '0.01', 'min' => 0, 'data-role-fields' => 'ROLE_MEDECIN'],
-            ])
-            // — Attributs Parent
             ->add('relationAvecPatient', TextType::class, [
                 'label' => 'Relation avec le patient',
                 'required' => false,
-                'constraints' => [new Length(['max' => 100, 'maxMessage' => 'Ce champ ne peut pas dépasser {{ limit }} caractères.'])],
+                'constraints' => [new Length(['max' => 100])],
                 'attr' => $attr + ['placeholder' => 'Ex. Père, Mère, Tuteur', 'data-role-fields' => 'ROLE_PARENT'],
             ])
-            // — Attributs Patient / Utilisateur
             ->add('dateNaissance', DateType::class, [
                 'label' => 'Date de naissance',
                 'widget' => 'single_text',
                 'required' => false,
+                'help' => 'La date ne doit pas être dans le futur.',
                 'constraints' => [new LessThanOrEqual(new \DateTimeImmutable('today'), message: 'La date de naissance ne peut pas être dans le futur.')],
-                'attr' => $attr + ['data-role-fields' => 'ROLE_PATIENT'],
+                'attr' => $attr + ['data-role-fields' => 'ROLE_PATIENT', 'max' => (new \DateTimeImmutable('today'))->format('Y-m-d')],
             ])
             ->add('adresse', TextType::class, [
                 'label' => 'Adresse',
                 'required' => false,
-                'constraints' => [new Length(['max' => 500, 'maxMessage' => 'L\'adresse ne peut pas dépasser {{ limit }} caractères.'])],
+                'constraints' => [new Length(['max' => 500])],
                 'attr' => $attr + ['placeholder' => 'Adresse', 'data-role-fields' => 'ROLE_PATIENT'],
             ])
             ->add('sexe', TextType::class, [
                 'label' => 'Sexe',
                 'required' => false,
-                'constraints' => [new Length(['max' => 20, 'maxMessage' => 'Ce champ ne peut pas dépasser {{ limit }} caractères.'])],
+                'constraints' => [new Length(['max' => 20])],
                 'attr' => $attr + ['placeholder' => 'Ex. M, F', 'data-role-fields' => 'ROLE_PATIENT'],
+            ])
+            ->add('submit', SubmitType::class, [
+                'label' => 'Créer mon compte',
+                'attr' => ['class' => 'w-full py-3 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7] cursor-pointer'],
             ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults([
-            'data_class' => null,
-        ]);
+        $resolver->setDefaults(['data_class' => null]);
     }
 }

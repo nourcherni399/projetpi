@@ -3,10 +3,11 @@
 {% block title %}Prendre rendez-vous - {{ doctor.name }} - AutiCare{% endblock %}
 
 {% block user_content %}
-{% set stepParams = { id: doctor.id } %}
-{% set stepParams = stepParams|merge({ etape: 1, date: choices.date, time: choices.time }) %}
+{% set stepParams = { id: doctor.id, etape: 1, disponibilite_id: choices.disponibilite_id, date_rdv: choices.date_rdv, date_label: choices.date_label } %}
+{% set linkStep2 = stepParams|merge({ etape: 2, type: choices.type, mode: choices.mode, motif: choices.motif }) %}
+{% set linkStep3 = stepParams|merge({ etape: 3, type: choices.type, mode: choices.mode, motif: choices.motif }) %}
 <style>
-.rdv-date.rdv-selected, .rdv-time.rdv-selected { border-color: #A7C7E7 !important; background-color: rgba(167,199,231,0.15) !important; color: #4B5563 !important; }
+.rdv-slot.rdv-selected { border-color: #A7C7E7 !important; background-color: rgba(167,199,231,0.15) !important; color: #4B5563 !important; }
 .rdv-type-option:has(input:checked), .rdv-mode-option:has(input:checked) { border-color: #A7C7E7 !important; background-color: rgba(167,199,231,0.1) !important; }
 .rdv-type-option, .rdv-mode-option { border: 2px solid #E5E0D8; transition: border-color 0.2s, background-color 0.2s; }
 .rdv-type-option:hover, .rdv-mode-option:hover { border-color: rgba(167,199,231,0.6); }
@@ -25,7 +26,6 @@
                     <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium {{ doctor.specialty_class }}">{{ doctor.specialty }}</span>
                 </div>
             </div>
-            <p class="text-[#6B7280] text-sm mb-2 flex items-center gap-1">★ {{ doctor.rating }} ({{ doctor.reviews }} avis)</p>
             <p class="text-[#6B7280] text-sm mb-4">{{ doctor.description }}</p>
             <div class="space-y-2 text-sm text-[#6B7280] mb-4">
                 <p class="flex items-center gap-2"><svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg> {{ doctor.address }}</p>
@@ -41,17 +41,15 @@
     </aside>
 
     <div class="flex-1 min-w-0">
-        {% set linkStep2 = stepParams|merge({ etape: 2 }) %}
-        {% set linkStep3 = stepParams|merge({ etape: 3, type: choices.type, mode: choices.mode, motif: choices.motif }) %}
         <div class="flex flex-wrap items-center gap-2 mb-8 text-sm">
             <a href="{{ path('user_appointment_book', stepParams) }}" class="flex items-center gap-1 {% if step >= 1 %}text-[#A7C7E7] font-medium{% else %}text-[#6B7280]{% endif %}">
                 {% if step > 1 %}<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>{% else %}<span class="flex items-center justify-center w-6 h-6 rounded-full bg-[#A7C7E7] text-white text-xs">1</span>{% endif %}
-                Date & Heure
+                Créneau
             </a>
             <span class="text-[#E5E0D8]">›</span>
             <a href="{{ path('user_appointment_book', linkStep2) }}" class="flex items-center gap-1 {% if step >= 2 %}text-[#A7C7E7] font-medium{% else %}text-[#6B7280]{% endif %}">
                 {% if step > 2 %}<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>{% else %}<span class="flex items-center justify-center w-6 h-6 rounded-full {% if step == 2 %}bg-[#A7C7E7] text-white{% else %}bg-[#E5E0D8] text-[#6B7280]{% endif %} text-xs">2</span>{% endif %}
-                Type de consultation
+                Type
             </a>
             <span class="text-[#E5E0D8]">›</span>
             <a href="{{ path('user_appointment_book', linkStep3) }}" class="flex items-center gap-1 {% if step >= 3 %}text-[#A7C7E7] font-medium{% else %}text-[#6B7280]{% endif %}">
@@ -67,25 +65,17 @@
 
         <div class="bg-white rounded-2xl shadow-sm border border-[#E5E0D8] p-6 md:p-8">
             {% if step == 1 %}
-            {% set days = ['mar. 27 janv.', 'mer. 28 janv.', 'jeu. 29 janv.', 'ven. 30 janv.', 'sam. 31 janv.'] %}
-            {% set times = ['10:00', '11:00', '15:00', '16:00'] %}
-            {% set defaultDate = choices.date is not empty ? choices.date : days[0] %}
-            {% set defaultTime = choices.time is not empty ? choices.time : times[0] %}
+            <h2 class="text-xl font-bold text-[#4B5563] mb-6">Choisissez un créneau disponible</h2>
+            <p class="text-[#6B7280] mb-4">Les créneaux déjà réservés ne sont pas affichés.</p>
+            {% if slots is defined and slots|length > 0 %}
             <form method="get" action="{{ path('user_appointment_book', { id: doctor.id }) }}" id="rdv-form-step1">
                 <input type="hidden" name="etape" value="2">
-                <input type="hidden" name="date" id="rdv-input-date" value="{{ defaultDate }}">
-                <input type="hidden" name="time" id="rdv-input-time" value="{{ defaultTime }}">
-                <h2 class="text-xl font-bold text-[#4B5563] mb-6">Choisissez une date et un horaire</h2>
-                <p class="text-[#6B7280] mb-4">Date</p>
-                <div class="flex flex-wrap gap-2 mb-6" id="rdv-dates" role="group" aria-label="Choisir une date">
-                    {% for day in days %}
-                    <button type="button" class="rdv-date px-4 py-3 rounded-lg border-2 border-[#E5E0D8] text-[#6B7280] hover:border-[#A7C7E7] font-medium transition-colors {% if day == defaultDate %}rdv-selected{% endif %}" data-date="{{ day }}">{{ day }}</button>
-                    {% endfor %}
-                </div>
-                <p class="text-[#6B7280] mb-4">Horaire</p>
-                <div class="flex flex-wrap gap-2 mb-8" id="rdv-times" role="group" aria-label="Choisir un horaire">
-                    {% for time in times %}
-                    <button type="button" class="rdv-time px-4 py-3 rounded-lg border-2 border-[#E5E0D8] text-[#6B7280] hover:border-[#A7C7E7] font-medium transition-colors {% if time == defaultTime %}rdv-selected{% endif %}" data-time="{{ time }}">{{ time }}</button>
+                <input type="hidden" name="disponibilite_id" id="rdv-dispo" value="{{ choices.disponibilite_id|default(slots[0].disponibilite_id) }}">
+                <input type="hidden" name="date_rdv" id="rdv-date" value="{{ choices.date_rdv|default(slots[0].date_rdv) }}">
+                <input type="hidden" name="date_label" id="rdv-label" value="{{ choices.date_label|default(slots[0].label) }}">
+                <div class="flex flex-wrap gap-2 mb-8">
+                    {% for slot in slots %}
+                    <button type="button" class="rdv-slot px-4 py-3 rounded-lg border-2 border-[#E5E0D8] text-[#6B7280] hover:border-[#A7C7E7] font-medium transition-colors text-left {% if choices.disponibilite_id == slot.disponibilite_id and choices.date_rdv == slot.date_rdv %}rdv-selected{% endif %}" data-dispo="{{ slot.disponibilite_id }}" data-date="{{ slot.date_rdv }}" data-label="{{ slot.label }}">{{ slot.label }}</button>
                     {% endfor %}
                 </div>
                 <div class="flex justify-end">
@@ -95,33 +85,33 @@
             <script>
             (function() {
                 var form = document.getElementById('rdv-form-step1');
-                var dateInput = document.getElementById('rdv-input-date');
-                var timeInput = document.getElementById('rdv-input-time');
-                var dateBtns = document.querySelectorAll('.rdv-date');
-                var timeBtns = document.querySelectorAll('.rdv-time');
-                dateBtns.forEach(function(btn) {
+                var dispo = document.getElementById('rdv-dispo');
+                var date = document.getElementById('rdv-date');
+                var label = document.getElementById('rdv-label');
+                var btns = document.querySelectorAll('.rdv-slot');
+                btns.forEach(function(btn) {
                     btn.addEventListener('click', function() {
-                        dateBtns.forEach(function(b) { b.classList.remove('rdv-selected'); });
+                        btns.forEach(function(b) { b.classList.remove('rdv-selected'); });
                         this.classList.add('rdv-selected');
-                        if (dateInput) dateInput.value = this.getAttribute('data-date');
-                    });
-                });
-                timeBtns.forEach(function(btn) {
-                    btn.addEventListener('click', function() {
-                        timeBtns.forEach(function(b) { b.classList.remove('rdv-selected'); });
-                        this.classList.add('rdv-selected');
-                        if (timeInput) timeInput.value = this.getAttribute('data-time');
+                        if (dispo) dispo.value = this.getAttribute('data-dispo');
+                        if (date) date.value = this.getAttribute('data-date');
+                        if (label) label.value = this.getAttribute('data-label');
                     });
                 });
             })();
             </script>
+            {% else %}
+            <p class="text-[#6B7280] mb-6">Aucun créneau disponible pour les 4 prochaines semaines. Revenez plus tard ou choisissez un autre médecin.</p>
+            <a href="{{ path('user_appointments') }}" class="inline-flex px-6 py-3 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED]">Voir les autres médecins</a>
+            {% endif %}
             {% endif %}
 
             {% if step == 2 %}
             <form method="get" action="{{ path('user_appointment_book', { id: doctor.id }) }}" id="rdv-form-step2">
                 <input type="hidden" name="etape" value="3">
-                <input type="hidden" name="date" value="{{ choices.date }}">
-                <input type="hidden" name="time" value="{{ choices.time }}">
+                <input type="hidden" name="disponibilite_id" value="{{ choices.disponibilite_id }}">
+                <input type="hidden" name="date_rdv" value="{{ choices.date_rdv }}">
+                <input type="hidden" name="date_label" value="{{ choices.date_label }}">
                 <h2 class="text-xl font-bold text-[#4B5563] mb-6">Type de consultation</h2>
                 <p class="text-[#4B5563] font-medium mb-3">Type de rendez-vous</p>
                 <div class="space-y-3 mb-6">
@@ -175,73 +165,78 @@
 
             {% if step == 3 %}
             <h2 class="text-xl font-bold text-[#4B5563] mb-6">Vos informations</h2>
-            <form class="space-y-4 mb-8">
+            <form method="post" action="{{ path('user_appointment_submit', { id: doctor.id }) }}" class="space-y-4 mb-8">
+                <input type="hidden" name="_token" value="{{ csrf_token('rdv_submit') }}">
+                <input type="hidden" name="disponibilite_id" value="{{ choices.disponibilite_id }}">
+                <input type="hidden" name="date_rdv" value="{{ choices.date_rdv }}">
+                <input type="hidden" name="date_label" value="{{ choices.date_label }}">
+                <input type="hidden" name="type" value="{{ choices.type }}">
+                <input type="hidden" name="mode" value="{{ choices.mode }}">
+                <input type="hidden" name="motif" value="{{ choices.motif }}">
+                <input type="hidden" name="motif_key" value="{{ choices.type == 'urgent' ? 'urgence' : (choices.type == 'suivi' ? 'suivie' : 'normal') }}">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-[#4B5563] font-medium mb-1">Nom</label>
-                        <input type="text" placeholder="Votre nom" class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-white text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                        <label class="block text-[#4B5563] font-medium mb-1">Nom <span class="text-red-500">*</span></label>
+                        <input type="text" name="nom" required placeholder="Votre nom" class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-white text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
                     </div>
                     <div>
-                        <label class="block text-[#4B5563] font-medium mb-1">Prénom</label>
-                        <input type="text" placeholder="Votre prénom" class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-white text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                        <label class="block text-[#4B5563] font-medium mb-1">Prénom <span class="text-red-500">*</span></label>
+                        <input type="text" name="prenom" required placeholder="Votre prénom" class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-white text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
                     </div>
-                </div>
-                <div>
-                    <label class="block text-[#4B5563] font-medium mb-1">Email</label>
-                    <input type="email" placeholder="votre@email.fr" class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-white text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
                 </div>
                 <div>
                     <label class="block text-[#4B5563] font-medium mb-1">Téléphone</label>
-                    <input type="tel" value="06 12 34 56 78" class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-white text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                    <input type="tel" name="telephone" placeholder="06 12 34 56 78" class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-white text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                </div>
+                <div>
+                    <label class="block text-[#4B5563] font-medium mb-1">Adresse</label>
+                    <input type="text" name="adresse" placeholder="Adresse (optionnel)" class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-white text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
                 </div>
                 <div>
                     <label class="block text-[#4B5563] font-medium mb-1">Date de naissance du patient</label>
-                    <input type="text" placeholder="jj/mm/aaaa" class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-white text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                    <input type="date" name="date_naissance" class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-white text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
                 </div>
                 <div>
-                    <label class="block text-[#4B5563] font-medium mb-1">Notes complémentaires (optionnel)</label>
-                    <textarea rows="3" placeholder="Informations supplémentaires utiles pour le praticien..." class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-white text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]"></textarea>
+                    <label class="block text-[#4B5563] font-medium mb-1">Notes (optionnel)</label>
+                    <textarea name="note" rows="3" placeholder="Informations utiles pour le praticien..." class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-white text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]"></textarea>
+                </div>
+                <div class="bg-[#F5F1EB] rounded-xl p-4 mb-6">
+                    <h3 class="font-semibold text-[#4B5563] mb-3">Récapitulatif</h3>
+                    <ul class="text-[#6B7280] text-sm space-y-1">
+                        <li>Créneau: {{ choices.date_label|default('—') }}</li>
+                        <li>Type: {{ choices.type_label }}</li>
+                        <li>Mode: {{ choices.mode_label }}</li>
+                        {% if choices.motif %}<li>Motif: {{ choices.motif }}</li>{% endif %}
+                        <li class="font-semibold text-[#4B5563] pt-2">Tarif: {{ doctor.price }}€</li>
+                    </ul>
+                </div>
+                <div class="flex justify-between">
+                    <a href="{{ path('user_appointment_book', linkStep2) }}" class="px-6 py-3 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB]">&lt; Retour</a>
+                    <button type="submit" class="px-6 py-3 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED]">Envoyer ma demande</button>
                 </div>
             </form>
-            <div class="bg-[#F5F1EB] rounded-xl p-4 mb-8">
-                <h3 class="font-semibold text-[#4B5563] mb-3">Récapitulatif de vos choix</h3>
-                <ul class="text-[#6B7280] text-sm space-y-1">
-                    <li>Date: {{ choices.date|default('—') }}</li>
-                    <li>Heure: {{ choices.time|default('—') }}</li>
-                    <li>Type: {{ choices.type_label }}</li>
-                    <li>Mode: {{ choices.mode_label }}</li>
-                    {% if choices.motif %}<li>Motif: {{ choices.motif }}</li>{% endif %}
-                    <li class="font-semibold text-[#4B5563] pt-2">Total: {{ doctor.price }}€</li>
-                </ul>
-            </div>
-            <div class="flex justify-between">
-                <a href="{{ path('user_appointment_book', linkStep2) }}" class="px-6 py-3 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB]">&lt; Retour</a>
-                <a href="{{ path('user_appointment_book', { id: doctor.id, etape: 4, date: choices.date, time: choices.time, type: choices.type, mode: choices.mode, motif: choices.motif }) }}" class="px-6 py-3 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED]">Confirmer le rendez-vous</a>
-            </div>
             {% endif %}
 
             {% if step == 4 %}
             <div class="text-center py-8">
-                <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-100 text-emerald-600 mb-6">
-                    <svg class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-amber-100 text-amber-600 mb-6">
+                    <svg class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 </div>
-                <h2 class="text-2xl font-bold text-[#4B5563] mb-2">Rendez-vous confirmé !</h2>
-                <p class="text-[#6B7280] mb-8">Un email de confirmation a été envoyé à votre adresse.</p>
+                <h2 class="text-2xl font-bold text-[#4B5563] mb-2">Demande envoyée</h2>
+                <p class="text-[#6B7280] mb-8">Le médecin va recevoir votre demande et pourra l'accepter ou la refuser. Vous serez notifié de sa réponse.</p>
                 <div class="bg-[#F5F1EB] rounded-xl p-6 mb-8 text-left max-w-md mx-auto">
-                    <h3 class="font-semibold text-[#4B5563] mb-3">Détails du rendez-vous</h3>
+                    <h3 class="font-semibold text-[#4B5563] mb-3">Détails de la demande</h3>
                     <ul class="text-[#6B7280] text-sm space-y-2">
                         <li><strong class="text-[#4B5563]">Praticien:</strong> {{ doctor.name }}</li>
-                        <li><strong class="text-[#4B5563]">Date:</strong> {{ choices.date|default('—') }}</li>
-                        <li><strong class="text-[#4B5563]">Heure:</strong> {{ choices.time|default('—') }}</li>
+                        <li><strong class="text-[#4B5563]">Créneau:</strong> {{ choices.date_label|default('—') }}</li>
                         <li><strong class="text-[#4B5563]">Type:</strong> {{ choices.type_label }}</li>
                         <li><strong class="text-[#4B5563]">Mode:</strong> {{ choices.mode_label }}</li>
                         <li><strong class="text-[#4B5563]">Lieu:</strong> {{ choices.mode == 'teleconsult' ? 'Téléconsultation' : doctor.address }}</li>
                     </ul>
                 </div>
-                <p class="text-[#6B7280] text-sm mb-6">Vous recevrez un rappel par SMS 24h avant votre rendez-vous.</p>
                 <div class="flex flex-wrap gap-4 justify-center">
-                    <a href="{{ path('user_appointments') }}" class="inline-flex px-6 py-3 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED]">Voir mes rendez-vous</a>
-                    <a href="{{ path('home') }}" class="inline-flex px-6 py-3 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB]">Retour à l'accueil</a>
+                    <a href="{{ path('user_appointments') }}" class="inline-flex px-6 py-3 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED]">Prendre un autre RDV</a>
+                    <a href="{{ path('home') }}" class="inline-flex px-6 py-3 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB]">Accueil</a>
                 </div>
             </div>
             {% endif %}

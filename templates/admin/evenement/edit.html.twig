@@ -1,16 +1,16 @@
 {% extends 'layouts/admin.html.twig' %}
 
-{% block title %}Nouvelle thématique - AutiCare Admin{% endblock %}
+{% block title %}Modifier {{ evenement.title }} - AutiCare Admin{% endblock %}
 
 {% block admin_content %}
 <div class="max-w-2xl">
     <div class="mb-6 flex items-center gap-4">
-        <a href="{{ path('admin_thematique_index') }}" class="inline-flex items-center gap-2 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded-lg">
+        <a href="{{ path('admin_evenement_show', { id: evenement.id }) }}" class="inline-flex items-center gap-2 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded-lg">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-            Retour aux thématiques
+            Retour à l'événement
         </a>
     </div>
-    <h1 class="text-2xl font-semibold text-[#4B5563] mb-6">Nouvelle thématique</h1>
+    <h1 class="text-2xl font-semibold text-[#4B5563] mb-6">Modifier l'événement</h1>
 
     <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8">
         {{ form_start(form, {
@@ -18,22 +18,21 @@
             label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }
         }) }}
         <div class="grid grid-cols-1 gap-6">
-            {{ form_row(form.nomThematique) }}
-            {{ form_row(form.codeThematique) }}
+            {{ form_row(form.title) }}
             {{ form_row(form.description) }}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {{ form_row(form.couleur) }}
-                {{ form_row(form.sousTitre) }}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {{ form_row(form.dateEvent) }}
+                {{ form_row(form.heureDebut) }}
+                {{ form_row(form.heureFin) }}
             </div>
-            {{ form_row(form.ordre) }}
-            {{ form_row(form.publicCible) }}
-            {{ form_row(form.niveauDifficulte) }}
+            {{ form_row(form.lieu) }}
+            {{ form_row(form.thematique) }}
         </div>
         <div class="flex flex-wrap gap-3 pt-4">
             <button type="submit" class="px-5 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
-                Enregistrer la thématique
+                Enregistrer
             </button>
-            <a href="{{ path('admin_thematique_index') }}" class="px-5 py-2.5 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+            <a href="{{ path('admin_evenement_show', { id: evenement.id }) }}" class="px-5 py-2.5 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
                 Annuler
             </a>
         </div>

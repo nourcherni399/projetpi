@@ -1,0 +1,54 @@
+{% extends 'layouts/doctor.html.twig' %}
+
+{% block title %}Rendez-vous - AutiCare Médecin{% endblock %}
+
+{% block doctor_content %}
+<h1 class="text-2xl font-semibold text-[#4B5563] mb-6">Mes rendez-vous</h1>
+
+<div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
+    <div class="p-4 border-b border-[#E5E0D8]">
+        <h2 class="text-lg font-medium text-[#4B5563]">Liste des rendez-vous</h2>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead class="bg-[#F5F1EB] border-b border-[#E5E0D8]">
+                <tr>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Patient</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Créneau</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Motif</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Statut</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Téléphone</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-[#E5E0D8]">
+                {% for rv in rendez_vous %}
+                <tr class="hover:bg-[#F5F1EB]/50">
+                    <td class="px-6 py-4 text-[#4B5563]">{{ rv.nom }} {{ rv.prenom }}</td>
+                    <td class="px-6 py-4 text-[#6B7280]">
+                        {% if rv.disponibilite %}
+                            {{ rv.disponibilite.jour ? rv.disponibilite.jour.value|capitalize : '—' }},
+                            {{ rv.disponibilite.heureDebut ? rv.disponibilite.heureDebut|date('H:i') : '—' }}–{{ rv.disponibilite.heureFin ? rv.disponibilite.heureFin|date('H:i') : '—' }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-[#6B7280]">{{ rv.motif ? rv.motif.value|capitalize : '—' }}</td>
+                    <td class="px-6 py-4">
+                        {% if rv.status.value == 'confirmer' %}
+                            <span class="px-2 py-1 text-xs rounded-full bg-emerald-100 text-emerald-800">Confirmé</span>
+                        {% elseif rv.status.value == 'annuler' %}
+                            <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">Annulé</span>
+                        {% else %}
+                            <span class="px-2 py-1 text-xs rounded-full bg-amber-100 text-amber-800">En attente</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-[#6B7280]">{{ rv.telephone ?? '—' }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" class="px-6 py-8 text-center text-[#6B7280]">Aucun rendez-vous.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -5,9 +5,22 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Blog;
-use App\Entity\Module;
+use App\Entity\Disponibilite;
+use App\Entity\Evenement;
+use App\Entity\Medcin;
+use App\Entity\Notification;
+use App\Entity\Patient;
+use App\Entity\RendezVous;
+use App\Enum\Motif;
+use App\Enum\StatusRendezVous;
 use App\Form\BlogType;
+use App\Repository\DisponibiliteRepository;
+use App\Repository\EvenementRepository;
+use App\Repository\MedcinRepository;
 use App\Repository\ModuleRepository;
+use App\Repository\NotificationRepository;
+use App\Repository\RendezVousRepository;
+use App\Repository\ThematiqueRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,6 +31,12 @@ final class HomeController extends AbstractController
 {
     public function __construct(
         private readonly ModuleRepository $moduleRepository,
+        private readonly ThematiqueRepository $thematiqueRepository,
+        private readonly EvenementRepository $evenementRepository,
+        private readonly MedcinRepository $medcinRepository,
+        private readonly DisponibiliteRepository $disponibiliteRepository,
+        private readonly RendezVousRepository $rendezVousRepository,
+        private readonly NotificationRepository $notificationRepository,
         private readonly EntityManagerInterface $entityManager,
     ) {
     }
@@ -129,152 +148,46 @@ final class HomeController extends AbstractController
     #[Route('/evenements', name: 'user_events', methods: ['GET'])]
     public function events(): Response
     {
+        $thematiques = $this->thematiqueRepository->findBy(['actif' => true], ['ordre' => 'ASC', 'nomThematique' => 'ASC']);
+        $grouped = [];
+        foreach ($thematiques as $t) {
+            $evenements = $t->getEvenements()->toArray();
+            usort($evenements, static function (Evenement $a, Evenement $b): int {
+                $d = ($a->getDateEvent() <=> $b->getDateEvent());
+                return $d !== 0 ? $d : ($a->getHeureDebut() <=> $b->getHeureDebut());
+            });
+            $grouped[] = ['thematique' => $t, 'evenements' => $evenements];
+        }
+        $sansThematique = $this->evenementRepository->findBy(['thematique' => null], ['dateEvent' => 'ASC', 'heureDebut' => 'ASC']);
         return $this->render('front/events/index.html.twig', [
-            'events' => $this->getEventsData(),
+            'grouped' => $grouped,
+            'sansThematique' => $sansThematique,
         ]);
     }
 
     #[Route('/evenements/{id}', name: 'user_event_show', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function eventShow(int $id): Response
     {
-        $events = $this->getEventsData();
-        $event = $events[$id] ?? null;
-        if ($event === null) {
+        $evenement = $this->evenementRepository->find($id);
+        if ($evenement === null) {
             throw $this->createNotFoundException('Événement introuvable.');
         }
-        $event['id'] = $id;
-        return $this->render('front/events/show.html.twig', ['event' => $event]);
-    }
-
-    /**
-     * @return array<int, array{
-     *   title: string,
-     *   date_label: string,
-     *   day: string,
-     *   month_year: string,
-     *   time_range: string,
-     *   location: string,
-     *   capacity: string,
-     *   capacity_max: int,
-     *   capacity_current: int,
-     *   animator: string,
-     *   price_display: string,
-     *   type_tag: string,
-     *   public_tags: list<string>,
-     *   urgency_tag: string|null,
-     *   description_short: string,
-     *   description_long: string,
-     *   programme: list<array{label: string, duration: string}>,
-     *   address_full: string,
-     *   places_remaining: int,
-     *   contact_label: string
-     * }>
-     */
-    private function getEventsData(): array
-    {
-        return [
-            1 => [
-                'title' => 'Atelier Sensoriel pour Enfants',
-                'date_label' => '15 Février 2026',
-                'day' => '15',
-                'month_year' => 'Février 2026',
-                'time_range' => '14:00 - 16:00',
-                'location' => 'Centre AutiCare, Paris',
-                'capacity' => '4/12 places',
-                'capacity_max' => 12,
-                'capacity_current' => 8,
-                'animator' => 'Marie Dupont',
-                'price_display' => '25 €',
-                'type_tag' => 'Atelier',
-                'public_tags' => ['Enfants', 'Enfants (6-12 ans)'],
-                'urgency_tag' => 'Plus que 4 places !',
-                'description_short' => 'Un atelier ludique pour explorer différentes textures et sensations dans un environnement calme et adapté.',
-                'description_long' => 'Cet atelier est conçu pour les enfants autistes de 6 à 12 ans. Dans un environnement calme et adapté, les participants explorent différentes textures, sons et sensations, encadrés par des professionnels formés. Un moment de découverte et d\'apaisement pour favoriser le bien-être sensoriel.',
-                'programme' => [
-                    ['label' => 'Accueil et présentation', 'duration' => '15 min'],
-                    ['label' => 'Exploration tactile : différentes textures', 'duration' => '30 min'],
-                    ['label' => 'Pause sensorielle apaisante', 'duration' => '15 min'],
-                    ['label' => 'Jeux de sons et de lumières', 'duration' => '30 min'],
-                    ['label' => 'Activité créative libre', 'duration' => '20 min'],
-                    ['label' => 'Temps calme et conclusion', 'duration' => '10 min'],
-                ],
-                'address_full' => '12 rue de la Paix, 75002 Paris',
-                'places_remaining' => 4,
-                'contact_label' => 'Contacter l\'organisateur',
-            ],
-            2 => [
-                'title' => 'Rencontre Parents & Familles',
-                'date_label' => '22 Février 2026',
-                'day' => '22',
-                'month_year' => 'Février 2026',
-                'time_range' => '10:00 - 12:00',
-                'location' => 'En ligne (Zoom)',
-                'capacity' => '18/30 places',
-                'capacity_max' => 30,
-                'capacity_current' => 12,
-                'animator' => 'Équipe AutiCare',
-                'price_display' => 'Gratuit',
-                'type_tag' => 'Rencontre',
-                'public_tags' => ['Familles'],
-                'urgency_tag' => null,
-                'description_short' => 'Échangez avec d\'autres familles concernées par l\'autisme dans un cadre bienveillant et sans jugement.',
-                'description_long' => 'Un moment d\'échange et de partage d\'expériences entre parents et proches dans un cadre bienveillant. Rencontres en visioconférence pour permettre à tous de participer.',
-                'programme' => [],
-                'address_full' => 'En ligne',
-                'places_remaining' => 18,
-                'contact_label' => 'Contacter l\'organisateur',
-            ],
-            3 => [
-                'title' => 'Séance de Sensibilisation',
-                'date_label' => '1 Mars 2026',
-                'day' => '1',
-                'month_year' => 'Mars 2026',
-                'time_range' => '18:00 - 20:00',
-                'location' => 'Médiathèque Centrale, Lyon',
-                'capacity' => '32/50 places',
-                'capacity_max' => 50,
-                'capacity_current' => 18,
-                'animator' => 'Dr. Pierre Martin',
-                'price_display' => 'Gratuit',
-                'type_tag' => 'Sensibilisation',
-                'public_tags' => ['Tout public'],
-                'urgency_tag' => null,
-                'description_short' => 'Une session pour mieux comprendre l\'autisme, déconstruire les idées reçues et apprendre à accompagner.',
-                'description_long' => 'Session d\'information et d\'échanges pour mieux comprendre l\'autisme, déconstruire les idées reçues et découvrir comment accompagner au quotidien.',
-                'programme' => [],
-                'address_full' => 'Médiathèque Centrale, Lyon',
-                'places_remaining' => 32,
-                'contact_label' => 'Contacter l\'organisateur',
-            ],
-            4 => [
-                'title' => 'Formation Communication Visuelle',
-                'date_label' => '8 Mars 2026',
-                'day' => '8',
-                'month_year' => 'Mars 2026',
-                'time_range' => '09:00 - 17:00',
-                'location' => 'Centre AutiCare, Paris',
-                'capacity' => '7/15 places',
-                'capacity_max' => 15,
-                'capacity_current' => 8,
-                'animator' => 'Sophie Laurent',
-                'price_display' => '120 €',
-                'type_tag' => 'Formation',
-                'public_tags' => ['Professionnels'],
-                'urgency_tag' => null,
-                'description_short' => 'Formation complète sur les outils de communication visuelle et leur utilisation avec les personnes autistes.',
-                'description_long' => 'Formation d\'une journée pour les professionnels sur les outils de communication visuelle (PECS, pictogrammes, emplois du temps visuels) et leur mise en œuvre.',
-                'programme' => [],
-                'address_full' => 'Centre AutiCare, Paris',
-                'places_remaining' => 7,
-                'contact_label' => 'Contacter l\'organisateur',
-            ],
-        ];
+        return $this->render('front/events/show.html.twig', ['evenement' => $evenement]);
     }
 
     #[Route('/rendez-vous', name: 'user_appointments', methods: ['GET'])]
     public function appointments(): Response
     {
-        return $this->render('front/appointments/index.html.twig');
+        $medecins = $this->medcinRepository->findAllOrderByNom();
+        $specialites = array_values(array_unique(array_filter(array_map(
+            static fn (Medcin $m) => $m->getSpecialite(),
+            $medecins
+        ))));
+        sort($specialites);
+        return $this->render('front/appointments/index.html.twig', [
+            'medecins' => $medecins,
+            'specialites' => $specialites,
+        ]);
     }
 
     /** Labels pour type de consultation et mode (affichage récap/confirmation). */
@@ -289,20 +202,25 @@ final class HomeController extends AbstractController
         'teleconsult' => 'Téléconsultation',
     ];
 
+    /** Numéro de jour PHP (1=lundi) pour chaque Jour enum. */
+    private const JOUR_TO_NUMBER = [
+        'lundi' => 1, 'mardi' => 2, 'mercredi' => 3, 'jeudi' => 4,
+        'vendredi' => 5, 'samedi' => 6, 'dimanche' => 7,
+    ];
+
     #[Route('/rendez-vous/prendre/{id}', name: 'user_appointment_book', requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function appointmentBook(int $id, \Symfony\Component\HttpFoundation\Request $request): Response
+    public function appointmentBook(int $id, Request $request): Response
     {
-        $doctors = $this->getDoctorsData();
-        $doctor = $doctors[$id] ?? null;
-        if ($doctor === null) {
+        $medecin = $this->medcinRepository->find($id);
+        if ($medecin === null || !$medecin instanceof Medcin) {
             throw $this->createNotFoundException('Praticien introuvable.');
         }
-        $doctor['id'] = $id;
+        $doctor = $this->medecinToDoctorArray($medecin);
         $step = (int) $request->query->get('etape', 1);
         $step = max(1, min(4, $step));
 
-        $date = (string) $request->query->get('date', '');
-        $time = (string) $request->query->get('time', '');
+        $disponibiliteId = $request->query->get('disponibilite_id');
+        $dateRdv = (string) $request->query->get('date_rdv', '');
         $type = (string) $request->query->get('type', 'premiere');
         $mode = (string) $request->query->get('mode', 'cabinet');
         $motif = (string) $request->query->get('motif', '');
@@ -314,9 +232,12 @@ final class HomeController extends AbstractController
             $mode = 'cabinet';
         }
 
+        $slots = $this->getAvailableSlotsForMedecin($medecin);
+
         $choices = [
-            'date' => $date,
-            'time' => $time,
+            'disponibilite_id' => $disponibiliteId,
+            'date_rdv' => $dateRdv,
+            'date_label' => $request->query->get('date_label', ''),
             'type' => $type,
             'type_label' => self::APPOINTMENT_TYPE_LABELS[$type],
             'mode' => $mode,
@@ -328,58 +249,185 @@ final class HomeController extends AbstractController
             'doctor' => $doctor,
             'step' => $step,
             'choices' => $choices,
+            'slots' => $slots,
         ]);
     }
 
-    /** @return array<int, array{name: string, initials: string, specialty: string, specialty_class: string, rating: string, reviews: int, description: string, address: string, phone: string, email: string, price: int, has_cabinet: bool, has_teleconsult: bool}> */
-    private function getDoctorsData(): array
+    /**
+     * @return list<array{disponibilite_id: int, date_rdv: string, label: string}>
+     */
+    private function getAvailableSlotsForMedecin(Medcin $medecin): array
     {
+        $dispos = $this->disponibiliteRepository->findByMedecin($medecin);
+        $slots = [];
+        $today = new \DateTimeImmutable('today');
+        $end = $today->modify('+4 weeks');
+        $jourNumber = self::JOUR_TO_NUMBER;
+
+        foreach ($dispos as $dispo) {
+            if (!$dispo->isEstDispo() || $dispo->getJour() === null) {
+                continue;
+            }
+            $jourValue = $dispo->getJour()->value;
+            $targetDayNum = $jourNumber[$jourValue] ?? null;
+            if ($targetDayNum === null) {
+                continue;
+            }
+            $iter = $today;
+            while ($iter <= $end) {
+                if ((int) $iter->format('N') === $targetDayNum) {
+                    if (!$this->rendezVousRepository->isSlotTaken($dispo, $iter)) {
+                        $heureDebut = $dispo->getHeureDebut() ? $dispo->getHeureDebut()->format('H:i') : '—';
+                        $heureFin = $dispo->getHeureFin() ? $dispo->getHeureFin()->format('H:i') : '—';
+                        $slots[] = [
+                            'disponibilite_id' => $dispo->getId(),
+                            'date_rdv' => $iter->format('Y-m-d'),
+                            'label' => ucfirst($jourValue) . ' ' . $iter->format('d/m/Y') . ', ' . $heureDebut . '-' . $heureFin,
+                        ];
+                    }
+                }
+                $iter = $iter->modify('+1 day');
+            }
+        }
+        usort($slots, static fn (array $a, array $b): int => strcmp($a['date_rdv'] . $a['disponibilite_id'], $b['date_rdv'] . $b['disponibilite_id']));
+        return $slots;
+    }
+
+    #[Route('/rendez-vous/prendre/{id}/confirmer', name: 'user_appointment_submit', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function appointmentSubmit(int $id, Request $request): Response
+    {
+        $medecin = $this->medcinRepository->find($id);
+        if ($medecin === null || !$medecin instanceof Medcin) {
+            throw $this->createNotFoundException('Praticien introuvable.');
+        }
+
+        $disponibiliteId = (int) $request->request->get('disponibilite_id', 0);
+        $dateRdvStr = (string) $request->request->get('date_rdv', '');
+        $disponibilite = $disponibiliteId > 0 ? $this->disponibiliteRepository->find($disponibiliteId) : null;
+        if ($disponibilite === null || $disponibilite->getMedecin() !== $medecin) {
+            $this->addFlash('error', 'Créneau invalide.');
+            return $this->redirectToRoute('user_appointment_book', ['id' => $id]);
+        }
+
+        $dateRdv = null;
+        if ($dateRdvStr !== '') {
+            try {
+                $dateRdv = new \DateTimeImmutable($dateRdvStr);
+            } catch (\Throwable) {
+            }
+        }
+        if ($dateRdv === null) {
+            $this->addFlash('error', 'Date invalide.');
+            return $this->redirectToRoute('user_appointment_book', ['id' => $id]);
+        }
+
+        if ($this->rendezVousRepository->isSlotTaken($disponibilite, $dateRdv)) {
+            $this->addFlash('error', 'Ce créneau n\'est plus disponible.');
+            return $this->redirectToRoute('user_appointment_book', ['id' => $id]);
+        }
+
+        $nom = trim((string) $request->request->get('nom', ''));
+        $prenom = trim((string) $request->request->get('prenom', ''));
+        if ($nom === '' || $prenom === '') {
+            $this->addFlash('error', 'Nom et prénom obligatoires.');
+            return $this->redirectToRoute('user_appointment_book', ['id' => $id, 'etape' => 3] + array_filter([
+                'disponibilite_id' => $disponibiliteId ?: null,
+                'date_rdv' => $dateRdvStr ?: null,
+                'type' => $request->request->get('type'),
+                'mode' => $request->request->get('mode'),
+                'motif' => $request->request->get('motif'),
+            ]));
+        }
+
+        $token = $request->request->get('_token');
+        if (!\is_string($token) || !$this->isCsrfTokenValid('rdv_submit', $token)) {
+            $this->addFlash('error', 'Session expirée. Veuillez recommencer.');
+            return $this->redirectToRoute('user_appointment_book', ['id' => $id]);
+        }
+
+        $motifKey = (string) $request->request->get('motif_key', 'normal');
+        $motif = match ($motifKey) {
+            'urgence' => Motif::URGENCE,
+            'suivie' => Motif::SUIVIE,
+            default => Motif::NORMAL,
+        };
+
+        $rdv = new RendezVous();
+        $rdv->setMedecin($medecin);
+        $rdv->setDisponibilite($disponibilite);
+        $rdv->setDateRdv($dateRdv);
+        $rdv->setNom($nom);
+        $rdv->setPrenom($prenom);
+        $rdv->setStatus(StatusRendezVous::EN_ATTENTE);
+        $rdv->setMotif($motif);
+        $rdv->setTelephone((string) $request->request->get('telephone', ''));
+        $rdv->setAdresse((string) $request->request->get('adresse', ''));
+        $rdv->setNotePatient((string) $request->request->get('note', 'vide'));
+        $dateNaissance = $request->request->get('date_naissance');
+        if ($dateNaissance !== null && $dateNaissance !== '') {
+            try {
+                $rdv->setDateNaissance(new \DateTime($dateNaissance));
+            } catch (\Throwable) {
+            }
+        }
+        $user = $this->getUser();
+        if ($user instanceof Patient) {
+            $rdv->setPatient($user);
+        }
+
+        $this->entityManager->persist($rdv);
+        $this->entityManager->flush();
+
+        $notif = new Notification();
+        $notif->setDestinataire($medecin);
+        $notif->setType(Notification::TYPE_DEMANDE_RDV);
+        $notif->setRendezVous($rdv);
+        $this->entityManager->persist($notif);
+        $this->entityManager->flush();
+
+        $this->addFlash('success', 'Votre demande de rendez-vous a été envoyée. Le médecin vous répondra sous peu.');
+        return $this->redirectToRoute('user_appointment_book', [
+            'id' => $id,
+            'etape' => 4,
+            'date_rdv' => $dateRdvStr,
+            'date_label' => $request->request->get('date_label', ''),
+            'type' => $request->request->get('type', 'premiere'),
+            'mode' => $request->request->get('mode', 'cabinet'),
+            'motif' => $request->request->get('motif', ''),
+        ]);
+    }
+
+    /**
+     * @return array{id: int, name: string, initials: string, specialty: string, specialty_class: string, rating: string, reviews: int, description: string, address: string, phone: string, email: string, price: int|float, has_cabinet: bool, has_teleconsult: bool}
+     */
+    private function medecinToDoctorArray(Medcin $medecin): array
+    {
+        $nom = $medecin->getNom() ?? '';
+        $prenom = $medecin->getPrenom() ?? '';
+        $initials = (mb_substr($nom, 0, 1) . mb_substr($prenom, 0, 1)) ?: 'DR';
+        $specialite = $medecin->getSpecialite() ?? 'Spécialiste';
+        $specialtyClass = match (mb_strtolower($specialite)) {
+            'psychiatre' => 'bg-emerald-100 text-emerald-800',
+            'psychologue' => 'bg-emerald-100 text-emerald-800',
+            'orthophoniste' => 'bg-sky-100 text-sky-800',
+            default => 'bg-[#A7C7E7]/20 text-[#4B5563]',
+        };
+
         return [
-            1 => [
-                'name' => 'Dr. Marie Dupont',
-                'initials' => 'DMD',
-                'specialty' => 'Psychiatre',
-                'specialty_class' => 'bg-emerald-100 text-emerald-800',
-                'rating' => '4.9',
-                'reviews' => 127,
-                'description' => 'Spécialisée dans le diagnostic et l\'accompagnement des troubles du spectre autistique chez l\'enfant et l\'adulte. Plus de 15 ans d\'expérience.',
-                'address' => '45 rue de la Roquette, 75011 Paris',
-                'phone' => '01 23 45 67 89',
-                'email' => 'contact@dr-dupont.fr',
-                'price' => 80,
-                'has_cabinet' => true,
-                'has_teleconsult' => true,
-            ],
-            2 => [
-                'name' => 'Dr. Thomas Bernard',
-                'initials' => 'DTB',
-                'specialty' => 'Psychologue',
-                'specialty_class' => 'bg-emerald-100 text-emerald-800',
-                'rating' => '4.8',
-                'reviews' => 89,
-                'description' => 'Psychologue clinicien spécialisé dans les thérapies comportementales et cognitives adaptées à l\'autisme.',
-                'address' => 'Lyon 6ème',
-                'phone' => '01 23 45 67 89',
-                'email' => 'contact@dr-bernard.fr',
-                'price' => 70,
-                'has_cabinet' => true,
-                'has_teleconsult' => true,
-            ],
-            3 => [
-                'name' => 'Claire Lefebvre',
-                'initials' => 'CL',
-                'specialty' => 'Orthophoniste',
-                'specialty_class' => 'bg-sky-100 text-sky-800',
-                'rating' => '4.7',
-                'reviews' => 56,
-                'description' => 'Accompagnement de la communication et du langage chez les personnes avec TSA.',
-                'address' => 'Paris 15ème',
-                'phone' => '01 23 45 67 89',
-                'email' => 'contact@claire-lefebvre.fr',
-                'price' => 65,
-                'has_cabinet' => true,
-                'has_teleconsult' => false,
-            ],
+            'id' => $medecin->getId(),
+            'name' => trim('Dr. ' . $nom . ' ' . $prenom) ?: 'Praticien',
+            'initials' => mb_strtoupper($initials),
+            'specialty' => $specialite,
+            'specialty_class' => $specialtyClass,
+            'rating' => '—',
+            'reviews' => 0,
+            'description' => 'Praticien accompagnant les personnes avec TSA. Cabinet : ' . ($medecin->getNomCabinet() ?? 'non renseigné') . '.',
+            'address' => $medecin->getAdresseCabinet() ?? '—',
+            'phone' => $medecin->getTelephoneCabinet() ?? $medecin->getTelephone() ?? '—',
+            'email' => $medecin->getEmail() ?? '—',
+            'price' => (int) round($medecin->getTarifConsultation() ?? 0),
+            'has_cabinet' => $medecin->getAdresseCabinet() !== null && $medecin->getAdresseCabinet() !== '',
+            'has_teleconsult' => true,
         ];
     }
 

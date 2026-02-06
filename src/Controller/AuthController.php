@@ -1,0 +1,38 @@
+<?php declare(strict_types=1);
+
+namespace App\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+
+final class AuthController extends AbstractController
+{
+    #[Route('/connexion', name: 'app_login', methods: ['GET', 'POST'])]
+    public function login(AuthenticationUtils $authenticationUtils): Response
+    {
+        if ($this->getUser()) {
+            return $this->redirectToRoute('home');
+        }
+        $error = $authenticationUtils->getLastAuthenticationError();
+        $lastUsername = $authenticationUtils->getLastUsername();
+
+        return $this->render('front/auth/login.html.twig', [
+            'last_username' => $lastUsername,
+            'error' => $error,
+        ]);
+    }
+
+    #[Route('/deconnexion', name: 'app_logout', methods: ['GET'])]
+    public function logout(): never
+    {
+        throw new \LogicException('Cette méthode peut être vide - elle sera interceptée par la clé logout du pare-feu.');
+    }
+
+    #[Route('/confirmer-compte', name: 'app_confirm_pin', methods: ['GET', 'POST'])]
+    public function confirmPinRedirect(): Response
+    {
+        return $this->redirectToRoute('app_login', [], Response::HTTP_MOVED_PERMANENTLY);
+    }
+}

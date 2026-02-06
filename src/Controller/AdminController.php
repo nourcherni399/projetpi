@@ -11,11 +11,13 @@ use App\Entity\ParentUser;
 use App\Entity\User;
 use App\Enum\UserRole;
 use App\Form\UserCreateType;
+use App\Form\UserEditType;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -35,10 +37,117 @@ final class AdminController extends AbstractController
     }
 
     #[Route('/admin/utilisateurs', name: 'admin_users', methods: ['GET'])]
-    public function users(): Response
+    public function users(Request $request): Response
     {
-        $users = $this->userRepository->findBy([], ['nom' => 'ASC', 'prenom' => 'ASC']);
-        return $this->render('admin/users/index.html.twig', ['users' => $users]);
+        $order = $request->query->get('order', 'asc');
+        if (!in_array(strtolower($order), ['asc', 'desc'], true)) {
+            $order = 'asc';
+        }
+        $users = $this->userRepository->findAllOrdered($order);
+        $stats = $this->userRepository->getStats();
+        return $this->render('admin/users/index.html.twig', [
+            'users' => $users,
+            'order' => $order,
+            'stats' => $stats,
+        ]);
+    }
+
+    #[Route('/admin/utilisateurs/{id}', name: 'admin_user_show', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function userShow(int $id): Response
+    {
+        $user = $this->userRepository->find($id);
+        if ($user === null) {
+            throw new NotFoundHttpException('Utilisateur introuvable.');
+        }
+        $userType = $user instanceof Medcin ? 'medcin' : ($user instanceof ParentUser ? 'parent' : ($user instanceof Admin ? 'admin' : 'patient'));
+        return $this->render('admin/users/show.html.twig', ['user' => $user, 'userType' => $userType]);
+    }
+
+    #[Route('/admin/utilisateurs/{id}/edit', name: 'admin_user_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
+    public function userEdit(Request $request, int $id): Response
+    {
+        $user = $this->userRepository->find($id);
+        if ($user === null) {
+            throw new NotFoundHttpException('Utilisateur introuvable.');
+        }
+        $form = $this->createForm(UserEditType::class, $user);
+        if ($user instanceof Medcin) {
+            $form->get('specialite')->setData($user->getSpecialite());
+            $form->get('nomCabinet')->setData($user->getNomCabinet());
+            $form->get('adresseCabinet')->setData($user->getAdresseCabinet());
+            $form->get('telephoneCabinet')->setData($user->getTelephoneCabinet());
+            $form->get('tarifConsultation')->setData($user->getTarifConsultation());
+        }
+        if ($user instanceof ParentUser) {
+            $form->get('relationAvecPatient')->setData($user->getRelationAvecPatient());
+        }
+        if ($user instanceof Patient) {
+            $form->get('dateNaissance')->setData($user->getDateNaissance());
+            $form->get('adresse')->setData($user->getAdresse());
+            $form->get('sexe')->setData($user->getSexe());
+        }
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $plainPassword = $form->get('plainPassword')->getData();
+            if ($plainPassword !== null && is_array($plainPassword) && trim((string) ($plainPassword['first'] ?? '')) !== '') {
+                $user->setPassword($this->passwordHasher->hashPassword($user, (string) $plainPassword['first']));
+            }
+            $user->setUpdatedAt(new \DateTimeImmutable());
+            if ($user instanceof Medcin && $form->has('specialite')) {
+                $user->setSpecialite($form->get('specialite')->getData());
+                $user->setNomCabinet($form->get('nomCabinet')->getData());
+                $user->setAdresseCabinet($form->get('adresseCabinet')->getData());
+                $user->setTelephoneCabinet($form->get('telephoneCabinet')->getData());
+                $tarif = $form->get('tarifConsultation')->getData();
+                $user->setTarifConsultation($tarif !== null ? (float) $tarif : null);
+            }
+            if ($user instanceof ParentUser && $form->has('relationAvecPatient')) {
+                $user->setRelationAvecPatient($form->get('relationAvecPatient')->getData());
+            }
+            if ($user instanceof Patient && $form->has('dateNaissance')) {
+                $dn = $form->get('dateNaissance')->getData();
+                $user->setDateNaissance($dn instanceof \DateTimeInterface ? \DateTimeImmutable::createFromInterface($dn) : null);
+                $user->setAdresse($form->get('adresse')->getData());
+                $user->setSexe($form->get('sexe')->getData());
+            }
+            $this->entityManager->flush();
+            $this->addFlash('success', 'L\'utilisateur a été modifié avec succès.');
+            return $this->redirectToRoute('admin_user_show', ['id' => $user->getId()]);
+        }
+
+        return $this->render('admin/users/edit.html.twig', [
+            'user' => $user,
+            'form' => $form,
+        ]);
+    }
+
+    #[Route('/admin/utilisateurs/{id}/supprimer', name: 'admin_user_confirm_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function userConfirmDelete(int $id): Response
+    {
+        $user = $this->userRepository->find($id);
+        if ($user === null) {
+            throw new NotFoundHttpException('Utilisateur introuvable.');
+        }
+        return $this->render('admin/users/delete_confirm.html.twig', ['user' => $user]);
+    }
+
+    #[Route('/admin/utilisateurs/{id}/delete', name: 'admin_user_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function userDelete(Request $request, int $id): Response
+    {
+        $user = $this->userRepository->find($id);
+        if ($user === null) {
+            throw new NotFoundHttpException('Utilisateur introuvable.');
+        }
+        $token = $request->request->get('_token');
+        if (!$this->isCsrfTokenValid('delete_user_' . $id, $token)) {
+            $this->addFlash('error', 'Jeton de sécurité invalide.');
+            return $this->redirectToRoute('admin_users');
+        }
+        $this->entityManager->remove($user);
+        $this->entityManager->flush();
+        $this->addFlash('success', 'L\'utilisateur a été supprimé.');
+        return $this->redirectToRoute('admin_users');
     }
 
     #[Route('/admin/utilisateurs/new', name: 'admin_user_new', methods: ['GET', 'POST'])]

@@ -32,11 +32,14 @@ class Thematique
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $couleur = null;
 
-    #[ORM\Column(length: 100, nullable: true)]
-    private ?string $icone = null;
+    #[ORM\Column(name: 'sous_titre', length: 255, nullable: true)]
+    private ?string $sousTitre = null;
 
     #[ORM\Column(type: 'smallint', nullable: true)]
     private ?int $ordre = null;
+
+    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    private bool $actif = true;
 
     #[ORM\Column(type: 'string', enumType: PublicCible::class, columnDefinition: "ENUM('Enfant', 'Parent', 'Médecin', 'Éducateur', 'Aidant', 'Autre')", nullable: true)]
     private ?PublicCible $publicCible = null;
@@ -102,14 +105,14 @@ class Thematique
         return $this;
     }
 
-    public function getIcone(): ?string
+    public function getSousTitre(): ?string
     {
-        return $this->icone;
+        return $this->sousTitre;
     }
 
-    public function setIcone(?string $icone): static
+    public function setSousTitre(?string $sousTitre): static
     {
-        $this->icone = $icone;
+        $this->sousTitre = $sousTitre;
         return $this;
     }
 
@@ -121,6 +124,17 @@ class Thematique
     public function setOrdre(?int $ordre): static
     {
         $this->ordre = $ordre;
+        return $this;
+    }
+
+    public function isActif(): bool
+    {
+        return $this->actif;
+    }
+
+    public function setActif(bool $actif): static
+    {
+        $this->actif = $actif;
         return $this;
     }
 
