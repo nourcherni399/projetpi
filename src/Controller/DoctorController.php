@@ -34,7 +34,7 @@ final class DoctorController extends AbstractController
         $disponibilites = $this->disponibiliteRepository->findForListing($medecin);
 
         $disponibilite = new Disponibilite();
-        $disponibilite->setMedecin($medecin);
+        $disponiilite->setMedecin($medecin);
         $form = $this->createForm(DoctorDisponibiliteType::class, $disponibilite);
         $form->handleRequest($request);
 
