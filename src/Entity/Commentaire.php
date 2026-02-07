@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Repository\CommentaireRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CommentaireRepository::class)]
@@ -13,25 +16,30 @@ class Commentaire
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: Types::TEXT)]
     private ?string $contenu = null;
 
     #[ORM\Column]
-    private ?bool $isPublished = null;
+    private ?bool $isPublished = true;
 
-    #[ORM\Column]
-    private ?\DateTime $dateCreation = null;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $dateCreation = null;
 
-    #[ORM\Column]
-    private ?\DateTime $dateModif = null;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $dateModif = null;
 
-    #[ORM\ManyToOne(inversedBy: 'commentaire')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(targetEntity: Blog::class, inversedBy: 'commentaires')]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Blog $blog = null;
 
-    #[ORM\ManyToOne(inversedBy: 'commentaires')]
-    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?User $user = null;
+
+    public function __construct()
+    {
+        $this->dateCreation = new \DateTime();
+    }
 
     public function getId(): ?int
     {
@@ -62,24 +70,24 @@ class Commentaire
         return $this;
     }
 
-    public function getDateCreation(): ?\DateTime
+    public function getDateCreation(): ?\DateTimeInterface
     {
         return $this->dateCreation;
     }
 
-    public function setDateCreation(\DateTime $dateCreation): static
+    public function setDateCreation(\DateTimeInterface $dateCreation): static
     {
         $this->dateCreation = $dateCreation;
 
         return $this;
     }
 
-    public function getDateModif(): ?\DateTime
+    public function getDateModif(): ?\DateTimeInterface
     {
         return $this->dateModif;
     }
 
-    public function setDateModif(\DateTime $dateModif): static
+    public function setDateModif(?\DateTimeInterface $dateModif): static
     {
         $this->dateModif = $dateModif;
 

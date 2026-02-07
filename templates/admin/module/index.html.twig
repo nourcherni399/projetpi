@@ -26,6 +26,12 @@
         </div>
         <div class="flex gap-3">
             <a href="{{ path('admin_module_new') }}" class="px-4 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Nouveau module</a>
+            <button onclick="toggleAlphabeticalSort()" id="sortButton" class="px-4 py-2.5 rounded-lg bg-purple-600 text-white font-medium hover:bg-purple-700 focus:outline focus:ring-2 focus:ring-purple-500 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                </svg>
+                <span id="sortButtonText">A-Z</span>
+            </button>
             <button onclick="exportToPDF()" class="px-4 py-2.5 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 focus:outline focus:ring-2 focus:ring-red-500 flex items-center gap-2">
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8a2 2 0 00-2-2h-2" />
@@ -144,61 +150,31 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-[#E5E0D8]">
+                {% for action in actionHistory %}
                 <tr class="hover:bg-[#F5F1EB]/50">
-                    <td class="px-6 py-4 text-[#6B7280]">06/02/2026 17:45</td>
-                    <td class="px-6 py-4 text-[#4B5563]">Admin</td>
+                    <td class="px-6 py-4 text-[#6B7280]">{{ action.dateHeure|date('d/m/Y H:i') }}</td>
+                    <td class="px-6 py-4 text-[#4B5563]">{{ action.utilisateur }}</td>
                     <td class="px-6 py-4">
-                        <span class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
-                            Création
+                        <span class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full
+                            {% if action.action == 'Création' %}bg-green-100 text-green-800
+                            {% elseif action.action == 'Modification' %}bg-blue-100 text-blue-800
+                            {% elseif action.action == 'Publication' %}bg-yellow-100 text-yellow-800
+                            {% elseif action.action == 'Suppression' %}bg-red-100 text-red-800
+                            {% elseif action.action == 'Export PDF' %}bg-purple-100 text-purple-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ action.action }}
                         </span>
                     </td>
-                    <td class="px-6 py-4 text-[#4B5563] font-medium">Communication</td>
-                    <td class="px-6 py-4 text-[#6B7280]">Module créé avec succès</td>
+                    <td class="px-6 py-4 text-[#4B5563] font-medium">{{ action.module ?: '-' }}</td>
+                    <td class="px-6 py-4 text-[#6B7280]">{{ action.details }}</td>
                 </tr>
-                <tr class="hover:bg-[#F5F1EB]/50">
-                    <td class="px-6 py-4 text-[#6B7280]">06/02/2026 16:30</td>
-                    <td class="px-6 py-4 text-[#4B5563]">Admin</td>
-                    <td class="px-6 py-4">
-                        <span class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-                            Modification
-                        </span>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="px-6 py-8 text-center text-[#6B7280]">
+                        Aucune action enregistrée pour le moment.
                     </td>
-                    <td class="px-6 py-4 text-[#4B5563] font-medium">Autonomie</td>
-                    <td class="px-6 py-4 text-[#6B7280]">Titre et description modifiés</td>
                 </tr>
-                <tr class="hover:bg-[#F5F1EB]/50">
-                    <td class="px-6 py-4 text-[#6B7280]">06/02/2026 15:20</td>
-                    <td class="px-6 py-4 text-[#4B5563]">Admin</td>
-                    <td class="px-6 py-4">
-                        <span class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
-                            Publication
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 text-[#4B5563] font-medium">Émotions</td>
-                    <td class="px-6 py-4 text-[#6B7280]">Module publié</td>
-                </tr>
-                <tr class="hover:bg-[#F5F1EB]/50">
-                    <td class="px-6 py-4 text-[#6B7280]">05/02/2026 14:15</td>
-                    <td class="px-6 py-4 text-[#4B5563]">Admin</td>
-                    <td class="px-6 py-4">
-                        <span class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
-                            Suppression
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 text-[#4B5563] font-medium">Ancien Module</td>
-                    <td class="px-6 py-4 text-[#6B7280]">Module supprimé</td>
-                </tr>
-                <tr class="hover:bg-[#F5F1EB]/50">
-                    <td class="px-6 py-4 text-[#6B7280]">05/02/2026 11:30</td>
-                    <td class="px-6 py-4 text-[#4B5563]">Admin</td>
-                    <td class="px-6 py-4">
-                        <span class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">
-                            Export PDF
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 text-[#4B5563] font-medium">-</td>
-                    <td class="px-6 py-4 text-[#6B7280]">Export de la liste des modules</td>
-                </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
@@ -207,107 +183,7 @@
     </div>
 </div>
 
-<!-- Statistiques de publication d'articles par module -->
-<div class="mt-8 bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
-    <h3 class="text-lg font-semibold text-[#4B5563] mb-4">Publication d'articles par module</h3>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {% for module in modules %}
-        <div class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-4 border border-amber-200">
-            <div class="flex items-center justify-between mb-3">
-                <h4 class="font-medium text-[#4B5563] text-sm truncate flex-1">{{ module.titre }}</h4>
-                <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full 
-                    {% if module.isPublished %}bg-green-100 text-green-800
-                    {% else %}bg-gray-100 text-gray-800{% endif %}">
-                    {% if module.isPublished %}Publié{% else %}Brouillon{% endif %}
-                </span>
-            </div>
-            
-            <div class="space-y-3">
-                <!-- Statistiques des articles -->
-                <div class="flex items-center justify-between p-3 bg-white rounded-lg border border-amber-100">
-                    <div class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        <div>
-                            <div class="text-lg font-bold text-amber-600">{{ module.blogs|length }}</div>
-                            <div class="text-xs text-[#6B7280]">articles</div>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        {% if module.blogs|length > 0 %}
-                        <div class="text-xs text-green-600 font-medium">Actif</div>
-                        {% else %}
-                        <div class="text-xs text-gray-500 font-medium">Aucun</div>
-                        {% endif %}
-                    </div>
-                </div>
-                
-                <!-- Statistiques du module -->
-                <div class="grid grid-cols-2 gap-2">
-                    <div class="text-center p-2 bg-white rounded border border-amber-100">
-                        <div class="text-xs text-[#6B7280] mb-1">Niveau</div>
-                        <div class="text-sm font-medium 
-                            {% if module.niveau == 'facile' %}text-green-600
-                            {% elseif module.niveau == 'moyen' %}text-yellow-600
-                            {% else %}text-red-600{% endif %}">
-                            {{ module.niveau|capitalize }}
-                        </div>
-                    </div>
-                    <div class="text-center p-2 bg-white rounded border border-amber-100">
-                        <div class="text-xs text-[#6B7280] mb-1">Catégorie</div>
-                        <div class="text-sm font-medium text-purple-600">
-                            {% if module.categorie %}
-                                {{ module.categorie.label }}
-                            {% else %}
-                                Non défini
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Dates -->
-                <div class="grid grid-cols-2 gap-2 text-xs text-[#6B7280]">
-                    <div>
-                        <div class="text-gray-500">Création:</div>
-                        <div class="font-medium text-[#4B5563]">
-                            {{ module.dateCreation ? module.dateCreation|date('d/m/Y') : 'N/A' }}
-                        </div>
-                    </div>
-                    <div>
-                        <div class="text-gray-500">Modification:</div>
-                        <div class="font-medium text-[#4B5563]">
-                            {{ module.dateModif ? module.dateModif|date('d/m/Y') : 'N/A' }}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-    
-    <!-- Résumé global -->
-    <div class="mt-6 pt-6 border-t border-[#E5E0D8]">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="text-center p-4 bg-blue-50 rounded-lg">
-                <div class="text-2xl font-bold text-blue-600">{{ modules|length }}</div>
-                <div class="text-sm text-[#6B7280]">Total modules</div>
-            </div>
-            <div class="text-center p-4 bg-green-50 rounded-lg">
-                <div class="text-2xl font-bold text-green-600">{{ modules|filter(m => m.isPublished)|length }}</div>
-                <div class="text-sm text-[#6B7280]">Modules publiés</div>
-            </div>
-            <div class="text-center p-4 bg-amber-50 rounded-lg">
-                <div class="text-2xl font-bold text-amber-600">{{ modules|reduce((total, module) => total + module.blogs|length, 0) }}</div>
-                <div class="text-sm text-[#6B7280]">Total articles</div>
-            </div>
-            <div class="text-center p-4 bg-purple-50 rounded-lg">
-                <div class="text-2xl font-bold text-purple-600">{{ modules|filter(m => m.blogs|length > 0)|length }}</div>
-                <div class="text-sm text-[#6B7280]">Modules avec articles</div>
-            </div>
-        </div>
-    </div>
-</div>
+
 
 <!-- Visualisations avec sphères et chartes -->
 <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -639,8 +515,73 @@ document.addEventListener('DOMContentLoaded', function() {
         // Sauvegarde du PDF
         doc.save('liste_modules.pdf');
         
+        // Enregistrer l'action d'export PDF
+        fetch('/admin/modules/export-pdf-action', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        }).then(response => response.json())
+          .then(data => {
+              console.log('Action export PDF enregistrée');
+          })
+          .catch(error => {
+              console.error('Erreur lors de l\'enregistrement de l\'action:', error);
+          });
+        
         // Notification
         alert('Le PDF a été généré et téléchargé avec succès !');
+    };
+
+    // Fonction de tri alphabétique
+    window.toggleAlphabeticalSort = function() {
+        const tableBody = document.getElementById('modulesTableBody');
+        const rows = Array.from(tableBody.getElementsByTagName('tr'));
+        const sortButton = document.getElementById('sortButton');
+        const sortButtonText = document.getElementById('sortButtonText');
+        
+        // Vérifier si déjà trié alphabétiquement
+        const isCurrentlySorted = sortButton.dataset.sorted === 'true';
+        
+        if (isCurrentlySorted) {
+            // Remettre dans l'ordre original
+            rows.sort((a, b) => {
+                const originalOrderA = parseInt(a.dataset.originalOrder || '0');
+                const originalOrderB = parseInt(b.dataset.originalOrder || '0');
+                return originalOrderA - originalOrderB;
+            });
+            
+            sortButton.dataset.sorted = 'false';
+            sortButtonText.textContent = 'A-Z';
+            sortButton.classList.remove('bg-purple-700');
+            sortButton.classList.add('bg-purple-600');
+        } else {
+            // Sauvegarder l'ordre original si pas déjà fait
+            if (!tableBody.dataset.originalOrderSaved) {
+                rows.forEach((row, index) => {
+                    row.dataset.originalOrder = index;
+                });
+                tableBody.dataset.originalOrderSaved = 'true';
+            }
+            
+            // Trier alphabétiquement par titre
+            rows.sort((a, b) => {
+                const titleA = a.dataset.title || '';
+                const titleB = b.dataset.title || '';
+                return titleA.localeCompare(titleB, 'fr', { sensitivity: 'base' });
+            });
+            
+            sortButton.dataset.sorted = 'true';
+            sortButtonText.textContent = 'Z-A';
+            sortButton.classList.remove('bg-purple-600');
+            sortButton.classList.add('bg-purple-700');
+        }
+        
+        // Réorganiser les lignes dans le tableau
+        rows.forEach(row => {
+            tableBody.appendChild(row);
+        });
     };
 });
 </script>

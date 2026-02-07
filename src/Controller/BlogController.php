@@ -28,15 +28,43 @@ final class BlogController extends AbstractController
     #[Route('', name: 'user_blog', methods: ['GET'])]
     public function index(): Response
     {
-        $modules = $this->moduleRepository->findPublishedOrderByDate();
-        $data = $this->getBlogData($modules);
+        // Récupérer toutes les catégories avec leurs modules
+        $categoriesData = $this->getCategoriesWithModules();
+        
         return $this->render('front/blog/index.html.twig', [
-            'featured' => $data['featured'],
-            'articles' => $data['articles'],
-            'modules' => $modules, // Ajout des modules pour le template
-            'categories' => $data['categories'],
-            'popular_articles' => $data['popular_articles'],
-            'popular_tags' => $data['popular_tags'],
+            'categories' => $categoriesData,
+            'popular_articles' => $this->getPopularArticles(),
+            'popular_tags' => ['Module', 'Autisme', 'TSA', 'Éducation', 'Communication', 'Témoignage'],
+        ]);
+    }
+
+    #[Route('/categorie/{slug}', name: 'user_blog_categorie', methods: ['GET'])]
+    public function categorie(string $slug): Response
+    {
+        // Trouver la catégorie par son slug
+        $categorie = null;
+        $modules = [];
+        
+        try {
+            $catEnum = \App\Enum\CategorieModule::from($slug);
+            $categorie = [
+                'name' => $catEnum->label(),
+                'slug' => $slug,
+                'image' => $this->getCategorieImage($slug),
+            ];
+            
+            $modules = $this->moduleRepository->findBy([
+                'categorie' => $catEnum,
+                'isPublished' => true
+            ], ['dateCreation' => 'DESC']);
+            
+        } catch (\ValueError $e) {
+            throw $this->createNotFoundException('Catégorie introuvable.');
+        }
+
+        return $this->render('front/blog/categorie.html.twig', [
+            'categorie' => $categorie,
+            'modules' => $modules,
         ]);
     }
 
@@ -145,126 +173,89 @@ final class BlogController extends AbstractController
         return $this->redirectToRoute('user_blog_module', ['id' => $blog->getModule()->getId()]);
     }
 
-    #[Route('/categorie/{categorie}', name: 'user_blog_categorie', requirements: ['categorie' => '[A-Z_]+'], methods: ['GET'])]
-    public function categorie(string $categorie): Response
+    #[Route('/article/{id}', name: 'user_blog_show_article', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function showArticle(Blog $blog): Response
     {
-        try {
-            $catEnum = \App\Enum\CategorieModule::from($categorie);
-        } catch (\ValueError $e) {
-            throw $this->createNotFoundException('Catégorie introuvable.');
+        // Vérifier si l'article est publié et visible
+        if (!$blog->isPublished() || !$blog->isVisible()) {
+            throw $this->createNotFoundException('Article non trouvé');
         }
 
-        $modules = $this->moduleRepository->findBy(['categorie' => $catEnum, 'isPublished' => true], ['dateCreation' => 'DESC']);
-
-        return $this->render('front/blog/categorie.html.twig', [
-            'categorie' => $catEnum,
-            'modules' => $modules,
+        return $this->render('front/blog/show_article.html.twig', [
+            'article' => $blog,
+            'module' => $blog->getModule()
         ]);
     }
 
     /**
-     * @param list<Module> $modules
-     * @return array{
-     *   featured: array{id: int, title: string, excerpt: string, author: string, author_initials: string, date: string, likes: int, comments: int, tags: list<string>, has_infographic: bool, infographic_title: string, infographic_description: string, infographic_stats: list<string>},
-     *   articles: list<array{id: int, title: string, excerpt: string, author: string, author_initials: string, date: string, likes: int, comments: int, tags: list<string>, highlight: string|null, image_label: string, image_url: string|null}>,
-     *   categories: list<array{name: string, count: int}>,
-     *   popular_articles: list<array{id: int, title: string}>,
-     *   popular_tags: list<string>
-     * }
+     * Récupère toutes les catégories avec leurs modules
      */
-    private function getBlogData(array $modules): array
+    private function getCategoriesWithModules(): array
     {
-        $defaultFeatured = [
-            'id' => 0,
-            'title' => 'Comprendre l\'autisme',
-            'excerpt' => 'Découvrez les ressources et conseils pour mieux comprendre le trouble du spectre de l\'autisme et accompagner au mieux les personnes concernées.',
-            'author' => 'AutiCare',
-            'author_initials' => 'AG',
-            'date' => date('d F Y'),
-            'likes' => 42,
-            'comments' => 8,
-            'tags' => ['Témoignages', 'Article à la une'],
-            'has_infographic' => true,
-            'infographic_title' => 'Troubles du spectre de l\'autisme (TSA)',
-            'infographic_description' => 'Ce trouble neuro-développemental peut altérer le comportement social, la communication et le langage.',
-            'infographic_stats' => ['Pas de cause unique identifiée', 'TOUCHE 1 personne sur 100 • 3 garçons pour 1 fille'],
-            'image_url' => 'images/logo.png',
-        ];
-
-        $featured = $defaultFeatured;
-        $articles = [];
-        $popular_articles = [];
-        $niveauLabels = ['difficile' => 'Difficile', 'moyen' => 'Moyen', 'facile' => 'Facile'];
-
-        foreach ($modules as $index => $module) {
-            $popular_articles[] = ['id' => $module->getId(), 'title' => $module->getTitre() ?? ''];
-
-            if ($index === 0) {
-                $featured = [
-                    'id' => $module->getId(),
-                    'title' => $module->getTitre() ?? '',
-                    'excerpt' => $module->getDescription() ?? '',
-                    'author' => 'AutiCare',
-                    'author_initials' => 'AG',
-                    'date' => $module->getDateCreation() ? $module->getDateCreation()->format('d F Y') : '',
-                    'likes' => 0,
-                    'comments' => 0,
-                    'tags' => ['Module', $niveauLabels[$module->getNiveau()] ?? $module->getNiveau()],
-                    'has_infographic' => true,
-                    'infographic_title' => $module->getTitre() ?? 'Troubles du spectre de l\'autisme (TSA)',
-                    'infographic_description' => $module->getDescription() ?? 'Ce trouble neuro-développemental peut altérer le comportement social, la communication et le langage.',
-                    'infographic_stats' => ['Niveau : ' . ($niveauLabels[$module->getNiveau()] ?? $module->getNiveau())],
-                    'image_url' => $module->getImage() ? $module->getImage() : 'images/logo.png',
-                ];
-            } else {
-                $articles[] = [
-                    'id' => $module->getId(),
-                    'title' => $module->getTitre() ?? '',
-                    'excerpt' => $module->getDescription() ?? '',
-                    'author' => 'AutiCare',
-                    'author_initials' => 'AG',
-                    'date' => $module->getDateCreation() ? $module->getDateCreation()->format('d F Y') : '',
-                    'likes' => 0,
-                    'comments' => 0,
-                    'tags' => ['Module', $niveauLabels[$module->getNiveau()] ?? $module->getNiveau()],
-                    'highlight' => null,
-                    'image_label' => 'Module',
-                    'image_url' => $module->getImage() ? $module->getImage() : 'images/logo.png',
-                ];
-            }
-        }
-
         $categories = [];
-        $categoryCounts = [];
-        foreach ($modules as $module) {
-            $cat = $module->getCategorie();
-            if ($cat !== \App\Enum\CategorieModule::EMPTY) {
-                $label = $cat->label();
-                if (!isset($categoryCounts[$label])) {
-                    $categoryCounts[$label] = 0;
-                }
-                $categoryCounts[$label]++;
-                if (!isset($categories[$label])) {
-                    $categories[$label] = [
-                        'name' => $label,
-                        'count' => 0,
-                        'image' => $module->getImage() ?: 'images/logo.png',
-                        'slug' => $cat->value,
-                    ];
-                }
+        
+        // Liste de toutes les catégories de l'énumération (sauf EMPTY)
+        $categorieEnums = [
+            \App\Enum\CategorieModule::COMPRENDRE_TSA,
+            \App\Enum\CategorieModule::AUTONOMIE,
+            \App\Enum\CategorieModule::COMMUNICATION,
+            \App\Enum\CategorieModule::EMOTIONS,
+            \App\Enum\CategorieModule::VIE_QUOTIDIENNE,
+            \App\Enum\CategorieModule::ACCOMPAGNEMENT,
+        ];
+        
+        foreach ($categorieEnums as $catEnum) {
+            $modules = $this->moduleRepository->findBy([
+                'categorie' => $catEnum,
+                'isPublished' => true
+            ], ['dateCreation' => 'DESC']);
+            
+            if (count($modules) > 0) {
+                $categories[] = [
+                    'name' => $catEnum->label(),
+                    'slug' => $catEnum->value,
+                    'count' => count($modules),
+                    'image' => $this->getCategorieImage($catEnum->value),
+                    'modules' => array_slice($modules, 0, 3), // Prendre les 3 premiers modules
+                ];
             }
         }
-        foreach ($categories as $key => $cat) {
-            $categories[$key]['count'] = $categoryCounts[$key] ?? 0;
-        }
-        $categories = array_values($categories);
-
-        return [
-            'featured' => $featured,
-            'articles' => $articles,
-            'categories' => $categories,
-            'popular_articles' => $popular_articles,
-            'popular_tags' => ['Module', 'Autisme', 'TSA', 'Éducation', 'Communication'],
+        
+        return $categories;
+    }
+    
+    /**
+     * Récupère une image par défaut pour chaque catégorie
+     */
+    private function getCategorieImage(string $slug): string
+    {
+        $images = [
+            'COMPRENDRE_TSA' => 'images/categories/comprendre-tsa.jpg',
+            'AUTONOMIE' => 'images/categories/autonomie.jpg',
+            'COMMUNICATION' => 'images/categories/communication.jpg',
+            'EMOTIONS' => 'images/categories/emotions.jpg',
+            'VIE_QUOTIDIENNE' => 'images/categories/vie-quotidienne.jpg',
+            'ACCOMPAGNEMENT' => 'images/categories/accompagnement.jpg',
         ];
+        
+        return $images[$slug] ?? 'images/logo.png';
+    }
+    
+    /**
+     * Récupère les articles populaires
+     */
+    private function getPopularArticles(): array
+    {
+        $modules = $this->moduleRepository->findBy(['isPublished' => true], ['dateCreation' => 'DESC'], 5);
+        
+        $popular = [];
+        foreach ($modules as $module) {
+            $popular[] = [
+                'id' => $module->getId(),
+                'title' => $module->getTitre() ?? 'Module sans titre',
+            ];
+        }
+        
+        return $popular;
     }
 }

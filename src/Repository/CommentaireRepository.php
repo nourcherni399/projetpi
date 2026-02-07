@@ -8,6 +8,11 @@ use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @extends ServiceEntityRepository<Commentaire>
+ *
+ * @method Commentaire|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Commentaire|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Commentaire[]    findAll()
+ * @method Commentaire[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class CommentaireRepository extends ServiceEntityRepository
 {
@@ -16,28 +21,47 @@ class CommentaireRepository extends ServiceEntityRepository
         parent::__construct($registry, Commentaire::class);
     }
 
-    //    /**
-    //     * @return Commentaire[] Returns an array of Commentaire objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('c.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * Récupère les commentaires publiés pour un article
+     */
+    public function findPublishedByBlog(int $blogId): array
+    {
+        return $this->createQueryBuilder('c')
+            ->where('c.blog = :blogId')
+            ->andWhere('c.isPublished = :published')
+            ->setParameter('blogId', $blogId)
+            ->setParameter('published', true)
+            ->orderBy('c.dateCreation', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 
-    //    public function findOneBySomeField($value): ?Commentaire
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    /**
+     * Compte le nombre de commentaires pour un article
+     */
+    public function countByBlog(int $blogId): int
+    {
+        return $this->createQueryBuilder('c')
+            ->select('COUNT(c.id)')
+            ->where('c.blog = :blogId')
+            ->andWhere('c.isPublished = :published')
+            ->setParameter('blogId', $blogId)
+            ->setParameter('published', true)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Récupère les commentaires récents
+     */
+    public function findRecent(int $limit = 5): array
+    {
+        return $this->createQueryBuilder('c')
+            ->where('c.isPublished = :published')
+            ->setParameter('published', true)
+            ->orderBy('c.dateCreation', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 }

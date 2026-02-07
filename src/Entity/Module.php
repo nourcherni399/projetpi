@@ -49,7 +49,7 @@ class Module
     /**
      * @var Collection<int, Blog>
      */
-    #[ORM\OneToMany(targetEntity: Blog::class, mappedBy: 'module')]
+    #[ORM\OneToMany(targetEntity: Blog::class, mappedBy: 'module', cascade: ['remove'])]
     private Collection $blogs;
 
     #[ORM\Column(type: 'string', enumType: CategorieModule::class, columnDefinition: "ENUM('', 'COMPRENDRE_TSA', 'AUTONOMIE', 'COMMUNICATION', 'EMOTIONS', 'VIE_QUOTIDIENNE', 'ACCOMPAGNEMENT') NOT NULL")]
