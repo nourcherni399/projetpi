@@ -20,8 +20,11 @@
             <p class="text-[#6B7280] text-sm">
                 {{ evenement.dateEvent ? evenement.dateEvent|date('d/m/Y') : '—' }}
                 {{ evenement.heureDebut ? evenement.heureDebut|date('H:i') : '' }} – {{ evenement.heureFin ? evenement.heureFin|date('H:i') : '' }}
-                · {{ evenement.lieu }}
+                · {{ evenement.lieu|default('—') }}
             </p>
+            {% if evenement.locationUrl %}
+            <p class="text-[#6B7280] text-sm mt-1"><a href="{{ evenement.locationUrl }}" target="_blank" rel="noopener" class="text-[#A7C7E7] hover:underline">URL carte</a></p>
+            {% endif %}
             {% if evenement.thematique %}
             <p class="text-[#6B7280] text-sm mt-1">Thématique : {{ evenement.thematique.nomThematique }}</p>
             {% endif %}

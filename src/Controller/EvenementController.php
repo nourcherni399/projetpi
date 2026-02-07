@@ -28,7 +28,7 @@ final class EvenementController extends AbstractController
     {
         $q = $request->query->get('q');
         $sortBy = $request->query->get('sort', 'date');
-        if (!in_array($sortBy, ['date', 'lieu', 'theme'], true)) {
+        if (!in_array($sortBy, ['date', 'lieu', 'theme', 'titre'], true)) {
             $sortBy = 'date';
         }
         $sortOrder = $request->query->get('order', 'asc');

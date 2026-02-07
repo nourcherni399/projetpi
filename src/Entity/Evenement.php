@@ -36,6 +36,10 @@ class Evenement
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $lieu = null;
 
+    /** URL de localisation (lien Google Maps ou URL d'intégration iframe). */
+    #[ORM\Column(length: 500, nullable: true)]
+    private ?string $locationUrl = null;
+
     /** Agrégation : un événement appartient à une thématique (sans cascade delete). */
     #[ORM\ManyToOne(inversedBy: 'evenements')]
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
@@ -119,6 +123,45 @@ class Evenement
     {
         $this->lieu = $lieu;
         return $this;
+    }
+
+    public function getLocationUrl(): ?string
+    {
+        return $this->locationUrl;
+    }
+
+    public function setLocationUrl(?string $locationUrl): static
+    {
+        $this->locationUrl = $locationUrl;
+        return $this;
+    }
+
+    /**
+     * Retourne une URL d'intégration (iframe) pour afficher la même localisation sur la carte.
+     * Utilise locationUrl si possible (lien précis), sinon le lieu (adresse).
+     */
+    public function getMapEmbedUrl(): ?string
+    {
+        $url = $this->locationUrl;
+        if ($url !== null && $url !== '') {
+            $urlLower = strtolower($url);
+            if (str_contains($urlLower, 'embed') || str_contains($urlLower, 'iframe')) {
+                return $url;
+            }
+            if (preg_match('/[?&]q=([^&]+)/', $url, $m)) {
+                return 'https://maps.google.com/maps?q=' . rawurlencode(urldecode($m[1])) . '&output=embed';
+            }
+            if (preg_match('/[?&]query=([^&]+)/', $url, $m)) {
+                return 'https://maps.google.com/maps?q=' . rawurlencode(urldecode($m[1])) . '&output=embed';
+            }
+            if (preg_match('/@(-?\d+\.?\d*),(-?\d+\.?\d*)/', $url, $m)) {
+                return 'https://maps.google.com/maps?q=' . $m[1] . ',' . $m[2] . '&output=embed';
+            }
+        }
+        if ($this->lieu !== null && $this->lieu !== '') {
+            return 'https://maps.google.com/maps?q=' . rawurlencode($this->lieu) . '&output=embed';
+        }
+        return null;
     }
 
     public function getThematique(): ?Thematique

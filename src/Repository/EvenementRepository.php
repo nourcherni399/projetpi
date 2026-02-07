@@ -28,25 +28,41 @@ class EvenementRepository extends ServiceEntityRepository
             ->leftJoin('e.thematique', 't');
 
         if ($q !== null && $q !== '') {
-            $qb->andWhere(
-                $qb->expr()->orX(
-                    $qb->expr()->like('e.title', ':q'),
-                    $qb->expr()->like('e.description', ':q'),
-                    $qb->expr()->like('e.lieu', ':q'),
-                    $qb->expr()->like('t.nomThematique', ':q')
-                )
-            )->setParameter('q', '%' . addcslashes($q, '%_') . '%');
+            $trimmed = trim($q);
+            $searchDate = null;
+            foreach (['d/m/Y', 'd-m-Y', 'd.m.Y', 'Y-m-d', 'd/m/Y H:i', 'd-m-Y H:i', 'Y-m-d H:i'] as $format) {
+                $parsed = \DateTimeImmutable::createFromFormat($format, $trimmed);
+                if ($parsed !== false) {
+                    $searchDate = $parsed;
+                    break;
+                }
+            }
+            if ($searchDate !== null) {
+                $qb->andWhere('e.dateEvent = :searchDate')->setParameter('searchDate', $searchDate->format('Y-m-d'));
+            } else {
+                $qb->andWhere(
+                    $qb->expr()->orX(
+                        $qb->expr()->like('e.title', ':q'),
+                        $qb->expr()->like('e.description', ':q'),
+                        $qb->expr()->like('e.lieu', ':q'),
+                        $qb->expr()->like('t.nomThematique', ':q')
+                    )
+                )->setParameter('q', '%' . addcslashes($trimmed, '%_') . '%');
+            }
         }
 
         switch ($sortBy) {
             case 'lieu':
-                $qb->addOrderBy('e.lieu', $order)->addOrderBy('e.dateEvent', 'ASC')->addOrderBy('e.heureDebut', 'ASC');
+                $qb->addOrderBy('e.lieu', $order)->addOrderBy('e.dateEvent', $order)->addOrderBy('e.heureDebut', $order);
                 break;
             case 'theme':
-                $qb->addOrderBy('t.nomThematique', $order)->addOrderBy('e.dateEvent', 'ASC')->addOrderBy('e.heureDebut', 'ASC');
+                $qb->addOrderBy('t.nomThematique', $order)->addOrderBy('e.dateEvent', $order)->addOrderBy('e.heureDebut', $order);
+                break;
+            case 'titre':
+                $qb->addOrderBy('e.title', $order)->addOrderBy('e.dateEvent', $order)->addOrderBy('e.heureDebut', $order);
                 break;
             default:
-                $qb->addOrderBy('e.dateEvent', $order)->addOrderBy('e.heureDebut', 'ASC');
+                $qb->addOrderBy('e.dateEvent', $order)->addOrderBy('e.heureDebut', $order);
                 break;
         }
 

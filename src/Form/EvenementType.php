@@ -63,6 +63,12 @@ final class EvenementType extends AbstractType
                 'constraints' => [new Length(['max' => 255, 'maxMessage' => 'Le lieu ne peut pas dépasser {{ limit }} caractères.'])],
                 'attr' => $attr + ['placeholder' => 'Ex. Salle principale (optionnel)'],
             ])
+            ->add('locationUrl', TextType::class, [
+                'label' => 'URL de localisation (carte)',
+                'required' => false,
+                'constraints' => [new Length(['max' => 500, 'maxMessage' => 'L\'URL ne peut pas dépasser {{ limit }} caractères.'])],
+                'attr' => $attr + ['placeholder' => 'Lien Google Maps'],
+            ])
             ->add('thematique', EntityType::class, [
                 'label' => 'Thématique',
                 'class' => \App\Entity\Thematique::class,
