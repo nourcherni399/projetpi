@@ -107,4 +107,78 @@ class RendezVousRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
         return $count > 0;
     }
+
+    /**
+     * Compte les rendez-vous d'un médecin pour une période donnée
+     */
+    public function countByMedecinAndDateRange(Medcin $medecin, \DateTimeInterface $startDate, \DateTimeInterface $endDate): int
+    {
+        return (int) $this->createQueryBuilder('r')
+            ->select('COUNT(r.id)')
+            ->andWhere('r.medecin = :medecin')
+            ->andWhere('r.dateRdv BETWEEN :start AND :end')
+            ->setParameter('medecin', $medecin)
+            ->setParameter('start', $startDate->format('Y-m-d'))
+            ->setParameter('end', $endDate->format('Y-m-d'))
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Compte les rendez-vous d'un médecin pour une date spécifique
+     */
+    public function countByMedecinAndDate(Medcin $medecin, \DateTimeInterface $date): int
+    {
+        return (int) $this->createQueryBuilder('r')
+            ->select('COUNT(r.id)')
+            ->andWhere('r.medecin = :medecin')
+            ->andWhere('r.dateRdv = :date')
+            ->setParameter('medecin', $medecin)
+            ->setParameter('date', $date->format('Y-m-d'))
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Compte les rendez-vous d'un médecin par statut
+     */
+    public function countByMedecinAndStatus(Medcin $medecin, StatusRendezVous $status): int
+    {
+        return (int) $this->createQueryBuilder('r')
+            ->select('COUNT(r.id)')
+            ->andWhere('r.medecin = :medecin')
+            ->andWhere('r.status = :status')
+            ->setParameter('medecin', $medecin)
+            ->setParameter('status', $status)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Compte tous les rendez-vous d'un médecin
+     */
+    public function countByMedecin(Medcin $medecin): int
+    {
+        return (int) $this->createQueryBuilder('r')
+            ->select('COUNT(r.id)')
+            ->andWhere('r.medecin = :medecin')
+            ->setParameter('medecin', $medecin)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Compte les rendez-vous d'un patient avec un médecin
+     */
+    public function countByPatientAndMedecin(Patient $patient, Medcin $medecin): int
+    {
+        return (int) $this->createQueryBuilder('r')
+            ->select('COUNT(r.id)')
+            ->andWhere('r.patient = :patient')
+            ->andWhere('r.medecin = :medecin')
+            ->setParameter('patient', $patient)
+            ->setParameter('medecin', $medecin)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }

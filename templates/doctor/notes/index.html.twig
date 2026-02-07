@@ -43,8 +43,16 @@
 </div>
 
 <div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
-    <div class="p-4 border-b border-[#E5E0D8]">
+    <div class="p-4 border-b border-[#E5E0D8] flex justify-between items-center">
         <h2 class="text-lg font-medium text-[#4B5563]">Notes enregistrées</h2>
+        {% if notes is not empty %}
+            <a href="{{ path('doctor_notes_pdf') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#A7C7E7] to-[#B8D4ED] text-white font-medium hover:from-[#B8D4ED] hover:to-[#C9E1F3] shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Télécharger PDF
+            </a>
+        {% endif %}
     </div>
     <div class="overflow-x-auto">
         <table class="w-full text-left">

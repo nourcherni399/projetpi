@@ -18,6 +18,8 @@ use App\Repository\NotificationRepository;
 use App\Repository\NoteRepository;
 use App\Repository\RendezVousRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -45,7 +47,108 @@ final class DoctorController extends AbstractController
     public function dashboard(): Response
     {
         $medecin = $this->getMedecin();
-        return $this->render('doctor/dashboard.html.twig', $this->getDoctorTemplateVars($medecin));
+        
+        // Calculer les statistiques réelles avec PHP
+        $stats = [];
+        if ($medecin !== null) {
+            // Total des rendez-vous ce mois
+            $currentMonth = new \DateTime('first day of this month');
+            $totalRdv = $this->rendezVousRepository->countByMedecinAndDateRange($medecin, $currentMonth, new \DateTime());
+            
+            // Rendez-vous aujourd'hui
+            $today = new \DateTime('today');
+            $todayRdv = $this->rendezVousRepository->countByMedecinAndDate($medecin, $today);
+            
+            // Patients uniques (actifs)
+            $uniquePatients = $this->rendezVousRepository->findDistinctPatientsByMedecin($medecin);
+            $activePatients = count($uniquePatients);
+            
+            // Taux de completion (rendez-vous confirmés / total)
+            $confirmedRdv = $this->rendezVousRepository->countByMedecinAndStatus($medecin, \App\Enum\StatusRendezVous::CONFIRMER);
+            $totalAllRdv = $this->rendezVousRepository->countByMedecin($medecin);
+            $completionRate = $totalAllRdv > 0 ? round(($confirmedRdv / $totalAllRdv) * 100) : 0;
+            
+            // Rendez-vous en attente
+            $pendingRdv = $this->rendezVousRepository->countByMedecinAndStatus($medecin, \App\Enum\StatusRendezVous::EN_ATTENTE);
+            
+            // Rendez-vous de cette semaine
+            $weekStart = new \DateTime('monday this week');
+            $weekEnd = new \DateTime('sunday this week');
+            $weekRdv = $this->rendezVousRepository->countByMedecinAndDateRange($medecin, $weekStart, $weekEnd);
+            
+            // Statistiques avancées avec PHP
+            $lastMonth = new \DateTime('first day of last month');
+            $lastMonthEnd = new \DateTime('last day of last month');
+            $lastMonthRdv = $this->rendezVousRepository->countByMedecinAndDateRange($medecin, $lastMonth, $lastMonthEnd);
+            
+            // Tendance mensuelle
+            $monthlyTrend = $totalRdv > 0 ? round((($totalRdv - $lastMonthRdv) / $lastMonthRdv) * 100) : 0;
+            
+            // Rendez-vous annulés
+            $cancelledRdv = $this->rendezVousRepository->countByMedecinAndStatus($medecin, \App\Enum\StatusRendezVous::ANNULER);
+            
+            // Rendez-vous par jour de la semaine (dernière semaine)
+            $weekStats = [];
+            for ($i = 0; $i < 7; $i++) {
+                $day = new \DateTime('monday this week');
+                $day->modify("+$i days");
+                $dayRdv = $this->rendezVousRepository->countByMedecinAndDate($medecin, $day);
+                $weekStats[] = [
+                    'day' => $day->format('D'),
+                    'count' => $dayRdv,
+                    'percentage' => $weekRdv > 0 ? round(($dayRdv / $weekRdv) * 100) : 0
+                ];
+            }
+            
+            // Top 5 patients les plus actifs
+            $topPatients = [];
+            foreach ($uniquePatients as $patient) {
+                $patientRdv = $this->rendezVousRepository->countByPatientAndMedecin($patient, $medecin);
+                $topPatients[] = [
+                    'patient' => $patient,
+                    'count' => $patientRdv
+                ];
+            }
+            usort($topPatients, function($a, $b) {
+                return $b['count'] - $a['count'];
+            });
+            $topPatients = array_slice($topPatients, 0, 5);
+            
+            // Heures les plus populaires
+            $hourStats = [];
+            $allRdv = $this->rendezVousRepository->findByMedecinOrderByIdDesc($medecin);
+            foreach ($allRdv as $rdv) {
+                if ($rdv->getDisponibilite() && $rdv->getDisponibilite()->getHeureDebut()) {
+                    $hour = $rdv->getDisponibilite()->getHeureDebut()->format('H');
+                    if (!isset($hourStats[$hour])) {
+                        $hourStats[$hour] = 0;
+                    }
+                    $hourStats[$hour]++;
+                }
+            }
+            ksort($hourStats);
+            
+            $stats = [
+                'total_rdv' => $totalRdv,
+                'today_rdv' => $todayRdv,
+                'active_patients' => $activePatients,
+                'completion_rate' => $completionRate,
+                'pending_rdv' => $pendingRdv,
+                'week_rdv' => $weekRdv,
+                'confirmed_rdv' => $confirmedRdv,
+                'total_all_rdv' => $totalAllRdv,
+                'last_month_rdv' => $lastMonthRdv,
+                'monthly_trend' => $monthlyTrend,
+                'cancelled_rdv' => $cancelledRdv,
+                'week_stats' => $weekStats,
+                'top_patients' => $topPatients,
+                'hour_stats' => $hourStats
+            ];
+        }
+        
+        return $this->render('doctor/dashboard.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
+            'stats' => $stats
+        ]));
     }
 
     #[Route('/medecin/disponibilites', name: 'doctor_availability', methods: ['GET', 'POST'])]
@@ -304,6 +407,211 @@ final class DoctorController extends AbstractController
         $this->markDoctorNotificationForRdvAsRead($medecin, $rdv);
         $this->addFlash('success', 'Demande refusée. Le patient a été notifié.');
         return $this->redirectToRoute('doctor_notifications');
+    }
+
+    #[Route('/medecin/notes/pdf', name: 'doctor_notes_pdf', methods: ['GET'])]
+    public function downloadNotesPdf(): Response
+    {
+        $medecin = $this->getMedecin();
+        if ($medecin === null) {
+            return $this->redirectToRoute('login');
+        }
+
+        // Récupérer toutes les notes du médecin
+        $notes = $this->noteRepository->findByMedecinOrderByDate($medecin);
+
+        // Configuration de DomPDF
+        $options = new Options();
+        $options->set('defaultFont', 'Arial');
+        $options->set('isRemoteEnabled', true);
+        $options->set('isHtml5ParserEnabled', true);
+
+        // Créer le PDF
+        $dompdf = new Dompdf($options);
+
+        // Générer le HTML pour le PDF
+        $html = $this->renderView('doctor/notes/pdf.html.twig', [
+            'notes' => $notes,
+            'medecin' => $medecin,
+            'date' => new \DateTime()
+        ]);
+
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        // Nom du fichier
+        $filename = 'notes_' . $medecin->getNom() . '_' . date('Y-m-d') . '.pdf';
+
+        // Retourner la réponse PDF
+        return new Response(
+            $dompdf->stream($filename, ['Attachment' => true]),
+            200,
+            [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"'
+            ]
+        );
+    }
+
+    #[Route('/demo/notes', name: 'demo_notes', methods: ['GET', 'POST'])]
+    public function demoNotes(Request $request): Response
+    {
+        // Si c'est une requête POST pour ajouter une note
+        if ($request->isMethod('POST')) {
+            $content = $request->request->get('content');
+            $patientName = $request->request->get('patient_name');
+            $patientEmail = $request->request->get('patient_email');
+            
+            if ($content && $patientName) {
+                // Créer une nouvelle note
+                $note = new Note();
+                $note->setContenu($content);
+                $note->setDateCreation(new \DateTime());
+                
+                // Créer un médecin fictif pour la démo
+                $medecin = new class {
+                    public function getId() { return 1; }
+                    public function getPrenom() { return 'Jean'; }
+                    public function getNom() { return 'Dupont'; }
+                };
+                
+                // Créer un patient fictif pour la démo
+                $patient = new class {
+                    public function getId() { return rand(1000, 9999); }
+                    public function getPrenom() { 
+                        $parts = explode(' ', $patientName);
+                        return $parts[0] ?? $patientName; 
+                    }
+                    public function getNom() { 
+                        $parts = explode(' ', $patientName);
+                        return $parts[1] ?? $patientName; 
+                    }
+                    public function getEmail() { return $patientEmail ?: 'email@example.com'; }
+                };
+                
+                $note->setPatient($patient);
+                $note->setMedecin($medecin);
+                
+                // Ajouter la note à la base de données
+                $this->entityManager->persist($note);
+                $this->entityManager->flush();
+                
+                // Rediriger pour éviter la double soumission
+                return $this->redirectToRoute('demo_notes');
+            }
+        }
+        
+        // Récupérer toutes les notes pour l'affichage
+        $allNotes = $this->noteRepository->findAll();
+        
+        return $this->render('demo/notes.html.twig', [
+            'allNotes' => $allNotes
+        ]);
+    }
+
+    #[Route('/demo/notes/pdf', name: 'demo_notes_pdf', methods: ['GET'])]
+    public function demoNotesPdf(): Response
+    {
+        // Récupérer toutes les notes de la base de données
+        $allNotes = $this->noteRepository->findAll();
+        
+        if (empty($allNotes)) {
+            // Si aucune note dans la base, utiliser des données fictives
+            $medecin = new class {
+                public function getPrenom() { return 'Jean'; }
+                public function getNom() { return 'Dupont'; }
+            };
+
+            $notes = [];
+            
+            // Patient 1
+            $patient1 = new class {
+                public function getId() { return 1; }
+                public function getPrenom() { return 'Marie'; }
+                public function getNom() { return 'Martin'; }
+                public function getEmail() { return 'marie.martin@email.com'; }
+            };
+            
+            $notes[] = new class {
+                public function getPatient() { global $patient1; return $patient1; }
+                public function getContenu() { return 'Patient présente une amélioration significative de ses symptômes. Continue le traitement actuel et recommande suivi régulier.'; }
+                public function getDateCreation() { return new \DateTime('2024-01-15 10:30'); }
+            };
+            
+            $notes[] = new class {
+                public function getPatient() { global $patient1; return $patient1; }
+                public function getContenu() { return 'Note de suivi : Le patient rapporte une bonne tolérance au traitement. Aucun effet secondaire observé. Prochain rendez-vous dans 2 semaines.'; }
+                public function getDateCreation() { return new \DateTime('2024-01-20 14:15'); }
+            };
+
+            // Patient 2
+            $patient2 = new class {
+                public function getId() { return 2; }
+                public function getPrenom() { return 'Pierre'; }
+                public function getNom() { return 'Durand'; }
+                public function getEmail() { return 'pierre.durand@email.com'; }
+            };
+            
+            $notes[] = new class {
+                public function getPatient() { global $patient2; return $patient2; }
+                public function getContenu() { return 'Première consultation. Patient anxieux mais coopératif. Évaluation complète des symptômes réalisée. Plan de traitement établi.'; }
+                public function getDateCreation() { return new \DateTime('2024-01-18 09:00'); }
+            };
+
+            // Patient 3
+            $patient3 = new class {
+                public function getId() { return 3; }
+                public function getPrenom() { return 'Sophie'; }
+                public function getNom() { return 'Bernard'; }
+                public function getEmail() { return 'sophie.bernard@email.com'; }
+            };
+            
+            $notes[] = new class {
+                public function getPatient() { global $patient3; return $patient3; }
+                public function getContenu() { return 'Réévaluation après 3 mois de traitement. Progression notable dans la gestion des symptômes. Adapter posologie si nécessaire.'; }
+                public function getDateCreation() { return new \DateTime('2024-01-22 16:45'); }
+            };
+        } else {
+            // Utiliser les vraies notes de la base de données
+            // Prendre le premier médecin disponible pour l'affichage
+            $firstNote = $allNotes[0];
+            $medecin = $firstNote->getMedecin();
+            $notes = $allNotes;
+        }
+
+        // Configuration de DomPDF
+        $options = new Options();
+        $options->set('defaultFont', 'Arial');
+        $options->set('isRemoteEnabled', true);
+        $options->set('isHtml5ParserEnabled', true);
+
+        // Créer le PDF
+        $dompdf = new Dompdf($options);
+
+        // Générer le HTML pour le PDF
+        $html = $this->renderView('doctor/notes/pdf.html.twig', [
+            'notes' => $notes,
+            'medecin' => $medecin,
+            'date' => new \DateTime()
+        ]);
+
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        // Nom du fichier
+        $filename = 'real_notes_' . date('Y-m-d_H-i') . '.pdf';
+
+        // Retourner la réponse PDF
+        return new Response(
+            $dompdf->stream($filename, ['Attachment' => true]),
+            200,
+            [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"'
+            ]
+        );
     }
 
     private function markDoctorNotificationForRdvAsRead(Medcin $medecin, RendezVous $rdv): void
