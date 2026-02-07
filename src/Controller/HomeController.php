@@ -14,8 +14,10 @@ use App\Entity\RendezVous;
 use App\Enum\Motif;
 use App\Enum\StatusRendezVous;
 use App\Form\BlogType;
+use App\Entity\InscritEvents;
 use App\Repository\DisponibiliteRepository;
 use App\Repository\EvenementRepository;
+use App\Repository\InscritEventsRepository;
 use App\Repository\MedcinRepository;
 use App\Repository\ModuleRepository;
 use App\Repository\NotificationRepository;
@@ -37,6 +39,7 @@ final class HomeController extends AbstractController
         private readonly DisponibiliteRepository $disponibiliteRepository,
         private readonly RendezVousRepository $rendezVousRepository,
         private readonly NotificationRepository $notificationRepository,
+        private readonly InscritEventsRepository $inscritEventsRepository,
         private readonly EntityManagerInterface $entityManager,
     ) {
     }
@@ -146,22 +149,60 @@ final class HomeController extends AbstractController
     }
 
     #[Route('/evenements', name: 'user_events', methods: ['GET'])]
-    public function events(): Response
+    public function events(Request $request): Response
     {
+        $dateFrom = null;
+        $dateTo = null;
+        $dateFromStr = trim((string) $request->query->get('date_from', ''));
+        $dateToStr = trim((string) $request->query->get('date_to', ''));
+        if ($dateFromStr !== '') {
+            try {
+                $dateFrom = new \DateTimeImmutable($dateFromStr);
+            } catch (\Throwable) {
+            }
+        }
+        if ($dateToStr !== '') {
+            try {
+                $dateTo = new \DateTimeImmutable($dateToStr);
+            } catch (\Throwable) {
+            }
+        }
+        $themeId = $request->query->get('theme');
+        $themeId = is_numeric($themeId) ? (int) $themeId : null;
+        $lieu = trim((string) $request->query->get('lieu', ''));
+
+        $evenementsFiltres = $this->evenementRepository->findFiltered($dateFrom, $dateTo, $themeId, $lieu === '' ? null : $lieu);
+
         $thematiques = $this->thematiqueRepository->findBy(['actif' => true], ['ordre' => 'ASC', 'nomThematique' => 'ASC']);
+        $lieux = $this->evenementRepository->findDistinctLieux();
+
         $grouped = [];
         foreach ($thematiques as $t) {
-            $evenements = $t->getEvenements()->toArray();
-            usort($evenements, static function (Evenement $a, Evenement $b): int {
-                $d = ($a->getDateEvent() <=> $b->getDateEvent());
-                return $d !== 0 ? $d : ($a->getHeureDebut() <=> $b->getHeureDebut());
-            });
+            if ($themeId !== null && $t->getId() !== $themeId) {
+                continue;
+            }
+            $evenements = array_values(array_filter($evenementsFiltres, static fn (Evenement $e) => $e->getThematique() && $e->getThematique()->getId() === $t->getId()));
             $grouped[] = ['thematique' => $t, 'evenements' => $evenements];
         }
-        $sansThematique = $this->evenementRepository->findBy(['thematique' => null], ['dateEvent' => 'ASC', 'heureDebut' => 'ASC']);
+        $sansThematique = array_values(array_filter($evenementsFiltres, static fn (Evenement $e) => $e->getThematique() === null));
+
+        $eventCards = [];
+        foreach ($evenementsFiltres as $ev) {
+            $eventCards[] = ['event' => $ev, 'thematique' => $ev->getThematique()];
+        }
+
         return $this->render('front/events/index.html.twig', [
             'grouped' => $grouped,
             'sansThematique' => $sansThematique,
+            'eventCards' => $eventCards,
+            'thematiques' => $thematiques,
+            'lieux' => $lieux,
+            'filters' => [
+                'date_from' => $dateFromStr,
+                'date_to' => $dateToStr,
+                'theme' => $themeId,
+                'lieu' => $lieu,
+            ],
         ]);
     }
 
@@ -172,7 +213,82 @@ final class HomeController extends AbstractController
         if ($evenement === null) {
             throw $this->createNotFoundException('Événement introuvable.');
         }
-        return $this->render('front/events/show.html.twig', ['evenement' => $evenement]);
+        $user = $this->getUser();
+        $userInscrit = $user !== null
+            ? $this->inscritEventsRepository->findInscriptionForUserAndEvent($user, $evenement) !== null
+            : false;
+
+        return $this->render('front/events/show.html.twig', [
+            'evenement' => $evenement,
+            'userInscrit' => $userInscrit,
+        ]);
+    }
+
+    #[Route('/evenements/{id}/inscrire', name: 'user_event_register', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function eventRegister(int $id, Request $request): Response
+    {
+        $user = $this->getUser();
+        if ($user === null) {
+            $this->addFlash('error', 'Connectez-vous pour vous inscrire à un événement.');
+            return $this->redirectToRoute('app_login');
+        }
+
+        $evenement = $this->evenementRepository->find($id);
+        if ($evenement === null) {
+            throw $this->createNotFoundException('Événement introuvable.');
+        }
+
+        if (!$this->isCsrfTokenValid('event_register_' . $id, (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton de sécurité invalide.');
+            return $this->redirectToRoute('user_event_show', ['id' => $id]);
+        }
+
+        if ($this->inscritEventsRepository->findInscriptionForUserAndEvent($user, $evenement) !== null) {
+            $this->addFlash('info', 'Vous êtes déjà inscrit à cet événement.');
+            return $this->redirectToRoute('user_event_show', ['id' => $id]);
+        }
+
+        $inscrit = new InscritEvents();
+        $inscrit->setUser($user);
+        $inscrit->setEvenement($evenement);
+        $inscrit->setDateInscrit(new \DateTime());
+        $inscrit->setEstInscrit(true);
+        $this->entityManager->persist($inscrit);
+        $this->entityManager->flush();
+
+        $this->addFlash('success', 'Vous êtes inscrit à l\'événement.');
+        return $this->redirectToRoute('user_event_show', ['id' => $id]);
+    }
+
+    #[Route('/evenements/{id}/desinscrire', name: 'user_event_unregister', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function eventUnregister(int $id, Request $request): Response
+    {
+        $user = $this->getUser();
+        if ($user === null) {
+            $this->addFlash('error', 'Connectez-vous pour gérer vos inscriptions.');
+            return $this->redirectToRoute('app_login');
+        }
+
+        $evenement = $this->evenementRepository->find($id);
+        if ($evenement === null) {
+            throw $this->createNotFoundException('Événement introuvable.');
+        }
+
+        if (!$this->isCsrfTokenValid('event_unregister_' . $id, (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton de sécurité invalide.');
+            return $this->redirectToRoute('user_event_show', ['id' => $id]);
+        }
+
+        $inscrit = $this->inscritEventsRepository->findInscriptionForUserAndEvent($user, $evenement);
+        if ($inscrit !== null) {
+            $inscrit->setEstInscrit(false);
+            $this->entityManager->flush();
+            $this->addFlash('success', 'Vous avez été désinscrit de l\'événement.');
+        } else {
+            $this->addFlash('info', 'Vous n\'étiez pas inscrit à cet événement.');
+        }
+
+        return $this->redirectToRoute('user_event_show', ['id' => $id]);
     }
 
     #[Route('/rendez-vous', name: 'user_appointments', methods: ['GET'])]
@@ -427,12 +543,6 @@ final class HomeController extends AbstractController
                 array_map(fn (Module $m) => $niveauLabels[$m->getNiveau()] ?? $m->getNiveau(), $modules)
             ))),
         ];
-    }
-
-    #[Route('/inscription', name: 'register', methods: ['GET'])]
-    public function register(): Response
-    {
-        return $this->render('front/auth/register.html.twig');
     }
 
     #[Route('/connexion', name: 'login', methods: ['GET'])]

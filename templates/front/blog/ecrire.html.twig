@@ -20,7 +20,7 @@
 
     <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8">
         {{ form_start(form, {
-            attr: { class: 'space-y-6' },
+            attr: { class: 'space-y-6', novalidate: 'novalidate' },
             label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }
         }) }}
         {{ form_errors(form) }}
