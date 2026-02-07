@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\InheritanceType('SINGLE_TABLE')]
@@ -18,7 +19,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
     'parent' => ParentUser::class,
     'medcin' => Medcin::class,
 ])]
-abstract class User implements PasswordAuthenticatedUserInterface
+abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     /** @var Collection<int, Blog> */
     #[ORM\OneToMany(targetEntity: Blog::class, mappedBy: 'user')]
@@ -249,5 +250,28 @@ abstract class User implements PasswordAuthenticatedUserInterface
             }
         }
         return $this;
+    }
+
+    public function getRoles(): array
+    {
+        $roles = [];
+        if ($this->role) {
+            $roles[] = $this->role->value;
+        }
+        
+        // guarantee every user at least has ROLE_USER
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    public function eraseCredentials(): void
+    {
+        // If you store any temporary, sensitive data on user, clear it here
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
     }
 }

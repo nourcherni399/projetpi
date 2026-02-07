@@ -21,6 +21,7 @@ use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\LessThanOrEqual;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Range;
+use Symfony\Component\Validator\Constraints\Regex;
 
 /**
  * Formulaire d'inscription publique.
@@ -102,7 +103,7 @@ final class InscriptionType extends AbstractType
                 'choices' => [UserRole::PATIENT, UserRole::PARENT, UserRole::USER],
                 'placeholder' => 'Sélectionnez votre profil',
                 'constraints' => [new NotBlank(message: 'Veuillez sélectionner un profil.')],
-                'attr' => $attr,
+                'attr' => $attr + ['data-role-select' => '1'],
             ])
             ->add('relationAvecPatient', TextType::class, [
                 'label' => 'Relation avec le patient',

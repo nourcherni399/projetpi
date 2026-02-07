@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
+use App\Enum\UserRole;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -12,7 +14,15 @@ final class AuthController extends AbstractController
     #[Route('/connexion', name: 'app_login', methods: ['GET', 'POST'])]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
-        if ($this->getUser()) {
+        $user = $this->getUser();
+        if ($user instanceof User) {
+            $role = $user->getRole();
+            if ($role === UserRole::ADMIN) {
+                return $this->redirectToRoute('admin_dashboard');
+            }
+            if ($role === UserRole::MEDECIN) {
+                return $this->redirectToRoute('doctor_dashboard');
+            }
             return $this->redirectToRoute('home');
         }
         $error = $authenticationUtils->getLastAuthenticationError();
