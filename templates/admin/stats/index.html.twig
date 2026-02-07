@@ -1,0 +1,215 @@
+{% extends 'layouts/admin.html.twig' %}
+
+{% block title %}Statistiques Produits - AutiCare Admin{% endblock %}
+
+{% block admin_content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-semibold text-[#4B5563]">Statistiques des Produits</h1>
+        <div class="flex items-center gap-2 text-sm text-[#6B280]">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Dernière mise à jour: {{ "now"|date("d/m/Y H:i") }}
+        </div>
+    </div>
+
+    <!-- Cartes statistiques principales -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white rounded-xl border border-[#E5E0D8] p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-[#6B280]">Total Produits</p>
+                    <p class="text-2xl font-bold text-[#4B5563] mt-2">{{ totalProduits }}</p>
+                </div>
+                <div class="p-3 bg-blue-100 rounded-lg">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-[#E5E0D8] p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-[#6B280]">Produits Disponibles</p>
+                    <p class="text-2xl font-bold text-green-600 mt-2">{{ produitsDisponibles }}</p>
+                    <p class="text-xs text-[#6B280] mt-1">{{ totalProduits > 0 ? ((produitsDisponibles / totalProduits) * 100)|number_format(1) : 0 }}% du total</p>
+                </div>
+                <div class="p-3 bg-green-100 rounded-lg">
+                    <svg class="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-[#E5E0D8] p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-[#6B280]">Produits Indisponibles</p>
+                    <p class="text-2xl font-bold text-red-600 mt-2">{{ produitsIndisponibles }}</p>
+                    <p class="text-xs text-[#6B280] mt-1">{{ totalProduits > 0 ? ((produitsIndisponibles / totalProduits) * 100)|number_format(1) : 0 }}% du total</p>
+                </div>
+                <div class="p-3 bg-red-100 rounded-lg">
+                    <svg class="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-[#E5E0D8] p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-[#6B280]">Paniers Actifs</p>
+                    <p class="text-2xl font-bold text-[#A7C7E7] mt-2">{{ paniersActifs }}</p>
+                    <p class="text-xs text-[#6B280] mt-1">sur {{ totalPaniers }} total</p>
+                </div>
+                <div class="p-3 bg-[#A7C7E7]/20 rounded-lg">
+                    <svg class="w-6 h-6 text-[#A7C7E7]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if produitsParCategorie is not empty %}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Graphique des produits par catégorie -->
+        <div class="bg-white rounded-xl border border-[#E5E0D8] p-6">
+            <h2 class="text-lg font-semibold text-[#4B5563] mb-4">Répartition des Produits par Catégorie</h2>
+            <div class="space-y-3">
+                {% for item in produitsParCategorie %}
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3 flex-1">
+                        <span class="text-sm font-medium text-[#4B5563] w-24">{{ item.categorie }}</span>
+                        <div class="flex-1 bg-gray-200 rounded-full h-2">
+                            <div class="bg-[#A7C7E7] h-2 rounded-full" style="width: {{ totalProduits > 0 ? (item.nombre / totalProduits * 100)|number_format(0) : 0 }}%"></div>
+                        </div>
+                    </div>
+                    <span class="text-sm font-semibold text-[#6B280] ml-3">{{ item.nombre }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Prix moyens par catégorie -->
+        {% if prixMoyensParCategorie is not empty %}
+        <div class="bg-white rounded-xl border border-[#E5E0D8] p-6">
+            <h2 class="text-lg font-semibold text-[#4B5563] mb-4">Prix Moyen par Catégorie</h2>
+            <div class="space-y-3">
+                {% for item in prixMoyensParCategorie %}
+                <div class="flex items-center justify-between p-3 bg-[#F5F1EB] rounded-lg">
+                    <span class="text-sm font-medium text-[#4B5563]">{{ item.categorie }}</span>
+                    <span class="text-sm font-semibold text-[#A7C7E7]">{{ item.prixMoyen|number_format(2, ',', ' ') }} د.ت</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if produitsPlusChers is not empty or produitsMoinsChers is not empty or produitsPlusAjoutes is not empty %}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Top produits plus chers -->
+        {% if produitsPlusChers is not empty %}
+        <div class="bg-white rounded-xl border border-[#E5E0D8] p-6">
+            <h2 class="text-lg font-semibold text-[#4B5563] mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+                Top 5 Produits Plus Chers
+            </h2>
+            <div class="space-y-2">
+                {% for produit in produitsPlusChers %}
+                <div class="flex items-center justify-between p-2 border border-[#E5E0D8] rounded-lg">
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-[#4B5563] truncate">{{ produit.nom }}</p>
+                        <p class="text-xs text-[#6B280]">{{ produit.categorie ? produit.categorie.label : 'N/A' }}</p>
+                    </div>
+                    <span class="text-sm font-bold text-red-600">{{ produit.prix|number_format(2, ',', ' ') }} د.ت</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Top produits moins chers -->
+        {% if produitsMoinsChers is not empty %}
+        <div class="bg-white rounded-xl border border-[#E5E0D8] p-6">
+            <h2 class="text-lg font-semibold text-[#4B5563] mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+                </svg>
+                Top 5 Produits Moins Chers
+            </h2>
+            <div class="space-y-2">
+                {% for produit in produitsMoinsChers %}
+                <div class="flex items-center justify-between p-2 border border-[#E5E0D8] rounded-lg">
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-[#4B5563] truncate">{{ produit.nom }}</p>
+                        <p class="text-xs text-[#6B280]">{{ produit.categorie ? produit.categorie.label : 'N/A' }}</p>
+                    </div>
+                    <span class="text-sm font-bold text-green-600">{{ produit.prix|number_format(2, ',', ' ') }} د.ت</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Produits les plus ajoutés aux paniers -->
+        {% if produitsPlusAjoutes is not empty %}
+        <div class="bg-white rounded-xl border border-[#E5E0D8] p-6">
+            <h2 class="text-lg font-semibold text-[#4B5563] mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-[#A7C7E7]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                Top 5 Plus Ajoutés au Panier
+            </h2>
+            <div class="space-y-2">
+                {% for item in produitsPlusAjoutes %}
+                <div class="flex items-center justify-between p-2 border border-[#E5E0D8] rounded-lg">
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-[#4B5563] truncate">{{ item.nom }}</p>
+                        <p class="text-xs text-[#6B280]">{{ item.prix|number_format(2, ',', ' ') }} د.ت</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-sm font-bold text-[#A7C7E7]">{{ item.totalQuantite }}</span>
+                        <p class="text-xs text-[#6B280]">ajouté(s)</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Statistiques des paniers -->
+    <div class="bg-white rounded-xl border border-[#E5E0D8] p-6">
+        <h2 class="text-lg font-semibold text-[#4B5563] mb-4">Statistiques des Paniers</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="text-center p-4 bg-[#F5F1EB] rounded-lg">
+                <p class="text-sm font-medium text-[#6B280]">Total Paniers</p>
+                <p class="text-xl font-bold text-[#4B5563] mt-1">{{ totalPaniers }}</p>
+            </div>
+            <div class="text-center p-4 bg-[#F5F1EB] rounded-lg">
+                <p class="text-sm font-medium text-[#6B280]">Paniers Actifs</p>
+                <p class="text-xl font-bold text-[#A7C7E7] mt-1">{{ paniersActifs }}</p>
+            </div>
+            <div class="text-center p-4 bg-[#F5F1EB] rounded-lg">
+                <p class="text-sm font-medium text-[#6B280]">Total Articles</p>
+                <p class="text-xl font-bold text-[#4B5563] mt-1">{{ totalArticlesDansPaniers }}</p>
+            </div>
+            <div class="text-center p-4 bg-[#F5F1EB] rounded-lg">
+                <p class="text-sm font-medium text-[#6B280]">Valeur Totale</p>
+                <p class="text-xl font-bold text-green-600 mt-1">{{ valeurTotalePaniers|number_format(2, ',', ' ') }} د.ت</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

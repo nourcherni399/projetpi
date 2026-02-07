@@ -52,21 +52,18 @@ class Module
     #[ORM\OneToMany(targetEntity: Blog::class, mappedBy: 'module', cascade: ['remove'])]
     private Collection $blogs;
 
+    #[ORM\OneToMany(targetEntity: Ressource::class, mappedBy: 'module', cascade: ['remove'])]
+    private Collection $ressources;
+
     #[ORM\Column(type: 'string', enumType: CategorieModule::class, columnDefinition: "ENUM('', 'COMPRENDRE_TSA', 'AUTONOMIE', 'COMMUNICATION', 'EMOTIONS', 'VIE_QUOTIDIENNE', 'ACCOMPAGNEMENT') NOT NULL")]
     private CategorieModule $categorie;
-
-    /**
-     * @var Collection<int, Ressource>
-     */
-    #[ORM\OneToMany(targetEntity: Ressource::class, mappedBy: 'module', orphanRemoval: true)]
-    private Collection $ressources;
 
 
     public function __construct()
     {
         $this->blogs = new ArrayCollection();
-        $this->categorie = CategorieModule::EMPTY;
         $this->ressources = new ArrayCollection();
+        $this->categorie = CategorieModule::EMPTY;
     }
 
     public function getId(): ?int
@@ -212,18 +209,6 @@ class Module
         return $this;
     }
 
-    public function getCategorie(): CategorieModule
-    {
-        return $this->categorie;
-    }
-
-    public function setCategorie(CategorieModule $categorie): static
-    {
-        $this->categorie = $categorie;
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, Ressource>
      */
@@ -250,6 +235,18 @@ class Module
                 $ressource->setModule(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCategorie(): CategorieModule
+    {
+        return $this->categorie;
+    }
+
+    public function setCategorie(CategorieModule $categorie): static
+    {
+        $this->categorie = $categorie;
 
         return $this;
     }

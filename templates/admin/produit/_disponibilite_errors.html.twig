@@ -1,0 +1,4 @@
+{# Erreurs pour le champ disponibilité #}
+{% if app.session.flashbag.has('disponibilite_vide') %}
+    <div class="text-red-600 text-sm mt-1">Le champ disponibilité est obligatoire.</div>
+{% endif %}

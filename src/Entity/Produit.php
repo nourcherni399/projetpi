@@ -7,6 +7,7 @@ namespace App\Entity;
 use App\Enum\Categorie;
 use App\Repository\ProduitRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\File;
 
 #[ORM\Entity(repositoryClass: ProduitRepository::class)]
 class Produit
@@ -33,6 +34,8 @@ class Produit
 
     #[ORM\Column(length: 500, nullable: true)]
     private ?string $image = null;
+
+    private ?File $imageFile = null;
 
     #[ORM\ManyToOne(inversedBy: 'produits')]
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
@@ -134,6 +137,17 @@ class Produit
             $stock->setProduit($this);
         }
         $this->stock = $stock;
+        return $this;
+    }
+
+    public function getImageFile(): ?File
+    {
+        return $this->imageFile;
+    }
+
+    public function setImageFile(?File $imageFile): static
+    {
+        $this->imageFile = $imageFile;
         return $this;
     }
 }
