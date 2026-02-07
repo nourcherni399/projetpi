@@ -6,8 +6,10 @@ namespace App\Controller;
 
 use App\Entity\Blog;
 use App\Entity\Module;
+use App\Enum\Categorie;
 use App\Form\BlogType;
 use App\Repository\ModuleRepository;
+use App\Repository\ProduitRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,6 +20,7 @@ final class HomeController extends AbstractController
 {
     public function __construct(
         private readonly ModuleRepository $moduleRepository,
+        private readonly ProduitRepository $produitRepository,
         private readonly EntityManagerInterface $entityManager,
     ) {
     }
@@ -35,9 +38,67 @@ final class HomeController extends AbstractController
     }
 
     #[Route('/produits', name: 'user_products', methods: ['GET'])]
-    public function products(): Response
+    public function products(Request $request): Response
     {
-        return $this->render('front/products/index.html.twig');
+        $categorie = $request->query->get('categorie');
+        $minPrice = $request->query->get('minPrice');
+        $maxPrice = $request->query->get('maxPrice');
+        $search = $request->query->get('search');
+        $sortBy = $request->query->get('sortBy', 'nom'); // 'nom' ou 'prix'
+        $sortOrder = $request->query->get('sortOrder', 'asc'); // 'asc' ou 'desc'
+        
+        $criteria = [];
+        
+        if ($categorie) {
+            try {
+                $categorieEnum = Categorie::from($categorie);
+                $criteria['categorie'] = $categorieEnum;
+            } catch (\ValueError $e) {
+                // Invalid category, ignore
+            }
+        }
+        
+        // Définir l'ordre de tri
+        $orderBy = [];
+        if ($sortBy === 'prix') {
+            $orderBy['prix'] = $sortOrder === 'desc' ? 'DESC' : 'ASC';
+        } else {
+            $orderBy['nom'] = $sortOrder === 'desc' ? 'DESC' : 'ASC';
+        }
+        
+        $produits = $this->produitRepository->findBy($criteria, $orderBy);
+        
+        // Filter by price range and search term in PHP
+        if ($minPrice !== null || $maxPrice !== null || $search !== null) {
+            $minPrice = $minPrice !== null ? (int)$minPrice : 0;
+            $maxPrice = $maxPrice !== null ? (int)$maxPrice : PHP_INT_MAX;
+            $searchTerm = $search !== null ? strtolower(trim($search)) : '';
+            
+            $produits = array_filter($produits, function($produit) use ($minPrice, $maxPrice, $searchTerm) {
+                $priceMatch = $produit->getPrix() >= $minPrice && $produit->getPrix() <= $maxPrice;
+                
+                if ($searchTerm === '') {
+                    return $priceMatch;
+                }
+                
+                $nomMatch = strpos(strtolower($produit->getNom()), $searchTerm) !== false;
+                $descriptionMatch = $produit->getDescription() && strpos(strtolower($produit->getDescription()), $searchTerm) !== false;
+                $categorieMatch = $produit->getCategorie() && strpos(strtolower($produit->getCategorie()->label()), $searchTerm) !== false;
+                
+                return $priceMatch && ($nomMatch || $descriptionMatch || $categorieMatch);
+            });
+        }
+        
+        return $this->render('front/products/index.html.twig', [
+            'produits' => $produits,
+            'categories' => Categorie::cases(),
+            'selectedCategorie' => $categorie,
+            'minPrice' => $minPrice,
+            'maxPrice' => $maxPrice,
+            'search' => $search,
+            'sortBy' => $sortBy,
+            'sortOrder' => $sortOrder,
+        ]);
     }
 
     #[Route('/produits/{id}', name: 'user_product_show', requirements: ['id' => '\d+'], methods: ['GET'])]

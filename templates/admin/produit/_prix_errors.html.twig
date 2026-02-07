@@ -1,0 +1,16 @@
+{# Erreurs pour le champ prix #}
+{% if app.session.flashbag.has('prix_vide') %}
+    <div class="text-red-600 text-sm mt-1">Le champ prix est obligatoire.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('prix_non_numerique') %}
+    <div class="text-red-600 text-sm mt-1">Le prix doit être un nombre valide.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('prix_negatif') %}
+    <div class="text-red-600 text-sm mt-1">Le prix doit être supérieur à 0.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('prix_trop_eleve') %}
+    <div class="text-red-600 text-sm mt-1">Le prix ne peut pas dépasser 999999.99 د.ت.</div>
+{% endif %}

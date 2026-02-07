@@ -1,0 +1,20 @@
+{# Erreurs pour le champ image #}
+{% if app.session.flashbag.has('image_manquante') %}
+    <div class="text-red-600 text-sm mt-1">Le champ image est obligatoire.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('image_trop_grosse') %}
+    <div class="text-red-600 text-sm mt-1">L'image ne doit pas dépasser 5MB.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('image_format_invalide') %}
+    <div class="text-red-600 text-sm mt-1">L'image doit être au format JPEG, PNG, GIF ou WebP.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('image_trop_petite') %}
+    <div class="text-red-600 text-sm mt-1">L'image doit faire au moins 100x100 pixels.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('image_trop_grande') %}
+    <div class="text-red-600 text-sm mt-1">L'image ne peut pas dépasser 2000x2000 pixels.</div>
+{% endif %}

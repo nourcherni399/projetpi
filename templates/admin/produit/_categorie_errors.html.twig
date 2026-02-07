@@ -1,0 +1,4 @@
+{# Erreurs pour le champ catégorie #}
+{% if app.session.flashbag.has('categorie_vide') %}
+    <div class="text-red-600 text-sm mt-1">Le champ catégorie est obligatoire.</div>
+{% endif %}

@@ -1,0 +1,135 @@
+{% extends 'layouts/user.html.twig' %}
+
+{% block title %}Commande Confirmée - AutiCare{% endblock %}
+
+{% block user_content %}
+<section class="text-center mb-10">
+    <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-100 text-green-600 mb-4">
+        <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+    </div>
+    <h1 class="text-3xl font-bold text-[#4B5563] mb-3">Commande Confirmée!</h1>
+    <p class="text-[#6B7280]">Merci pour votre achat. Votre commande a été reçue avec succès.</p>
+</section>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="lg:col-span-2">
+        <!-- Détails de la commande -->
+        <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6 mb-6">
+            <h2 class="text-xl font-semibold text-[#4B5563] mb-4">Détails de la Commande</h2>
+            
+            <div class="grid grid-cols-2 gap-6 mb-6 pb-6 border-b border-[#E5E0D8]">
+                <div>
+                    <p class="text-sm text-[#6B7280] mb-1">Numéro de Commande</p>
+                    <p class="text-lg font-semibold text-[#4B5563]">#{{ commande.id }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-[#6B7280] mb-1">Date</p>
+                    <p class="text-lg font-semibold text-[#4B5563]">{{ commande.dateCreation|date('d/m/Y') }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-[#6B7280] mb-1">Status</p>
+                    <p class="text-lg font-semibold text-green-600">{% if commande.statut == 'en_attente' %}En Attente{% else %}{{ commande.statut }}{% endif %}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-[#6B7280] mb-1">Mode de Paiement</p>
+                    <p class="text-lg font-semibold text-[#4B5563]">{% if commande.modePayment == 'delivery' %}Livraison{% else %}Carte Bancaire{% endif %}</p>
+                </div>
+            </div>
+
+            <!-- Articles commandés -->
+            <h3 class="font-semibold text-[#4B5563] mb-3">Articles Commandés</h3>
+            <div class="space-y-3 mb-6 pb-6 border-b border-[#E5E0D8]">
+                {% for ligne in commande.lignes %}
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="font-medium text-[#4B5563]">{{ ligne.produit.nom }}</p>
+                        <p class="text-sm text-[#6B7280]">Quantité: {{ ligne.quantite }}</p>
+                    </div>
+                    <p class="font-semibold text-[#A7C7E7]">{{ ligne.sousTotal|number_format(2, ',', ' ') }} د.ت</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="flex justify-between text-lg font-bold text-[#4B5563]">
+                <span>Montant Total:</span>
+                <span class="text-[#A7C7E7]">{{ commande.total|number_format(2, ',', ' ') }} د.ت</span>
+            </div>
+        </div>
+
+        <!-- Informations de livraison -->
+        <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
+            <h2 class="text-xl font-semibold text-[#4B5563] mb-4">Adresse de Livraison</h2>
+            
+            <div class="space-y-2 text-[#6B7280]">
+                <p><strong class="text-[#4B5563]">{{ commande.nom }}</strong></p>
+                <p>{{ commande.adresse }}</p>
+                <p>{{ commande.ville }}{% if commande.codePostal %} {{ commande.codePostal }}{% endif %}</p>
+                <p class="mt-3"><strong class="text-[#4B5563]">Email:</strong> {{ commande.email }}</p>
+                <p><strong class="text-[#4B5563]">Téléphone:</strong> {{ commande.telephone }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prochaines étapes -->
+    <div>
+        <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6 sticky top-20">
+            <h3 class="text-lg font-semibold text-[#4B5563] mb-4">Prochaines Étapes</h3>
+            
+            <div class="space-y-3">
+                <div class="flex gap-3">
+                    <div class="w-8 h-8 rounded-full bg-[#A7C7E7] text-white flex items-center justify-center flex-shrink-0 font-semibold">✓</div>
+                    <div>
+                        <p class="font-semibold text-[#4B5563]">Commande Reçue</p>
+                        <p class="text-sm text-[#6B7280]">Votre commande a été validée</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <div class="w-8 h-8 rounded-full bg-[#E5E0D8] text-[#6B7280] flex items-center justify-center flex-shrink-0 font-semibold">2</div>
+                    <div>
+                        <p class="font-semibold text-[#4B5563]">Préparation</p>
+                        <p class="text-sm text-[#6B7280]">Nous préparons votre commande</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <div class="w-8 h-8 rounded-full bg-[#E5E0D8] text-[#6B7280] flex items-center justify-center flex-shrink-0 font-semibold">3</div>
+                    <div>
+                        <p class="font-semibold text-[#4B5563]">Livraison</p>
+                        <p class="text-sm text-[#6B7280]">Votre colis en route</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <div class="w-8 h-8 rounded-full bg-[#E5E0D8] text-[#6B7280] flex items-center justify-center flex-shrink-0 font-semibold">4</div>
+                    <div>
+                        <p class="font-semibold text-[#4B5563]">Reçu</p>
+                        <p class="text-sm text-[#6B7280]">Votre commande livrée</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 p-4 bg-[#F5F1EB] rounded-lg">
+                <p class="text-sm text-[#6B7280]">
+                    <strong>Délai de livraison:</strong> 2-3 jours ouvrables
+                </p>
+                <p class="text-sm text-[#6B7280] mt-2">
+                    Un email de confirmation a été envoyé à <strong>{{ commande.email }}</strong>
+                </p>
+            </div>
+
+            <div class="mt-6 space-y-3">
+                <a href="{{ path('user_products') }}" class="block w-full px-4 py-3 bg-[#A7C7E7] text-white rounded-lg font-semibold text-center hover:bg-[#B8D4ED] transition">
+                    Continuer les achats
+                </a>
+                <a href="{{ path('home') }}" class="block w-full px-4 py-3 border border-[#A7C7E7] text-[#A7C7E7] rounded-lg font-semibold text-center hover:bg-[#F5F1EB] transition">
+                    Retour à l'accueil
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

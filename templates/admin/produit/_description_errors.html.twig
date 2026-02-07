@@ -1,0 +1,12 @@
+{# Erreurs pour le champ description #}
+{% if app.session.flashbag.has('description_vide') %}
+    <div class="text-red-600 text-sm mt-1">Le champ description est obligatoire.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('description_courte') %}
+    <div class="text-red-600 text-sm mt-1">La description doit contenir au moins 10 caractères.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('description_longue') %}
+    <div class="text-red-600 text-sm mt-1">La description ne peut pas dépasser 1000 caractères.</div>
+{% endif %}

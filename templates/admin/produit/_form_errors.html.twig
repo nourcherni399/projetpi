@@ -1,0 +1,76 @@
+{# Afficher les erreurs spécifiques sous chaque champ #}
+{% if app.session.flashbag.has('nom_vide') %}
+    <div class="text-red-600 text-sm mt-1">Nom requis</div>
+{% endif %}
+
+{% if app.session.flashbag.has('nom_nombre') %}
+    <div class="text-red-600 text-sm mt-1">Nom invalide</div>
+{% endif %}
+
+{% if app.session.flashbag.has('nom_court') %}
+    <div class="text-red-600 text-sm mt-1">Nom trop court</div>
+{% endif %}
+
+{% if app.session.flashbag.has('nom_long') %}
+    <div class="text-red-600 text-sm mt-1">Nom trop long</div>
+{% endif %}
+
+{% if app.session.flashbag.has('nom_caracteres') %}
+    <div class="text-red-600 text-sm mt-1">Caractères invalides</div>
+{% endif %}
+
+{% if app.session.flashbag.has('description_vide') %}
+    <div class="text-red-600 text-sm mt-1">Description requise</div>
+{% endif %}
+
+{% if app.session.flashbag.has('description_courte') %}
+    <div class="text-red-600 text-sm mt-1">Description trop courte</div>
+{% endif %}
+
+{% if app.session.flashbag.has('description_longue') %}
+    <div class="text-red-600 text-sm mt-1">Description trop longue</div>
+{% endif %}
+
+{% if app.session.flashbag.has('prix_vide') %}
+    <div class="text-red-600 text-sm mt-1">Prix requis</div>
+{% endif %}
+
+{% if app.session.flashbag.has('prix_non_numerique') %}
+    <div class="text-red-600 text-sm mt-1">Prix invalide</div>
+{% endif %}
+
+{% if app.session.flashbag.has('prix_negatif') %}
+    <div class="text-red-600 text-sm mt-1">Prix positif requis</div>
+{% endif %}
+
+{% if app.session.flashbag.has('prix_trop_eleve') %}
+    <div class="text-red-600 text-sm mt-1">Prix trop élevé</div>
+{% endif %}
+
+{% if app.session.flashbag.has('categorie_vide') %}
+    <div class="text-red-600 text-sm mt-1">Catégorie requise</div>
+{% endif %}
+
+{% if app.session.flashbag.has('disponibilite_vide') %}
+    <div class="text-red-600 text-sm mt-1">Disponibilité requise</div>
+{% endif %}
+
+{% if app.session.flashbag.has('image_manquante') %}
+    <div class="text-red-600 text-sm mt-1">Image requise</div>
+{% endif %}
+
+{% if app.session.flashbag.has('image_trop_grosse') %}
+    <div class="text-red-600 text-sm mt-1">Image trop grosse</div>
+{% endif %}
+
+{% if app.session.flashbag.has('image_format_invalide') %}
+    <div class="text-red-600 text-sm mt-1">Format invalide</div>
+{% endif %}
+
+{% if app.session.flashbag.has('image_trop_petite') %}
+    <div class="text-red-600 text-sm mt-1">Image trop petite</div>
+{% endif %}
+
+{% if app.session.flashbag.has('image_trop_grande') %}
+    <div class="text-red-600 text-sm mt-1">Image trop grande</div>
+{% endif %}
