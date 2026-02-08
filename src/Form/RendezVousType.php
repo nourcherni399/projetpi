@@ -18,6 +18,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
 final class RendezVousType extends AbstractType
@@ -62,17 +63,24 @@ final class RendezVousType extends AbstractType
             ])
             ->add('nom', TextType::class, [
                 'label' => 'Nom du patient',
-                'constraints' => [new NotBlank(message: 'Le nom est obligatoire.')],
+                'constraints' => [
+                    new NotBlank(message: 'Le nom est obligatoire.'),
+                    new Length(['min' => 1, 'max' => 255, 'maxMessage' => 'Le nom ne peut pas dépasser {{ limit }} caractères.']),
+                ],
                 'attr' => $attr + ['placeholder' => 'Nom'],
             ])
             ->add('prenom', TextType::class, [
                 'label' => 'Prénom du patient',
-                'constraints' => [new NotBlank(message: 'Le prénom est obligatoire.')],
+                'constraints' => [
+                    new NotBlank(message: 'Le prénom est obligatoire.'),
+                    new Length(['min' => 1, 'max' => 255, 'maxMessage' => 'Le prénom ne peut pas dépasser {{ limit }} caractères.']),
+                ],
                 'attr' => $attr + ['placeholder' => 'Prénom'],
             ])
             ->add('adresse', TextareaType::class, [
                 'label' => 'Adresse',
                 'required' => false,
+                'constraints' => [new Length(['max' => 500, 'maxMessage' => 'L\'adresse ne peut pas dépasser {{ limit }} caractères.'])],
                 'attr' => $attr + ['rows' => 2, 'placeholder' => 'Adresse'],
             ])
             ->add('dateNaissance', DateType::class, [
@@ -84,12 +92,14 @@ final class RendezVousType extends AbstractType
             ->add('telephone', TextType::class, [
                 'label' => 'Téléphone',
                 'required' => false,
+                'constraints' => [new Length(['max' => 30, 'maxMessage' => 'Le téléphone ne peut pas dépasser {{ limit }} caractères.'])],
                 'attr' => $attr + ['placeholder' => '06 12 34 56 78'],
             ])
             ->add('notePatient', TextareaType::class, [
                 'label' => 'Note patient',
                 'required' => false,
                 'empty_data' => 'vide',
+                'constraints' => [new Length(['max' => 65535, 'maxMessage' => 'La note ne peut pas dépasser {{ limit }} caractères.'])],
                 'attr' => $attr + ['rows' => 3, 'placeholder' => 'Notes…'],
             ])
             ->add('status', EnumType::class, [

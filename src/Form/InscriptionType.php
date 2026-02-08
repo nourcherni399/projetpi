@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Form;
 
+use App\Enum\Sexe;
 use App\Enum\UserRole;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
@@ -125,11 +126,13 @@ final class InscriptionType extends AbstractType
                 'constraints' => [new Length(['max' => 500])],
                 'attr' => $attr + ['placeholder' => 'Adresse', 'data-role-fields' => 'ROLE_PATIENT'],
             ])
-            ->add('sexe', TextType::class, [
+            ->add('sexe', EnumType::class, [
                 'label' => 'Sexe',
+                'class' => Sexe::class,
+                'choice_label' => fn (Sexe $s) => $s->value,
+                'placeholder' => 'Choisir',
                 'required' => false,
-                'constraints' => [new Length(['max' => 20])],
-                'attr' => $attr + ['placeholder' => 'Ex. M, F', 'data-role-fields' => 'ROLE_PATIENT'],
+                'attr' => $attr + ['data-role-fields' => 'ROLE_PATIENT'],
             ])
             ->add('submit', SubmitType::class, [
                 'label' => 'Créer mon compte',

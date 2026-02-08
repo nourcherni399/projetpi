@@ -13,6 +13,7 @@ use App\Entity\Patient;
 use App\Entity\RendezVous;
 use App\Enum\Motif;
 use App\Enum\StatusRendezVous;
+use App\Enum\UserRole;
 use App\Form\BlogType;
 use App\Entity\InscritEvents;
 use App\Repository\DisponibiliteRepository;
@@ -25,6 +26,7 @@ use App\Repository\RendezVousRepository;
 use App\Repository\ThematiqueRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -45,8 +47,18 @@ final class HomeController extends AbstractController
     }
 
     #[Route('/', name: 'home', methods: ['GET'])]
-    public function home(): Response
+    public function home(): Response|RedirectResponse
     {
+        $user = $this->getUser();
+        if ($user !== null && method_exists($user, 'getRole')) {
+            $role = $user->getRole();
+            if ($role === UserRole::ADMIN) {
+                return $this->redirectToRoute('admin_dashboard');
+            }
+            if ($role === UserRole::MEDECIN) {
+                return $this->redirectToRoute('doctor_dashboard');
+            }
+        }
         return $this->render('front/home/index.html.twig');
     }
 

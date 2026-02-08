@@ -75,8 +75,8 @@ final class InscriptionController extends AbstractController
                     $user->setDateNaissance($dn instanceof \DateTimeInterface ? \DateTimeImmutable::createFromInterface($dn) : null);
                     $adresse = isset($data['adresse']) && $data['adresse'] !== '' ? trim((string) $data['adresse']) : null;
                     $user->setAdresse($adresse !== null && $adresse !== '' ? mb_substr($adresse, 0, 500) : null);
-                    $sexe = isset($data['sexe']) && $data['sexe'] !== '' ? trim((string) $data['sexe']) : null;
-                    $user->setSexe($sexe !== null && $sexe !== '' ? mb_substr($sexe, 0, 20) : null);
+                    $sexe = $data['sexe'] ?? null;
+                    $user->setSexe($sexe instanceof \App\Enum\Sexe ? $sexe : null);
                 }
 
                 $this->entityManager->persist($user);

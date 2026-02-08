@@ -11,8 +11,10 @@ use App\Entity\Note;
 use App\Entity\Patient;
 use App\Entity\RendezVous;
 use App\Enum\StatusRendezVous;
+use App\Entity\User;
 use App\Form\DoctorDisponibiliteType;
 use App\Form\NoteType;
+use App\Form\ProfileType;
 use App\Repository\DisponibiliteRepository;
 use App\Repository\NotificationRepository;
 use App\Repository\NoteRepository;
@@ -46,6 +48,28 @@ final class DoctorController extends AbstractController
     {
         $medecin = $this->getMedecin();
         return $this->render('doctor/dashboard.html.twig', $this->getDoctorTemplateVars($medecin));
+    }
+
+    #[Route('/medecin/mon-profil', name: 'doctor_profile', methods: ['GET', 'POST'])]
+    public function profile(Request $request): Response
+    {
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            return $this->redirectToRoute('app_login');
+        }
+        $medecin = $this->getMedecin();
+        $form = $this->createForm(ProfileType::class, $user, ['data_class' => $user::class]);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $user->setUpdatedAt(new \DateTimeImmutable());
+            $this->entityManager->flush();
+            $this->addFlash('success', 'Votre profil a été mis à jour avec succès.');
+            return $this->redirectToRoute('doctor_profile');
+        }
+        return $this->render('doctor/profile/edit.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
+            'user' => $user,
+            'form' => $form,
+        ]));
     }
 
     #[Route('/medecin/disponibilites', name: 'doctor_availability', methods: ['GET', 'POST'])]

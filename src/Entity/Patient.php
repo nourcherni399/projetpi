@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Enum\Sexe;
 use App\Repository\PatientRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -53,14 +54,14 @@ class Patient extends User
         return $this;
     }
 
-    public function getSexe(): ?string
+    public function getSexe(): ?Sexe
     {
-        return $this->sexe;
+        return $this->sexe !== null ? Sexe::tryFrom($this->sexe) : null;
     }
 
-    public function setSexe(?string $sexe): static
+    public function setSexe(?Sexe $sexe): static
     {
-        $this->sexe = $sexe;
+        $this->sexe = $sexe?->value;
         return $this;
     }
 

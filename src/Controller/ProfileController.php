@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Enum\UserRole;
 use App\Form\ProfileType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,6 +29,15 @@ final class ProfileController extends AbstractController
         if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
+        if (method_exists($user, 'getRole')) {
+            $role = $user->getRole();
+            if ($role === UserRole::ADMIN) {
+                return $this->redirectToRoute('admin_profile');
+            }
+            if ($role === UserRole::MEDECIN) {
+                return $this->redirectToRoute('doctor_profile');
+            }
+        }
 
         $form = $this->createForm(ProfileType::class, $user, [
             'data_class' => $user::class,
@@ -48,5 +58,30 @@ final class ProfileController extends AbstractController
             'user' => $user,
             'form' => $form,
         ]);
+    }
+
+    #[Route('/mon-profil/desactiver', name: 'user_profile_deactivate', methods: ['POST'])]
+    public function deactivate(Request $request): Response
+    {
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            return $this->redirectToRoute('app_login');
+        }
+        if (method_exists($user, 'getRole')) {
+            $role = $user->getRole();
+            if ($role === \App\Enum\UserRole::ADMIN || $role === \App\Enum\UserRole::MEDECIN) {
+                return $this->redirectToRoute('user_profile');
+            }
+        }
+        $token = $request->request->get('_token');
+        if (!$this->isCsrfTokenValid('user_deactivate', $token)) {
+            $this->addFlash('error', 'Jeton de sécurité invalide.');
+            return $this->redirectToRoute('user_profile');
+        }
+        $user->setIsActive(false);
+        $user->setUpdatedAt(new \DateTimeImmutable());
+        $this->entityManager->flush();
+        $this->addFlash('success', 'Votre compte a été désactivé. Vous pouvez le réactiver en contactant l’équipe.');
+        return $this->redirectToRoute('app_logout');
     }
 }
