@@ -10,6 +10,7 @@ use App\Entity\Patient;
 use App\Entity\ParentUser;
 use App\Entity\User;
 use App\Enum\UserRole;
+use App\Form\ProfileType;
 use App\Form\UserCreateType;
 use App\Form\UserEditType;
 use App\Repository\UserRepository;
@@ -34,6 +35,27 @@ final class AdminController extends AbstractController
     public function dashboard(): Response
     {
         return $this->render('admin/dashboard/index.html.twig');
+    }
+
+    #[Route('/admin/mon-profil', name: 'admin_profile', methods: ['GET', 'POST'])]
+    public function profile(Request $request): Response
+    {
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            return $this->redirectToRoute('app_login');
+        }
+        $form = $this->createForm(ProfileType::class, $user, ['data_class' => $user::class]);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $user->setUpdatedAt(new \DateTimeImmutable());
+            $this->entityManager->flush();
+            $this->addFlash('success', 'Votre profil a été mis à jour avec succès.');
+            return $this->redirectToRoute('admin_profile');
+        }
+        return $this->render('admin/profile/edit.html.twig', [
+            'user' => $user,
+            'form' => $form,
+        ]);
     }
 
     #[Route('/admin/utilisateurs', name: 'admin_users', methods: ['GET'])]

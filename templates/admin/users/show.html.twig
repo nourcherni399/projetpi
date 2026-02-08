@@ -90,7 +90,7 @@
             </tr>
             <tr>
                 <th class="px-6 py-3 bg-[#F5F1EB] text-[#4B5563]">Sexe</th>
-                <td class="px-6 py-3 text-[#6B7280]">{{ user.sexe ?? '—' }}</td>
+                <td class="px-6 py-3 text-[#6B7280]">{{ user.sexe ? user.sexe.value : '—' }}</td>
             </tr>
             {% endif %}
         </tbody>

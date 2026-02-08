@@ -12,6 +12,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
 final class ModuleType extends AbstractType
@@ -25,17 +26,26 @@ final class ModuleType extends AbstractType
         $builder
             ->add('titre', TextType::class, [
                 'label' => 'Titre',
-                'constraints' => [new NotBlank(message: 'Le titre est obligatoire.')],
+                'constraints' => [
+                    new NotBlank(message: 'Le titre est obligatoire.'),
+                    new Length(['min' => 1, 'max' => 255, 'maxMessage' => 'Le titre ne peut pas dépasser {{ limit }} caractères.']),
+                ],
                 'attr' => $attr + ['placeholder' => 'Ex. Introduction au TSA'],
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Description',
-                'constraints' => [new NotBlank(message: 'La description est obligatoire.')],
+                'constraints' => [
+                    new NotBlank(message: 'La description est obligatoire.'),
+                    new Length(['min' => 1, 'max' => 65535, 'maxMessage' => 'La description ne peut pas dépasser {{ limit }} caractères.']),
+                ],
                 'attr' => $attr + ['rows' => 3, 'placeholder' => 'Courte description du module…'],
             ])
             ->add('contenu', TextareaType::class, [
                 'label' => 'Contenu',
-                'constraints' => [new NotBlank(message: 'Le contenu est obligatoire.')],
+                'constraints' => [
+                    new NotBlank(message: 'Le contenu est obligatoire.'),
+                    new Length(['min' => 1, 'max' => 65535, 'maxMessage' => 'Le contenu ne peut pas dépasser {{ limit }} caractères.']),
+                ],
                 'attr' => $attr + ['rows' => 5, 'placeholder' => 'Contenu détaillé du module…'],
             ])
             ->add('niveau', ChoiceType::class, [
@@ -52,6 +62,7 @@ final class ModuleType extends AbstractType
                 'label' => 'URL de l\'image',
                 'required' => false,
                 'empty_data' => '',
+                'constraints' => [new Length(['max' => 500, 'maxMessage' => 'L\'URL ne peut pas dépasser {{ limit }} caractères.'])],
                 'attr' => $attr + ['placeholder' => 'https://…'],
             ])
             ->add('isPublished', CheckboxType::class, [
