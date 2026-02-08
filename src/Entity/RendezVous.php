@@ -29,7 +29,7 @@ class RendezVous
 
     /** Date choisie pour le rendez-vous (ex. lundi 17 fév.). */
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $dateRdv = null;
+    private ?\DateTime $dateRdv = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
@@ -45,7 +45,7 @@ class RendezVous
     private ?string $adresse = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $dateNaissance = null;
+    private ?\DateTime $dateNaissance = null;
 
     #[ORM\Column(length: 30, nullable: true)]
     private ?string $telephone = null;
@@ -86,12 +86,12 @@ class RendezVous
         return $this;
     }
 
-    public function getDateRdv(): ?\DateTimeInterface
+    public function getDateRdv(): ?\DateTime
     {
         return $this->dateRdv;
     }
 
-    public function setDateRdv(?\DateTimeInterface $dateRdv): static
+    public function setDateRdv(?\DateTime $dateRdv): static
     {
         $this->dateRdv = $dateRdv;
         return $this;
@@ -141,12 +141,12 @@ class RendezVous
         return $this;
     }
 
-    public function getDateNaissance(): ?\DateTimeInterface
+    public function getDateNaissance(): ?\DateTime
     {
         return $this->dateNaissance;
     }
 
-    public function setDateNaissance(?\DateTimeInterface $dateNaissance): static
+    public function setDateNaissance(?\DateTime $dateNaissance): static
     {
         $this->dateNaissance = $dateNaissance;
         return $this;

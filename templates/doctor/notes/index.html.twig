@@ -3,70 +3,246 @@
 {% block title %}Notes patients - AutiCare Médecin{% endblock %}
 
 {% block doctor_content %}
-<h1 class="text-2xl font-semibold text-[#4B5563] mb-6">Notes par patient</h1>
-{% for message in app.flashes('success') %}
-    <div class="mb-4 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">{{ message }}</div>
-{% endfor %}
-{% for message in app.flashes('error') %}
-    <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-800">{{ message }}</div>
-{% endfor %}
-
-<div class="mb-6 bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
-    <div class="p-4 border-b border-[#E5E0D8]">
-        <h2 class="text-lg font-medium text-[#4B5563]">Nouvelle note</h2>
-        <p class="text-sm text-[#6B7280] mt-1">Créez une note pour un patient avec lequel vous avez déjà un rendez-vous.</p>
+<div class="space-y-6">
+    <!-- En-tête moderne -->
+    <div class="bg-gradient-to-r from-[#A7C7E7] to-[#B8D4ED] rounded-2xl p-8 text-white shadow-xl">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold mb-2">Notes patients</h1>
+                <p class="text-blue-100">Suivez l'évolution de vos patients et documentez vos consultations</p>
+            </div>
+            <div class="text-center">
+                <div class="text-4xl font-bold">{{ stats.total }}</div>
+                <div class="text-sm text-blue-100">Total notes</div>
+            </div>
+        </div>
     </div>
-    <div class="p-6">
-        {% if patients is empty %}
-            <p class="text-[#6B7280]">Aucun patient pour l’instant. Les patients apparaîtront après un premier rendez-vous.</p>
-        {% else %}
-            {{ form_start(form, { attr: { class: 'space-y-4' }, label_attr: { class: 'block text-[#4B5563] font-medium mb-1' } }) }}
-            {{ form_errors(form) }}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+    <!-- Cartes de statistiques -->
+    {% if stats is defined %}
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200 p-6 hover:shadow-lg transition-all">
+            <div class="flex items-center justify-between">
                 <div>
-                    {{ form_label(form.patient) }}
-                    {{ form_widget(form.patient) }}
-                    {{ form_errors(form.patient) }}
+                    <p class="text-purple-600 text-sm font-medium">Patients suivis</p>
+                    <p class="text-3xl font-bold text-purple-900 mt-2">{{ stats.patients_with_notes }}</p>
+                    <p class="text-purple-600 text-xs mt-1">Avec notes</p>
                 </div>
-                <div class="md:col-span-2">
-                    {{ form_label(form.contenu) }}
-                    {{ form_widget(form.contenu) }}
+                <div class="flex items-center justify-center w-12 h-12 rounded-full bg-purple-200">
+                    <svg class="w-6 h-6 text-purple-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-3A3 3 0 0014 11V7a3 3 0 00-3-3H7a3 3 0 00-3 3v4a3 3 0 003 3h14a3 3 0 003-3v-4a3 3 0 00-3-3z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 p-6 hover:shadow-lg transition-all">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-blue-600 text-sm font-medium">Cette semaine</p>
+                    <p class="text-3xl font-bold text-blue-900 mt-2">{{ stats.this_week }}</p>
+                    <p class="text-blue-600 text-xs mt-1">Nouvelles notes</p>
+                </div>
+                <div class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-200">
+                    <svg class="w-6 h-6 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 p-6 hover:shadow-lg transition-all">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-green-600 text-sm font-medium">Ce mois</p>
+                    <p class="text-3xl font-bold text-green-900 mt-2">{{ stats.this_month }}</p>
+                    <p class="text-green-600 text-xs mt-1">Total mensuel</p>
+                </div>
+                <div class="flex items-center justify-center w-12 h-12 rounded-full bg-green-200">
+                    <svg class="w-6 h-6 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl border border-amber-200 p-6 hover:shadow-lg transition-all">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-amber-600 text-sm font-medium">Longueur moyenne</p>
+                    <p class="text-3xl font-bold text-amber-900 mt-2">{{ stats.average_length }}</p>
+                    <p class="text-amber-600 text-xs mt-1">Caractères</p>
+                </div>
+                <div class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-200">
+                    <svg class="w-6 h-6 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Formulaire moderne -->
+    <div class="bg-white rounded-2xl border border-[#E5E0D8] shadow-lg overflow-hidden">
+        <div class="p-6 border-b border-[#E5E0D8] bg-gradient-to-r from-[#A7C7E7]/10 to-transparent">
+            <h2 class="text-xl font-semibold text-gray-800 flex items-center gap-2">
+                <svg class="w-5 h-5 text-[#A7C7E7]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                Nouvelle note
+            </h2>
+            <p class="text-sm text-gray-600 mt-1">Documentez la progression de vos patients</p>
+        </div>
+        
+        <div class="p-6">
+            {% if patients is empty %}
+                <div class="text-center py-8">
+                    <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-3A3 3 0 0014 11V7a3 3 0 00-3-3H7a3 3 0 00-3 3v4a3 3 0 003 3h14a3 3 0 003-3v-4a3 3 0 00-3-3z" />
+                    </svg>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Aucun patient disponible</h3>
+                    <p class="text-gray-500">Les patients apparaîtront après votre premier rendez-vous</p>
+                </div>
+            {% else %}
+                {{ form_start(form, { attr: { class: 'space-y-6' } }) }}
+                {{ form_errors(form) }}
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        {{ form_label(form.patient, null, { 'label_attr': { 'class': 'text-sm font-medium text-gray-700' } }) }}
+                        {{ form_widget(form.patient, { 'attr': { 'class': 'w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#A7C7E7] focus:ring-2 focus:ring-[#A7C7E7]/20 transition-all' } }) }}
+                        {{ form_errors(form.patient) }}
+                    </div>
+                </div>
+                
+                <div class="space-y-2">
+                    {{ form_label(form.contenu, null, { 'label_attr': { 'class': 'text-sm font-medium text-gray-700' } }) }}
+                    {{ form_widget(form.contenu, { 'attr': { 
+                        'class': 'w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#A7C7E7] focus:ring-2 focus:ring-[#A7C7E7]/20 transition-all resize-none',
+                        'rows': 6,
+                        'placeholder': 'Décrivez l\'évolution du patient, les observations importantes, les recommandations...'
+                    } }) }}
                     {{ form_errors(form.contenu) }}
                 </div>
-            </div>
-            <div class="mt-4">
-                <button type="submit" class="px-4 py-2 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Enregistrer la note</button>
-            </div>
-            {{ form_end(form) }}
-        {% endif %}
+                
+                <div class="flex gap-4">
+                    <button type="submit" class="px-6 py-3 bg-gradient-to-r from-[#A7C7E7] to-[#B8D4ED] text-white rounded-xl hover:shadow-lg transition-all transform hover:scale-105 flex items-center gap-2 font-medium">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Enregistrer la note
+                    </button>
+                </div>
+                
+                {{ form_end(form) }}
+            {% endif %}
+        </div>
     </div>
-</div>
 
-<div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
-    <div class="p-4 border-b border-[#E5E0D8]">
-        <h2 class="text-lg font-medium text-[#4B5563]">Notes enregistrées</h2>
-    </div>
-    <div class="overflow-x-auto">
-        <table class="w-full text-left">
-            <thead class="bg-[#F5F1EB] border-b border-[#E5E0D8]">
-                <tr>
-                    <th class="px-6 py-4 font-medium text-[#4B5563]">Patient</th>
-                    <th class="px-6 py-4 font-medium text-[#4B5563]">Contenu</th>
-                    <th class="px-6 py-4 font-medium text-[#4B5563]">Date</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-[#E5E0D8]">
-                {% for note in notes %}
-                <tr class="hover:bg-[#F5F1EB]/50">
-                    <td class="px-6 py-4 text-[#4B5563]">{{ note.patient ? (note.patient.nom ~ ' ' ~ note.patient.prenom) : '—' }}</td>
-                    <td class="px-6 py-4 text-[#6B7280] max-w-md">{{ note.contenu|u.truncate(120) }}</td>
-                    <td class="px-6 py-4 text-[#6B7280] whitespace-nowrap">{{ note.dateCreation ? note.dateCreation|date('d/m/Y H:i') : '—' }}</td>
-                </tr>
-                {% else %}
-                <tr><td colspan="3" class="px-6 py-8 text-center text-[#6B7280]">Aucune note.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <!-- Tableau moderne -->
+    <div class="bg-white rounded-2xl border border-[#E5E0D8] shadow-lg overflow-hidden">
+        <div class="p-6 border-b border-[#E5E0D8] bg-gray-50">
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-semibold text-gray-800 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-[#A7C7E7]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Notes enregistrées
+                </h2>
+                <div class="text-sm text-gray-500">
+                    {{ notes|length }} notes au total
+                </div>
+            </div>
+        </div>
+        
+        <div class="overflow-x-auto">
+            {% if notes|length > 0 %}
+                <table class="w-full">
+                    <thead class="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Note</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        {% for note in notes %}
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#A7C7E7] to-[#B8D4ED] flex items-center justify-center text-white font-semibold">
+                                        {% if note.patient %}
+                                            {{ note.patient.nom|first|upper }}{{ note.patient.prenom|first|upper }}
+                                        {% else %}
+                                            ?
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        {% if note.patient %}
+                                            <div class="font-medium text-gray-900">{{ note.patient.prenom }} {{ note.patient.nom }}</div>
+                                            {% if note.patient.dateNaissance %}
+                                                <div class="text-sm text-gray-500">{{ note.patient.dateNaissance|date('d/m/Y') }}</div>
+                                            {% endif %}
+                                        {% else %}
+                                            <div class="font-medium text-gray-900">Patient inconnu</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-gray-600">
+                                <div class="max-w-md">
+                                    <p class="text-sm leading-relaxed">{{ note.contenu|u.truncate(150) }}</p>
+                                    {% if note.contenu|length > 150 %}
+                                        <button class="text-blue-600 hover:text-blue-800 text-sm mt-1 font-medium">Lire la suite</button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-gray-600">
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <div>
+                                        <div class="text-sm font-medium">{{ note.dateCreation ? note.dateCreation|date('d/m/Y') : '—' }}</div>
+                                        <div class="text-xs">{{ note.dateCreation ? note.dateCreation|date('H:i') : '—' }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-2">
+                                    <button class="inline-flex items-center gap-1 px-3 py-2 text-sm rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828L8.586-8.586z" />
+                                        </svg>
+                                        Modifier
+                                    </button>
+                                    <form method="post" action="#" onsubmit="return confirm('Supprimer cette note ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_note_' ~ note.id) }}">
+                                        <button type="submit" class="inline-flex items-center gap-1 px-3 py-2 text-sm rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-all">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                            Supprimer
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="text-center py-16">
+                    <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Aucune note enregistrée</h3>
+                    <p class="text-gray-500">Commencez par documenter vos premières consultations</p>
+                </div>
+            {% endif %}
+        </div>
     </div>
 </div>
 {% endblock %}

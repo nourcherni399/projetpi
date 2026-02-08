@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Profil Médecin{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold text-[#4B5563] mb-2">Mon Profil Médecin</h1>
+            <p class="text-[#6B7280]">Gérez vos informations personnelles et professionnelles</p>
+        </div>
+
+        <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8">
+            {{ form_start(form) }}
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {{ form_row(form.nom) }}
+                        {{ form_row(form.prenom) }}
+                    </div>
+                    {{ form_row(form.email) }}
+                    {{ form_row(form.telephone) }}
+                    
+                    <div class="pt-6 border-t border-[#E5E0D8]">
+                        <h3 class="text-lg font-semibold text-[#4B5563] mb-4">Informations professionnelles</h3>
+                        <div class="space-y-4">
+                            {{ form_row(form.specialite) }}
+                            {{ form_row(form.nomCabinet) }}
+                            {{ form_row(form.telephoneCabinet) }}
+                            {{ form_row(form.tarifConsultation) }}
+                            {{ form_row(form.adresseCabinet) }}
+                        </div>
+                    </div>
+                    
+                    <div class="pt-4">
+                        <button type="submit" class="px-5 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                            Mettre à jour mon profil
+                        </button>
+                    </div>
+                </div>
+            {{ form_end(form) }}
+        </div>
+
+        <div class="mt-6 flex gap-3 flex-wrap">
+            <a href="{{ path('doctor_dashboard') }}" class="px-5 py-2.5 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                Retour au tableau de bord
+            </a>
+            <a href="{{ path('app_logout') }}" class="px-5 py-2.5 rounded-lg border border-red-200 text-red-600 font-medium hover:bg-red-50 focus:outline focus:ring-2 focus:ring-red-500">
+                Se déconnecter
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

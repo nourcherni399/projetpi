@@ -99,3 +99,4 @@ final class InscriptionController extends AbstractController
         ]);
     }
 }
+

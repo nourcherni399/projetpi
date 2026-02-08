@@ -148,6 +148,7 @@
         {{ form_end(form) }}
     </div>
 
+<<<<<<< HEAD
     {% if not is_granted('ROLE_ADMIN') and not is_granted('ROLE_MEDECIN') %}
     <div class="mt-10 bg-white rounded-2xl shadow-xl border border-[#E5E0D8] overflow-hidden">
         <div class="px-8 py-6 border-b border-[#E5E0D8] flex items-center gap-3">
@@ -171,6 +172,8 @@
     </div>
     {% endif %}
 
+=======
+>>>>>>> ea790de (les modifications)
     <div class="mt-8 text-center">
         {% if is_granted('ROLE_ADMIN') %}
             <a href="{{ path('admin_dashboard') }}" class="inline-flex items-center gap-2 text-[#6B7280] hover:text-[#A7C7E7] font-medium transition-colors">
