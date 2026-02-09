@@ -17,8 +17,6 @@ class InscritEventsRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, InscritEvents::class);
     }
-<<<<<<< HEAD
-=======
 
     public function findInscriptionForUserAndEvent(User $user, Evenement $evenement): ?InscritEvents
     {
@@ -77,5 +75,4 @@ class InscritEventsRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
->>>>>>> b93fab8 (Modification Gestion Event)
 }
