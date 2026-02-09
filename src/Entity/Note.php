@@ -28,12 +28,12 @@ class Note
     #[ORM\Column(type: Types::TEXT)]
     private ?string $contenu = null;
 
-    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
-    private ?\DateTimeImmutable $dateCreation = null;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTime $dateCreation = null;
 
     public function __construct()
     {
-        $this->dateCreation = new \DateTimeImmutable();
+        $this->dateCreation = new \DateTime();
     }
 
     public function getId(): ?int
@@ -74,12 +74,12 @@ class Note
         return $this;
     }
 
-    public function getDateCreation(): ?\DateTimeImmutable
+    public function getDateCreation(): ?\DateTime
     {
         return $this->dateCreation;
     }
 
-    public function setDateCreation(\DateTimeImmutable $dateCreation): static
+    public function setDateCreation(\DateTime $dateCreation): static
     {
         $this->dateCreation = $dateCreation;
         return $this;

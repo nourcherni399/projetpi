@@ -13,8 +13,8 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: PatientRepository::class)]
 class Patient extends User
 {
-    #[ORM\Column(type: 'date_immutable', nullable: true)]
-    private ?\DateTimeImmutable $dateNaissance = null;
+    #[ORM\Column(type: 'date', nullable: true)]
+    private ?\DateTimeInterface $dateNaissance = null;
 
     #[ORM\Column(length: 500, nullable: true)]
     private ?string $adresse = null;
@@ -32,12 +32,12 @@ class Patient extends User
         $this->rendezVous = new ArrayCollection();
     }
 
-    public function getDateNaissance(): ?\DateTimeImmutable
+    public function getDateNaissance(): ?\DateTimeInterface
     {
         return $this->dateNaissance;
     }
 
-    public function setDateNaissance(?\DateTimeImmutable $dateNaissance): static
+    public function setDateNaissance(?\DateTimeInterface $dateNaissance): static
     {
         $this->dateNaissance = $dateNaissance;
         return $this;
