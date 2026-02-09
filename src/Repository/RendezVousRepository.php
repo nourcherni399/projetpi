@@ -90,10 +90,7 @@ class RendezVousRepository extends ServiceEntityRepository
             ->setParameter('medecin', $medecin)
             ->setParameter('status', StatusRendezVous::EN_ATTENTE)
             ->orderBy('r.id', 'DESC')
-<<<<<<< HEAD
             ->setMaxResults(1000) // Limite de 1000 résultats pour éviter l'épuisement de mémoire
-=======
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
             ->getQuery()
             ->getResult();
     }
