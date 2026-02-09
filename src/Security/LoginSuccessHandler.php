@@ -40,7 +40,11 @@ final class LoginSuccessHandler implements AuthenticationSuccessHandlerInterface
             return new RedirectResponse($this->urlGenerator->generate('doctor_dashboard'));
         }
 
-        // Patient ou Parent : rester sur la page cible (target path) ou accueil
+        // Patient ou Parent : priorité au _target_path (inscription événement, etc.)
+        $targetPath = $request->request->get('_target_path') ?? $request->query->get('_target_path');
+        if (\is_string($targetPath) && $targetPath !== '' && str_starts_with($targetPath, '/') && !str_starts_with($targetPath, '//')) {
+            return new RedirectResponse($targetPath);
+        }
         if ($targetPath = $this->getTargetPath($request->getSession(), 'main')) {
             return new RedirectResponse($targetPath);
         }

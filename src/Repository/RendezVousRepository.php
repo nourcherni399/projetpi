@@ -177,4 +177,18 @@ class RendezVousRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult();
     }
+
+    /**
+     * @return list<RendezVous>
+     */
+    public function findByDisponibiliteAndStatus(Disponibilite $disponibilite, StatusRendezVous $status): array
+    {
+        return $this->createQueryBuilder('r')
+            ->andWhere('r.disponibilite = :disponibilite')
+            ->andWhere('r.status = :status')
+            ->setParameter('disponibilite', $disponibilite)
+            ->setParameter('status', $status)
+            ->getQuery()
+            ->getResult();
+    }
 }

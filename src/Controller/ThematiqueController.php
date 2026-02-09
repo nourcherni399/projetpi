@@ -82,4 +82,22 @@ final class ThematiqueController extends AbstractController
             'form' => $form,
         ]);
     }
+
+    #[Route('/{id}/delete', name: 'admin_thematique_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function delete(Request $request, int $id): Response
+    {
+        $thematique = $this->thematiqueRepository->find($id);
+        if ($thematique === null) {
+            throw new NotFoundHttpException('Thématique introuvable.');
+        }
+        $token = $request->request->get('_token');
+        if (!$this->isCsrfTokenValid('delete_thematique_' . $id, $token)) {
+            $this->addFlash('error', 'Jeton de sécurité invalide.');
+            return $this->redirectToRoute('admin_thematique_index');
+        }
+        $this->entityManager->remove($thematique);
+        $this->entityManager->flush();
+        $this->addFlash('success', 'La thématique a été supprimée.');
+        return $this->redirectToRoute('admin_thematique_index');
+    }
 }

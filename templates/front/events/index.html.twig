@@ -15,9 +15,15 @@
     {% for item in grouped %}
     {% set thematique = item.thematique %}
     {% set evenements = item.evenements %}
-    <div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden flex flex-col {{ thematique.couleur ? 'border-l-4' : '' }}" {% if thematique.couleur %}style="border-left-color: {{ thematique.couleur }};"{% endif %}>
+    <div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden flex flex-col shadow-sm hover:shadow-md transition-shadow {{ thematique.couleur ? 'border-l-4' : '' }}" {% if thematique.couleur %}style="border-left-color: {{ thematique.couleur }};"{% endif %}>
+        {% if thematique.image %}
+        {% set imgUrl = thematique.image starts with 'http' ? thematique.image : asset(thematique.image) %}
+        <div class="aspect-[21/9] max-h-40 bg-[#E5E0D8] overflow-hidden">
+            <img src="{{ imgUrl }}" alt="{{ thematique.nomThematique }}" class="w-full h-full object-cover" loading="lazy">
+        </div>
+        {% endif %}
         <div class="p-5 border-b border-[#E5E0D8]">
-            {% if thematique.couleur %}
+            {% if thematique.couleur and not thematique.image %}
             <span class="inline-block w-10 h-10 rounded-lg border border-[#E5E0D8] mb-3" style="background-color: {{ thematique.couleur }};" title="Couleur"></span>
             {% endif %}
             <h2 class="text-lg font-semibold text-[#4B5563] mb-1">{{ thematique.nomThematique }}</h2>

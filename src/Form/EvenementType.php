@@ -15,6 +15,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\NotNull;
 
 final class EvenementType extends AbstractType
 {
@@ -58,19 +59,27 @@ final class EvenementType extends AbstractType
                 'attr' => $attr,
             ])
             ->add('lieu', TextType::class, [
-                'label' => 'Lieu',
+                'label' => 'Lieu / Adresse',
+                'required' => true,
                 'constraints' => [
-                    new NotBlank(message: 'Le lieu est obligatoire.'),
+                    new NotBlank(message: 'Ce champ est obligatoire.'),
                     new Length(['min' => 1, 'max' => 255, 'maxMessage' => 'Le lieu ne peut pas dépasser {{ limit }} caractères.']),
                 ],
                 'attr' => $attr + ['placeholder' => 'Ex. Salle principale'],
+            ])
+            ->add('locationUrl', TextType::class, [
+                'label' => 'Lien Google Maps',
+                'required' => false,
+                'constraints' => [new Length(['max' => 500])],
+                'attr' => $attr + ['placeholder' => 'Collez le lien de partage Google Maps'],
             ])
             ->add('thematique', EntityType::class, [
                 'label' => 'Thématique',
                 'class' => \App\Entity\Thematique::class,
                 'choice_label' => 'nomThematique',
-                'placeholder' => 'Choisir une thématique (optionnel)',
-                'required' => false,
+                'placeholder' => 'Choisir une thématique',
+                'required' => true,
+                'constraints' => [new NotNull(message: 'Ce champ est obligatoire.')],
                 'attr' => $attr,
             ]);
     }

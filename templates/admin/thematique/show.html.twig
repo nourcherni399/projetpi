@@ -12,9 +12,21 @@
         <a href="{{ path('admin_thematique_edit', { id: thematique.id }) }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
             Modifier
         </a>
+        <form method="post" action="{{ path('admin_thematique_delete', { id: thematique.id }) }}" class="inline" onsubmit="return confirm('Supprimer cette thématique ? Les événements associés ne seront pas supprimés.');">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete_thematique_' ~ thematique.id) }}">
+            <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-red-200 text-red-600 font-medium hover:bg-red-50 focus:outline focus:ring-2 focus:ring-red-200">
+                Supprimer
+            </button>
+        </form>
     </div>
 
     <div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden mb-8">
+        {% if thematique.image %}
+        {% set imgUrl = thematique.image starts with 'http' ? thematique.image : asset(thematique.image) %}
+        <div class="aspect-[21/9] max-h-48 bg-[#E5E0D8] overflow-hidden">
+            <img src="{{ imgUrl }}" alt="{{ thematique.nomThematique }}" class="w-full h-full object-cover" loading="lazy">
+        </div>
+        {% endif %}
         <div class="p-6 border-b border-[#E5E0D8] flex flex-wrap items-start gap-4">
             {% if thematique.couleur %}
                 <span class="w-8 h-8 rounded-lg border border-[#E5E0D8] shrink-0" style="background-color: {{ thematique.couleur }};" title="Couleur"></span>
@@ -58,19 +70,26 @@
                 <thead class="bg-[#F5F1EB] border-b border-[#E5E0D8]">
                     <tr>
                         <th class="px-6 py-4 font-medium text-[#4B5563]">Titre</th>
-                        <th class="px-6 py-4 font-medium text-[#4B5563]">Date</th>
-                        <th class="px-6 py-4 font-medium text-[#4B5563]">Lieu</th>
-                        <th class="px-6 py-4 font-medium text-[#4B5563]">Actions</th>
+                        <th class="px-6 py-4 font-medium text-[#4B5563] text-center">Date</th>
+                        <th class="px-6 py-4 font-medium text-[#4B5563] text-center">Lieu</th>
+                        <th class="px-6 py-4 font-medium text-[#4B5563] text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#E5E0D8]">
                     {% for event in thematique.evenements %}
                     <tr class="hover:bg-[#F5F1EB]/50">
                         <td class="px-6 py-4 text-[#4B5563]">{{ event.title }}</td>
-                        <td class="px-6 py-4 text-[#6B7280]">{{ event.dateEvent ? event.dateEvent|date('d/m/Y') : '—' }} {{ event.heureDebut ? event.heureDebut|date('H:i') : '' }}</td>
-                        <td class="px-6 py-4 text-[#6B7280]">{{ event.lieu }}</td>
-                        <td class="px-6 py-4">
-                            <a href="{{ path('admin_evenement_show', { id: event.id }) }}" class="text-[#A7C7E7] hover:text-[#4B5563] text-sm font-medium">Voir</a>
+                        <td class="px-6 py-4 text-[#6B7280] text-center">{{ event.dateEvent ? event.dateEvent|date('d/m/Y') : '—' }} {{ event.heureDebut ? event.heureDebut|date('H:i') : '' }}</td>
+                        <td class="px-6 py-4 text-[#6B7280] text-center">{{ event.lieu }}</td>
+                        <td class="px-6 py-4 text-center">
+                            <div class="flex flex-wrap gap-2 justify-center">
+                                <a href="{{ path('admin_evenement_show', { id: event.id }) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#A7C7E7] text-[#A7C7E7] font-medium text-sm hover:bg-[#A7C7E7]/10">Voir</a>
+                                <a href="{{ path('admin_evenement_edit', { id: event.id }) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#A7C7E7] text-white font-medium text-sm hover:bg-[#B8D4ED]">Modifier</a>
+                                <form method="post" action="{{ path('admin_evenement_delete', { id: event.id }) }}" class="inline" onsubmit="return confirm('Supprimer cet événement ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_evenement_' ~ event.id) }}">
+                                    <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-200 text-red-600 font-medium text-sm hover:bg-red-50">Supprimer</button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     {% else %}
