@@ -11,14 +11,8 @@ use App\Entity\Note;
 use App\Entity\Patient;
 use App\Entity\RendezVous;
 use App\Enum\StatusRendezVous;
-<<<<<<< HEAD
-use App\Form\DoctorDisponibiliteType;
-use App\Form\NoteType;
-=======
 use App\Entity\User;
-
 use App\Form\ProfileType;
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
 use App\Repository\DisponibiliteRepository;
 use App\Repository\NotificationRepository;
 use App\Repository\NoteRepository;
@@ -51,7 +45,6 @@ final class DoctorController extends AbstractController
     public function dashboard(): Response
     {
         $medecin = $this->getMedecin();
-<<<<<<< HEAD
         
         if ($medecin === null) {
             $this->addFlash('error', 'Médecin non trouvé.');
@@ -70,8 +63,7 @@ final class DoctorController extends AbstractController
         
         return $this->render('doctor/dashboard.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
             'stats' => $stats,
-=======
-        return $this->render('doctor/dashboard.html.twig', $this->getDoctorTemplateVars($medecin));
+        ]));
     }
 
     #[Route('/medecin/mon-profil', name: 'doctor_profile', methods: ['GET', 'POST'])]
@@ -93,7 +85,7 @@ final class DoctorController extends AbstractController
         return $this->render('doctor/profile/edit.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
             'user' => $user,
             'form' => $form,
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
+
         ]));
     }
 
@@ -249,72 +241,30 @@ final class DoctorController extends AbstractController
             $this->addFlash('error', 'Accès non autorisé.');
             return $this->redirectToRoute('login');
         }
+
+#[Route('/medecin/disponibilites/{id}/supprimer', name: 'doctor_availability_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
+public function deleteAvailability(Request $request, int $id): Response
+{
+    $medecin = $this->getMedecin();
         
-        $disponibilite = $this->disponibiliteRepository->find($id);
-        
-        if ($disponibilite === null || $disponibilite->getMedecin() !== $medecin) {
-=======
-        $disponibilite = $this->disponibiliteRepository->find($id);
-        $canEdit = $disponibilite !== null && (
-            ($medecin === null && $disponibilite->getMedecin() === null)
-            || ($medecin !== null && $disponibilite->getMedecin() === $medecin)
-        );
-
-        if (!$canEdit) {
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
-            $this->addFlash('error', 'Créneau introuvable.');
-            return $this->redirectToRoute('doctor_availability');
-        }
-
-        $form = $this->createForm(DoctorDisponibiliteType::class, $disponibilite);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->entityManager->flush();
-            $this->addFlash('success', 'Disponibilité mise à jour.');
-            return $this->redirectToRoute('doctor_availability');
-        }
-
-        return $this->render('doctor/availability/edit.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
-            'form' => $form,
-            'disponibilite' => $disponibilite,
-        ]));
+    if ($medecin === null) {
+        $this->addFlash('error', 'Accès non autorisé.');
+        return $this->redirectToRoute('login');
     }
 
-    #[Route('/medecin/disponibilites/{id}/supprimer', name: 'doctor_availability_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
-    public function deleteAvailability(Request $request, int $id): Response
-    {
-        $medecin = $this->getMedecin();
-<<<<<<< HEAD
-        if ($medecin === null) {
-            $this->addFlash('error', 'Accès non autorisé.');
-            return $this->redirectToRoute('login');
-        }
+    // Contrôle: vérifier que l'ID est valide
+    if ($id <= 0) {
+        $this->addFlash('error', 'Identifiant de disponibilité invalide.');
+        return $this->redirectToRoute('doctor_availability');
+    }
 
-        // Contrôle: vérifier que l'ID est valide
-        if ($id <= 0) {
-            $this->addFlash('error', 'Identifiant de disponibilité invalide.');
-            return $this->redirectToRoute('doctor_availability');
-        }
-
-        $disponibilite = $this->disponibiliteRepository->find($id);
+    $disponibilite = $this->disponibiliteRepository->find($id);
         
-        // Contrôle: vérifier que la disponibilité existe
-        if ($disponibilite === null) {
-            $this->addFlash('error', 'Disponibilité introuvable.');
-            return $this->redirectToRoute('doctor_availability');
-        }
-
-        // Contrôle: vérifier que la disponibilité appartient bien au médecin connecté
-        if ($disponibilite->getMedecin() !== $medecin) {
-            $this->addFlash('error', 'Cette disponibilité ne vous appartient pas.');
-            return $this->redirectToRoute('doctor_availability');
-        }
-
-        // Contrôle: vérifier qu'il n'y a pas de rendez-vous confirmés pour cette disponibilité
-        $rendezVousConfirmes = $this->rendezVousRepository->findByDisponibiliteAndStatus($disponibilite, StatusRendezVous::CONFIRMER);
-        if (!empty($rendezVousConfirmes)) {
-            $this->addFlash('error', 'Impossible de supprimer cette disponibilité car des rendez-vous confirmés y sont associés.');
+    // Contrôle: vérifier que la disponibilité existe
+    if ($disponibilite === null) {
+        $this->addFlash('error', 'Disponibilité introuvable.');
+        return $this->redirectToRoute('doctor_availability');
+    }
             return $this->redirectToRoute('doctor_availability');
         }
 
