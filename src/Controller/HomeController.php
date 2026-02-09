@@ -226,13 +226,15 @@ final class HomeController extends AbstractController
             throw $this->createNotFoundException('Événement introuvable.');
         }
         $user = $this->getUser();
-        $userInscrit = $user !== null
-            ? $this->inscritEventsRepository->findInscriptionForUserAndEvent($user, $evenement) !== null
-            : false;
+        $inscription = $user !== null
+            ? $this->inscritEventsRepository->findInscriptionForUserAndEvent($user, $evenement)
+            : null;
+        $userInscrit = $inscription !== null && $inscription->getStatut() === 'accepte';
 
         return $this->render('front/events/show.html.twig', [
             'evenement' => $evenement,
             'userInscrit' => $userInscrit,
+            'inscription' => $inscription,
         ]);
     }
 
@@ -242,7 +244,7 @@ final class HomeController extends AbstractController
         $user = $this->getUser();
         if ($user === null) {
             $this->addFlash('error', 'Connectez-vous pour vous inscrire à un événement.');
-            return $this->redirectToRoute('app_login');
+            return $this->redirectToRoute('app_login', ['_target_path' => $this->generateUrl('user_event_show', ['id' => $id])]);
         }
 
         $evenement = $this->evenementRepository->find($id);
@@ -255,8 +257,21 @@ final class HomeController extends AbstractController
             return $this->redirectToRoute('user_event_show', ['id' => $id]);
         }
 
-        if ($this->inscritEventsRepository->findInscriptionForUserAndEvent($user, $evenement) !== null) {
-            $this->addFlash('info', 'Vous êtes déjà inscrit à cet événement.');
+        $existing = $this->inscritEventsRepository->findInscriptionForUserAndEvent($user, $evenement);
+        if ($existing !== null) {
+            if ($existing->getStatut() === 'accepte') {
+                $this->addFlash('info', 'Vous êtes déjà inscrit à cet événement.');
+                return $this->redirectToRoute('user_event_show', ['id' => $id]);
+            }
+            if ($existing->getStatut() === 'en_attente') {
+                $this->addFlash('info', 'Votre demande d\'inscription est déjà en attente de validation.');
+                return $this->redirectToRoute('user_event_show', ['id' => $id]);
+            }
+            $existing->setStatut('en_attente');
+            $existing->setDateInscrit(new \DateTime());
+            $existing->setEstInscrit(true);
+            $this->entityManager->flush();
+            $this->addFlash('success', 'Votre demande a été renvoyée. L\'administrateur la validera sous peu.');
             return $this->redirectToRoute('user_event_show', ['id' => $id]);
         }
 
@@ -265,10 +280,11 @@ final class HomeController extends AbstractController
         $inscrit->setEvenement($evenement);
         $inscrit->setDateInscrit(new \DateTime());
         $inscrit->setEstInscrit(true);
+        $inscrit->setStatut('en_attente');
         $this->entityManager->persist($inscrit);
         $this->entityManager->flush();
 
-        $this->addFlash('success', 'Vous êtes inscrit à l\'événement.');
+        $this->addFlash('success', 'Votre demande d\'inscription a été enregistrée. L\'administrateur la validera sous peu.');
         return $this->redirectToRoute('user_event_show', ['id' => $id]);
     }
 
@@ -292,8 +308,9 @@ final class HomeController extends AbstractController
         }
 
         $inscrit = $this->inscritEventsRepository->findInscriptionForUserAndEvent($user, $evenement);
-        if ($inscrit !== null) {
+        if ($inscrit !== null && $inscrit->getStatut() === 'accepte') {
             $inscrit->setEstInscrit(false);
+            $inscrit->setStatut('desinscrit');
             $this->entityManager->flush();
             $this->addFlash('success', 'Vous avez été désinscrit de l\'événement.');
         } else {

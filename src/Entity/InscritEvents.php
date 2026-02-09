@@ -32,6 +32,10 @@ class InscritEvents
     #[ORM\Column(type: 'boolean', options: ['default' => true])]
     private bool $estInscrit = true;
 
+    /** Statut de la demande : en_attente, accepte, refuse. L'admin valide ou refuse. */
+    #[ORM\Column(length: 20, options: ['default' => 'en_attente'])]
+    private string $statut = 'en_attente';
+
     public function getId(): ?int
     {
         return $this->id;
@@ -78,6 +82,17 @@ class InscritEvents
     public function setEstInscrit(bool $estInscrit): static
     {
         $this->estInscrit = $estInscrit;
+        return $this;
+    }
+
+    public function getStatut(): string
+    {
+        return $this->statut;
+    }
+
+    public function setStatut(string $statut): static
+    {
+        $this->statut = $statut;
         return $this;
     }
 }

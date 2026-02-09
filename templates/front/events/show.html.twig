@@ -93,8 +93,18 @@
                 {% endif %}
             </div>
             {% if not app.user %}
-                <p class="text-[#6B7280] text-sm">Connectez-vous pour vous inscrire à cet événement.</p>
-                <a href="{{ path('app_login') }}" class="block w-full text-center px-6 py-3 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Se connecter</a>
+                <p class="text-[#6B7280] text-sm mb-3">Connectez-vous pour vous inscrire à cet événement.</p>
+                <a href="{{ path('app_login', { _target_path: path('user_event_show', { id: evenement.id }) }) }}" class="block w-full text-center px-6 py-3 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7] mb-2">Se connecter</a>
+                <p class="text-[#6B7280] text-xs mb-1">Pas encore de compte ?</p>
+                <a href="{{ path('register', { _target_path: path('user_event_show', { id: evenement.id }) }) }}" class="block w-full text-center px-6 py-3 rounded-lg border border-[#E5E0D8] text-[#4B5563] font-medium hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Créer un compte</a>
+            {% elseif inscription is defined and inscription and inscription.statut == 'refuse' %}
+                <p class="text-amber-600 font-medium text-sm">Votre inscription a été refusée.</p>
+                <form method="post" action="{{ path('user_event_register', { id: evenement.id }) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('event_register_' ~ evenement.id) }}">
+                    <button type="submit" class="w-full px-6 py-3 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Redemander une inscription</button>
+                </form>
+            {% elseif inscription is defined and inscription and inscription.statut == 'en_attente' %}
+                <p class="text-amber-600 font-medium text-sm">Votre inscription est en attente de validation par l'administrateur.</p>
             {% elseif userInscrit|default(false) %}
                 <p class="text-emerald-600 font-medium text-sm">Vous êtes inscrit à cet événement.</p>
                 <form method="post" action="{{ path('user_event_unregister', { id: evenement.id }) }}" onsubmit="return confirm('Se désinscrire de cet événement ?');">
