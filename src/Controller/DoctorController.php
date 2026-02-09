@@ -93,7 +93,6 @@ final class DoctorController extends AbstractController
     public function availability(Request $request): Response
     {
         $medecin = $this->getMedecin();
-<<<<<<< HEAD
         
         if ($medecin === null) {
             $this->addFlash('error', 'Médecin non trouvé.');
@@ -154,71 +153,6 @@ final class DoctorController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-<<<<<<< HEAD
-            // Contrôles de saisie supplémentaires
-            $jour = $disponibilite->getJour();
-            $heureDebut = $disponibilite->getHeureDebut();
-            $heureFin = $disponibilite->getHeureFin();
-            
-            // Contrôle: vérifier que le jour est valide
-            if ($jour === null) {
-                $this->addFlash('error', 'Le jour est obligatoire.');
-                return $this->render('doctor/availability/new.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
-                    'form' => $form,
-                ]));
-            }
-            
-            // Contrôle: vérifier que les heures sont valides
-            if ($heureDebut === null || $heureFin === null) {
-                $this->addFlash('error', 'Les heures de début et de fin sont obligatoires.');
-                return $this->render('doctor/availability/new.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
-                    'form' => $form,
-                ]));
-            }
-            
-            // Contrôle: vérifier que l'heure de fin est après l'heure de début
-            if ($heureFin <= $heureDebut) {
-                $this->addFlash('error', 'L\'heure de fin doit être après l\'heure de début.');
-                return $this->render('doctor/availability/new.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
-                    'form' => $form,
-                ]));
-            }
-            
-            // Contrôle: vérifier que la durée n'est pas excessive (max 8 heures)
-            $interval = $heureDebut->diff($heureFin);
-            if ($interval->h > 8 || ($interval->h == 8 && $interval->i > 0)) {
-                $this->addFlash('error', 'La disponibilité ne peut pas dépasser 8 heures.');
-                return $this->render('doctor/availability/new.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
-                    'form' => $form,
-                ]));
-            }
-            
-            // Contrôle: vérifier qu'il n'y a pas de conflit avec d'autres disponibilités
-            $existingDispos = $this->disponibiliteRepository->findByMedecinAndJour($medecin, $jour);
-            foreach ($existingDispos as $existing) {
-                if (($heureDebut >= $existing->getHeureDebut() && $heureDebut < $existing->getHeureFin()) ||
-                    ($heureFin > $existing->getHeureDebut() && $heureFin <= $existing->getHeureFin()) ||
-                    ($heureDebut <= $existing->getHeureDebut() && $heureFin >= $existing->getHeureFin())) {
-                    $this->addFlash('error', 'Cette disponibilité chevauche une disponibilité existante.');
-                    return $this->render('doctor/availability/new.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
-                        'form' => $form,
-                    ]));
-                }
-            }
-            
-            try {
-                $disponibilite->setMedecin($medecin);
-                $this->entityManager->persist($disponibilite);
-                $this->entityManager->flush();
-                $this->addFlash('success', 'Disponibilité enregistrée avec succès.');
-                return $this->redirectToRoute('doctor_availability');
-            } catch (\Throwable $e) {
-                $this->addFlash('error', 'Une erreur est survenue lors de l\'enregistrement. Veuillez réessayer.');
-                return $this->render('doctor/availability/new.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
-                    'form' => $form,
-                ]));
-            }
-=======
             $disponibilite->setMedecin($medecin);
             $this->entityManager->persist($disponibilite);
             $this->entityManager->flush();
@@ -235,59 +169,54 @@ final class DoctorController extends AbstractController
     public function editAvailability(Request $request, int $id): Response
     {
         $medecin = $this->getMedecin();
-<<<<<<< HEAD
         
         if ($medecin === null) {
             $this->addFlash('error', 'Accès non autorisé.');
             return $this->redirectToRoute('login');
         }
 
-#[Route('/medecin/disponibilites/{id}/supprimer', name: 'doctor_availability_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
-public function deleteAvailability(Request $request, int $id): Response
-{
-    $medecin = $this->getMedecin();
+        $disponibilite = $this->disponibiliteRepository->find($id);
+        $canEdit = $disponibilite !== null && (
+            ($medecin === null && $disponibilite->getMedecin() === null)
+            || ($medecin !== null && $disponibilite->getMedecin() === $medecin)
+        );
         
-    if ($medecin === null) {
-        $this->addFlash('error', 'Accès non autorisé.');
-        return $this->redirectToRoute('login');
-    }
-
-    // Contrôle: vérifier que l'ID est valide
-    if ($id <= 0) {
-        $this->addFlash('error', 'Identifiant de disponibilité invalide.');
-        return $this->redirectToRoute('doctor_availability');
-    }
-
-    $disponibilite = $this->disponibiliteRepository->find($id);
-        
-    // Contrôle: vérifier que la disponibilité existe
-    if ($disponibilite === null) {
-        $this->addFlash('error', 'Disponibilité introuvable.');
-        return $this->redirectToRoute('doctor_availability');
-    }
+        if (!$canEdit) {
+            $this->addFlash('error', 'Créneau introuvable.');
             return $this->redirectToRoute('doctor_availability');
         }
 
-        // Contrôle: vérifier le token CSRF
-        $token = $request->request->get('_token');
-        if (!\is_string($token) || !$this->isCsrfTokenValid('delete' . $id, $token)) {
-            $this->addFlash('error', 'Jeton de sécurité invalide. Veuillez réessayer.');
-            return $this->redirectToRoute('doctor_availability');
-        }
+        $form = $this->createForm(DoctorDisponibiliteType::class, $disponibilite);
+        $form->handleRequest($request);
 
-        try {
-            $this->entityManager->remove($disponibilite);
+        if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->flush();
-            $this->addFlash('success', 'Disponibilité supprimée avec succès.');
-        } catch (\Throwable $e) {
-            $this->addFlash('error', 'Une erreur est survenue lors de la suppression. Veuillez réessayer.');
+            $this->addFlash('success', 'Disponibilité mise à jour.');
+            return $this->redirectToRoute('doctor_availability');
         }
-=======
+
+        return $this->render('doctor/availability/edit.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
+            'form' => $form,
+            'disponibilite' => $disponibilite,
+        ]));
+    }
+
+    #[Route('/medecin/disponibilites/{id}/supprimer', name: 'doctor_availability_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function deleteAvailability(Request $request, int $id): Response
+    {
+        $medecin = $this->getMedecin();
+        
+        if ($medecin === null) {
+            $this->addFlash('error', 'Accès non autorisé.');
+            return $this->redirectToRoute('login');
+        }
+
         $disponibilite = $this->disponibiliteRepository->find($id);
         $canDelete = $disponibilite !== null && (
             ($medecin === null && $disponibilite->getMedecin() === null)
             || ($medecin !== null && $disponibilite->getMedecin() === $medecin)
         );
+        
         if (!$canDelete) {
             $this->addFlash('error', 'Créneau introuvable.');
             return $this->redirectToRoute('doctor_availability');
@@ -302,7 +231,6 @@ public function deleteAvailability(Request $request, int $id): Response
         $this->entityManager->remove($disponibilite);
         $this->entityManager->flush();
         $this->addFlash('success', 'Créneau supprimé.');
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
 
         return $this->redirectToRoute('doctor_availability');
     }
@@ -312,21 +240,11 @@ public function deleteAvailability(Request $request, int $id): Response
     {
         $medecin = $this->getMedecin();
         if ($medecin === null) {
-<<<<<<< HEAD
-            $this->addFlash('error', 'Accès non autorisé.');
-=======
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
             return $this->redirectToRoute('login');
         }
 
         $patients = $this->rendezVousRepository->findDistinctPatientsByMedecin($medecin);
         $notes = $this->noteRepository->findByMedecinOrderByDate($medecin);
-<<<<<<< HEAD
-        
-        // Calculer les statistiques pour les notes
-        $stats = $this->calculateNotesStats($notes, $medecin);
-=======
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
 
         $note = new Note();
         $note->setMedecin($medecin);
@@ -334,112 +252,17 @@ public function deleteAvailability(Request $request, int $id): Response
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-<<<<<<< HEAD
-            // Contrôles de saisie supplémentaires
-            $patient = $note->getPatient();
-            $contenu = $note->getContenu();
-            
-            // Contrôle: vérifier qu'un patient est sélectionné
-            if ($patient === null) {
-                $this->addFlash('error', 'Veuillez sélectionner un patient.');
-                return $this->render('doctor/notes/index.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
-                    'notes' => $notes,
-                    'form' => $form,
-                    'patients' => $patients,
-                    'stats' => $stats,
-                ]));
-            }
-            
-            // Contrôle: vérifier que le contenu n'est pas vide
-            if (empty($contenu) || trim($contenu) === '') {
-                $this->addFlash('error', 'Le contenu de la note ne peut pas être vide.');
-                return $this->render('doctor/notes/index.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
-                    'notes' => $notes,
-                    'form' => $form,
-                    'patients' => $patients,
-                    'stats' => $stats,
-                ]));
-            }
-            
-            // Contrôle: vérifier la longueur du contenu (entre 10 et 5000 caractères)
-            $contenuLength = strlen(trim($contenu));
-            if ($contenuLength < 10) {
-                $this->addFlash('error', 'La note doit contenir au moins 10 caractères.');
-                return $this->render('doctor/notes/index.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
-                    'notes' => $notes,
-                    'form' => $form,
-                    'patients' => $patients,
-                    'stats' => $stats,
-                ]));
-            }
-            
-            if ($contenuLength > 5000) {
-                $this->addFlash('error', 'La note ne peut pas dépasser 5000 caractères.');
-                return $this->render('doctor/notes/index.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
-                    'notes' => $notes,
-                    'form' => $form,
-                    'patients' => $patients,
-                    'stats' => $stats,
-                ]));
-            }
-            
-            // Contrôle: vérifier que le médecin a bien eu un rendez-vous avec ce patient
-            $hasRendezVous = $this->rendezVousRepository->findByMedecinAndPatient($medecin, $patient);
-            if (empty($hasRendezVous)) {
-                $this->addFlash('error', 'Vous ne pouvez ajouter une note qu\'à un patient avec qui vous avez eu un rendez-vous.');
-                return $this->render('doctor/notes/index.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
-                    'notes' => $notes,
-                    'form' => $form,
-                    'patients' => $patients,
-                    'stats' => $stats,
-                ]));
-            }
-            
-            // Contrôle: vérifier qu'il n'y a pas de note identique récente (éviter les doublons)
-            $recentNotes = $this->noteRepository->findByMedecinAndPatient($medecin, $patient, 5); // 5 dernières minutes
-            foreach ($recentNotes as $recentNote) {
-                if (trim($recentNote->getContenu()) === trim($contenu)) {
-                    $this->addFlash('error', 'Une note identique existe déjà. Veuillez vérifier avant d\'ajouter.');
-                    return $this->render('doctor/notes/index.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
-                        'notes' => $notes,
-                        'form' => $form,
-                        'patients' => $patients,
-                        'stats' => $stats,
-                    ]));
-                }
-            }
-            
-            try {
-                $note->setMedecin($medecin);
-                $note->setDateCreation(new \DateTimeImmutable());
-                $this->entityManager->persist($note);
-                $this->entityManager->flush();
-                $this->addFlash('success', 'Note enregistrée avec succès.');
-                return $this->redirectToRoute('doctor_notes');
-            } catch (\Throwable $e) {
-                $this->addFlash('error', 'Une erreur est survenue lors de l\'enregistrement. Veuillez réessayer.');
-                return $this->render('doctor/notes/index.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
-                    'notes' => $notes,
-                    'form' => $form,
-                    'patients' => $patients,
-                    'stats' => $stats,
-                ]));
-            }
-=======
             $note->setMedecin($medecin);
             $this->entityManager->persist($note);
             $this->entityManager->flush();
             $this->addFlash('success', 'Note enregistrée.');
             return $this->redirectToRoute('doctor_notes');
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
         }
 
         return $this->render('doctor/notes/index.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
             'notes' => $notes,
             'form' => $form,
             'patients' => $patients,
-<<<<<<< HEAD
-            'stats' => $stats,
         ]));
     }
 
@@ -463,14 +286,10 @@ public function deleteAvailability(Request $request, int $id): Response
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            try {
-                $note->setDateModification(new \DateTimeImmutable());
-                $this->entityManager->flush();
-                $this->addFlash('success', 'Note modifiée avec succès.');
-                return $this->redirectToRoute('doctor_notes');
-            } catch (\Throwable $e) {
-                $this->addFlash('error', 'Une erreur est survenue lors de la modification. Veuillez réessayer.');
-            }
+            $note->setDateModification(new \DateTimeImmutable());
+            $this->entityManager->flush();
+            $this->addFlash('success', 'Note modifiée avec succès.');
+            return $this->redirectToRoute('doctor_notes');
         }
 
         return $this->render('doctor/notes/edit.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
