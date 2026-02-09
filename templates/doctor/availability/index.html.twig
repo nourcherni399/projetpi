@@ -1,0 +1,110 @@
+{% extends 'layouts/doctor.html.twig' %}
+
+{% block title %}Disponibilités - AutiCare Médecin{% endblock %}
+
+{% block doctor_content %}
+<h1 class="text-2xl font-semibold text-[#4B5563] mb-6">Gestion des disponibilités</h1>
+{% for message in app.flashes('success') %}
+    <div class="mb-4 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">{{ message }}</div>
+{% endfor %}
+{% for message in app.flashes('error') %}
+    <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-800">{{ message }}</div>
+{% endfor %}
+
+<div id="form-nouvelle-dispo" class="mb-6 bg-white rounded-xl border border-[#E5E0D8] overflow-hidden {% if not form.vars.submitted or form.vars.valid %}hidden{% endif %}" aria-hidden="{{ (form.vars.submitted and not form.vars.valid) ? 'false' : 'true' }}">
+    <div class="p-4 border-b border-[#E5E0D8]">
+        <h2 class="text-lg font-medium text-[#4B5563]">Nouvelle disponibilité</h2>
+        <p class="text-sm text-[#6B7280] mt-1">Champs correspondant à l'entité Disponibilité : jour, heure de début, heure de fin, durée (minutes), disponible.</p>
+    </div>
+    <div class="p-6">
+        {{ form_start(form, { attr: { class: 'space-y-4' }, label_attr: { class: 'block text-[#4B5563] font-medium mb-1' } }) }}
+        {{ form_errors(form) }}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                {{ form_label(form.jour) }}
+                {{ form_widget(form.jour) }}
+                {{ form_errors(form.jour) }}
+            </div>
+            <div>
+                {{ form_label(form.heureDebut) }}
+                {{ form_widget(form.heureDebut) }}
+                {{ form_errors(form.heureDebut) }}
+            </div>
+            <div>
+                {{ form_label(form.heureFin) }}
+                {{ form_widget(form.heureFin) }}
+                {{ form_errors(form.heureFin) }}
+            </div>
+            <div>
+                {{ form_label(form.duree) }}
+                {{ form_widget(form.duree) }}
+                {{ form_errors(form.duree) }}
+            </div>
+            <div class="flex items-center gap-2 md:col-span-2">
+                {{ form_widget(form.estDispo) }}
+                {{ form_label(form.estDispo) }}
+                {{ form_errors(form.estDispo) }}
+            </div>
+        </div>
+        <div class="mt-4 flex gap-3">
+            <button type="submit" class="px-4 py-2 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Enregistrer la disponibilité</button>
+        </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+
+<div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
+    <form method="get" action="{{ path('doctor_availability') }}" class="p-4 border-b border-[#E5E0D8] flex flex-wrap gap-4 justify-between items-center">
+        <input type="search" name="q" value="{{ search|default('') }}" placeholder="Rechercher par jour, heure ou durée…" class="px-4 py-2 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#4B5563] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7] max-w-xs">
+        <button type="button" id="btn-nouvelle-dispo" class="px-4 py-2 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Nouvelle disponibilité</button>
+    </form>
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead class="bg-[#F5F1EB] border-b border-[#E5E0D8]">
+                <tr>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Jour</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Heure début</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Heure fin</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Durée</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Disponible</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-[#E5E0D8]">
+                {% for dispo in disponibilites %}
+                <tr class="hover:bg-[#F5F1EB]/50">
+                    <td class="px-6 py-4 text-[#4B5563]">{{ dispo.jour ? dispo.jour.value|capitalize : '—' }}</td>
+                    <td class="px-6 py-4 text-[#6B7280]">{{ dispo.heureDebut ? dispo.heureDebut|date('H:i') : '—' }}</td>
+                    <td class="px-6 py-4 text-[#6B7280]">{{ dispo.heureFin ? dispo.heureFin|date('H:i') : '—' }}</td>
+                    <td class="px-6 py-4 text-[#6B7280]">{{ dispo.duree }} min</td>
+                    <td class="px-6 py-4 text-[#6B7280]">{{ dispo.estDispo ? 'Oui' : 'Non' }}</td>
+                    <td class="px-6 py-4">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <a href="{{ path('doctor_availability_edit', { id: dispo.id }) }}" class="px-3 py-1.5 text-sm rounded-lg bg-[#A7C7E7] text-white hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                                Modifier
+                            </a>
+                            <form action="{{ path('doctor_availability_delete', { id: dispo.id }) }}" method="post" class="inline" onsubmit="return confirm('Supprimer ce créneau ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('doctor_availability_delete_' ~ dispo.id) }}">
+                                <button type="submit" class="px-3 py-1.5 text-sm rounded-lg border border-[#E5E0D8] text-[#6B7280] hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                                    Supprimer
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="px-6 py-8 text-center text-[#6B7280]">Aucune disponibilité.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+document.getElementById('btn-nouvelle-dispo').addEventListener('click', function() {
+    var formEl = document.getElementById('form-nouvelle-dispo');
+    formEl.classList.toggle('hidden');
+    formEl.setAttribute('aria-hidden', formEl.classList.contains('hidden'));
+});
+</script>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends 'layouts/admin.html.twig' %}
+
+{% block title %}Utilisateurs - AutiCare Admin{% endblock %}
+
+{% block admin_content %}
+<h1 class="text-2xl font-semibold text-[#4B5563] mb-6">Gestion des utilisateurs</h1>
+{% for message in app.flashes('success') %}
+    <div class="mb-4 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">{{ message }}</div>
+{% endfor %}
+{% for message in app.flashes('error') %}
+    <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-800">{{ message }}</div>
+{% endfor %}
+
+{% if stats is defined %}
+<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-6">
+    <div class="bg-white rounded-xl border border-[#E5E0D8] p-4">
+        <p class="text-[#6B7280] text-sm">Total</p>
+        <p class="text-2xl font-bold text-[#4B5563]">{{ stats.total }}</p>
+    </div>
+    <div class="bg-white rounded-xl border border-[#E5E0D8] p-4">
+        <p class="text-[#6B7280] text-sm">Actifs</p>
+        <p class="text-2xl font-bold text-[#4B5563]">{{ stats.actifs }}</p>
+    </div>
+    <div class="bg-white rounded-xl border border-[#E5E0D8] p-4">
+        <p class="text-[#6B7280] text-sm">Admins</p>
+        <p class="text-2xl font-bold text-[#A7C7E7]">{{ stats.admins }}</p>
+    </div>
+    <div class="bg-white rounded-xl border border-[#E5E0D8] p-4">
+        <p class="text-[#6B7280] text-sm">Médecins</p>
+        <p class="text-2xl font-bold text-[#4B5563]">{{ stats.medecins }}</p>
+    </div>
+    <div class="bg-white rounded-xl border border-[#E5E0D8] p-4">
+        <p class="text-[#6B7280] text-sm">Patients</p>
+        <p class="text-2xl font-bold text-[#4B5563]">{{ stats.patients }}</p>
+    </div>
+    <div class="bg-white rounded-xl border border-[#E5E0D8] p-4">
+        <p class="text-[#6B7280] text-sm">Parents</p>
+        <p class="text-2xl font-bold text-[#4B5563]">{{ stats.parents }}</p>
+    </div>
+</div>
+{% endif %}
+
+<div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
+    <div class="p-4 border-b border-[#E5E0D8] flex flex-wrap gap-4 justify-between items-center">
+        <div class="flex flex-wrap gap-2 items-center">
+            <span class="text-[#4B5563] text-sm font-medium">Tri :</span>
+            <a href="{{ path('admin_users', { order: 'asc' }) }}" class="px-3 py-1.5 rounded-lg text-sm font-medium {{ (order|default('asc')) == 'asc' ? 'bg-[#A7C7E7] text-white' : 'bg-[#F5F1EB] text-[#4B5563] hover:bg-[#E5E0D8]' }}">A → Z</a>
+            <a href="{{ path('admin_users', { order: 'desc' }) }}" class="px-3 py-1.5 rounded-lg text-sm font-medium {{ (order|default('asc')) == 'desc' ? 'bg-[#A7C7E7] text-white' : 'bg-[#F5F1EB] text-[#4B5563] hover:bg-[#E5E0D8]' }}">Z → A</a>
+        </div>
+        <a href="{{ path('admin_user_new') }}" class="px-4 py-2 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Nouvel utilisateur</a>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead class="bg-[#F5F1EB] border-b border-[#E5E0D8]">
+                <tr>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Nom</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Email</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Rôle</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-[#E5E0D8]">
+                {% for user in users %}
+                <tr class="hover:bg-[#F5F1EB]/50">
+                    <td class="px-6 py-4 text-[#4B5563]">{{ user.nom }} {{ user.prenom }}</td>
+                    <td class="px-6 py-4 text-[#6B7280]">{{ user.email }}</td>
+                    <td class="px-6 py-4 text-[#6B7280]">{{ user.role ? user.role.value : '—' }}</td>
+                    <td class="px-6 py-4">
+                        <div class="flex flex-wrap gap-2">
+                            <a href="{{ path('admin_user_show', { id: user.id }) }}" class="text-[#A7C7E7] hover:underline font-medium text-sm">Voir</a>
+                            <a href="{{ path('admin_user_edit', { id: user.id }) }}" class="text-[#4B5563] hover:underline font-medium text-sm">Modifier</a>
+                            <a href="{{ path('admin_user_confirm_delete', { id: user.id }) }}" class="text-red-600 hover:underline font-medium text-sm">Supprimer</a>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4" class="px-6 py-8 text-center text-[#6B7280]">Aucun utilisateur.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends 'layouts/admin.html.twig' %}
+
+{% block title %}Supprimer l'utilisateur - AutiCare Admin{% endblock %}
+
+{% block admin_content %}
+<div class="max-w-lg">
+    <h1 class="text-2xl font-semibold text-[#4B5563] mb-4">Supprimer l'utilisateur</h1>
+    <p class="text-[#6B7280] mb-6">Êtes-vous sûr de vouloir supprimer <strong>{{ user.nom }} {{ user.prenom }}</strong> ({{ user.email }}) ? Cette action est irréversible.</p>
+    <form method="post" action="{{ path('admin_user_delete', { id: user.id }) }}" class="flex gap-3">
+        <input type="hidden" name="_token" value="{{ csrf_token('delete_user_' ~ user.id) }}">
+        <button type="submit" class="px-4 py-2 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700">Confirmer la suppression</button>
+        <a href="{{ path('admin_user_show', { id: user.id }) }}" class="px-4 py-2 rounded-lg border border-[#E5E0D8] text-[#4B5563] hover:bg-[#F5F1EB]">Annuler</a>
+    </form>
+</div>
+{% endblock %}

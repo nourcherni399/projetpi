@@ -1,0 +1,85 @@
+{% extends 'layouts/user.html.twig' %}
+
+{% block title %}Écrire un article - {{ module.titre }} - AutiCare{% endblock %}
+
+{% block user_content %}
+<div class="max-w-2xl mx-auto">
+    <div class="mb-6">
+        <a href="{{ path('user_blog_module', { id: module.id }) }}" class="inline-flex items-center gap-2 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded-lg text-sm font-medium">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            Retour au module
+        </a>
+    </div>
+
+    <h1 class="text-2xl font-bold text-[#4B5563] mb-2">Écrire un article</h1>
+    <p class="text-[#6B7280] text-sm mb-6">Module : {{ module.titre }}</p>
+
+    {% for message in app.flashes('success') %}
+        <div class="mb-4 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">{{ message }}</div>
+    {% endfor %}
+
+    {% for message in app.flashes('error') %}
+        <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-800">{{ message }}</div>
+    {% endfor %}
+
+    <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8">
+        {{ form_start(form, {
+            attr: { class: 'space-y-6' },
+            label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }
+        }) }}
+        {{ form_errors(form) }}
+
+        <div>
+            {{ form_label(form.titre) }}
+            {{ form_widget(form.titre) }}
+            {{ form_errors(form.titre) }}
+        </div>
+
+        <div>
+            {{ form_label(form.type) }}
+            {{ form_widget(form.type) }}
+            {{ form_errors(form.type) }}
+        </div>
+
+        <div>
+            {{ form_label(form.contenu) }}
+            {{ form_widget(form.contenu) }}
+            {{ form_errors(form.contenu) }}
+        </div>
+
+        <div>
+            {{ form_label(form.image) }}
+            {{ form_widget(form.image) }}
+            {{ form_errors(form.image) }}
+        </div>
+
+        <div class="flex flex-wrap gap-6">
+            <div class="flex items-center gap-2">
+                {{ form_widget(form.isPublished) }}
+                {{ form_label(form.isPublished) }}
+                {{ form_errors(form.isPublished) }}
+            </div>
+            <div class="flex items-center gap-2">
+                {{ form_widget(form.isUrgent) }}
+                {{ form_label(form.isUrgent) }}
+                {{ form_errors(form.isUrgent) }}
+            </div>
+            <div class="flex items-center gap-2">
+                {{ form_widget(form.isVisible) }}
+                {{ form_label(form.isVisible) }}
+                {{ form_errors(form.isVisible) }}
+            </div>
+        </div>
+
+        <div class="flex flex-wrap gap-3 pt-4">
+            <button type="submit" class="px-5 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                Enregistrer l'article
+            </button>
+            <a href="{{ path('user_blog_module', { id: module.id }) }}" class="px-5 py-2.5 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                Annuler
+            </a>
+        </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

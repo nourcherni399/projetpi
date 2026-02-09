@@ -1,0 +1,188 @@
+{% extends 'layouts/user.html.twig' %}
+
+{% block title %}Créer un compte - AutiCare{% endblock %}
+
+{% block user_content %}
+<div class="max-w-lg mx-auto py-12">
+    <div class="bg-white rounded-2xl shadow-lg border border-[#E5E0D8] p-8">
+        <div class="flex justify-center mb-4">
+            <span class="flex items-center justify-center w-14 h-14 rounded-full bg-[#A7C7E7] text-white">
+                <svg class="w-7 h-7" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>
+            </span>
+        </div>
+        <h1 class="text-2xl font-bold text-[#4B5563] text-center mb-1">Créer un compte</h1>
+        <p class="text-[#6B7280] text-center text-sm mb-6">Rejoignez la communauté AutiCare</p>
+
+        {{ form_start(form, {'attr': {'class': 'space-y-4'}}) }}
+            {{ form_errors(form) }}
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    {{ form_label(form.prenom, 'Prénom', {'label_attr': {'class': 'block text-[#4B5563] font-medium mb-1'}}) }}
+                    {{ form_widget(form.prenom, {'attr': {'class': 'w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#6B7280] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7]', 'placeholder': 'Votre prénom'}}) }}
+                    {{ form_errors(form.prenom) }}
+                </div>
+                <div>
+                    {{ form_label(form.nom, 'Nom', {'label_attr': {'class': 'block text-[#4B5563] font-medium mb-1'}}) }}
+                    {{ form_widget(form.nom, {'attr': {'class': 'w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#6B7280] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7]', 'placeholder': 'Votre nom'}}) }}
+                    {{ form_errors(form.nom) }}
+                </div>
+            </div>
+            
+            <div>
+                {{ form_label(form.email, 'Adresse e-mail', {'label_attr': {'class': 'block text-[#4B5563] font-medium mb-1'}}) }}
+                {{ form_widget(form.email, {'attr': {'class': 'w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#6B7280] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7]', 'placeholder': 'exemple@email.com'}}) }}
+                {{ form_errors(form.email) }}
+            </div>
+            
+            <div>
+                {{ form_label(form.telephone, 'Téléphone', {'label_attr': {'class': 'block text-[#4B5563] font-medium mb-1'}}) }}
+                {{ form_widget(form.telephone, {'attr': {'class': 'w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#6B7280] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7]', 'placeholder': '612345678'}}) }}
+                {{ form_errors(form.telephone) }}
+            </div>
+            
+            <div>
+                {{ form_label(form.password.first, 'Mot de passe', {'label_attr': {'class': 'block text-[#4B5563] font-medium mb-1'}}) }}
+                {{ form_widget(form.password.first, {'attr': {'class': 'w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#6B7280] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7]', 'placeholder': 'Minimum 6 caractères'}}) }}
+                {{ form_errors(form.password.first) }}
+            </div>
+            
+            <div>
+                {{ form_label(form.password.second, 'Confirmer le mot de passe', {'label_attr': {'class': 'block text-[#4B5563] font-medium mb-1'}}) }}
+                {{ form_widget(form.password.second, {'attr': {'class': 'w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#6B7280] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7]', 'placeholder': 'Confirmer'}}) }}
+                {{ form_errors(form.password.second) }}
+            </div>
+            
+            <div>
+                {{ form_label(form.role, 'Vous êtes', {'label_attr': {'class': 'block text-[#4B5563] font-medium mb-1'}}) }}
+                {{ form_widget(form.role, {'attr': {'class': 'w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]', 'data-role-select': '1'}}) }}
+                {{ form_errors(form.role) }}
+            </div>
+            
+            <!-- Champs spécifiques Parent -->
+            <div id="parent-fields" style="display: none;">
+                {{ form_row(form.relationAvecPatient, {
+                    'label': 'Relation avec le patient',
+                    'label_attr': {'class': 'block text-[#4B5563] font-medium mb-1'},
+                    'attr': {'class': 'w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#6B7280] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7]', 'placeholder': 'Ex. Père, Mère, Tuteur'}
+                }) }}
+            </div>
+            
+            <!-- Champs spécifiques Patient -->
+            <div id="patient-fields" style="display: none;">
+                {{ form_row(form.dateNaissance, {
+                    'label': 'Date de naissance',
+                    'label_attr': {'class': 'block text-[#4B5563] font-medium mb-1'},
+                    'attr': {'class': 'w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]'}
+                }) }}
+                
+                {{ form_row(form.adresse, {
+                    'label': 'Adresse',
+                    'label_attr': {'class': 'block text-[#4B5563] font-medium mb-1'},
+                    'attr': {'class': 'w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#6B7280] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7]', 'placeholder': 'Adresse'}
+                }) }}
+                
+                {{ form_row(form.sexe, {
+                    'label': 'Sexe',
+                    'label_attr': {'class': 'block text-[#4B5563] font-medium mb-1'},
+                    'attr': {'class': 'w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#6B7280] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7]', 'placeholder': 'Ex. M, F'}
+                }) }}
+            </div>
+            
+            {{ form_widget(form.submit, {'attr': {'class': 'w-full py-3 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7] cursor-pointer'}}) }}
+            
+        {{ form_end(form) }}
+        <p class="mt-6 text-center text-[#6B7280] text-sm">
+            Déjà un compte ? <a href="{{ path('app_login') }}" class="text-[#A7C7E7] hover:underline font-medium">Se connecter</a>
+        </p>
+    </div>
+</div>
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+    // S'assurer que le script s'exécute même si la page est chargée via navigation
+    function initRoleFields() {
+        console.log('Initialisation des champs de rôle...');
+        
+        const roleSelect = document.querySelector('[data-role-select="1"]');
+        const parentFields = document.getElementById('parent-fields');
+        const patientFields = document.getElementById('patient-fields');
+        
+        console.log('Elements trouvés:', {
+            roleSelect: !!roleSelect,
+            parentFields: !!parentFields,
+            patientFields: !!patientFields
+        });
+        
+        if (!roleSelect) {
+            console.error('Select de rôle non trouvé!');
+            return;
+        }
+        
+        function toggleFields() {
+            const selectedRole = roleSelect.value;
+            console.log('Rôle sélectionné:', selectedRole);
+            
+            // Masquer tous les champs
+            if (parentFields) {
+                parentFields.style.display = 'none';
+            }
+            if (patientFields) {
+                patientFields.style.display = 'none';
+            }
+            
+            // Afficher les champs selon le rôle
+            if (selectedRole === 'ROLE_PARENT' && parentFields) {
+                parentFields.style.display = 'block';
+                console.log('Parent fields affichés');
+            } else if (selectedRole === 'ROLE_PATIENT' && patientFields) {
+                patientFields.style.display = 'block';
+                console.log('Patient fields affichés');
+            }
+        }
+        
+        // Supprimer l'ancien écouteur s'il existe
+        roleSelect.removeEventListener('change', toggleFields);
+        
+        // Ajouter le nouvel écouteur
+        roleSelect.addEventListener('change', toggleFields);
+        
+        // Initialisation
+        toggleFields();
+    }
+
+    // Exécuter au chargement du DOM
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initRoleFields);
+    } else {
+        initRoleFields();
+    }
+
+    // Exécuter aussi après un court délai pour les navigations AJAX
+    setTimeout(initRoleFields, 100);
+    
+    // Exécuter aussi après un délai plus long pour les cas extrêmes
+    setTimeout(initRoleFields, 500);
+    
+    // Observer les changements dans le DOM
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.addedNodes.length) {
+                const hasRoleSelect = Array.from(mutation.addedNodes).some(node => 
+                    node.nodeType === 1 && node.querySelector && node.querySelector('[data-role-select="1"]')
+                );
+                if (hasRoleSelect) {
+                    setTimeout(initRoleFields, 50);
+                }
+            }
+        });
+    });
+        
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+    </script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends 'layouts/admin.html.twig' %}
+
+{% block title %}Tableau de bord - AutiCare Admin{% endblock %}
+
+{% block admin_content %}
+<h1 class="text-2xl font-bold text-[#4B5563] mb-1">Tableau de bord</h1>
+<p class="text-[#6B7280] mb-8">Bienvenue sur le panneau d'administration AutiCare</p>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-2xl shadow-sm border border-[#E5E0D8] p-6 flex flex-col items-center text-center">
+        <div class="w-12 h-12 rounded-full bg-[#A7C7E7]/20 text-[#A7C7E7] flex items-center justify-center mb-3">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
+        </div>
+        <p class="text-3xl font-bold text-[#4B5563]">1,234</p>
+        <p class="text-[#6B7280] text-sm">Utilisateurs</p>
+        <p class="mt-2 text-sm text-emerald-600 font-medium">+12%</p>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm border border-[#E5E0D8] p-6 flex flex-col items-center text-center">
+        <div class="w-12 h-12 rounded-full bg-[#A7C7E7]/20 text-[#A7C7E7] flex items-center justify-center mb-3">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+        </div>
+        <p class="text-3xl font-bold text-[#4B5563]">456</p>
+        <p class="text-[#6B7280] text-sm">Commandes</p>
+        <p class="mt-2 text-sm text-emerald-600 font-medium">+8%</p>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm border border-[#E5E0D8] p-6 flex flex-col items-center text-center">
+        <div class="w-12 h-12 rounded-full bg-[#A7C7E7]/20 text-[#A7C7E7] flex items-center justify-center mb-3">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+        </div>
+        <p class="text-3xl font-bold text-[#4B5563]">28</p>
+        <p class="text-[#6B7280] text-sm">Événements</p>
+        <p class="mt-2 text-sm text-emerald-600 font-medium">+2</p>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm border border-[#E5E0D8] p-6 flex flex-col items-center text-center">
+        <div class="w-12 h-12 rounded-full bg-[#A7C7E7]/20 text-[#A7C7E7] flex items-center justify-center mb-3">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg>
+        </div>
+        <p class="text-3xl font-bold text-[#4B5563]">89</p>
+        <p class="text-[#6B7280] text-sm">Commentaires</p>
+        <p class="mt-2 text-sm text-red-500 font-medium">-5%</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <section class="bg-white rounded-2xl shadow-sm border border-[#E5E0D8] p-6">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h2 class="text-lg font-semibold text-[#4B5563]">Nouveaux utilisateurs</h2>
+                <p class="text-sm text-[#6B7280]">Les dernières inscriptions</p>
+            </div>
+            <a href="{{ path('admin_users') }}" class="px-3 py-1.5 rounded-full bg-[#E5E7EB] text-[#4B5563] text-sm font-medium hover:bg-[#D1D5DB]">Voir tout</a>
+        </div>
+        <ul class="space-y-4">
+            <li class="flex items-center gap-4 p-3 rounded-xl hover:bg-[#F5F1EB]">
+                <span class="flex items-center justify-center w-10 h-10 rounded-full bg-[#A7C7E7] text-white text-sm font-semibold">MD</span>
+                <div class="flex-1 min-w-0">
+                    <p class="font-medium text-[#4B5563]">Marie Dupont</p>
+                    <p class="text-sm text-[#6B7280]">marie.d@email.com</p>
+                </div>
+                <span class="text-sm text-[#6B7280]">Il y a 2h</span>
+            </li>
+            <li class="flex items-center gap-4 p-3 rounded-xl hover:bg-[#F5F1EB]">
+                <span class="flex items-center justify-center w-10 h-10 rounded-full bg-[#95d7b5] text-[#4B5563] text-sm font-semibold">TB</span>
+                <div class="flex-1 min-w-0">
+                    <p class="font-medium text-[#4B5563]">Thomas Bernard</p>
+                    <p class="text-sm text-[#6B7280]">thomas.b@email.com</p>
+                </div>
+                <span class="text-sm text-[#6B7280]">Il y a 5h</span>
+            </li>
+            <li class="flex items-center gap-4 p-3 rounded-xl hover:bg-[#F5F1EB]">
+                <span class="flex items-center justify-center w-10 h-10 rounded-full bg-[#B8D4ED] text-white text-sm font-semibold">SL</span>
+                <div class="flex-1 min-w-0">
+                    <p class="font-medium text-[#4B5563]">Sophie Martin</p>
+                    <p class="text-sm text-[#6B7280]">sophie.m@email.com</p>
+                </div>
+                <span class="text-sm text-[#6B7280]">Hier</span>
+            </li>
+            <li class="flex items-center gap-4 p-3 rounded-xl hover:bg-[#F5F1EB]">
+                <span class="flex items-center justify-center w-10 h-10 rounded-full bg-[#D8B4FE] text-[#4B5563] text-sm font-semibold">JL</span>
+                <div class="flex-1 min-w-0">
+                    <p class="font-medium text-[#4B5563]">Jean Leroy</p>
+                    <p class="text-sm text-[#6B7280]">jean.l@email.com</p>
+                </div>
+                <span class="text-sm text-[#6B7280]">Il y a 2 jours</span>
+            </li>
+        </ul>
+    </section>
+    <section class="bg-white rounded-2xl shadow-sm border border-[#E5E0D8] p-6">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h2 class="text-lg font-semibold text-[#4B5563]">Commentaires récents</h2>
+                <p class="text-sm text-[#6B7280]">À modérer</p>
+            </div>
+            <a href="{{ path('admin_dashboard') }}" class="px-3 py-1.5 rounded-full bg-[#E5E7EB] text-[#4B5563] text-sm font-medium hover:bg-[#D1D5DB]">Voir tout</a>
+        </div>
+        <ul class="space-y-4">
+            <li class="p-4 rounded-xl border border-[#E5E0D8]">
+                <div class="flex justify-between items-start gap-2 mb-2">
+                    <p class="font-medium text-[#4B5563]">Sophie R.</p>
+                    <span class="px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-700">Approuvé</span>
+                </div>
+                <p class="text-sm text-[#6B7280] mb-1">« Un article très utile, merci pour ces conseils... »</p>
+                <p class="text-xs text-[#6B7280]">Sur : Notre parcours vers le diagnostic</p>
+            </li>
+            <li class="p-4 rounded-xl border border-[#E5E0D8]">
+                <div class="flex justify-between items-start gap-2 mb-2">
+                    <p class="font-medium text-[#4B5563]">Thomas D.</p>
+                    <span class="px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-700">En attente</span>
+                </div>
+                <p class="text-sm text-[#6B7280] mb-3">« Je voulais partager notre expérience avec le... »</p>
+                <div class="flex gap-2">
+                    <button type="button" class="px-3 py-1.5 rounded-full bg-[#A7C7E7] text-white text-sm font-medium hover:bg-[#B8D4ED]">Approuver</button>
+                    <button type="button" class="px-3 py-1.5 rounded-full bg-[#E5E7EB] text-[#4B5563] text-sm font-medium hover:bg-[#D1D5DB]">Rejeter</button>
+                </div>
+            </li>
+            <li class="p-4 rounded-xl border border-[#E5E0D8]">
+                <div class="flex justify-between items-start gap-2 mb-2">
+                    <p class="font-medium text-[#4B5563]">Claire B.</p>
+                    <span class="px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-700">En attente</span>
+                </div>
+                <p class="text-sm text-[#6B7280] mb-3">« Merci pour cet atelier, les enfants ont adoré... »</p>
+                <div class="flex gap-2">
+                    <button type="button" class="px-3 py-1.5 rounded-full bg-[#A7C7E7] text-white text-sm font-medium hover:bg-[#B8D4ED]">Approuver</button>
+                    <button type="button" class="px-3 py-1.5 rounded-full bg-[#E5E7EB] text-[#4B5563] text-sm font-medium hover:bg-[#D1D5DB]">Rejeter</button>
+                </div>
+            </li>
+        </ul>
+    </section>
+</div>
+{% endblock %}

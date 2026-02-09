@@ -1,0 +1,177 @@
+{% extends 'layouts/user.html.twig' %}
+
+{% block title %}Accueil - AutiCare{% endblock %}
+
+{% block user_content %}
+{# Hero + message d'accueil #}
+<section class="flex flex-col items-center justify-center text-center px-4 py-12 md:py-16">
+    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#E5E7EB] text-[#4B5563] text-sm font-medium mb-6">
+        <svg class="w-5 h-5 text-[#6B7280]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" /></svg>
+        Bienvenue sur AutiCare
+    </div>
+    <h1 class="text-4xl md:text-5xl font-bold text-[#4B5563] mb-4 max-w-3xl">
+        Accompagnement bienveillant pour les <span class="text-[#A7C7E7]">personnes autistes</span>
+    </h1>
+    <p class="text-lg text-[#6B7280] max-w-2xl mx-auto mb-8">
+        Une plateforme dédiée aux personnes autistes et à leurs familles. Découvrez nos produits adaptés, participez à nos événements et rejoignez une communauté bienveillante.
+    </p>
+    <div class="flex flex-wrap gap-4 justify-center">
+        <a href="{{ path('user_products') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+            Découvrir nos produits
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+        </a>
+        <a href="{{ path('user_events') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-[#E5E7EB] bg-[#F5F1EB] text-[#4B5563] font-medium hover:bg-[#E5E0D8] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+            Voir les événements
+        </a>
+    </div>
+</section>
+
+{# Statistiques #}
+<section class="py-12 border-t border-[#E5E0D8]">
+    <div class="max-w-5xl mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            <div class="flex flex-col items-center">
+                <div class="w-16 h-16 rounded-full bg-[#A7C7E7]/30 text-[#A7C7E7] flex items-center justify-center mb-4">
+                    <svg class="w-8 h-8" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>
+                </div>
+                <p class="text-3xl font-bold text-[#6B7280]">500+</p>
+                <p class="text-[#6B7280] mt-1">Familles accompagnées</p>
+            </div>
+            <div class="flex flex-col items-center">
+                <div class="w-16 h-16 rounded-full bg-[#A7C7E7]/30 text-[#A7C7E7] flex items-center justify-center mb-4">
+                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
+                </div>
+                <p class="text-3xl font-bold text-[#6B7280]">50+</p>
+                <p class="text-[#6B7280] mt-1">Événements par an</p>
+            </div>
+            <div class="flex flex-col items-center">
+                <div class="w-16 h-16 rounded-full bg-[#A7C7E7]/30 text-[#A7C7E7] flex items-center justify-center mb-4">
+                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" /></svg>
+                </div>
+                <p class="text-3xl font-bold text-[#6B7280]">100+</p>
+                <p class="text-[#6B7280] mt-1">Produits adaptés</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# Tout ce dont vous avez besoin #}
+<section class="py-12 border-t border-[#E5E0D8]">
+    <div class="max-w-5xl mx-auto px-4 text-center">
+        <h2 class="text-2xl font-bold text-[#4B5563] mb-4">Tout ce dont vous avez besoin</h2>
+        <p class="text-[#6B7280] max-w-2xl mx-auto">AutiCare propose un ensemble complet de services pour accompagner les personnes autistes et leurs proches au quotidien.</p>
+    </div>
+</section>
+
+{# 4 cartes de fonctionnalités #}
+<section class="py-12 border-t border-[#E5E0D8]">
+    <div class="max-w-6xl mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <article class="bg-white rounded-2xl border border-[#E5E0D8] p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 rounded-full bg-[#A7C7E7]/20 text-[#A7C7E7] flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+                </div>
+                <h3 class="font-semibold text-[#4B5563] mb-2">Produits Spécialisés</h3>
+                <p class="text-[#6B7280] text-sm">Une sélection de produits conçus pour la stimulation sensorielle, la concentration et l'apaisement.</p>
+            </article>
+            <article class="bg-white rounded-2xl border border-[#E5E0D8] p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 rounded-full bg-[#A7C7E7]/20 text-[#A7C7E7] flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+                </div>
+                <h3 class="font-semibold text-[#4B5563] mb-2">Événements & Ateliers</h3>
+                <p class="text-[#6B7280] text-sm">Participez à des ateliers, rencontres et séances de sensibilisation adaptés à vos besoins.</p>
+            </article>
+            <article class="bg-white rounded-2xl border border-[#E5E0D8] p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 rounded-full bg-[#A7C7E7]/20 text-[#A7C7E7] flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.256A8.967 8.967 0 016 18c2.295 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.256A8.967 8.967 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+                </div>
+                <h3 class="font-semibold text-[#4B5563] mb-2">Blog & Ressources</h3>
+                <p class="text-[#6B7280] text-sm">Partagez vos expériences, échangez des conseils et découvrez des articles inspirants.</p>
+            </article>
+            <article class="bg-white rounded-2xl border border-[#E5E0D8] p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 rounded-full bg-[#A7C7E7]/20 text-[#A7C7E7] flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741.479 3 3 0 003-3v.72m-12 0a9.094 9.094 0 003.741.479 3 3 0 003-3v.72m12 0a9.094 9.094 0 01-3.741.479 3 3 0 01-3-3v.72m-9 0a9.094 9.094 0 013.741.479 3 3 0 013-3v.72" /></svg>
+                </div>
+                <h3 class="font-semibold text-[#4B5563] mb-2">Communauté Bienveillante</h3>
+                <p class="text-[#6B7280] text-sm">Rejoignez une communauté de soutien où chaque personne est accueillie avec respect.</p>
+            </article>
+        </div>
+    </div>
+</section>
+
+{# Ce que dit notre communauté #}
+<section class="py-16 border-t border-[#E5E0D8]">
+    <div class="max-w-6xl mx-auto px-4">
+        <h2 class="text-2xl font-bold text-[#4B5563] text-center mb-2">Ce que dit notre communauté</h2>
+        <p class="text-[#6B7280] text-center max-w-2xl mx-auto mb-10">Découvrez les témoignages de familles et de personnes qui nous font confiance.</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <article class="bg-white rounded-2xl border border-[#E5E0D8] p-6 shadow-sm">
+                <p class="text-4xl text-[#A7C7E7] font-serif leading-none mb-4">"</p>
+                <p class="text-[#6B7280] mb-6">AutiCare nous a accompagnés avec une bienveillance rare. Les produits recommandés ont vraiment aidé notre fils au quotidien.</p>
+                <div class="flex items-center gap-3">
+                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-[#A7C7E7] text-[#4B5563] font-semibold text-sm">ML</span>
+                    <div>
+                        <p class="font-medium text-[#4B5563]">Marie L.</p>
+                        <p class="text-sm text-[#6B7280]">Maman d'un enfant autiste</p>
+                    </div>
+                </div>
+            </article>
+            <article class="bg-white rounded-2xl border border-[#E5E0D8] p-6 shadow-sm">
+                <p class="text-4xl text-[#A7C7E7] font-serif leading-none mb-4">"</p>
+                <p class="text-[#6B7280] mb-6">Enfin une plateforme qui me comprend. Les événements en ligne m'ont permis de rencontrer d'autres personnes comme moi.</p>
+                <div class="flex items-center gap-3">
+                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-[#A7C7E7] text-[#4B5563] font-semibold text-sm">TD</span>
+                    <div>
+                        <p class="font-medium text-[#4B5563]">Thomas D.</p>
+                        <p class="text-sm text-[#6B7280]">Personne autiste</p>
+                    </div>
+                </div>
+            </article>
+            <article class="bg-white rounded-2xl border border-[#E5E0D8] p-6 shadow-sm">
+                <p class="text-4xl text-[#A7C7E7] font-serif leading-none mb-4">"</p>
+                <p class="text-[#6B7280] mb-6">En tant qu'éducatrice, j'oriente les familles vers AutiCare. Les ressources et le blog sont d'une grande qualité.</p>
+                <div class="flex items-center gap-3">
+                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-[#A7C7E7] text-[#4B5563] font-semibold text-sm">SR</span>
+                    <div>
+                        <p class="font-medium text-[#4B5563]">Sophie R.</p>
+                        <p class="text-sm text-[#6B7280]">Éducatrice spécialisée</p>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</section>
+
+{# Rejoignez notre communauté (visiteurs) OU message pour les connectés #}
+<section class="py-16 border-t border-[#E5E0D8]">
+    <div class="max-w-2xl mx-auto px-4 text-center">
+        <div class="flex justify-center mb-6">
+            <span class="flex items-center justify-center w-20 h-20 rounded-full bg-[#A7C7E7] text-white">
+                <svg class="w-10 h-10" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>
+            </span>
+        </div>
+        {% if app.user %}
+            <h2 class="text-2xl font-bold text-[#6B7280] mb-3">Vous faites partie de la communauté</h2>
+            <p class="text-[#6B7280] mb-8">Accédez à vos services : produits adaptés, événements et votre espace personnel.</p>
+            <div class="flex flex-wrap gap-4 justify-center">
+                <a href="{{ path('user_profile') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                    Mon profil
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                </a>
+                <a href="{{ path('user_products') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-[#E5E7EB] bg-white text-[#6B7280] font-medium hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Découvrir les produits</a>
+                <a href="{{ path('user_events') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-[#E5E7EB] bg-white text-[#6B7280] font-medium hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Voir les événements</a>
+            </div>
+        {% else %}
+            <h2 class="text-2xl font-bold text-[#6B7280] mb-3">Rejoignez notre communauté</h2>
+            <p class="text-[#6B7280] mb-8">Créez votre compte gratuitement et accédez à tous nos services : produits adaptés, événements exclusifs et un espace d'échange bienveillant.</p>
+            <div class="flex flex-wrap gap-4 justify-center">
+                <a href="{{ path('register') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                    Créer mon compte
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                </a>
+                <a href="#" class="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-[#E5E7EB] bg-white text-[#6B7280] font-medium hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Nous contacter</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

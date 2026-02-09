@@ -1,0 +1,86 @@
+{% extends 'layouts/admin.html.twig' %}
+
+{% block title %}{{ thematique.nomThematique }} - Thématiques - AutiCare Admin{% endblock %}
+
+{% block admin_content %}
+<div class="max-w-4xl">
+    <div class="mb-6 flex items-center gap-4 flex-wrap">
+        <a href="{{ path('admin_thematique_index') }}" class="inline-flex items-center gap-2 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded-lg">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            Retour aux thématiques
+        </a>
+        <a href="{{ path('admin_thematique_edit', { id: thematique.id }) }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+            Modifier
+        </a>
+    </div>
+
+    <div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden mb-8">
+        <div class="p-6 border-b border-[#E5E0D8] flex flex-wrap items-start gap-4">
+            {% if thematique.couleur %}
+                <span class="w-8 h-8 rounded-lg border border-[#E5E0D8] shrink-0" style="background-color: {{ thematique.couleur }};" title="Couleur"></span>
+            {% endif %}
+            <div class="flex-1 min-w-0">
+                <h1 class="text-2xl font-semibold text-[#4B5563] mb-2">{{ thematique.nomThematique }}{% if not thematique.actif %} <span class="text-sm font-normal text-[#6B7280]">(masquée sur le site)</span>{% endif %}</h1>
+                <p class="text-[#6B7280] text-sm">Code : {{ thematique.codeThematique }}{% if thematique.ordre is not null %} · Ordre : {{ thematique.ordre }}{% endif %}</p>
+                {% if thematique.sousTitre %}
+                    <p class="text-[#6B7280] text-sm mt-2">{{ thematique.sousTitre }}</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="p-6 space-y-4">
+            {% if thematique.description %}
+                <div>
+                    <h2 class="text-sm font-medium text-[#4B5563] mb-1">Description</h2>
+                    <p class="text-[#6B7280] text-sm">{{ thematique.description }}</p>
+                </div>
+            {% endif %}
+            <div class="flex flex-wrap gap-4 text-sm">
+                {% if thematique.publicCible %}
+                    <span class="text-[#6B7280]"><span class="font-medium text-[#4B5563]">Public cible :</span> {{ thematique.publicCible.value }}</span>
+                {% endif %}
+                {% if thematique.niveauDifficulte %}
+                    <span class="text-[#6B7280]"><span class="font-medium text-[#4B5563]">Niveau :</span> {{ thematique.niveauDifficulte.value }}</span>
+                {% endif %}
+                {% if thematique.couleur %}
+                    <span class="text-[#6B7280]"><span class="font-medium text-[#4B5563]">Couleur :</span> <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded border border-[#E5E0D8] inline-block align-middle" style="background-color: {{ thematique.couleur }};"></span> {{ thematique.couleur }}</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
+        <div class="p-4 border-b border-[#E5E0D8] flex flex-wrap items-center justify-between gap-4">
+            <h2 class="text-lg font-semibold text-[#4B5563]">Événements de cette thématique</h2>
+            <a href="{{ path('admin_evenement_new') }}" class="px-4 py-2 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7] text-sm">Nouvel événement</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-[#F5F1EB] border-b border-[#E5E0D8]">
+                    <tr>
+                        <th class="px-6 py-4 font-medium text-[#4B5563]">Titre</th>
+                        <th class="px-6 py-4 font-medium text-[#4B5563]">Date</th>
+                        <th class="px-6 py-4 font-medium text-[#4B5563]">Lieu</th>
+                        <th class="px-6 py-4 font-medium text-[#4B5563]">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-[#E5E0D8]">
+                    {% for event in thematique.evenements %}
+                    <tr class="hover:bg-[#F5F1EB]/50">
+                        <td class="px-6 py-4 text-[#4B5563]">{{ event.title }}</td>
+                        <td class="px-6 py-4 text-[#6B7280]">{{ event.dateEvent ? event.dateEvent|date('d/m/Y') : '—' }} {{ event.heureDebut ? event.heureDebut|date('H:i') : '' }}</td>
+                        <td class="px-6 py-4 text-[#6B7280]">{{ event.lieu }}</td>
+                        <td class="px-6 py-4">
+                            <a href="{{ path('admin_evenement_show', { id: event.id }) }}" class="text-[#A7C7E7] hover:text-[#4B5563] text-sm font-medium">Voir</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="px-6 py-8 text-center text-[#6B7280]">Aucun événement pour cette thématique.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

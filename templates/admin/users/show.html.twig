@@ -1,0 +1,99 @@
+{% extends 'layouts/admin.html.twig' %}
+
+{% block title %}Utilisateur {{ user.nom }} {{ user.prenom }} - AutiCare Admin{% endblock %}
+
+{% block admin_content %}
+<div class="flex flex-wrap justify-between items-center mb-6">
+    <h1 class="text-2xl font-semibold text-[#4B5563]">Fiche utilisateur</h1>
+    <div class="flex gap-2">
+        <a href="{{ path('admin_user_edit', { id: user.id }) }}" class="px-4 py-2 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED]">Modifier</a>
+        <a href="{{ path('admin_user_confirm_delete', { id: user.id }) }}" class="px-4 py-2 rounded-lg border border-red-500 text-red-600 hover:bg-red-50">Supprimer</a>
+        <a href="{{ path('admin_users') }}" class="px-4 py-2 rounded-lg border border-[#E5E0D8] text-[#4B5563] hover:bg-[#F5F1EB]">Retour à la liste</a>
+    </div>
+</div>
+
+<div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
+    <table class="w-full text-left">
+        <tbody class="divide-y divide-[#E5E0D8]">
+            <tr>
+                <th class="px-6 py-3 bg-[#F5F1EB] text-[#4B5563] w-48">Id</th>
+                <td class="px-6 py-3 text-[#6B7280]">{{ user.id }}</td>
+            </tr>
+            <tr>
+                <th class="px-6 py-3 bg-[#F5F1EB] text-[#4B5563]">Nom</th>
+                <td class="px-6 py-3 text-[#6B7280]">{{ user.nom }}</td>
+            </tr>
+            <tr>
+                <th class="px-6 py-3 bg-[#F5F1EB] text-[#4B5563]">Prénom</th>
+                <td class="px-6 py-3 text-[#6B7280]">{{ user.prenom }}</td>
+            </tr>
+            <tr>
+                <th class="px-6 py-3 bg-[#F5F1EB] text-[#4B5563]">Email</th>
+                <td class="px-6 py-3 text-[#6B7280]">{{ user.email }}</td>
+            </tr>
+            <tr>
+                <th class="px-6 py-3 bg-[#F5F1EB] text-[#4B5563]">Téléphone</th>
+                <td class="px-6 py-3 text-[#6B7280]">{{ user.telephone ?? '—' }}</td>
+            </tr>
+            <tr>
+                <th class="px-6 py-3 bg-[#F5F1EB] text-[#4B5563]">Rôle</th>
+                <td class="px-6 py-3 text-[#6B7280]">{{ user.role ? user.role.value : '—' }}</td>
+            </tr>
+            <tr>
+                <th class="px-6 py-3 bg-[#F5F1EB] text-[#4B5563]">Actif</th>
+                <td class="px-6 py-3 text-[#6B7280]">{{ user.isActive ? 'Oui' : 'Non' }}</td>
+            </tr>
+            <tr>
+                <th class="px-6 py-3 bg-[#F5F1EB] text-[#4B5563]">Créé le</th>
+                <td class="px-6 py-3 text-[#6B7280]">{{ user.createdAt ? user.createdAt|date('d/m/Y H:i') : '—' }}</td>
+            </tr>
+            <tr>
+                <th class="px-6 py-3 bg-[#F5F1EB] text-[#4B5563]">Mis à jour le</th>
+                <td class="px-6 py-3 text-[#6B7280]">{{ user.updatedAt ? user.updatedAt|date('d/m/Y H:i') : '—' }}</td>
+            </tr>
+            {% if userType is defined and userType == 'medcin' %}
+            <tr>
+                <th class="px-6 py-3 bg-[#F5F1EB] text-[#4B5563]">Spécialité</th>
+                <td class="px-6 py-3 text-[#6B7280]">{{ user.specialite ?? '—' }}</td>
+            </tr>
+            <tr>
+                <th class="px-6 py-3 bg-[#F5F1EB] text-[#4B5563]">Nom du cabinet</th>
+                <td class="px-6 py-3 text-[#6B7280]">{{ user.nomCabinet ?? '—' }}</td>
+            </tr>
+            <tr>
+                <th class="px-6 py-3 bg-[#F5F1EB] text-[#4B5563]">Adresse du cabinet</th>
+                <td class="px-6 py-3 text-[#6B7280]">{{ user.adresseCabinet ?? '—' }}</td>
+            </tr>
+            <tr>
+                <th class="px-6 py-3 bg-[#F5F1EB] text-[#4B5563]">Téléphone du cabinet</th>
+                <td class="px-6 py-3 text-[#6B7280]">{{ user.telephoneCabinet ?? '—' }}</td>
+            </tr>
+            <tr>
+                <th class="px-6 py-3 bg-[#F5F1EB] text-[#4B5563]">Tarif consultation (€)</th>
+                <td class="px-6 py-3 text-[#6B7280]">{{ user.tarifConsultation ?? '—' }}</td>
+            </tr>
+            {% endif %}
+            {% if userType is defined and userType == 'parent' %}
+            <tr>
+                <th class="px-6 py-3 bg-[#F5F1EB] text-[#4B5563]">Relation avec le patient</th>
+                <td class="px-6 py-3 text-[#6B7280]">{{ user.relationAvecPatient ?? '—' }}</td>
+            </tr>
+            {% endif %}
+            {% if userType is defined and userType == 'patient' %}
+            <tr>
+                <th class="px-6 py-3 bg-[#F5F1EB] text-[#4B5563]">Date de naissance</th>
+                <td class="px-6 py-3 text-[#6B7280]">{{ user.dateNaissance ? user.dateNaissance|date('d/m/Y') : '—' }}</td>
+            </tr>
+            <tr>
+                <th class="px-6 py-3 bg-[#F5F1EB] text-[#4B5563]">Adresse</th>
+                <td class="px-6 py-3 text-[#6B7280]">{{ user.adresse ?? '—' }}</td>
+            </tr>
+            <tr>
+                <th class="px-6 py-3 bg-[#F5F1EB] text-[#4B5563]">Sexe</th>
+                <td class="px-6 py-3 text-[#6B7280]">{{ user.sexe ? user.sexe.value : '—' }}</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
