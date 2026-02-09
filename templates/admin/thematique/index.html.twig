@@ -30,8 +30,8 @@
             <p class="text-[#6B7280] text-sm mb-2">Code : {{ thematique.codeThematique }}</p>
             {% if thematique.sousTitre %}
             <p class="text-[#6B7280] text-sm mb-2">{{ thematique.sousTitre }}</p>
-            {% elseif thematique.publicCible %}
-            <p class="text-[#6B7280] text-sm mb-2">{{ thematique.publicCible.value }}</p>
+            {% elseif thematique.publicCible is defined and thematique.publicCible %}
+            <p class="text-[#6B7280] text-sm mb-2">{{ thematique.publicCible is iterable ? thematique.publicCible.value|default(thematique.publicCible) : thematique.publicCible }}</p>
             {% endif %}
             <div class="mt-auto pt-3 flex flex-wrap items-center gap-2">
                 <span class="text-[#A7C7E7] font-medium text-sm">{{ thematique.evenements|length }} événement{{ thematique.evenements|length != 1 ? 's' : '' }}</span>

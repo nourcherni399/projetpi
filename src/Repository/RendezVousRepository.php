@@ -107,4 +107,77 @@ class RendezVousRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
         return $count > 0;
     }
+<<<<<<< HEAD
+=======
+
+    public function countByMedecin(Medcin $medecin): int
+    {
+        return (int) $this->createQueryBuilder('r')
+            ->select('COUNT(r.id)')
+            ->andWhere('r.medecin = :medecin')
+            ->setParameter('medecin', $medecin)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function countTodayByMedecin(Medcin $medecin): int
+    {
+        return (int) $this->createQueryBuilder('r')
+            ->select('COUNT(r.id)')
+            ->andWhere('r.medecin = :medecin')
+            ->andWhere('r.dateRdv = :today')
+            ->setParameter('medecin', $medecin)
+            ->setParameter('today', new \DateTime())
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function countDistinctPatientsByMedecin(Medcin $medecin): int
+    {
+        return (int) $this->createQueryBuilder('r')
+            ->select('COUNT(DISTINCT r.patient)')
+            ->andWhere('r.medecin = :medecin')
+            ->andWhere('r.patient IS NOT NULL')
+            ->setParameter('medecin', $medecin)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * @return list<RendezVous>
+     */
+    public function findUpcomingByMedecin(Medcin $medecin, int $limit = 5): array
+    {
+        return $this->createQueryBuilder('r')
+            ->andWhere('r.medecin = :medecin')
+            ->andWhere('r.dateRdv >= :today')
+            ->andWhere('r.status IN (:statuses)')
+            ->setParameter('medecin', $medecin)
+            ->setParameter('today', new \DateTime())
+            ->setParameter('statuses', [StatusRendezVous::EN_ATTENTE, StatusRendezVous::CONFIRMER])
+            ->orderBy('r.dateRdv', 'ASC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function countThisWeekByMedecin(Medcin $medecin): int
+    {
+        $startOfWeek = new \DateTime('monday this week');
+        $endOfWeek = new \DateTime('sunday this week');
+        
+        return (int) $this->createQueryBuilder('r')
+            ->select('COUNT(r.id)')
+            ->andWhere('r.medecin = :medecin')
+            ->andWhere('r.dateRdv >= :startOfWeek')
+            ->andWhere('r.dateRdv <= :endOfWeek')
+            ->andWhere('r.status IN (:statuses)')
+            ->setParameter('medecin', $medecin)
+            ->setParameter('startOfWeek', $startOfWeek)
+            ->setParameter('endOfWeek', $endOfWeek)
+            ->setParameter('statuses', [StatusRendezVous::EN_ATTENTE, StatusRendezVous::CONFIRMER])
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+>>>>>>> origin/integreModule
 }

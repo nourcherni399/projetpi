@@ -45,16 +45,22 @@ class EvenementRepository extends ServiceEntityRepository
             case 'theme':
                 $qb->addOrderBy('t.nomThematique', $order)->addOrderBy('e.dateEvent', 'ASC')->addOrderBy('e.heureDebut', 'ASC');
                 break;
+<<<<<<< HEAD
             case 'titre':
                 $qb->addOrderBy('e.title', $order)->addOrderBy('e.dateEvent', 'ASC')->addOrderBy('e.heureDebut', 'ASC');
                 break;
             default:
                 $qb->addOrderBy('e.dateEvent', $order)->addOrderBy('e.heureDebut', $order);
+=======
+            default:
+                $qb->addOrderBy('e.dateEvent', $order)->addOrderBy('e.heureDebut', 'ASC');
+>>>>>>> origin/integreModule
                 break;
         }
 
         return $qb->getQuery()->getResult();
     }
+<<<<<<< HEAD
 
     /**
      * Filtre pour le front : date (from/to), lieu (contient), thématique (id).
@@ -82,4 +88,6 @@ class EvenementRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getResult();
     }
+=======
+>>>>>>> origin/integreModule
 }

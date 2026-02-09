@@ -5,7 +5,10 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Enum\UserRole;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+<<<<<<< HEAD
 use Symfony\Component\HttpFoundation\Request;
+=======
+>>>>>>> origin/integreModule
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
@@ -13,7 +16,11 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 final class AuthController extends AbstractController
 {
     #[Route('/connexion', name: 'app_login', methods: ['GET', 'POST'])]
+<<<<<<< HEAD
     public function login(Request $request, AuthenticationUtils $authenticationUtils): Response
+=======
+    public function login(AuthenticationUtils $authenticationUtils): Response
+>>>>>>> origin/integreModule
     {
         $user = $this->getUser();
         if ($user instanceof User) {
@@ -26,19 +33,25 @@ final class AuthController extends AbstractController
             }
             return $this->redirectToRoute('home');
         }
+<<<<<<< HEAD
 
         $targetPath = $request->query->get('_target_path') ?? $request->request->get('_target_path');
         if ($targetPath !== null && $targetPath !== '') {
             $request->getSession()->set('_security.main.target_path', $targetPath);
         }
 
+=======
+>>>>>>> origin/integreModule
         $error = $authenticationUtils->getLastAuthenticationError();
         $lastUsername = $authenticationUtils->getLastUsername();
 
         return $this->render('front/auth/login.html.twig', [
             'last_username' => $lastUsername,
             'error' => $error,
+<<<<<<< HEAD
             'target_path' => $targetPath,
+=======
+>>>>>>> origin/integreModule
         ]);
     }
 

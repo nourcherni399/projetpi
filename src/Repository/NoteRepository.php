@@ -47,4 +47,31 @@ class NoteRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+<<<<<<< HEAD
+=======
+
+    public function countByMedecin(Medcin $medecin): int
+    {
+        return (int) $this->createQueryBuilder('n')
+            ->select('COUNT(n.id)')
+            ->andWhere('n.medecin = :medecin')
+            ->setParameter('medecin', $medecin)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * @return list<Note>
+     */
+    public function findRecentByMedecin(Medcin $medecin, int $limit = 3): array
+    {
+        return $this->createQueryBuilder('n')
+            ->andWhere('n.medecin = :medecin')
+            ->setParameter('medecin', $medecin)
+            ->orderBy('n.dateCreation', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+>>>>>>> origin/integreModule
 }

@@ -10,7 +10,10 @@ use App\Repository\ThematiqueRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+<<<<<<< HEAD
 use Symfony\Component\Validator\Constraints as Assert;
+=======
+>>>>>>> origin/integreModule
 
 #[ORM\Entity(repositoryClass: ThematiqueRepository::class)]
 #[ORM\Table(name: 'thematique')]
@@ -22,6 +25,7 @@ class Thematique
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+<<<<<<< HEAD
     #[Assert\NotBlank(message: 'Ce champ est obligatoire.')]
     #[Assert\Length(max: 255, maxMessage: 'Le nom ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $nomThematique = null;
@@ -55,6 +59,23 @@ class Thematique
     #[ORM\Column(type: 'smallint', nullable: true)]
     #[Assert\NotNull(message: 'Ce champ est obligatoire.')]
     #[Assert\Range(min: 0, max: 32767, notInRangeMessage: 'L\'ordre doit être entre {{ min }} et {{ max }}.')]
+=======
+    private ?string $nomThematique = null;
+
+    #[ORM\Column(length: 50)]
+    private ?string $codeThematique = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $description = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $couleur = null;
+
+    #[ORM\Column(name: 'sous_titre', length: 255, nullable: true)]
+    private ?string $sousTitre = null;
+
+    #[ORM\Column(type: 'smallint', nullable: true)]
+>>>>>>> origin/integreModule
     private ?int $ordre = null;
 
     #[ORM\Column(type: 'boolean', options: ['default' => true])]
@@ -85,7 +106,11 @@ class Thematique
         return $this->nomThematique;
     }
 
+<<<<<<< HEAD
     public function setNomThematique(?string $nomThematique): static
+=======
+    public function setNomThematique(string $nomThematique): static
+>>>>>>> origin/integreModule
     {
         $this->nomThematique = $nomThematique;
         return $this;
@@ -96,7 +121,11 @@ class Thematique
         return $this->codeThematique;
     }
 
+<<<<<<< HEAD
     public function setCodeThematique(?string $codeThematique): static
+=======
+    public function setCodeThematique(string $codeThematique): static
+>>>>>>> origin/integreModule
     {
         $this->codeThematique = $codeThematique;
         return $this;
@@ -124,6 +153,7 @@ class Thematique
         return $this;
     }
 
+<<<<<<< HEAD
     public function getImage(): ?string
     {
         return $this->image;
@@ -135,6 +165,8 @@ class Thematique
         return $this;
     }
 
+=======
+>>>>>>> origin/integreModule
     public function getSousTitre(): ?string
     {
         return $this->sousTitre;

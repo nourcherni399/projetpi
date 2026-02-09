@@ -3,17 +3,276 @@
 {% block title %}Tableau de bord - AutiCare Médecin{% endblock %}
 
 {% block doctor_content %}
-<h1 class="text-2xl font-semibold text-[#4B5563] mb-6">Tableau de bord médecin</h1>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <section class="bg-white rounded-xl border border-[#E5E0D8] p-6">
-        <h2 class="text-lg font-medium text-[#4B5563] mb-2">Rendez-vous à venir</h2>
-        <p class="text-[#6B7280]">Vue d'ensemble des prochains rendez-vous (à connecter).</p>
-        <a href="{{ path('doctor_availability') }}" class="mt-4 inline-block text-[#A7C7E7] hover:underline font-medium">Gérer les disponibilités →</a>
-    </section>
-    <section class="bg-white rounded-xl border border-[#E5E0D8] p-6">
-        <h2 class="text-lg font-medium text-[#4B5563] mb-2">Mes disponibilités</h2>
-        <p class="text-[#6B7280]">Définir et visualiser vos créneaux de disponibilité.</p>
-        <a href="{{ path('doctor_availability') }}" class="mt-4 inline-block text-[#A7C7E7] hover:underline font-medium">Voir / modifier →</a>
-    </section>
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-[#4B5563]">Tableau de bord</h1>
+            <p class="text-[#6B7280] mt-1">Bienvenue, Dr {{ app.user ? app.user.prenom ~ ' ' ~ app.user.nom : '' }}</p>
+        </div>
+        <div class="flex items-center gap-2 text-sm text-[#6B7280]">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {{ "now"|date("d/m/Y H:i") }}
+        </div>
+    </div>
+
+    {% if stats is defined %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 p-6 hover:shadow-lg transition-shadow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-blue-600 text-sm font-medium">Patients suivis</p>
+                    <p class="text-3xl font-bold text-blue-900 mt-2">{{ stats.total_patients|default(0) }}</p>
+                    <p class="text-blue-600 text-xs mt-1">Total unique</p>
+                </div>
+                <div class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-200">
+                    <svg class="w-6 h-6 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 p-6 hover:shadow-lg transition-shadow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-green-600 text-sm font-medium">Rendez-vous</p>
+                    <p class="text-3xl font-bold text-green-900 mt-2">{{ stats.total_rdv|default(0) }}</p>
+                    <p class="text-green-600 text-xs mt-1">{{ stats.rdv_today|default(0) }} aujourd'hui</p>
+                </div>
+                <div class="flex items-center justify-center w-12 h-12 rounded-full bg-green-200">
+                    <svg class="w-6 h-6 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200 p-6 hover:shadow-lg transition-shadow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-purple-600 text-sm font-medium">Notes rédigées</p>
+                    <p class="text-3xl font-bold text-purple-900 mt-2">{{ stats.total_notes|default(0) }}</p>
+                    <p class="text-purple-600 text-xs mt-1">Total notes</p>
+                </div>
+                <div class="flex items-center justify-center w-12 h-12 rounded-full bg-purple-200">
+                    <svg class="w-6 h-6 text-purple-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border border-orange-200 p-6 hover:shadow-lg transition-shadow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-orange-600 text-sm font-medium">Disponibilités</p>
+                    <p class="text-3xl font-bold text-orange-900 mt-2">Actif</p>
+                    <p class="text-orange-600 text-xs mt-1">Gérer les créneaux</p>
+                </div>
+                <div class="flex items-center justify-center w-12 h-12 rounded-full bg-orange-200">
+                    <svg class="w-6 h-6 text-orange-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
+        <div class="p-6 border-b border-[#E5E0D8] bg-gradient-to-r from-[#A7C7E7]/10 to-transparent">
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-semibold text-[#4B5563]">Activité des rendez-vous</h2>
+                <div class="flex items-center gap-2 text-sm text-[#6B7280]">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    <span>Derniers 6 mois</span>
+                </div>
+            </div>
+        </div>
+        <div class="p-6">
+            <div class="h-64 flex items-center justify-center">
+                <canvas id="activityChart" class="w-full h-full"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
+            <div class="p-6 border-b border-[#E5E0D8] bg-gradient-to-r from-[#A7C7E7]/10 to-transparent">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-semibold text-[#4B5563]">Prochains rendez-vous</h2>
+                    <a href="{{ path('doctor_rendezvous') }}" class="text-sm text-[#A7C7E7] hover:underline font-medium">Voir tout →</a>
+                </div>
+            </div>
+            <div class="p-6">
+                {% if stats is defined and stats.upcoming_rdv is defined and stats.upcoming_rdv is not empty %}
+                    <div class="space-y-4">
+                        {% for rdv in stats.upcoming_rdv %}
+                            <div class="flex items-center justify-between p-4 bg-[#F5F1EB]/50 rounded-lg hover:bg-[#F5F1EB] transition-colors">
+                                <div class="flex items-center gap-4">
+                                    <div class="flex items-center justify-center w-10 h-10 rounded-full bg-[#A7C7E7]/20">
+                                        <svg class="w-5 h-5 text-[#A7C7E7]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-[#4B5563]">
+                                            {{ rdv.patient ? (rdv.patient.prenom ~ ' ' ~ rdv.patient.nom) : 'Patient non spécifié' }}
+                                        </p>
+                                        <p class="text-sm text-[#6B7280]">
+                                            {{ rdv.dateRdv ? rdv.dateRdv|date('d/m/Y') : '' }}
+                                            {% if rdv.disponibilite is defined and rdv.disponibilite %}
+                                                à {{ rdv.disponibilite.heureDebut|date('H:i') }} - {{ rdv.disponibilite.heureFin|date('H:i') }}
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                                <span class="px-3 py-1 rounded-full text-xs font-medium
+                                    {% if rdv.status is defined and rdv.status == 'confirmer' %}bg-green-100 text-green-800
+                                    {% elseif rdv.status is defined and rdv.status == 'en_attente' %}bg-yellow-100 text-yellow-800
+                                    {% else %}bg-red-100 text-red-800{% endif %}">
+                                    {{ rdv.status is defined and rdv.status is iterable ? rdv.status.value|replace({'_': ' '})|title : '—' }}
+                                </span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-8">
+                        <svg class="w-16 h-16 text-[#E5E0D8] mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <p class="text-[#6B7280]">Aucun rendez-vous à venir</p>
+                        <p class="text-[#9CA3AF] text-sm mt-1">Vos prochains rendez-vous apparaîtront ici</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
+            <div class="p-6 border-b border-[#E5E0D8] bg-gradient-to-r from-purple-50 to-transparent">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-semibold text-[#4B5563]">Notes récentes</h2>
+                    <a href="{{ path('doctor_notes') }}" class="text-sm text-purple-600 hover:underline font-medium">Voir tout →</a>
+                </div>
+            </div>
+            <div class="p-6">
+                {% if stats is defined and stats.recent_notes is defined and stats.recent_notes is not empty %}
+                    <div class="space-y-4">
+                        {% for note in stats.recent_notes %}
+                            <div class="p-4 bg-purple-50 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <p class="font-medium text-[#4B5563] text-sm">
+                                        {{ note.patient ? (note.patient.prenom ~ ' ' ~ note.patient.nom) : 'Patient anonyme' }}
+                                    </p>
+                                    <span class="text-xs text-purple-600">
+                                        {{ note.dateCreation ? note.dateCreation|date('d/m') : '' }}
+                                    </span>
+                                </div>
+                                <p class="text-[#6B7280] text-sm line-clamp-3">
+                                    {{ note.contenu|u.truncate(80) }}
+                                </p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-8">
+                        <svg class="w-16 h-16 text-[#E5E0D8] mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                        </svg>
+                        <p class="text-[#6B7280]">Aucune note récente</p>
+                        <p class="text-[#9CA3AF] text-sm mt-1">Vos dernières notes apparaîtront ici</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl border border-[#E5E0D8] p-6">
+        <h2 class="text-xl font-semibold text-[#4B5563] mb-4">Actions rapides</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <a href="{{ path('doctor_availability') }}" class="flex items-center gap-3 p-4 bg-[#A7C7E7]/10 rounded-lg hover:bg-[#A7C7E7]/20 transition-colors group">
+                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-[#A7C7E7] group-hover:scale-110 transition-transform">
+                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <p class="font-medium text-[#4B5563]">Gérer les disponibilités</p>
+                    <p class="text-sm text-[#6B7280]">Ajouter/modifier les créneaux</p>
+                </div>
+            </a>
+
+            <a href="{{ path('doctor_notes') }}" class="flex items-center gap-3 p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors group">
+                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-purple-500 group-hover:scale-110 transition-transform">
+                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                    </svg>
+                </div>
+                <div>
+                    <p class="font-medium text-[#4B5563]">Rédiger une note</p>
+                    <p class="text-sm text-[#6B7280]">Ajouter une note patient</p>
+                </div>
+            </a>
+
+            <a href="{{ path('doctor_rendezvous') }}" class="flex items-center gap-3 p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors group">
+                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-green-500 group-hover:scale-110 transition-transform">
+                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <div>
+                    <p class="font-medium text-[#4B5563]">Voir les rendez-vous</p>
+                    <p class="text-sm text-[#6B7280]">Consulter l'agenda</p>
+                </div>
+            </a>
+        </div>
+    </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var canvas = document.getElementById('activityChart');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin'];
+    var data = [12, 19, 15, 25, 22, 30];
+    var gradient = ctx.createLinearGradient(0, 0, 0, 250);
+    gradient.addColorStop(0, 'rgba(167, 199, 231, 0.3)');
+    gradient.addColorStop(1, 'rgba(167, 199, 231, 0.01)');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Rendez-vous',
+                data: data,
+                borderColor: '#A7C7E7',
+                backgroundColor: gradient,
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#A7C7E7',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 6,
+                pointHoverRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false }, ticks: { color: '#6B7280', font: { size: 12 } } },
+                y: { beginAtZero: true, grid: { color: 'rgba(229, 224, 216, 0.3)' }, ticks: { color: '#6B7280', font: { size: 12 } } }
+            }
+        }
+    });
+});
+</script>
 {% endblock %}

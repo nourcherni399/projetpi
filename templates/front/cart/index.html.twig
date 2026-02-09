@@ -1,0 +1,113 @@
+{% extends 'layouts/user.html.twig' %}
+
+{% block title %}Mon Panier - AutiCare{% endblock %}
+
+{% block user_content %}
+<span class="cart-items-count hidden">{{ cart.totalItems }}</span>
+<section class="text-center mb-10">
+    <h1 class="text-3xl font-bold text-[#4B5563] mb-3">Mon Panier</h1>
+</section>
+
+{% if cart and not cart.empty %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="lg:col-span-2">
+        <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] overflow-hidden">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-[#E5E0D8] bg-[#F5F1EB]">
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-[#4B5563]">Produit</th>
+                        <th class="px-6 py-3 text-center text-sm font-semibold text-[#4B5563]">Prix</th>
+                        <th class="px-6 py-3 text-center text-sm font-semibold text-[#4B5563]">Quantité</th>
+                        <th class="px-6 py-3 text-right text-sm font-semibold text-[#4B5563]">Total</th>
+                        <th class="px-6 py-3 text-center text-sm font-semibold text-[#4B5563]">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart.items %}
+                    <tr class="border-b border-[#E5E0D8] hover:bg-[#F5F1EB]">
+                        <td class="px-6 py-4">
+                            <div class="flex gap-4">
+                                {% if item.produit.image %}
+                                    <img src="{{ asset(item.produit.image) }}" alt="{{ item.produit.nom }}" class="w-16 h-16 object-cover rounded-lg">
+                                {% else %}
+                                    <div class="w-16 h-16 bg-[#E5E0D8] rounded-lg"></div>
+                                {% endif %}
+                                <div>
+                                    <p class="font-semibold text-[#4B5563]">{{ item.produit.nom }}</p>
+                                    {% if item.produit.description %}
+                                        <p class="text-sm text-[#6B280] mt-1">{{ item.produit.description|slice(0, 100) }}...</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-center text-[#4B5563] font-semibold">{{ item.prix|number_format(2, ',', ' ') }} د.ت</td>
+                        <td class="px-6 py-4 text-center">
+                            <form method="POST" action="{{ path('cart_update', {id: item.produit.id}) }}" class="flex justify-center gap-2">
+                                <input type="number" name="quantite" value="{{ item.quantite }}" min="1" class="w-16 px-2 py-1 border border-[#E5E0D8] rounded-lg text-center">
+                                <button type="submit" class="px-3 py-1 bg-[#A7C7E7] text-white rounded-lg text-sm hover:bg-[#B8D4ED]">OK</button>
+                            </form>
+                        </td>
+                        <td class="px-6 py-4 text-right text-[#A7C7E7] font-semibold">{{ item.totalPrice|number_format(2, ',', ' ') }} د.ت</td>
+                        <td class="px-6 py-4 text-center">
+                            <form method="POST" action="{{ path('cart_remove', {id: item.produit.id}) }}" onsubmit="return confirm('Êtes-vous sûr?')">
+                                <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="lg:col-span-1">
+        <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6 sticky top-20">
+            <h3 class="text-lg font-semibold text-[#4B5563] mb-4">Résumé de la Commande</h3>
+            
+            <div class="space-y-3 mb-6 pb-6 border-b border-[#E5E0D8]">
+                <div class="flex justify-between text-[#6B280]">
+                    <span>Nombre d'articles:</span>
+                    <span>{{ cart.totalItems }}</span>
+                </div>
+                <div class="flex justify-between text-[#6B280]">
+                    <span>Sous-total:</span>
+                    <span>{{ cart.totalPrice|number_format(2, ',', ' ') }} د.ت</span>
+                </div>
+            </div>
+
+            <div class="flex justify-between text-lg font-bold text-[#4B5563] mb-6">
+                <span>Total:</span>
+                <span class="text-[#A7C7E7]">{{ cart.totalPrice|number_format(2, ',', ' ') }} د.ت</span>
+            </div>
+
+            <div class="space-y-3">
+                <a href="{{ path('order_checkout') }}" class="block w-full px-4 py-3 bg-[#A7C7E7] text-white rounded-lg font-semibold text-center hover:bg-[#B8D4ED] transition">
+                    Procéder au paiement
+                </a>
+                <a href="{{ path('user_products_index') }}" class="block w-full px-4 py-3 border border-[#A7C7E7] text-[#A7C7E7] rounded-lg font-semibold text-center hover:bg-[#F5F1EB] transition">
+                    Continuer les achats
+                </a>
+                <form method="POST" action="{{ path('cart_clear') }}" onsubmit="return confirm('Vider le panier?')">
+                    <button type="submit" class="w-full px-4 py-3 bg-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-400 transition">
+                        Vider le panier
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-12 text-center">
+    <svg class="w-16 h-16 mx-auto text-[#E5E0D8] mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16.35 5.4c-1.32-1.6-3.36-2.556-5.54-2.556-3.728 0-6.75 3.022-6.75 6.75s3.022 6.75 6.75 6.75c2.54 0 4.722-1.482 5.756-3.612m3.72-3.612a5.06 5.06 0 01-2.748 4.971m0-9.942a5.06 5.06 0 012.748 4.971M15.75 6.75h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008v-.008z" />
+    </svg>
+    <h3 class="text-2xl font-bold text-[#4B5563] mb-2">Panier vide</h3>
+    <p class="text-[#6B7280] mb-6">Votre panier ne contient aucun produit pour le moment.</p>
+    <a href="{{ path('user_products_index') }}" class="inline-block px-6 py-3 bg-[#A7C7E7] text-white rounded-lg font-semibold hover:bg-[#B8D4ED]">
+        Retourner aux produits
+    </a>
+</div>
+{% endif %}
+
+{% endblock %}

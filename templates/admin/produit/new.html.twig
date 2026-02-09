@@ -18,6 +18,7 @@
             label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }
         }) }}
         <div class="grid grid-cols-1 gap-6">
+<<<<<<< HEAD
             {{ form_row(form.nom) }}
             {{ form_row(form.description) }}
             {{ form_row(form.categorie) }}
@@ -28,6 +29,38 @@
                 {{ form_errors(form.disponibilite) }}
             </div>
             {{ form_row(form.image) }}
+=======
+            <div class="space-y-2">
+                {{ form_label(form.nom) }}
+                {{ form_widget(form.nom) }}
+                {% include 'admin/produit/_form_errors.html.twig' %}
+            </div>
+            <div class="space-y-2">
+                {{ form_label(form.description) }}
+                {{ form_widget(form.description) }}
+                {% include 'admin/produit/_form_errors.html.twig' %}
+            </div>
+            <div class="space-y-2">
+                {{ form_label(form.categorie) }}
+                {{ form_widget(form.categorie) }}
+                {% include 'admin/produit/_form_errors.html.twig' %}
+            </div>
+            <div class="space-y-2">
+                {{ form_label(form.prix) }}
+                {{ form_widget(form.prix) }}
+                {% include 'admin/produit/_form_errors.html.twig' %}
+            </div>
+            <div class="flex items-center gap-2">
+                {{ form_widget(form.disponibilite) }}
+                {{ form_label(form.disponibilite) }}
+                {% include 'admin/produit/_form_errors.html.twig' %}
+            </div>
+            <div class="space-y-2">
+                {{ form_label(form.image) }}
+                {{ form_widget(form.image) }}
+                {% include 'admin/produit/_form_errors.html.twig' %}
+            </div>
+>>>>>>> origin/integreModule
         </div>
         <div class="flex flex-wrap gap-3 pt-4">
             <button type="submit" class="px-5 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">

@@ -10,7 +10,10 @@ use App\Entity\Patient;
 use App\Entity\ParentUser;
 use App\Entity\User;
 use App\Enum\UserRole;
+<<<<<<< HEAD
 use App\Form\ProfileType;
+=======
+>>>>>>> origin/integreModule
 use App\Form\UserCreateType;
 use App\Form\UserEditType;
 use App\Repository\UserRepository;
@@ -37,6 +40,7 @@ final class AdminController extends AbstractController
         return $this->render('admin/dashboard/index.html.twig');
     }
 
+<<<<<<< HEAD
     #[Route('/admin/mon-profil', name: 'admin_profile', methods: ['GET', 'POST'])]
     public function profile(Request $request): Response
     {
@@ -58,6 +62,8 @@ final class AdminController extends AbstractController
         ]);
     }
 
+=======
+>>>>>>> origin/integreModule
     #[Route('/admin/utilisateurs', name: 'admin_users', methods: ['GET'])]
     public function users(Request $request): Response
     {

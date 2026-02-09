@@ -29,7 +29,11 @@ class RendezVous
 
     /** Date choisie pour le rendez-vous (ex. lundi 17 fév.). */
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+<<<<<<< HEAD
     private ?\DateTimeInterface $dateRdv = null;
+=======
+    private ?\DateTime $dateRdv = null;
+>>>>>>> origin/integreModule
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
@@ -45,7 +49,11 @@ class RendezVous
     private ?string $adresse = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+<<<<<<< HEAD
     private ?\DateTimeInterface $dateNaissance = null;
+=======
+    private ?\DateTime $dateNaissance = null;
+>>>>>>> origin/integreModule
 
     #[ORM\Column(length: 30, nullable: true)]
     private ?string $telephone = null;
@@ -86,12 +94,20 @@ class RendezVous
         return $this;
     }
 
+<<<<<<< HEAD
     public function getDateRdv(): ?\DateTimeInterface
+=======
+    public function getDateRdv(): ?\DateTime
+>>>>>>> origin/integreModule
     {
         return $this->dateRdv;
     }
 
+<<<<<<< HEAD
     public function setDateRdv(?\DateTimeInterface $dateRdv): static
+=======
+    public function setDateRdv(?\DateTime $dateRdv): static
+>>>>>>> origin/integreModule
     {
         $this->dateRdv = $dateRdv;
         return $this;
@@ -141,12 +157,20 @@ class RendezVous
         return $this;
     }
 
+<<<<<<< HEAD
     public function getDateNaissance(): ?\DateTimeInterface
+=======
+    public function getDateNaissance(): ?\DateTime
+>>>>>>> origin/integreModule
     {
         return $this->dateNaissance;
     }
 
+<<<<<<< HEAD
     public function setDateNaissance(?\DateTimeInterface $dateNaissance): static
+=======
+    public function setDateNaissance(?\DateTime $dateNaissance): static
+>>>>>>> origin/integreModule
     {
         $this->dateNaissance = $dateNaissance;
         return $this;

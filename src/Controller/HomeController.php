@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+<<<<<<< HEAD
 use App\Entity\Blog;
 use App\Entity\Disponibilite;
 use App\Entity\Evenement;
 use App\Entity\InscritEvents;
+=======
+use App\Entity\Disponibilite;
+use App\Entity\Evenement;
+>>>>>>> origin/integreModule
 use App\Entity\Medcin;
 use App\Entity\Notification;
 use App\Entity\Patient;
@@ -15,6 +20,7 @@ use App\Entity\RendezVous;
 use App\Enum\Motif;
 use App\Enum\StatusRendezVous;
 use App\Enum\UserRole;
+<<<<<<< HEAD
 use App\Form\BlogType;
 use App\Repository\DisponibiliteRepository;
 use App\Repository\EvenementRepository;
@@ -22,6 +28,11 @@ use App\Repository\InscritEventsRepository;
 use App\Repository\MedcinRepository;
 use App\Repository\ModuleRepository;
 use App\Repository\NotificationRepository;
+=======
+use App\Repository\DisponibiliteRepository;
+use App\Repository\EvenementRepository;
+use App\Repository\MedcinRepository;
+>>>>>>> origin/integreModule
 use App\Repository\RendezVousRepository;
 use App\Repository\ThematiqueRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -34,6 +45,7 @@ use Symfony\Component\Routing\Attribute\Route;
 final class HomeController extends AbstractController
 {
     public function __construct(
+<<<<<<< HEAD
         private readonly ModuleRepository $moduleRepository,
         private readonly ThematiqueRepository $thematiqueRepository,
         private readonly EvenementRepository $evenementRepository,
@@ -42,6 +54,13 @@ final class HomeController extends AbstractController
         private readonly DisponibiliteRepository $disponibiliteRepository,
         private readonly RendezVousRepository $rendezVousRepository,
         private readonly NotificationRepository $notificationRepository,
+=======
+        private readonly MedcinRepository $medcinRepository,
+        private readonly EvenementRepository $evenementRepository,
+        private readonly ThematiqueRepository $thematiqueRepository,
+        private readonly DisponibiliteRepository $disponibiliteRepository,
+        private readonly RendezVousRepository $rendezVousRepository,
+>>>>>>> origin/integreModule
         private readonly EntityManagerInterface $entityManager,
     ) {
     }
@@ -68,6 +87,7 @@ final class HomeController extends AbstractController
         return $this->render('front/about/index.html.twig');
     }
 
+<<<<<<< HEAD
     #[Route('/produits', name: 'user_products', methods: ['GET'])]
     public function products(): Response
     {
@@ -203,6 +223,25 @@ final class HomeController extends AbstractController
             'filter_date_to' => $request->query->get('date_to'),
             'filter_lieu' => $lieu,
             'filter_thematique' => $thematiqueId,
+=======
+    #[Route('/evenements', name: 'user_events', methods: ['GET'])]
+    public function events(): Response
+    {
+        $thematiques = $this->thematiqueRepository->findBy(['actif' => true], ['ordre' => 'ASC', 'nomThematique' => 'ASC']);
+        $grouped = [];
+        foreach ($thematiques as $t) {
+            $evenements = $t->getEvenements()->toArray();
+            usort($evenements, static function (Evenement $a, Evenement $b): int {
+                $d = ($a->getDateEvent() <=> $b->getDateEvent());
+                return $d !== 0 ? $d : ($a->getHeureDebut() <=> $b->getHeureDebut());
+            });
+            $grouped[] = ['thematique' => $t, 'evenements' => $evenements];
+        }
+        $sansThematique = $this->evenementRepository->findBy(['thematique' => null], ['dateEvent' => 'ASC', 'heureDebut' => 'ASC']);
+        return $this->render('front/events/index.html.twig', [
+            'grouped' => $grouped,
+            'sansThematique' => $sansThematique,
+>>>>>>> origin/integreModule
         ]);
     }
 
@@ -213,6 +252,7 @@ final class HomeController extends AbstractController
         if ($evenement === null) {
             throw $this->createNotFoundException('Événement introuvable.');
         }
+<<<<<<< HEAD
         $user = $this->getUser();
         $inscription = $user !== null
             ? $this->inscritEventsRepository->findInscriptionForUserAndEvent($user, $evenement)
@@ -306,6 +346,9 @@ final class HomeController extends AbstractController
         }
 
         return $this->redirectToRoute('user_event_show', ['id' => $id]);
+=======
+        return $this->render('front/events/show.html.twig', ['evenement' => $evenement]);
+>>>>>>> origin/integreModule
     }
 
     #[Route('/rendez-vous', name: 'user_appointments', methods: ['GET'])]
@@ -437,6 +480,7 @@ final class HomeController extends AbstractController
         $disponibiliteId = (int) $request->request->get('disponibilite_id', 0);
         $dateRdvStr = (string) $request->request->get('date_rdv', '');
         $disponibilite = $disponibiliteId > 0 ? $this->disponibiliteRepository->find($disponibiliteId) : null;
+<<<<<<< HEAD
         if ($disponibilite === null || $disponibilite->getMedecin() !== $medecin) {
             $this->addFlash('error', 'Créneau invalide.');
             return $this->redirectToRoute('user_appointment_book', ['id' => $id]);
@@ -454,6 +498,23 @@ final class HomeController extends AbstractController
             return $this->redirectToRoute('user_appointment_book', ['id' => $id]);
         }
 
+=======
+        
+        // Convertir la chaîne en DateTime
+        $dateRdv = null;
+        if ($dateRdvStr !== '') {
+            try {
+                $dateRdv = new \DateTime($dateRdvStr);
+            } catch (\Throwable) {
+            }
+        }
+        
+        if ($disponibilite === null || $dateRdv === null) {
+            $this->addFlash('error', 'Créneau ou date invalide.');
+            return $this->redirectToRoute('user_appointment_book', ['id' => $id]);
+        }
+        
+>>>>>>> origin/integreModule
         if ($this->rendezVousRepository->isSlotTaken($disponibilite, $dateRdv)) {
             $this->addFlash('error', 'Ce créneau n\'est plus disponible.');
             return $this->redirectToRoute('user_appointment_book', ['id' => $id]);
@@ -463,21 +524,38 @@ final class HomeController extends AbstractController
         $prenom = trim((string) $request->request->get('prenom', ''));
         if ($nom === '' || $prenom === '') {
             $this->addFlash('error', 'Nom et prénom obligatoires.');
+<<<<<<< HEAD
             return $this->redirectToRoute('user_appointment_book', ['id' => $id, 'etape' => 3] + array_filter([
+=======
+            return $this->redirectToRoute('user_appointment_book', [
+                'id' => $id,
+                'etape' => 3,
+>>>>>>> origin/integreModule
                 'disponibilite_id' => $disponibiliteId ?: null,
                 'date_rdv' => $dateRdvStr ?: null,
                 'type' => $request->request->get('type'),
                 'mode' => $request->request->get('mode'),
                 'motif' => $request->request->get('motif'),
+<<<<<<< HEAD
             ]));
         }
 
+=======
+            ]);
+        }
+
+        // Validation du token CSRF
+>>>>>>> origin/integreModule
         $token = $request->request->get('_token');
         if (!\is_string($token) || !$this->isCsrfTokenValid('rdv_submit', $token)) {
             $this->addFlash('error', 'Session expirée. Veuillez recommencer.');
             return $this->redirectToRoute('user_appointment_book', ['id' => $id]);
         }
 
+<<<<<<< HEAD
+=======
+        // Détermination du motif
+>>>>>>> origin/integreModule
         $motifKey = (string) $request->request->get('motif_key', 'normal');
         $motif = match ($motifKey) {
             'urgence' => Motif::URGENCE,
@@ -485,6 +563,7 @@ final class HomeController extends AbstractController
             default => Motif::NORMAL,
         };
 
+<<<<<<< HEAD
         $rdv = new RendezVous();
         $rdv->setMedecin($medecin);
         $rdv->setDisponibilite($disponibilite);
@@ -519,6 +598,50 @@ final class HomeController extends AbstractController
         $this->entityManager->flush();
 
         $this->addFlash('success', 'Votre demande de rendez-vous a été envoyée. Le médecin vous répondra sous peu.');
+=======
+        // Création du rendez-vous
+        $rendezVous = new RendezVous();
+        $rendezVous->setMedecin($medecin);
+        $rendezVous->setDisponibilite($disponibilite);
+        $rendezVous->setDateRdv($dateRdv);
+        $rendezVous->setNom($nom);
+        $rendezVous->setPrenom($prenom);
+        $rendezVous->setStatus(StatusRendezVous::EN_ATTENTE);
+        $rendezVous->setMotif($motif);
+        $rendezVous->setTelephone((string) $request->request->get('telephone', ''));
+        $rendezVous->setAdresse((string) $request->request->get('adresse', ''));
+        $rendezVous->setNotePatient((string) $request->request->get('note', ''));
+        
+        // Gestion de la date de naissance
+        $dateNaissance = $request->request->get('date_naissance');
+        if ($dateNaissance !== null && $dateNaissance !== '') {
+            try {
+                $rendezVous->setDateNaissance(new \DateTime($dateNaissance));
+            } catch (\Throwable) {
+            }
+        }
+        
+        // Association avec le patient connecté
+        $user = $this->getUser();
+        if ($user instanceof Patient) {
+            $rendezVous->setPatient($user);
+        }
+
+        // Sauvegarde en base de données
+        $this->entityManager->persist($rendezVous);
+        $this->entityManager->flush();
+
+        // Création de la notification pour le médecin
+        $notification = new Notification();
+        $notification->setDestinataire($medecin);
+        $notification->setType(Notification::TYPE_DEMANDE_RDV);
+        $notification->setRendezVous($rendezVous);
+        $this->entityManager->persist($notification);
+        $this->entityManager->flush();
+
+        $this->addFlash('success', 'Votre demande de rendez-vous a été envoyée. Le médecin vous répondra sous peu.');
+        
+>>>>>>> origin/integreModule
         return $this->redirectToRoute('user_appointment_book', [
             'id' => $id,
             'etape' => 4,
@@ -564,7 +687,10 @@ final class HomeController extends AbstractController
         ];
     }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/integreModule
     #[Route('/inscription', name: 'register', methods: ['GET'])]
     public function register(): Response
     {

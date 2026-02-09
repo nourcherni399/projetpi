@@ -22,6 +22,69 @@ final class ProfileController extends AbstractController
     ) {
     }
 
+<<<<<<< HEAD
+=======
+    #[Route('/admin/profil', name: 'admin_profile', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function adminProfile(Request $request): Response
+    {
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        $form = $this->createForm(ProfileType::class, $user, [
+            'data_class' => $user::class,
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $user->setUpdatedAt(new \DateTimeImmutable());
+            $this->entityManager->flush();
+
+            $this->addFlash('success', 'Votre profil administrateur a été mis à jour avec succès.');
+
+            return $this->redirectToRoute('admin_profile');
+        }
+
+        return $this->render('admin/profile/edit.html.twig', [
+            'user' => $user,
+            'form' => $form,
+        ]);
+    }
+
+    #[Route('/medecin/profil', name: 'doctor_profile', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_MEDECIN')]
+    public function doctorProfile(Request $request): Response
+    {
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        $form = $this->createForm(ProfileType::class, $user, [
+            'data_class' => $user::class,
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $user->setUpdatedAt(new \DateTimeImmutable());
+            $this->entityManager->flush();
+
+            $this->addFlash('success', 'Votre profil médecin a été mis à jour avec succès.');
+
+            return $this->redirectToRoute('doctor_profile');
+        }
+
+        return $this->render('medecin/profile/edit.html.twig', [
+            'user' => $user,
+            'form' => $form,
+        ]);
+    }
+
+>>>>>>> origin/integreModule
     #[Route('/mon-profil', name: 'user_profile', methods: ['GET', 'POST'])]
     public function edit(Request $request): Response
     {
@@ -84,4 +147,8 @@ final class ProfileController extends AbstractController
         $this->addFlash('success', 'Votre compte a été désactivé. Vous pouvez le réactiver en contactant l’équipe.');
         return $this->redirectToRoute('app_logout');
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> origin/integreModule

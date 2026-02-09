@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+<<<<<<< HEAD
 use App\Entity\Evenement;
 use App\Entity\InscritEvents;
 use App\Entity\User;
+=======
+use App\Entity\InscritEvents;
+>>>>>>> origin/integreModule
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -19,6 +23,7 @@ class InscritEventsRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, InscritEvents::class);
     }
+<<<<<<< HEAD
 
     /**
      * Inscriptions en attente de validation (admin), triées par date.
@@ -76,4 +81,6 @@ class InscritEventsRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+=======
+>>>>>>> origin/integreModule
 }

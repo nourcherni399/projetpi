@@ -1,0 +1,20 @@
+{# Erreurs pour le champ nom #}
+{% if app.session.flashbag.has('nom_vide') %}
+    <div class="text-red-600 text-sm mt-1">Le champ nom est obligatoire.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('nom_nombre') %}
+    <div class="text-red-600 text-sm mt-1">Le nom ne peut pas contenir que des lettres.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('nom_court') %}
+    <div class="text-red-600 text-sm mt-1">Le nom doit contenir au moins 3 caractères.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('nom_long') %}
+    <div class="text-red-600 text-sm mt-1">Le nom ne peut pas dépasser 255 caractères.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('nom_caracteres') %}
+    <div class="text-red-600 text-sm mt-1">Le nom contient des caractères non autorisés.</div>
+{% endif %}

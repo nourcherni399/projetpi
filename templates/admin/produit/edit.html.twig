@@ -1,0 +1,70 @@
+{% extends 'layouts/admin.html.twig' %}
+
+{% block title %}Modifier {{ produit.nom }} - AutiCare Admin{% endblock %}
+
+{% block admin_content %}
+<div class="max-w-2xl">
+    <div class="mb-6 flex items-center gap-4">
+        <a href="{{ path('admin_produit_show', {id: produit.id}) }}" class="inline-flex items-center gap-2 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded-lg">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            Retour
+        </a>
+    </div>
+    <h1 class="text-2xl font-semibold text-[#4B5563] mb-6">Modifier le produit</h1>
+
+    <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8">
+        {{ form_start(form, {
+            attr: { class: 'space-y-6' },
+            label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }
+        }) }}
+        <div class="grid grid-cols-1 gap-6">
+            <div class="space-y-2">
+                {{ form_label(form.nom) }}
+                {{ form_widget(form.nom) }}
+                {% include 'admin/produit/_form_errors.html.twig' %}
+            </div>
+            <div class="space-y-2">
+                {{ form_label(form.description) }}
+                {{ form_widget(form.description) }}
+                {% include 'admin/produit/_form_errors.html.twig' %}
+            </div>
+            <div class="space-y-2">
+                {{ form_label(form.categorie) }}
+                {{ form_widget(form.categorie) }}
+                {% include 'admin/produit/_form_errors.html.twig' %}
+            </div>
+            <div class="space-y-2">
+                {{ form_label(form.prix) }}
+                {{ form_widget(form.prix) }}
+                {% include 'admin/produit/_form_errors.html.twig' %}
+            </div>
+            <div class="flex items-center gap-2">
+                {{ form_widget(form.disponibilite) }}
+                {{ form_label(form.disponibilite) }}
+                {% include 'admin/produit/_form_errors.html.twig' %}
+            </div>
+            <div class="space-y-2">
+                {{ form_label(form.image) }}
+                {{ form_widget(form.image) }}
+                {% include 'admin/produit/_form_errors.html.twig' %}
+            </div>
+            
+            {% if produit.image %}
+            <div class="space-y-2">
+                <label class="block text-[#4B5563] font-medium mb-2">Image actuelle</label>
+                <img src="{{ asset(produit.image) }}" alt="{{ produit.nom }}" class="w-32 h-32 object-cover rounded-lg">
+            </div>
+            {% endif %}
+        </div>
+        <div class="flex flex-wrap gap-3 pt-4">
+            <button type="submit" class="px-5 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                Enregistrer les modifications
+            </button>
+            <a href="{{ path('admin_produit_show', {id: produit.id}) }}" class="px-5 py-2.5 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                Annuler
+            </a>
+        </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

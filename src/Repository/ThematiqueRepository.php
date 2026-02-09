@@ -17,6 +17,7 @@ class ThematiqueRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Thematique::class);
     }
+<<<<<<< HEAD
 
     /**
      * @return Thematique[]
@@ -33,4 +34,6 @@ class ThematiqueRepository extends ServiceEntityRepository
             ->addOrderBy('t.nomThematique', 'ASC');
         return $qb->getQuery()->getResult();
     }
+=======
+>>>>>>> origin/integreModule
 }

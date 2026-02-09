@@ -24,6 +24,7 @@ final class ThematiqueController extends AbstractController
     }
 
     #[Route('', name: 'admin_thematique_index', methods: ['GET'])]
+<<<<<<< HEAD
     public function index(Request $request): Response
     {
         $q = $request->query->get('q');
@@ -32,6 +33,12 @@ final class ThematiqueController extends AbstractController
             'thematiques' => $thematiques,
             'q' => $q,
         ]);
+=======
+    public function index(): Response
+    {
+        $thematiques = $this->thematiqueRepository->findBy([], ['ordre' => 'ASC', 'nomThematique' => 'ASC']);
+        return $this->render('admin/thematique/index.html.twig', ['thematiques' => $thematiques]);
+>>>>>>> origin/integreModule
     }
 
     #[Route('/new', name: 'admin_thematique_new', methods: ['GET', 'POST'])]
@@ -86,6 +93,7 @@ final class ThematiqueController extends AbstractController
             'form' => $form,
         ]);
     }
+<<<<<<< HEAD
 
     #[Route('/{id}/delete', name: 'admin_thematique_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function delete(Request $request, int $id): Response
@@ -104,4 +112,6 @@ final class ThematiqueController extends AbstractController
         $this->addFlash('success', 'La thématique a été supprimée.');
         return $this->redirectToRoute('admin_thematique_index');
     }
+=======
+>>>>>>> origin/integreModule
 }

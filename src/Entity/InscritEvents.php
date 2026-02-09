@@ -7,7 +7,10 @@ namespace App\Entity;
 use App\Repository\InscritEventsRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+<<<<<<< HEAD
 use Symfony\Component\Validator\Constraints as Assert;
+=======
+>>>>>>> origin/integreModule
 
 #[ORM\Entity(repositoryClass: InscritEventsRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_USER_EVENT', columns: ['user_id', 'evenement_id'])]
@@ -20,22 +23,32 @@ class InscritEvents
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+<<<<<<< HEAD
     #[Assert\NotNull(message: 'L\'utilisateur est obligatoire.')]
+=======
+>>>>>>> origin/integreModule
     private ?User $user = null;
 
     #[ORM\ManyToOne(inversedBy: 'inscrits')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+<<<<<<< HEAD
     #[Assert\NotNull(message: 'L\'événement est obligatoire.')]
     private ?Evenement $evenement = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Assert\NotNull(message: 'La date d\'inscription est obligatoire.')]
+=======
+    private ?Evenement $evenement = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+>>>>>>> origin/integreModule
     private ?\DateTimeInterface $dateInscrit = null;
 
     /** true = inscrit, false = annulé (remplace l'enum Status_Inscrit). */
     #[ORM\Column(type: 'boolean', options: ['default' => true])]
     private bool $estInscrit = true;
 
+<<<<<<< HEAD
     /** en_attente | accepte | refuse | desinscrit */
     #[ORM\Column(length: 20, options: ['default' => 'en_attente'])]
     #[Assert\NotBlank(message: 'Le statut est obligatoire.')]
@@ -43,6 +56,8 @@ class InscritEvents
     #[Assert\Choice(choices: ['en_attente', 'accepte', 'refuse', 'desinscrit'], message: 'Le statut doit être : en_attente, accepte, refuse ou desinscrit.')]
     private string $statut = 'en_attente';
 
+=======
+>>>>>>> origin/integreModule
     public function getId(): ?int
     {
         return $this->id;
@@ -75,7 +90,11 @@ class InscritEvents
         return $this->dateInscrit;
     }
 
+<<<<<<< HEAD
     public function setDateInscrit(?\DateTimeInterface $dateInscrit): static
+=======
+    public function setDateInscrit(\DateTimeInterface $dateInscrit): static
+>>>>>>> origin/integreModule
     {
         $this->dateInscrit = $dateInscrit;
         return $this;
@@ -91,6 +110,7 @@ class InscritEvents
         $this->estInscrit = $estInscrit;
         return $this;
     }
+<<<<<<< HEAD
 
     public function getStatut(): string
     {
@@ -102,4 +122,6 @@ class InscritEvents
         $this->statut = $statut ?? 'en_attente';
         return $this;
     }
+=======
+>>>>>>> origin/integreModule
 }

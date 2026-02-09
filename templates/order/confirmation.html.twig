@@ -1,0 +1,123 @@
+{% extends 'layouts/user.html.twig' %}
+
+{% block title %}Confirmation de commande - AutiCare{% endblock %}
+
+{% block user_content %}
+<section class="text-center mb-10">
+    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 text-green-600 mb-4">
+        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+    </div>
+    <h1 class="text-3xl font-bold text-green-600 mb-3">Commande confirmée!</h1>
+    <p class="text-[#6B7280] text-lg">Merci pour votre achat</p>
+</section>
+
+<div class="max-w-2xl mx-auto">
+    <!-- Numéro de commande -->
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+        <p class="text-[#6B7280] text-sm">Numéro de commande</p>
+        <p class="text-2xl font-bold text-[#A7C7E7]">#{{ commande.id }}</p>
+    </div>
+
+    <!-- Informations de livraison -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
+            <h2 class="font-bold text-[#4B5563] mb-4">Adresse de livraison</h2>
+            <div class="text-[#6B7280] text-sm space-y-1">
+                <p class="font-medium">{{ commande.nom }}</p>
+                <p>{{ commande.adresse }}</p>
+                <p>{{ commande.codePostal }} {{ commande.ville }}</p>
+                <p>{{ commande.telephone }}</p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
+            <h2 class="font-bold text-[#4B5563] mb-4">Informations de commande</h2>
+            <div class="text-[#6B7280] text-sm space-y-2">
+                <div class="flex justify-between">
+                    <span>Date:</span>
+                    <span>{{ commande.dateCreation|date('d/m/Y H:i') }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Mode paiement:</span>
+                    <span class="font-medium">
+                        {% if commande.modePayment == 'carte_visa' %}Visa
+                        {% elseif commande.modePayment == 'carte_mastercard' %}MasterCard
+                        {% elseif commande.modePayment == 'carte_amex' %}American Express
+                        {% else %}À la livraison
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Statut:</span>
+                    <span class="font-medium {% if commande.statut == 'payée' %}text-green-600{% elseif commande.statut == 'en_attente' %}text-orange-600{% endif %}">
+                        {% if commande.statut == 'payée' %}Payée
+                        {% elseif commande.statut == 'en_attente' %}En attente
+                        {% elseif commande.statut == 'livrée' %}Livrée
+                        {% else %}Annulée
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Articles commandés -->
+    <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] overflow-hidden mb-8">
+        <table class="w-full">
+            <thead class="bg-[#F5F1EB] border-b border-[#E5E0D8]">
+                <tr>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-[#4B5563]">Produit</th>
+                    <th class="px-6 py-4 text-center text-sm font-semibold text-[#4B5563]">Prix</th>
+                    <th class="px-6 py-4 text-center text-sm font-semibold text-[#4B5563]">Quantité</th>
+                    <th class="px-6 py-4 text-right text-sm font-semibold text-[#4B5563]">Sous-total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ligne in commande.lignes %}
+                <tr class="border-b border-[#E5E0D8]">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-4">
+                            {% if ligne.produit.image %}
+                                <img src="{{ asset(ligne.produit.image) }}" alt="{{ ligne.produit.nom }}" class="w-12 h-12 object-cover rounded">
+                            {% endif %}
+                            <span class="font-medium text-[#4B5563]">{{ ligne.produit.nom }}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-center text-[#6B7280]">{{ ligne.prix|number_format(2, ',', ' ') }} د.ت</td>
+                    <td class="px-6 py-4 text-center text-[#6B7280]">{{ ligne.quantite }}</td>
+                    <td class="px-6 py-4 text-right font-semibold text-[#A7C7E7]">{{ ligne.sousTotal|number_format(2, ',', ' ') }} د.ت</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="bg-[#F5F1EB] px-6 py-4 flex justify-between items-center">
+            <span class="font-bold text-[#4B5563]">Total</span>
+            <span class="text-2xl font-bold text-[#A7C7E7]">{{ commande.total|number_format(2, ',', ' ') }} د.ت</span>
+        </div>
+    </div>
+
+    <!-- Boutons action -->
+    <div class="flex gap-4 justify-center">
+        <a href="{{ path('user_products') }}" class="px-6 py-3 bg-[#A7C7E7] text-white rounded-lg hover:bg-[#B8D4ED]">Continuer les achats</a>
+        <a href="{{ path('home') }}" class="px-6 py-3 border border-[#A7C7E7] text-[#A7C7E7] rounded-lg hover:bg-[#F5F1EB]">Retour à l'accueil</a>
+    </div>
+
+    <!-- Message paiement -->
+    {% if commande.modePayment == 'a_la_livraison' %}
+    <div class="mt-8 bg-orange-50 border border-orange-200 rounded-lg p-6">
+        <h3 class="font-bold text-orange-600 mb-2">⚠️ Paiement à la livraison</h3>
+        <p class="text-orange-700 text-sm">
+            Vous avez choisi le paiement à la livraison. Vous devrez payer le montant total ({{ commande.total|number_format(2, ',', ' ') }} د.ت) lors de la réception de votre colis.
+        </p>
+    </div>
+    {% else %}
+    <div class="mt-8 bg-green-50 border border-green-200 rounded-lg p-6">
+        <h3 class="font-bold text-green-600 mb-2">✓ Paiement reçu</h3>
+        <p class="text-green-700 text-sm">
+            Votre paiement de {{ commande.total|number_format(2, ',', ' ') }} د.ت a été traité avec succès. Vous recevrez un email de confirmation à {{ commande.email }}.
+        </p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

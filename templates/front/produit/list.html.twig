@@ -1,0 +1,90 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nos produits - AutiCare{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-4 py-12">
+    <div class="mb-8">
+        <a href="{{ path('home') }}" class="inline-flex items-center gap-2 text-[#A7C7E7] hover:text-[#B8D4ED]">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            Retour
+        </a>
+    </div>
+
+    <h1 class="text-4xl font-bold text-[#4B5563] mb-2">Nos Produits</h1>
+    <p class="text-[#6B7280] mb-8">Découvrez notre sélection de produits disponibles ({{ produits|length }} produit(s))</p>
+
+    <!-- Filtres par catégorie -->
+    <div class="mb-8">
+        <label for="filterCategorie" class="block text-[#4B5563] font-medium mb-2">Filtrer par catégorie</label>
+        <select id="filterCategorie" class="mt-1 block w-full max-w-xs rounded-lg border border-[#E5E0D8] bg-white px-4 py-2.5 text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+            <option value="">Toutes les catégories</option>
+            {% for categorie in categories %}
+                <option value="{{ categorie.value }}" {% if selectedCategorie == categorie.value %}selected{% endif %}>{{ categorie.label() }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    {% if produits|length > 0 %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for produit in produits %}
+                <div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden hover:shadow-lg transition-shadow">
+                    <!-- Image -->
+                    <div class="aspect-square bg-[#F5F1EB] flex items-center justify-center overflow-hidden">
+                        {% if produit.image %}
+                            <img src="{{ asset(produit.image) }}" alt="{{ produit.nom }}" class="w-full h-full object-cover hover:scale-110 transition-transform">
+                        {% else %}
+                            <div class="w-full h-full bg-[#E5E0D8] flex items-center justify-center text-[#9CA3AF]">Pas d'image</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Contenu -->
+                    <div class="p-6">
+                        <div class="mb-2">
+                            <span class="inline-block px-3 py-1 rounded-full bg-[#A7C7E7]/20 text-[#A7C7E7] text-xs font-medium">
+                                {{ produit.categorie ? produit.categorie.label : '—' }}
+                            </span>
+                        </div>
+
+                        <h3 class="text-lg font-semibold text-[#4B5563] mb-2">{{ produit.nom }}</h3>
+
+                        {% if produit.description %}
+                            <p class="text-[#6B7280] text-sm mb-4 line-clamp-2">{{ produit.description }}</p>
+                        {% endif %}
+
+                        <div class="flex justify-between items-center">
+                            <p class="text-2xl font-bold text-[#A7C7E7]">{{ produit.prix|number_format(2, ',', ' ') }} د.ت</p>
+                            <span class="px-3 py-1 rounded-full {% if produit.disponibilite %}bg-emerald-100 text-emerald-800{% else %}bg-red-100 text-red-800{% endif %} text-xs font-medium">
+                                {{ produit.disponibilite ? 'Disponible' : 'Indisponible' }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="bg-[#F5F1EB] rounded-xl border border-[#E5E0D8] p-12 text-center">
+            <svg class="w-16 h-16 text-[#9CA3AF] mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+            </svg>
+            <h2 class="text-xl font-semibold text-[#4B5563] mb-2">Aucun produit disponible</h2>
+            <p class="text-[#6B7280]">Revenez plus tard pour découvrir nos nouveaux produits</p>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterSelect = document.getElementById('filterCategorie');
+    
+    filterSelect.addEventListener('change', function() {
+        const categorie = this.value;
+        if (categorie) {
+            window.location.href = "{{ path('produit_list') }}?categorie=" + categorie;
+        } else {
+            window.location.href = "{{ path('produit_list') }}";
+        }
+    });
+});
+</script>
+{% endblock %}

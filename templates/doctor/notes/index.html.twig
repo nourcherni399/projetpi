@@ -3,70 +3,108 @@
 {% block title %}Notes patients - AutiCare Médecin{% endblock %}
 
 {% block doctor_content %}
-<h1 class="text-2xl font-semibold text-[#4B5563] mb-6">Notes par patient</h1>
-{% for message in app.flashes('success') %}
-    <div class="mb-4 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">{{ message }}</div>
-{% endfor %}
-{% for message in app.flashes('error') %}
-    <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-800">{{ message }}</div>
-{% endfor %}
+<div class="space-y-6">
+    {% for message in app.flashes('success') %}
+        <div class="mb-4 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">{{ message }}</div>
+    {% endfor %}
+    {% for message in app.flashes('error') %}
+        <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-800">{{ message }}</div>
+    {% endfor %}
 
-<div class="mb-6 bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
-    <div class="p-4 border-b border-[#E5E0D8]">
-        <h2 class="text-lg font-medium text-[#4B5563]">Nouvelle note</h2>
-        <p class="text-sm text-[#6B7280] mt-1">Créez une note pour un patient avec lequel vous avez déjà un rendez-vous.</p>
-    </div>
-    <div class="p-6">
-        {% if patients is empty %}
-            <p class="text-[#6B7280]">Aucun patient pour l’instant. Les patients apparaîtront après un premier rendez-vous.</p>
-        {% else %}
-            {{ form_start(form, { attr: { class: 'space-y-4' }, label_attr: { class: 'block text-[#4B5563] font-medium mb-1' } }) }}
-            {{ form_errors(form) }}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    {{ form_label(form.patient) }}
-                    {{ form_widget(form.patient) }}
-                    {{ form_errors(form.patient) }}
-                </div>
-                <div class="md:col-span-2">
-                    {{ form_label(form.contenu) }}
-                    {{ form_widget(form.contenu) }}
-                    {{ form_errors(form.contenu) }}
-                </div>
+    <!-- En-tête -->
+    <div class="bg-gradient-to-r from-[#A7C7E7] to-[#B8D4ED] rounded-2xl p-8 text-white shadow-xl">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold mb-2">Notes patients</h1>
+                <p class="text-blue-100">Suivez l'évolution de vos patients et documentez vos consultations</p>
             </div>
-            <div class="mt-4">
-                <button type="submit" class="px-4 py-2 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Enregistrer la note</button>
+            <div class="text-center">
+                <div class="text-4xl font-bold">{{ notes|length }}</div>
+                <div class="text-sm text-blue-100">Total notes</div>
             </div>
-            {{ form_end(form) }}
-        {% endif %}
+        </div>
     </div>
-</div>
 
-<div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
-    <div class="p-4 border-b border-[#E5E0D8]">
-        <h2 class="text-lg font-medium text-[#4B5563]">Notes enregistrées</h2>
+    {% if stats is defined %}
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200 p-6">
+            <p class="text-purple-600 text-sm font-medium">Patients suivis</p>
+            <p class="text-3xl font-bold text-purple-900 mt-2">{{ stats.patients_with_notes|default(0) }}</p>
+        </div>
+        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 p-6">
+            <p class="text-blue-600 text-sm font-medium">Cette semaine</p>
+            <p class="text-3xl font-bold text-blue-900 mt-2">{{ stats.this_week|default(0) }}</p>
+        </div>
+        <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 p-6">
+            <p class="text-green-600 text-sm font-medium">Ce mois</p>
+            <p class="text-3xl font-bold text-green-900 mt-2">{{ stats.this_month|default(0) }}</p>
+        </div>
+        <div class="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl border border-amber-200 p-6">
+            <p class="text-amber-600 text-sm font-medium">Longueur moyenne</p>
+            <p class="text-3xl font-bold text-amber-900 mt-2">{{ stats.average_length|default(0) }}</p>
+        </div>
     </div>
-    <div class="overflow-x-auto">
-        <table class="w-full text-left">
-            <thead class="bg-[#F5F1EB] border-b border-[#E5E0D8]">
-                <tr>
-                    <th class="px-6 py-4 font-medium text-[#4B5563]">Patient</th>
-                    <th class="px-6 py-4 font-medium text-[#4B5563]">Contenu</th>
-                    <th class="px-6 py-4 font-medium text-[#4B5563]">Date</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-[#E5E0D8]">
-                {% for note in notes %}
-                <tr class="hover:bg-[#F5F1EB]/50">
-                    <td class="px-6 py-4 text-[#4B5563]">{{ note.patient ? (note.patient.nom ~ ' ' ~ note.patient.prenom) : '—' }}</td>
-                    <td class="px-6 py-4 text-[#6B7280] max-w-md">{{ note.contenu|u.truncate(120) }}</td>
-                    <td class="px-6 py-4 text-[#6B7280] whitespace-nowrap">{{ note.dateCreation ? note.dateCreation|date('d/m/Y H:i') : '—' }}</td>
-                </tr>
-                {% else %}
-                <tr><td colspan="3" class="px-6 py-8 text-center text-[#6B7280]">Aucune note.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    {% endif %}
+
+    <!-- Formulaire nouvelle note -->
+    <div class="bg-white rounded-2xl border border-[#E5E0D8] shadow-lg overflow-hidden">
+        <div class="p-6 border-b border-[#E5E0D8] bg-gradient-to-r from-[#A7C7E7]/10 to-transparent">
+            <h2 class="text-xl font-semibold text-gray-800">Nouvelle note</h2>
+            <p class="text-sm text-gray-600 mt-1">Documentez la progression de vos patients</p>
+        </div>
+        <div class="p-6">
+            {% if patients is empty %}
+                <p class="text-[#6B7280]">Aucun patient pour l'instant. Les patients apparaîtront après un premier rendez-vous.</p>
+            {% else %}
+                {{ form_start(form, { attr: { class: 'space-y-4' }, label_attr: { class: 'block text-[#4B5563] font-medium mb-1' } }) }}
+                {{ form_errors(form) }}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        {{ form_label(form.patient) }}
+                        {{ form_widget(form.patient) }}
+                        {{ form_errors(form.patient) }}
+                    </div>
+                    <div class="md:col-span-2">
+                        {{ form_label(form.contenu) }}
+                        {{ form_widget(form.contenu) }}
+                        {{ form_errors(form.contenu) }}
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <button type="submit" class="px-4 py-2 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Enregistrer la note</button>
+                </div>
+                {{ form_end(form) }}
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Tableau des notes -->
+    <div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
+        <div class="p-4 border-b border-[#E5E0D8]">
+            <h2 class="text-lg font-medium text-[#4B5563]">Notes enregistrées</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-[#F5F1EB] border-b border-[#E5E0D8]">
+                    <tr>
+                        <th class="px-6 py-4 font-medium text-[#4B5563]">Patient</th>
+                        <th class="px-6 py-4 font-medium text-[#4B5563]">Contenu</th>
+                        <th class="px-6 py-4 font-medium text-[#4B5563]">Date</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-[#E5E0D8]">
+                    {% for note in notes %}
+                    <tr class="hover:bg-[#F5F1EB]/50">
+                        <td class="px-6 py-4 text-[#4B5563]">{{ note.patient ? (note.patient.nom ~ ' ' ~ note.patient.prenom) : '—' }}</td>
+                        <td class="px-6 py-4 text-[#6B7280] max-w-md">{{ note.contenu|u.truncate(120) }}</td>
+                        <td class="px-6 py-4 text-[#6B7280] whitespace-nowrap">{{ note.dateCreation ? note.dateCreation|date('d/m/Y H:i') : '—' }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="3" class="px-6 py-8 text-center text-[#6B7280]">Aucune note.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 {% endblock %}

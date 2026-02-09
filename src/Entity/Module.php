@@ -52,6 +52,7 @@ class Module
     #[ORM\OneToMany(targetEntity: Blog::class, mappedBy: 'module', cascade: ['remove'])]
     private Collection $blogs;
 
+<<<<<<< HEAD
     #[ORM\Column(type: 'string', enumType: CategorieModule::class, columnDefinition: "ENUM('', 'COMPRENDRE_TSA', 'AUTONOMIE', 'COMMUNICATION', 'EMOTIONS', 'VIE_QUOTIDIENNE', 'ACCOMPAGNEMENT') NOT NULL")]
     private CategorieModule $categorie;
 
@@ -61,12 +62,25 @@ class Module
     #[ORM\OneToMany(targetEntity: Ressource::class, mappedBy: 'module', orphanRemoval: true)]
     private Collection $ressources;
 
+=======
+    #[ORM\OneToMany(targetEntity: Ressource::class, mappedBy: 'module', cascade: ['remove'])]
+    private Collection $ressources;
+
+    #[ORM\Column(type: 'string', enumType: CategorieModule::class, columnDefinition: "ENUM('', 'COMPRENDRE_TSA', 'AUTONOMIE', 'COMMUNICATION', 'EMOTIONS', 'VIE_QUOTIDIENNE', 'ACCOMPAGNEMENT') NOT NULL")]
+    private CategorieModule $categorie;
+
+>>>>>>> origin/integreModule
 
     public function __construct()
     {
         $this->blogs = new ArrayCollection();
+<<<<<<< HEAD
         $this->categorie = CategorieModule::EMPTY;
         $this->ressources = new ArrayCollection();
+=======
+        $this->ressources = new ArrayCollection();
+        $this->categorie = CategorieModule::EMPTY;
+>>>>>>> origin/integreModule
     }
 
     public function getId(): ?int
@@ -212,6 +226,7 @@ class Module
         return $this;
     }
 
+<<<<<<< HEAD
     public function getCategorie(): CategorieModule
     {
         return $this->categorie;
@@ -224,6 +239,8 @@ class Module
         return $this;
     }
 
+=======
+>>>>>>> origin/integreModule
     /**
      * @return Collection<int, Ressource>
      */
@@ -253,4 +270,19 @@ class Module
 
         return $this;
     }
+<<<<<<< HEAD
+=======
+
+    public function getCategorie(): CategorieModule
+    {
+        return $this->categorie;
+    }
+
+    public function setCategorie(CategorieModule $categorie): static
+    {
+        $this->categorie = $categorie;
+
+        return $this;
+    }
+>>>>>>> origin/integreModule
 }

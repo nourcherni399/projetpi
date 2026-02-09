@@ -7,7 +7,10 @@ namespace App\Controller;
 use App\Entity\Evenement;
 use App\Form\EvenementType;
 use App\Repository\EvenementRepository;
+<<<<<<< HEAD
 use App\Repository\InscritEventsRepository;
+=======
+>>>>>>> origin/integreModule
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,7 +23,10 @@ final class EvenementController extends AbstractController
 {
     public function __construct(
         private readonly EvenementRepository $evenementRepository,
+<<<<<<< HEAD
         private readonly InscritEventsRepository $inscritEventsRepository,
+=======
+>>>>>>> origin/integreModule
         private readonly EntityManagerInterface $entityManager,
     ) {
     }
@@ -30,7 +36,11 @@ final class EvenementController extends AbstractController
     {
         $q = $request->query->get('q');
         $sortBy = $request->query->get('sort', 'date');
+<<<<<<< HEAD
         if (!in_array($sortBy, ['date', 'lieu', 'theme', 'titre'], true)) {
+=======
+        if (!in_array($sortBy, ['date', 'lieu', 'theme'], true)) {
+>>>>>>> origin/integreModule
             $sortBy = 'date';
         }
         $sortOrder = $request->query->get('order', 'asc');
@@ -53,6 +63,7 @@ final class EvenementController extends AbstractController
         if ($evenement === null) {
             throw new NotFoundHttpException('Événement introuvable.');
         }
+<<<<<<< HEAD
         $participants = $this->inscritEventsRepository->findByEvenementOrderByDate($evenement);
         return $this->render('admin/evenement/show.html.twig', [
             'evenement' => $evenement,
@@ -94,6 +105,9 @@ final class EvenementController extends AbstractController
         $this->entityManager->flush();
         $this->addFlash('success', 'Inscription refusée.');
         return $this->redirectToRoute('admin_evenement_show', ['id' => $inscription->getEvenement()->getId()]);
+=======
+        return $this->render('admin/evenement/show.html.twig', ['evenement' => $evenement]);
+>>>>>>> origin/integreModule
     }
 
     #[Route('/new', name: 'admin_evenement_new', methods: ['GET', 'POST'])]

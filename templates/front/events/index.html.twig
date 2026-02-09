@@ -11,6 +11,7 @@
     <p class="text-[#6B7280] max-w-2xl mx-auto">Découvrez nos ateliers et rencontres par thématique.</p>
 </section>
 
+<<<<<<< HEAD
 <form method="get" action="{{ path('user_events') }}" class="mb-8 p-5 bg-white rounded-xl border border-[#E5E0D8] shadow-sm">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
         <div>
@@ -81,6 +82,15 @@
         <div class="events-card-body flex flex-col flex-1 min-w-0">
         <div class="p-5 border-b border-[#E5E0D8]">
             {% if thematique.couleur and not thematique.image %}
+=======
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for item in grouped %}
+    {% set thematique = item.thematique %}
+    {% set evenements = item.evenements %}
+    <div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden flex flex-col {{ thematique.couleur ? 'border-l-4' : '' }}" {% if thematique.couleur %}style="border-left-color: {{ thematique.couleur }};"{% endif %}>
+        <div class="p-5 border-b border-[#E5E0D8]">
+            {% if thematique.couleur %}
+>>>>>>> origin/integreModule
             <span class="inline-block w-10 h-10 rounded-lg border border-[#E5E0D8] mb-3" style="background-color: {{ thematique.couleur }};" title="Couleur"></span>
             {% endif %}
             <h2 class="text-lg font-semibold text-[#4B5563] mb-1">{{ thematique.nomThematique }}</h2>
@@ -106,7 +116,10 @@
             <p class="text-[#6B7280] text-sm py-2">Aucun événement pour le moment.</p>
             {% endfor %}
         </div>
+<<<<<<< HEAD
         </div>
+=======
+>>>>>>> origin/integreModule
     </div>
     {% endfor %}
 
@@ -136,6 +149,7 @@
 {% if grouped is empty and (sansThematique|default([])) is empty %}
 <p class="text-center text-[#6B7280] py-12">Aucun événement à venir pour le moment.</p>
 {% endif %}
+<<<<<<< HEAD
 
 <style>
 #thematiques-container[data-view="list"] {
@@ -200,4 +214,6 @@
     } catch (e) {}
 })();
 </script>
+=======
+>>>>>>> origin/integreModule
 {% endblock %}

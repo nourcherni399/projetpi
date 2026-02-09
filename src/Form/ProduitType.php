@@ -9,12 +9,22 @@ use App\Enum\Categorie;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
+<<<<<<< HEAD
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+=======
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\File;
+>>>>>>> origin/integreModule
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\PositiveOrZero;
 
@@ -25,7 +35,10 @@ final class ProduitType extends AbstractType
         $builder
             ->add('nom', TextType::class, [
                 'label' => 'Nom du produit',
+<<<<<<< HEAD
                 'constraints' => [new NotBlank(message: 'Le nom est obligatoire.')],
+=======
+>>>>>>> origin/integreModule
                 'attr' => [
                     'class' => 'mt-1 block w-full rounded-lg border border-[#E5E0D8] bg-white px-4 py-2.5 text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]',
                     'placeholder' => 'Ex. Coussin sensoriel lesté',
@@ -33,7 +46,10 @@ final class ProduitType extends AbstractType
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Description',
+<<<<<<< HEAD
                 'required' => false,
+=======
+>>>>>>> origin/integreModule
                 'attr' => [
                     'class' => 'mt-1 block w-full rounded-lg border border-[#E5E0D8] bg-white px-4 py-2.5 text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]',
                     'rows' => 4,
@@ -45,12 +61,16 @@ final class ProduitType extends AbstractType
                 'class' => Categorie::class,
                 'choice_label' => fn (Categorie $c) => $c->label(),
                 'placeholder' => 'Choisir une catégorie',
+<<<<<<< HEAD
                 'constraints' => [new NotBlank(message: 'La catégorie est obligatoire.')],
+=======
+>>>>>>> origin/integreModule
                 'attr' => [
                     'class' => 'mt-1 block w-full rounded-lg border border-[#E5E0D8] bg-white px-4 py-2.5 text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]',
                 ],
             ])
             ->add('prix', NumberType::class, [
+<<<<<<< HEAD
                 'label' => 'Prix (€)',
                 'html5' => true,
                 'scale' => 2,
@@ -62,6 +82,12 @@ final class ProduitType extends AbstractType
                     'class' => 'mt-1 block w-full rounded-lg border border-[#E5E0D8] bg-white px-4 py-2.5 text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]',
                     'min' => 0,
                     'step' => '0.01',
+=======
+                'label' => 'Prix (د.ت)',
+                'scale' => 2,
+                'attr' => [
+                    'class' => 'mt-1 block w-full rounded-lg border border-[#E5E0D8] bg-white px-4 py-2.5 text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]',
+>>>>>>> origin/integreModule
                     'placeholder' => '0.00',
                 ],
             ])
@@ -74,12 +100,37 @@ final class ProduitType extends AbstractType
                 ],
                 'label_attr' => ['class' => 'text-[#4B5563]'],
             ])
+<<<<<<< HEAD
             ->add('image', UrlType::class, [
                 'label' => 'URL de l\'image',
                 'required' => false,
                 'attr' => [
                     'class' => 'mt-1 block w-full rounded-lg border border-[#E5E0D8] bg-white px-4 py-2.5 text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]',
                     'placeholder' => 'https://…',
+=======
+            ->add('image', FileType::class, [
+                'label' => 'Image du produit',
+                'required' => false,
+                'mapped' => false,
+                'constraints' => [
+                    new File([
+                        'maxSize' => '5M',
+                        'mimeTypes' => [
+                            'image/jpeg',
+                            'image/jpg', 
+                            'image/png',
+                            'image/gif',
+                            'image/webp'
+                        ],
+                        'mimeTypesMessage' => 'Veuillez uploader une image valide (JPEG, PNG, GIF ou WebP).',
+                        'maxSizeMessage' => 'L\'image ne doit pas dépasser 5MB.',
+                        'uploadErrorMessage' => 'Une erreur est survenue lors de l\'upload de l\'image.',
+                    ])
+                ],
+                'attr' => [
+                    'class' => 'mt-1 block w-full rounded-lg border border-[#E5E0D8] bg-white px-4 py-2.5 text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]',
+                    'accept' => 'image/*',
+>>>>>>> origin/integreModule
                 ],
             ]);
     }

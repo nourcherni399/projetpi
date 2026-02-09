@@ -1,4 +1,3 @@
-
 {% extends 'layouts/admin.html.twig' %}
 
 {% block title %}Mon profil - AutiCare Admin{% endblock %}
@@ -11,7 +10,7 @@
         </div>
         <div>
             <h1 class="text-2xl font-bold text-[#4B5563]">Mon compte</h1>
-            <p class="text-[#6B7280]">Modifiez vos informations dans l’interface d’administration</p>
+            <p class="text-[#6B7280]">Modifiez vos informations dans l'interface d'administration</p>
         </div>
     </div>
 
@@ -94,11 +93,17 @@
                     </div>
                 </div>
             {% endif %}
-            <div class="pt-6 flex items-center gap-3">
+            <div class="pt-6 flex items-center gap-3 flex-wrap">
                 {{ form_widget(form.submit, {'attr': {'class': 'inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#A7C7E7] text-white font-semibold hover:bg-[#96B8DC] focus:outline focus:ring-2 focus:ring-[#A7C7E7] focus:ring-offset-2 transition-colors cursor-pointer'}}) }}
                 <a href="{{ path('admin_dashboard') }}" class="inline-flex items-center gap-2 px-4 py-3 rounded-xl border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB] transition-colors">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                     Retour
+                </a>
+                <a href="{{ path('app_logout') }}" class="inline-flex items-center gap-2 px-4 py-3 rounded-xl border border-red-200 text-red-600 font-medium hover:bg-red-50 transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    Se déconnecter
                 </a>
             </div>
         {{ form_end(form) }}
