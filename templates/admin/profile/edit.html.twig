@@ -1,0 +1,110 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> bc1944e (Integration user - PI)
+{% extends 'layouts/admin.html.twig' %}
+
+{% block title %}Mon profil - AutiCare Admin{% endblock %}
+
+{% block admin_content %}
+<div class="max-w-3xl">
+    <div class="flex items-center gap-4 mb-8">
+        <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-[#A7C7E7]/20 text-[#A7C7E7]">
+            <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+        </div>
+        <div>
+            <h1 class="text-2xl font-bold text-[#4B5563]">Mon compte</h1>
+            <p class="text-[#6B7280]">Modifiez vos informations dans l’interface d’administration</p>
+        </div>
+    </div>
+
+    {% for message in app.flashes('success') %}
+        <div class="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-3">
+            <span class="flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100 text-emerald-600">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+            </span>
+            <p class="text-emerald-700 font-medium">{{ message }}</p>
+        </div>
+    {% endfor %}
+
+    <div class="bg-white rounded-2xl shadow-sm border border-[#E5E0D8] overflow-hidden">
+        <div class="px-8 py-6 bg-gradient-to-r from-[#A7C7E7]/10 to-transparent border-b border-[#E5E0D8] flex items-center gap-3">
+            <span class="flex items-center justify-center w-10 h-10 rounded-xl bg-[#A7C7E7]/20 text-[#A7C7E7]">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+            </span>
+            <div>
+                <h2 class="text-lg font-semibold text-[#4B5563]">Informations personnelles</h2>
+                <p class="text-sm text-[#6B7280]">Nom, prénom, email, téléphone</p>
+            </div>
+        </div>
+
+        {{ form_start(form, {'attr': {'class': 'p-8 space-y-6'}}) }}
+            {{ form_errors(form) }}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    {{ form_label(form.prenom, null, {'label_attr': {'class': 'block text-[#4B5563] font-medium mb-2'}}) }}
+                    {{ form_widget(form.prenom) }}
+                    {{ form_errors(form.prenom) }}
+                </div>
+                <div>
+                    {{ form_label(form.nom, null, {'label_attr': {'class': 'block text-[#4B5563] font-medium mb-2'}}) }}
+                    {{ form_widget(form.nom) }}
+                    {{ form_errors(form.nom) }}
+                </div>
+            </div>
+            <div>
+                {{ form_label(form.email, null, {'label_attr': {'class': 'block text-[#4B5563] font-medium mb-2'}}) }}
+                {{ form_widget(form.email) }}
+                {{ form_errors(form.email) }}
+            </div>
+            <div>
+                {{ form_label(form.telephone, null, {'label_attr': {'class': 'block text-[#4B5563] font-medium mb-2'}}) }}
+                {{ form_widget(form.telephone) }}
+                {{ form_errors(form.telephone) }}
+            </div>
+            {% if form.specialite is defined %}
+                <div class="pt-6 border-t border-[#E5E0D8]">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="w-1 h-6 rounded-full bg-[#A7C7E7]"></span>
+                        <h3 class="text-base font-semibold text-[#4B5563]">Informations professionnelles</h3>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            {{ form_label(form.specialite, null, {'label_attr': {'class': 'block text-[#4B5563] font-medium mb-2'}}) }}
+                            {{ form_widget(form.specialite) }}
+                            {{ form_errors(form.specialite) }}
+                        </div>
+                        <div>
+                            {{ form_label(form.nomCabinet, null, {'label_attr': {'class': 'block text-[#4B5563] font-medium mb-2'}}) }}
+                            {{ form_widget(form.nomCabinet) }}
+                            {{ form_errors(form.nomCabinet) }}
+                        </div>
+                        <div>
+                            {{ form_label(form.telephoneCabinet, null, {'label_attr': {'class': 'block text-[#4B5563] font-medium mb-2'}}) }}
+                            {{ form_widget(form.telephoneCabinet) }}
+                            {{ form_errors(form.telephoneCabinet) }}
+                        </div>
+                        <div>
+                            {{ form_label(form.tarifConsultation, null, {'label_attr': {'class': 'block text-[#4B5563] font-medium mb-2'}}) }}
+                            {{ form_widget(form.tarifConsultation) }}
+                            {{ form_errors(form.tarifConsultation) }}
+                        </div>
+                        <div class="md:col-span-2">
+                            {{ form_label(form.adresseCabinet, null, {'label_attr': {'class': 'block text-[#4B5563] font-medium mb-2'}}) }}
+                            {{ form_widget(form.adresseCabinet) }}
+                            {{ form_errors(form.adresseCabinet) }}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            <div class="pt-6 flex items-center gap-3">
+                {{ form_widget(form.submit, {'attr': {'class': 'inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#A7C7E7] text-white font-semibold hover:bg-[#96B8DC] focus:outline focus:ring-2 focus:ring-[#A7C7E7] focus:ring-offset-2 transition-colors cursor-pointer'}}) }}
+                <a href="{{ path('admin_dashboard') }}" class="inline-flex items-center gap-2 px-4 py-3 rounded-xl border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB] transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                    Retour
+                </a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

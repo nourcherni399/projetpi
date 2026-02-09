@@ -142,7 +142,11 @@
     </div>
 </section>
 
+<<<<<<< HEAD
 {# Rejoignez notre communauté #}
+=======
+{# Rejoignez notre communauté (visiteurs) OU message pour les connectés #}
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
 <section class="py-16 border-t border-[#E5E0D8]">
     <div class="max-w-2xl mx-auto px-4 text-center">
         <div class="flex justify-center mb-6">
@@ -150,6 +154,7 @@
                 <svg class="w-10 h-10" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>
             </span>
         </div>
+<<<<<<< HEAD
         <h2 class="text-2xl font-bold text-[#6B7280] mb-3">Rejoignez notre communauté</h2>
         <p class="text-[#6B7280] mb-8">Créez votre compte gratuitement et accédez à tous nos services : produits adaptés, événements exclusifs et un espace d'échange bienveillant.</p>
         <div class="flex flex-wrap gap-4 justify-center">
@@ -162,3 +167,34 @@
     </div>
 </section>
 {% endblock %}
+=======
+        {% if app.user %}
+            <h2 class="text-2xl font-bold text-[#6B7280] mb-3">Vous faites partie de la communauté</h2>
+            <p class="text-[#6B7280] mb-8">Accédez à vos services : produits adaptés, événements et votre espace personnel.</p>
+            <div class="flex flex-wrap gap-4 justify-center">
+                <a href="{{ path('user_profile') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                    Mon profil
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                </a>
+                <a href="{{ path('user_products') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-[#E5E7EB] bg-white text-[#6B7280] font-medium hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Découvrir les produits</a>
+                <a href="{{ path('user_events') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-[#E5E7EB] bg-white text-[#6B7280] font-medium hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Voir les événements</a>
+            </div>
+        {% else %}
+            <h2 class="text-2xl font-bold text-[#6B7280] mb-3">Rejoignez notre communauté</h2>
+            <p class="text-[#6B7280] mb-8">Créez votre compte gratuitement et accédez à tous nos services : produits adaptés, événements exclusifs et un espace d'échange bienveillant.</p>
+            <div class="flex flex-wrap gap-4 justify-center">
+                <a href="{{ path('register') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                    Créer mon compte
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                </a>
+                <a href="#" class="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-[#E5E7EB] bg-white text-[#6B7280] font-medium hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Nous contacter</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+<<<<<<< HEAD
+{% endblock %}
+=======
+{% endblock %}
+>>>>>>> bc1944e (Integration user - PI)
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3

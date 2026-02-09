@@ -31,7 +31,10 @@ class RendezVousRepository extends ServiceEntityRepository
             ->andWhere('r.medecin = :medecin')
             ->setParameter('medecin', $medecin)
             ->orderBy('r.id', 'DESC')
+<<<<<<< HEAD
             ->setMaxResults(1000) // Limite de 1000 résultats pour éviter l'épuisement de mémoire
+=======
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
             ->getQuery()
             ->getResult();
     }
@@ -74,7 +77,10 @@ class RendezVousRepository extends ServiceEntityRepository
             ->andWhere('r.patient = :patient')
             ->setParameter('patient', $patient)
             ->orderBy('r.id', 'DESC')
+<<<<<<< HEAD
             ->setMaxResults(1000) // Limite de 1000 résultats pour éviter l'épuisement de mémoire
+=======
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
             ->getQuery()
             ->getResult();
     }
@@ -90,7 +96,10 @@ class RendezVousRepository extends ServiceEntityRepository
             ->setParameter('medecin', $medecin)
             ->setParameter('status', StatusRendezVous::EN_ATTENTE)
             ->orderBy('r.id', 'DESC')
+<<<<<<< HEAD
             ->setMaxResults(1000) // Limite de 1000 résultats pour éviter l'épuisement de mémoire
+=======
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
             ->getQuery()
             ->getResult();
     }
@@ -110,6 +119,7 @@ class RendezVousRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
         return $count > 0;
     }
+<<<<<<< HEAD
 
     public function countByMedecin(Medcin $medecin): int
     {
@@ -191,4 +201,6 @@ class RendezVousRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+=======
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
 }

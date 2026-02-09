@@ -10,6 +10,10 @@ use App\Entity\Patient;
 use App\Entity\ParentUser;
 use App\Entity\User;
 use App\Enum\UserRole;
+<<<<<<< HEAD
+=======
+use App\Form\ProfileType;
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
 use App\Form\UserCreateType;
 use App\Form\UserEditType;
 use App\Repository\UserRepository;
@@ -36,6 +40,30 @@ final class AdminController extends AbstractController
         return $this->render('admin/dashboard/index.html.twig');
     }
 
+<<<<<<< HEAD
+=======
+    #[Route('/admin/mon-profil', name: 'admin_profile', methods: ['GET', 'POST'])]
+    public function profile(Request $request): Response
+    {
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            return $this->redirectToRoute('app_login');
+        }
+        $form = $this->createForm(ProfileType::class, $user, ['data_class' => $user::class]);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $user->setUpdatedAt(new \DateTimeImmutable());
+            $this->entityManager->flush();
+            $this->addFlash('success', 'Votre profil a été mis à jour avec succès.');
+            return $this->redirectToRoute('admin_profile');
+        }
+        return $this->render('admin/profile/edit.html.twig', [
+            'user' => $user,
+            'form' => $form,
+        ]);
+    }
+
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
     #[Route('/admin/utilisateurs', name: 'admin_users', methods: ['GET'])]
     public function users(Request $request): Response
     {
@@ -209,4 +237,12 @@ final class AdminController extends AbstractController
             UserRole::USER => new Patient(),
         };
     }
+<<<<<<< HEAD
 }
+=======
+<<<<<<< HEAD
+}
+=======
+}
+>>>>>>> bc1944e (Integration user - PI)
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3

@@ -8,8 +8,15 @@ use App\Entity\Medcin;
 use App\Entity\ParentUser;
 use App\Entity\Patient;
 use App\Entity\User;
+<<<<<<< HEAD
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
+=======
+use App\Enum\Sexe;
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\EnumType;
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
@@ -36,17 +43,39 @@ final class ProfileType extends AbstractType
         $builder
             ->add('nom', TextType::class, [
                 'label' => 'Nom',
+<<<<<<< HEAD
                 'constraints' => [new NotBlank(message: 'Le nom est obligatoire.')],
+=======
+                'constraints' => [
+                    new NotBlank(message: 'Le nom est obligatoire.'),
+                    new Length(['min' => 1, 'max' => 255, 'maxMessage' => 'Le nom ne peut pas dépasser {{ limit }} caractères.']),
+                ],
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
                 'attr' => self::ATTR + ['placeholder' => 'Votre nom'],
             ])
             ->add('prenom', TextType::class, [
                 'label' => 'Prénom',
+<<<<<<< HEAD
                 'constraints' => [new NotBlank(message: 'Le prénom est obligatoire.')],
+=======
+                'constraints' => [
+                    new NotBlank(message: 'Le prénom est obligatoire.'),
+                    new Length(['min' => 1, 'max' => 255, 'maxMessage' => 'Le prénom ne peut pas dépasser {{ limit }} caractères.']),
+                ],
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
                 'attr' => self::ATTR + ['placeholder' => 'Votre prénom'],
             ])
             ->add('email', EmailType::class, [
                 'label' => 'Adresse e-mail',
+<<<<<<< HEAD
                 'constraints' => [new NotBlank(message: "L'email est obligatoire."), new Email(message: "L'adresse email n'est pas valide.")],
+=======
+                'constraints' => [
+                    new NotBlank(message: "L'email est obligatoire."),
+                    new Email(message: "L'adresse email n'est pas valide."),
+                    new Length(['max' => 180, 'maxMessage' => "L'email ne peut pas dépasser {{ limit }} caractères."]),
+                ],
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
                 'attr' => self::ATTR + ['placeholder' => 'exemple@email.com'],
             ])
             ->add('telephone', IntegerType::class, [
@@ -73,11 +102,21 @@ final class ProfileType extends AbstractType
                     'constraints' => [new Length(['max' => 500])],
                     'attr' => self::ATTR + ['placeholder' => 'Votre adresse'],
                 ])
+<<<<<<< HEAD
                 ->add('sexe', TextType::class, [
                     'label' => 'Sexe',
                     'required' => false,
                     'constraints' => [new Length(['max' => 20])],
                     'attr' => self::ATTR + ['placeholder' => 'Ex. M, F'],
+=======
+                ->add('sexe', EnumType::class, [
+                    'label' => 'Sexe',
+                    'class' => Sexe::class,
+                    'choice_label' => fn (Sexe $s) => $s->value,
+                    'placeholder' => 'Choisir',
+                    'required' => false,
+                    'attr' => self::ATTR,
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
                 ]);
         }
 
@@ -119,7 +158,11 @@ final class ProfileType extends AbstractType
                 ->add('tarifConsultation', NumberType::class, [
                     'label' => 'Tarif consultation (€)',
                     'required' => false,
+<<<<<<< HEAD
                     'html5' => true,
+=======
+                    'constraints' => [new \Symfony\Component\Validator\Constraints\Range(['min' => 0, 'max' => 99999.99, 'notInRangeMessage' => 'Le tarif doit être entre {{ min }} et {{ max }} €.'])],
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
                     'attr' => self::ATTR + ['placeholder' => '80', 'step' => '0.01', 'min' => '0'],
                 ]);
         }
@@ -138,4 +181,8 @@ final class ProfileType extends AbstractType
             'data_class' => User::class,
         ]);
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3

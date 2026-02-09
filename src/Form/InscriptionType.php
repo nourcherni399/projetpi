@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Form;
 
+use App\Enum\Sexe;
+
 use App\Enum\UserRole;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
@@ -27,6 +29,10 @@ use Symfony\Component\Validator\Constraints\Regex;
  * Formulaire d'inscription publique.
  * Les rôles Patient, Parent, Utilisateur et Médecin sont proposés.
  * Les comptes Admin ne peuvent être créés que par un administrateur (interface /admin/utilisateurs/new).
+
+ * Seuls les rôles Patient, Parent et Utilisateur sont proposés.
+ * Les comptes Admin et Médecin ne peuvent être créés que par un administrateur (interface /admin/utilisateurs/new).
+
  */
 final class InscriptionType extends AbstractType
 {
@@ -34,6 +40,8 @@ final class InscriptionType extends AbstractType
     {
         $attr = [
             'class' => 'mt-1 block w-full rounded-lg border border-[#E5E0D8] bg-white px-4 py-2.5 text-[#4B5563] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7]',
+            'class' => 'mt-1 block w-full rounded-lg border border-[#E5E0D8] bg-white px-4 py-2.5 text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]',
+
         ];
 
         $builder
@@ -66,7 +74,8 @@ final class InscriptionType extends AbstractType
                 'label' => 'Téléphone',
                 'constraints' => [
                     new NotBlank(message: 'Le téléphone est obligatoire.'),
-                    new Range(['min' => 10000000, 'max' => 999999999, 'notInRangeMessage' => 'Le téléphone doit contenir entre 8 et 12 chiffres.']),
+                    new Range(['min' => 10000000, 'max' => 999999999999, 'notInRangeMessage' => 'Le téléphone doit contenir entre 8 et 12 chiffres.']),
+
                 ],
                 'attr' => $attr + ['placeholder' => '612345678'],
             ])
@@ -96,12 +105,16 @@ final class InscriptionType extends AbstractType
                 'class' => UserRole::class,
                 'choice_label' => fn (UserRole $r) => match ($r) {
                     UserRole::MEDECIN => 'Médecin / Professionnel de santé',
+
                     UserRole::PARENT => 'Parent / Proche',
                     UserRole::PATIENT => 'Personne concernée (patient)',
                     UserRole::USER => 'Utilisateur',
                     default => $r->value,
                 },
                 'choices' => [UserRole::MEDECIN, UserRole::PATIENT, UserRole::PARENT, UserRole::USER],
+
+                'choices' => [UserRole::PATIENT, UserRole::PARENT, UserRole::USER],
+
                 'placeholder' => 'Sélectionnez votre profil',
                 'constraints' => [new NotBlank(message: 'Veuillez sélectionner un profil.')],
                 'attr' => $attr + ['data-role-select' => '1'],
@@ -142,15 +155,16 @@ final class InscriptionType extends AbstractType
                 'constraints' => [new Length(['max' => 10])],
                 'attr' => $attr + ['placeholder' => '50', 'data-role-fields' => 'ROLE_MEDECIN'],
             ])
+
             ->add('dateNaissance', DateType::class, [
                 'label' => 'Date de naissance',
                 'widget' => 'single_text',
                 'required' => false,
                 'help' => 'La date ne doit pas être dans le futur.',
-                'constraints' => [
-                    new LessThanOrEqual('today', message: 'La date de naissance ne peut pas être dans le futur.')
-                ],
-                'attr' => $attr + ['data-role-fields' => 'ROLE_PATIENT'],
+
+                'constraints' => [new LessThanOrEqual(new \DateTimeImmutable('today'), message: 'La date de naissance ne peut pas être dans le futur.')],
+                'attr' => $attr + ['data-role-fields' => 'ROLE_PATIENT', 'max' => (new \DateTimeImmutable('today'))->format('Y-m-d')],
+
             ])
             ->add('adresse', TextType::class, [
                 'label' => 'Adresse',
@@ -158,11 +172,15 @@ final class InscriptionType extends AbstractType
                 'constraints' => [new Length(['max' => 500])],
                 'attr' => $attr + ['placeholder' => 'Adresse', 'data-role-fields' => 'ROLE_PATIENT'],
             ])
-            ->add('sexe', TextType::class, [
+
+            ->add('sexe', EnumType::class, [
                 'label' => 'Sexe',
+                'class' => Sexe::class,
+                'choice_label' => fn (Sexe $s) => $s->value,
+                'placeholder' => 'Choisir',
                 'required' => false,
-                'constraints' => [new Length(['max' => 20])],
-                'attr' => $attr + ['placeholder' => 'Ex. M, F', 'data-role-fields' => 'ROLE_PATIENT'],
+                'attr' => $attr + ['data-role-fields' => 'ROLE_PATIENT'],
+
             ])
             ->add('submit', SubmitType::class, [
                 'label' => 'Créer mon compte',
@@ -172,11 +190,7 @@ final class InscriptionType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults([
-            'data_class' => null,
-            'csrf_protection' => true,
-            'csrf_field_name' => '_token',
-            'csrf_token_id' => 'registration',
-        ]);
+
+        $resolver->setDefaults(['data_class' => null]);
     }
 }

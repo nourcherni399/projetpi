@@ -9,13 +9,49 @@
 {% endfor %}
 <div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
     <div class="p-4 border-b border-[#E5E0D8] flex flex-wrap gap-4 justify-between">
+<<<<<<< HEAD
         <input type="search" placeholder="Rechercher un module…" class="px-4 py-2 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#4B5563] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7] max-w-xs">
         <a href="{{ path('admin_module_new') }}" class="px-4 py-2 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Nouveau module</a>
+=======
+        <div class="flex-1 max-w-xs">
+            <div class="relative">
+                <input 
+                    type="search" 
+                    id="searchInput"
+                    placeholder="Rechercher un module par titre…" 
+                    class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#4B5563] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7]"
+                >
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                    </svg>
+                </span>
+            </div>
+        </div>
+        <div class="flex gap-3">
+            <a href="{{ path('admin_module_new') }}" class="px-4 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Nouveau module</a>
+            <button onclick="toggleAlphabeticalSort()" id="sortButton" class="px-4 py-2.5 rounded-lg bg-purple-600 text-white font-medium hover:bg-purple-700 focus:outline focus:ring-2 focus:ring-purple-500 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                </svg>
+                <span id="sortButtonText">A-Z</span>
+            </button>
+            <button onclick="exportToPDF()" class="px-4 py-2.5 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 focus:outline focus:ring-2 focus:ring-red-500 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8a2 2 0 00-2-2h-2" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 2v6h6" />
+                    <text x="7" y="18" font-size="3" font-weight="bold" fill="white">PDF</text>
+                </svg>
+                Exporter PDF
+            </button>
+        </div>
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
     </div>
     <div class="overflow-x-auto">
         <table class="w-full text-left">
             <thead class="bg-[#F5F1EB] border-b border-[#E5E0D8]">
                 <tr>
+<<<<<<< HEAD
                     <th class="px-6 py-4 font-medium text-[#4B5563]">Titre</th>
                     <th class="px-6 py-4 font-medium text-[#4B5563]">Niveau</th>
                     <th class="px-6 py-4 font-medium text-[#4B5563]">Publié</th>
@@ -32,9 +68,552 @@
                 </tr>
                 {% else %}
                 <tr><td colspan="4" class="px-6 py-8 text-center text-[#6B7280]">Aucun module.</td></tr>
+=======
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Image</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Titre</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Description</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Niveau</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Catégorie</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Publié</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Articles</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-[#E5E0D8]" id="modulesTableBody">
+                {% for module in modules %}
+                <tr class="hover:bg-[#F5F1EB]/50" data-title="{{ module.titre|lower }}">
+                    <td class="px-6 py-4">
+                        {% if module.image %}
+                            <img src="{{ asset(module.image) }}" alt="{{ module.titre }}" class="w-12 h-12 object-cover rounded-lg">
+                        {% else %}
+                            <div class="w-12 h-12 bg-[#E5E0D8] rounded-lg flex items-center justify-center text-[#6B7280] text-xs">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75416a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487a4.5 4.5 0 0 1 6.364 6.364l-8.485 8.485L6 18l-1.5-1.5Z" />
+                                </svg>
+                            </div>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-[#4B5563] font-medium">{{ module.titre }}</td>
+                    <td class="px-6 py-4 text-[#6B7280] max-w-xs truncate">{{ module.description }}</td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
+                            {% if module.niveau == 'facile' %}bg-green-100 text-green-800
+                            {% elseif module.niveau == 'moyen' %}bg-yellow-100 text-yellow-800
+                            {% else %}bg-red-100 text-red-800{% endif %}">
+                            {{ module.niveau|capitalize }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">
+                            {% if module.categorie %}
+                                {{ module.categorie.label }}
+                            {% else %}
+                                Non défini
+                            {% endif %}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        {% if module.isPublished %}
+                            <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Publié</span>
+                        {% else %}
+                            <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">Brouillon</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+                            {{ module.blogs|length }} article{{ module.blogs|length > 1 ? 's' : '' }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex gap-2">
+                            <a href="{{ path('admin_module_edit', {'id': module.id}) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 focus:outline focus:ring-2 focus:ring-blue-500" title="Modifier">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </a>
+                            <form method="post" action="{{ path('admin_module_delete', {'id': module.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce module ?');" class="inline">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ module.id) }}">
+                                <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 focus:outline focus:ring-2 focus:ring-red-500" title="Supprimer">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="8" class="px-6 py-8 text-center text-[#6B7280]">Aucun module.</td></tr>
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+<<<<<<< HEAD
+=======
+
+<!-- Historique des actions - AFFICHAGE COMME DANS L'IMAGE -->
+<div class="mt-8 bg-white rounded-xl shadow-sm border border-[#E5E0D8] overflow-hidden">
+    <div class="p-6 border-b border-[#E5E0D8]">
+        <h3 class="text-lg font-semibold text-[#4B5563] mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-[#A7C7E7]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Historique des actions
+        </h3>
+        <p class="text-sm text-[#6B7280]">Affichage des 5 dernières actions</p>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-[#F5F1EB] border-b border-[#E5E0D8]">
+                <tr>
+                    <th class="px-6 py-4 text-left font-medium text-[#4B5563]">Date & Heure</th>
+                    <th class="px-6 py-4 text-left font-medium text-[#4B5563]">Utilisateur</th>
+                    <th class="px-6 py-4 text-left font-medium text-[#4B5563]">Action</th>
+                    <th class="px-6 py-4 text-left font-medium text-[#4B5563]">Module</th>
+                    <th class="px-6 py-4 text-left font-medium text-[#4B5563]">Détails</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-[#E5E0D8]">
+                {% for action in actionHistory %}
+                <tr class="hover:bg-[#F5F1EB]/50">
+                    <td class="px-6 py-4 text-[#6B7280]">{{ action.dateHeure|date('d/m/Y H:i') }}</td>
+                    <td class="px-6 py-4 text-[#4B5563]">{{ action.utilisateur }}</td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full
+                            {% if action.action == 'Création' %}bg-green-100 text-green-800
+                            {% elseif action.action == 'Modification' %}bg-blue-100 text-blue-800
+                            {% elseif action.action == 'Publication' %}bg-yellow-100 text-yellow-800
+                            {% elseif action.action == 'Suppression' %}bg-red-100 text-red-800
+                            {% elseif action.action == 'Export PDF' %}bg-purple-100 text-purple-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ action.action }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-[#4B5563] font-medium">{{ action.module ?: '-' }}</td>
+                    <td class="px-6 py-4 text-[#6B7280]">{{ action.details }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="px-6 py-8 text-center text-[#6B7280]">
+                        Aucune action enregistrée pour le moment.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="px-6 py-4 border-t border-[#E5E0D8] bg-[#F5F1EB] text-right">
+        <button class="text-sm text-[#A7C7E7] hover:text-[#B8D4ED] font-medium">Voir tout l'historique →</button>
+    </div>
+</div>
+
+<!-- Visualisations avec sphères et chartes -->
+<div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Sphère des catégories -->
+    <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
+        <h3 class="text-lg font-semibold text-[#4B5563] mb-4">Répartition des modules par catégorie</h3>
+        <div class="relative h-64 flex items-center justify-center">
+            <canvas id="categoryChart" width="300" height="300"></canvas>
+        </div>
+    </div>
+
+    <!-- Sphère des niveaux -->
+    <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
+        <h3 class="text-lg font-semibold text-[#4B5563] mb-4">Répartition des modules par niveau</h3>
+        <div class="relative h-64 flex items-center justify-center">
+            <canvas id="levelChart" width="300" height="300"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Statistiques des modules -->
+<div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Statistiques par catégorie -->
+    <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
+        <h3 class="text-lg font-semibold text-[#4B5563] mb-4">Modules par catégorie</h3>
+        <div class="space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-[#6B7280]">Comprendre le TSA</span>
+                <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                    {{ modules|filter(m => m.categorie.value == 'COMPRENDRE_TSA')|length }}
+                </span>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-[#6B7280]">Autonomie</span>
+                <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                    {{ modules|filter(m => m.categorie.value == 'AUTONOMIE')|length }}
+                </span>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-[#6B7280]">Communication</span>
+                <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
+                    {{ modules|filter(m => m.categorie.value == 'COMMUNICATION')|length }}
+                </span>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-[#6B7280]">Émotions</span>
+                <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">
+                    {{ modules|filter(m => m.categorie.value == 'EMOTIONS')|length }}
+                </span>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-[#6B7280]">Vie quotidienne</span>
+                <span class="px-2 py-1 bg-purple-100 text-purple-800 text-xs font-medium rounded-full">
+                    {{ modules|filter(m => m.categorie.value == 'VIE_QUOTIDIENNE')|length }}
+                </span>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-[#6B7280]">Accompagnement</span>
+                <span class="px-2 py-1 bg-indigo-100 text-indigo-800 text-xs font-medium rounded-full">
+                    {{ modules|filter(m => m.categorie.value == 'ACCOMPAGNEMENT')|length }}
+                </span>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-[#6B7280]">Non défini</span>
+                <span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs font-medium rounded-full">
+                    {{ modules|filter(m => m.categorie.value == '' or m.categorie.value == 'EMPTY')|length }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques par niveau -->
+    <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
+        <h3 class="text-lg font-semibold text-[#4B5563] mb-4">Modules par niveau</h3>
+        <div class="space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-[#6B7280]">Facile</span>
+                <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                    {{ modules|filter(m => m.niveau == 'facile')|length }}
+                </span>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-[#6B7280]">Moyen</span>
+                <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
+                    {{ modules|filter(m => m.niveau == 'moyen')|length }}
+                </span>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-[#6B7280]">Difficile</span>
+                <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">
+                    {{ modules|filter(m => m.niveau == 'difficile')|length }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques générales -->
+    <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
+        <h3 class="text-lg font-semibold text-[#4B5563] mb-4">Statistiques générales</h3>
+        <div class="grid grid-cols-2 gap-4">
+            <div class="text-center">
+                <div class="text-2xl font-bold text-[#4B5563]">{{ modules|length }}</div>
+                <div class="text-sm text-[#6B7280]">Total des modules</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-green-600">{{ modules|filter(m => m.isPublished)|length }}</div>
+                <div class="text-sm text-[#6B7280]">Modules publiés</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-orange-600">{{ modules|filter(m => not m.isPublished)|length }}</div>
+                <div class="text-sm text-[#6B7280]">Brouillons</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const tableBody = document.getElementById('modulesTableBody');
+    const rows = tableBody.getElementsByTagName('tr');
+
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            const title = row.getAttribute('data-title');
+            
+            if (title.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        }
+    });
+
+    const categoryData = {
+        'Comprendre le TSA': {{ modules|filter(m => m.categorie.value == 'COMPRENDRE_TSA')|length }},
+        'Autonomie': {{ modules|filter(m => m.categorie.value == 'AUTONOMIE')|length }},
+        'Communication': {{ modules|filter(m => m.categorie.value == 'COMMUNICATION')|length }},
+        'Émotions': {{ modules|filter(m => m.categorie.value == 'EMOTIONS')|length }},
+        'Vie quotidienne': {{ modules|filter(m => m.categorie.value == 'VIE_QUOTIDIENNE')|length }},
+        'Accompagnement': {{ modules|filter(m => m.categorie.value == 'ACCOMPAGNEMENT')|length }},
+        'Non défini': {{ modules|filter(m => m.categorie.value == '' or m.categorie.value == 'EMPTY')|length }}
+    };
+
+    const levelData = {
+        'Facile': {{ modules|filter(m => m.niveau == 'facile')|length }},
+        'Moyen': {{ modules|filter(m => m.niveau == 'moyen')|length }},
+        'Difficile': {{ modules|filter(m => m.niveau == 'difficile')|length }}
+    };
+
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    const categoryLabels = Object.keys(categoryData);
+    const categoryValues = Object.values(categoryData);
+    const categoryColors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#6366F1', '#9CA3AF'];
+
+    new Chart(categoryCtx, {
+        type: 'pie',
+        data: {
+            labels: categoryLabels,
+            datasets: [{
+                data: categoryValues,
+                backgroundColor: categoryColors,
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            return `${label}: ${value} module${value > 1 ? 's' : ''}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    const levelCtx = document.getElementById('levelChart').getContext('2d');
+    const levelLabels = Object.keys(levelData);
+    const levelValues = Object.values(levelData);
+    const levelColors = ['#10B981', '#F59E0B', '#EF4444'];
+
+    new Chart(levelCtx, {
+        type: 'doughnut',
+        data: {
+            labels: levelLabels,
+            datasets: [{
+                data: levelValues,
+                backgroundColor: levelColors,
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            return `${label}: ${value} module${value > 1 ? 's' : ''}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Fonction d'export PDF
+    window.exportToPDF = function() {
+        // Récupérer les données depuis le tableau HTML
+        const rows = document.querySelectorAll('#modulesTableBody tr:not([style*="display: none"])');
+        const modules = [];
+        
+        rows.forEach(row => {
+            const cells = row.getElementsByTagName('td');
+            if (cells.length >= 8) {
+                const module = {
+                    titre: cells[1].textContent.trim(),
+                    description: cells[2].textContent.trim(),
+                    niveau: cells[3].textContent.trim(),
+                    categorie: cells[4].textContent.trim(),
+                    publie: cells[5].textContent.trim(),
+                    articles: cells[6].textContent.trim()
+                };
+                modules.push(module);
+            }
+        });
+        
+        // Création du document PDF
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        // Titre
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Liste des Modules', 105, 20, { align: 'center' });
+        
+        // Date d'export
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Généré le: ${new Date().toLocaleDateString('fr-FR')}`, 105, 30, { align: 'center' });
+        
+        // Ligne de séparation
+        doc.setLineWidth(0.5);
+        doc.line(20, 35, 190, 35);
+        
+        // En-têtes du tableau
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Titre', 20, 45);
+        doc.text('Description', 60, 45);
+        doc.text('Niveau', 120, 45);
+        doc.text('Catégorie', 140, 45);
+        doc.text('Publié', 170, 45);
+        doc.text('Articles', 190, 45);
+        
+        // Ligne de séparation
+        doc.setLineWidth(0.3);
+        doc.line(20, 50, 190, 50);
+        
+        // Données des modules
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        
+        let yPosition = 55;
+        modules.forEach((module, index) => {
+            // Vérifier si on dépasse la page
+            if (yPosition > 270) {
+                doc.addPage();
+                yPosition = 20;
+            }
+            
+            // Titre
+            doc.text(module.titre.substring(0, 25), 20, yPosition);
+            
+            // Description
+            doc.text(module.description.substring(0, 30), 60, yPosition);
+            
+            // Niveau
+            doc.text(module.niveau, 120, yPosition);
+            
+            // Catégorie
+            doc.text(module.categorie.substring(0, 15), 140, yPosition);
+            
+            // Publié
+            doc.text(module.publie, 170, yPosition);
+            
+            // Articles
+            doc.text(module.articles, 190, yPosition);
+            
+            yPosition += 8;
+        });
+        
+        // Pied de page
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'italic');
+        doc.text(`Total: ${modules.length} modules`, 105, 280, { align: 'center' });
+        
+        // Sauvegarde du PDF
+        doc.save('liste_modules.pdf');
+        
+        // Enregistrer l'action d'export PDF
+        fetch('/admin/modules/export-pdf-action', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        }).then(response => response.json())
+          .then(data => {
+              console.log('Action export PDF enregistrée');
+          })
+          .catch(error => {
+              console.error('Erreur lors de l\'enregistrement de l\'action:', error);
+          });
+        
+        // Notification
+        alert('Le PDF a été généré et téléchargé avec succès !');
+    };
+
+    // Fonction de tri alphabétique
+    window.toggleAlphabeticalSort = function() {
+        const tableBody = document.getElementById('modulesTableBody');
+        const rows = Array.from(tableBody.getElementsByTagName('tr'));
+        const sortButton = document.getElementById('sortButton');
+        const sortButtonText = document.getElementById('sortButtonText');
+        
+        // Vérifier si déjà trié alphabétiquement
+        const isCurrentlySorted = sortButton.dataset.sorted === 'true';
+        
+        if (isCurrentlySorted) {
+            // Remettre dans l'ordre original
+            rows.sort((a, b) => {
+                const originalOrderA = parseInt(a.dataset.originalOrder || '0');
+                const originalOrderB = parseInt(b.dataset.originalOrder || '0');
+                return originalOrderA - originalOrderB;
+            });
+            
+            sortButton.dataset.sorted = 'false';
+            sortButtonText.textContent = 'A-Z';
+            sortButton.classList.remove('bg-purple-700');
+            sortButton.classList.add('bg-purple-600');
+        } else {
+            // Sauvegarder l'ordre original si pas déjà fait
+            if (!tableBody.dataset.originalOrderSaved) {
+                rows.forEach((row, index) => {
+                    row.dataset.originalOrder = index;
+                });
+                tableBody.dataset.originalOrderSaved = 'true';
+            }
+            
+            // Trier alphabétiquement par titre
+            rows.sort((a, b) => {
+                const titleA = a.dataset.title || '';
+                const titleB = b.dataset.title || '';
+                return titleA.localeCompare(titleB, 'fr', { sensitivity: 'base' });
+            });
+            
+            sortButton.dataset.sorted = 'true';
+            sortButtonText.textContent = 'Z-A';
+            sortButton.classList.remove('bg-purple-600');
+            sortButton.classList.add('bg-purple-700');
+        }
+        
+        // Réorganiser les lignes dans le tableau
+        rows.forEach(row => {
+            tableBody.appendChild(row);
+        });
+    };
+});
+</script>
+
+<!-- Inclusion de jsPDF pour l'export PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- Inclusion de Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
 {% endblock %}

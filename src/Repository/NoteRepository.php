@@ -47,6 +47,7 @@ class NoteRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+<<<<<<< HEAD
 
     public function countByMedecin(Medcin $medecin): int
     {
@@ -71,4 +72,6 @@ class NoteRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+=======
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
 }

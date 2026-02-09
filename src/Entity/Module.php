@@ -2,6 +2,10 @@
 
 namespace App\Entity;
 
+<<<<<<< HEAD
+=======
+use App\Enum\CategorieModule;
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
 use App\Repository\ModuleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -48,12 +52,32 @@ class Module
     /**
      * @var Collection<int, Blog>
      */
+<<<<<<< HEAD
     #[ORM\OneToMany(targetEntity: Blog::class, mappedBy: 'module')]
     private Collection $blogs;
 
     public function __construct()
     {
         $this->blogs = new ArrayCollection();
+=======
+    #[ORM\OneToMany(targetEntity: Blog::class, mappedBy: 'module', cascade: ['remove'])]
+    private Collection $blogs;
+
+    #[ORM\Column(type: 'string', enumType: CategorieModule::class, columnDefinition: "ENUM('', 'COMPRENDRE_TSA', 'AUTONOMIE', 'COMMUNICATION', 'EMOTIONS', 'VIE_QUOTIDIENNE', 'ACCOMPAGNEMENT') NOT NULL")]
+    private CategorieModule $categorie;
+
+    /**
+     * @var Collection<int, Ressource>
+     */
+    #[ORM\OneToMany(targetEntity: Ressource::class, mappedBy: 'module', orphanRemoval: true)]
+    private Collection $ressources;
+
+    public function __construct()
+    {
+        $this->blogs = new ArrayCollection();
+        $this->categorie = CategorieModule::EMPTY;
+        $this->ressources = new ArrayCollection();
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
     }
 
     public function getId(): ?int
@@ -69,7 +93,10 @@ class Module
     public function setTitre(string $titre): static
     {
         $this->titre = $titre;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
         return $this;
     }
 
@@ -81,7 +108,10 @@ class Module
     public function setDescription(string $description): static
     {
         $this->description = $description;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
         return $this;
     }
 
@@ -93,7 +123,10 @@ class Module
     public function setContenu(string $contenu): static
     {
         $this->contenu = $contenu;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
         return $this;
     }
 
@@ -105,7 +138,10 @@ class Module
     public function setNiveau(string $niveau): static
     {
         $this->niveau = $niveau;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
         return $this;
     }
 
@@ -117,7 +153,10 @@ class Module
     public function setImage(string $image): static
     {
         $this->image = $image;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
         return $this;
     }
 
@@ -129,7 +168,10 @@ class Module
     public function setIsPublished(bool $isPublished): static
     {
         $this->isPublished = $isPublished;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
         return $this;
     }
 
@@ -141,7 +183,10 @@ class Module
     public function setDateCreation(\DateTime $dateCreation): static
     {
         $this->dateCreation = $dateCreation;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
         return $this;
     }
 
@@ -153,7 +198,10 @@ class Module
     public function setDateModif(\DateTime $dateModif): static
     {
         $this->dateModif = $dateModif;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
         return $this;
     }
 
@@ -165,7 +213,10 @@ class Module
     public function setAdmin(?Admin $admin): static
     {
         $this->admin = $admin;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
         return $this;
     }
 
@@ -183,19 +234,70 @@ class Module
             $this->blogs->add($blog);
             $blog->setModule($this);
         }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
         return $this;
     }
 
     public function removeBlog(Blog $blog): static
     {
         if ($this->blogs->removeElement($blog)) {
+<<<<<<< HEAD
             // set the owning side to null (unless already changed)
+=======
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
             if ($blog->getModule() === $this) {
                 $blog->setModule(null);
             }
         }
+<<<<<<< HEAD
 
         return $this;
     }
 }
+=======
+        return $this;
+    }
+
+    public function getCategorie(): CategorieModule
+    {
+        return $this->categorie;
+    }
+
+    public function setCategorie(CategorieModule $categorie): static
+    {
+        $this->categorie = $categorie;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Ressource>
+     */
+    public function getRessources(): Collection
+    {
+        return $this->ressources;
+    }
+
+    public function addRessource(Ressource $ressource): static
+    {
+        if (!$this->ressources->contains($ressource)) {
+            $this->ressources->add($ressource);
+            $ressource->setModule($this);
+        }
+        return $this;
+    }
+
+    public function removeRessource(Ressource $ressource): static
+    {
+        if ($this->ressources->removeElement($ressource)) {
+            if ($ressource->getModule() === $this) {
+                $ressource->setModule(null);
+            }
+        }
+        return $this;
+    }
+}
+
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3

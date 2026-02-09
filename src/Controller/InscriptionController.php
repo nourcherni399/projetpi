@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+
 use App\Entity\Medcin;
 use App\Entity\Patient;
 use App\Entity\ParentUser;
@@ -40,6 +41,9 @@ final class InscriptionController extends AbstractController
             $email = trim((string) ($data['email'] ?? ''));
             $role = $data['role'] ?? null;
 
+            $email = trim((string) ($data['email'] ?? ''));
+
+
             if ($email === '' || strlen($email) > 180) {
                 $this->addFlash('error', 'Adresse e-mail invalide.');
                 return $this->render('front/auth/register.html.twig', ['form' => $form]);
@@ -50,23 +54,35 @@ final class InscriptionController extends AbstractController
                 return $this->render('front/auth/register.html.twig', ['form' => $form]);
             }
 
+=======
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
             if ($this->userRepository->findOneBy(['email' => $email])) {
                 $this->addFlash('error', 'Un compte existe déjà avec cette adresse e-mail.');
                 return $this->render('front/auth/register.html.twig', ['form' => $form]);
             }
+<<<<<<< HEAD
             
             if (!$role instanceof UserRole || !\in_array($role, [UserRole::MEDECIN, UserRole::PATIENT, UserRole::PARENT, UserRole::USER], true)) {
+=======
+
+            $role = $data['role'];
+            if (!$role instanceof UserRole || !\in_array($role, [UserRole::PATIENT, UserRole::PARENT, UserRole::USER], true)) {
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
                 $this->addFlash('error', 'Profil non autorisé pour l\'inscription.');
                 return $this->render('front/auth/register.html.twig', ['form' => $form]);
             }
 
             try {
+<<<<<<< HEAD
                 $user = match ($role) {
                     UserRole::MEDECIN => new Medcin(),
                     UserRole::PARENT => new ParentUser(),
                     UserRole::PATIENT => new Patient(),
                     default => new Patient(),
                 };
+=======
+                $user = $role === UserRole::PARENT ? new ParentUser() : new Patient();
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
                 $user->setNom(mb_substr(trim((string) ($data['nom'] ?? '')), 0, 255));
                 $user->setPrenom(mb_substr(trim((string) ($data['prenom'] ?? '')), 0, 255));
                 $user->setEmail($email);
@@ -87,6 +103,7 @@ final class InscriptionController extends AbstractController
                     $user->setDateNaissance($dn instanceof \DateTimeInterface ? \DateTimeImmutable::createFromInterface($dn) : null);
                     $adresse = isset($data['adresse']) && $data['adresse'] !== '' ? trim((string) $data['adresse']) : null;
                     $user->setAdresse($adresse !== null && $adresse !== '' ? mb_substr($adresse, 0, 500) : null);
+<<<<<<< HEAD
                     $sexe = isset($data['sexe']) && $data['sexe'] !== '' ? trim((string) $data['sexe']) : null;
                     $user->setSexe($sexe !== null && $sexe !== '' ? mb_substr($sexe, 0, 20) : null);
                 }
@@ -105,6 +122,10 @@ final class InscriptionController extends AbstractController
                     
                     $tarifConsultation = isset($data['tarifConsultation']) ? (int) $data['tarifConsultation'] : null;
                     $user->setTarifConsultation($tarifConsultation > 0 ? $tarifConsultation : null);
+
+                    $sexe = $data['sexe'] ?? null;
+                    $user->setSexe($sexe instanceof \App\Enum\Sexe ? $sexe : null);
+
                 }
 
                 $this->entityManager->persist($user);
@@ -126,4 +147,4 @@ final class InscriptionController extends AbstractController
             'form' => $form,
         ]);
     }
-}
+

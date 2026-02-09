@@ -32,8 +32,10 @@ final class RendezVousController extends AbstractController
     #[Route('/new', name: 'admin_rendez_vous_new', methods: ['GET', 'POST'])]
     public function new(Request $request): Response
     {
+
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
         
+
         $rendezVous = new RendezVous();
         $form = $this->createForm(RendezVousType::class, $rendezVous);
         $form->handleRequest($request);

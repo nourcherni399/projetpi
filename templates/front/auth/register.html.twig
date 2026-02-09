@@ -79,12 +79,15 @@
                 {{ form_row(form.adresse, {
                     'label': 'Adresse',
                     'label_attr': {'class': 'block text-[#4B5563] font-medium mb-1'},
-                    'attr': {'class': 'w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]', 'placeholder': 'Adresse'}
+
+                    'attr': {'class': 'w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#6B7280] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7]', 'placeholder': 'Adresse'}
+
                 }) }}
                 
                 {{ form_row(form.sexe, {
                     'label': 'Sexe',
                     'label_attr': {'class': 'block text-[#4B5563] font-medium mb-1'},
+
                     'attr': {'class': 'w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]', 'placeholder': 'Ex. M, F'}
                 }) }}
             </div>
@@ -132,6 +135,7 @@
             </div>
             {% endif %}
             
+
             {{ form_widget(form.submit, {'attr': {'class': 'w-full py-3 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7] cursor-pointer'}}) }}
             
         {{ form_end(form) }}
@@ -151,6 +155,7 @@
         const roleSelect = document.querySelector('[data-role-select="1"]');
         const parentFields = document.getElementById('parent-fields');
         const patientFields = document.getElementById('patient-fields');
+<<<<<<< HEAD
         const medecinFields = document.getElementById('medecin-fields');
         
         console.log('Éléments trouvés:', {
@@ -158,6 +163,13 @@
             parentFields: !!parentFields,
             patientFields: !!patientFields,
             medecinFields: !!medecinFields
+=======
+        
+        console.log('Elements trouvés:', {
+            roleSelect: !!roleSelect,
+            parentFields: !!parentFields,
+            patientFields: !!patientFields
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
         });
         
         if (!roleSelect) {
@@ -176,9 +188,8 @@
             if (patientFields) {
                 patientFields.style.display = 'none';
             }
-            if (medecinFields) {
-                medecinFields.style.display = 'none';
-            }
+   }
+
             
             // Afficher les champs selon le rôle
             if (selectedRole === 'ROLE_PARENT' && parentFields) {
@@ -187,9 +198,12 @@
             } else if (selectedRole === 'ROLE_PATIENT' && patientFields) {
                 patientFields.style.display = 'block';
                 console.log('Patient fields affichés');
+
             } else if (selectedRole === 'ROLE_MEDECIN' && medecinFields) {
                 medecinFields.style.display = 'block';
                 console.log('Medecin fields affichés');
+
+
             }
         }
         
@@ -229,7 +243,9 @@
             }
         });
     });
-    
+
+        
+
     observer.observe(document.body, {
         childList: true,
         subtree: true

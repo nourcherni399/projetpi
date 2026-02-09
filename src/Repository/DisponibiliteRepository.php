@@ -24,14 +24,17 @@ class DisponibiliteRepository extends ServiceEntityRepository
     {
         return $this->findBy(
             ['medecin' => $medecin],
+
             ['jour' => 'ASC', 'heureDebut' => 'ASC'],
             1000 // Limite de 1000 résultats pour éviter l'épuisement de mémoire
+
         );
     }
 
     /** @return list<Disponibilite> */
     public function findForListing(?Medcin $medecin): array
     {
+
         if ($medecin === null) {
             return []; // Retourner un tableau vide si aucun médecin n'est spécifié
         }
@@ -40,6 +43,7 @@ class DisponibiliteRepository extends ServiceEntityRepository
             ['medecin' => $medecin],
             ['jour' => 'ASC', 'heureDebut' => 'ASC'],
             1000 // Limite de 1000 résultats pour éviter l'épuisement de mémoire
+
         );
     }
 }

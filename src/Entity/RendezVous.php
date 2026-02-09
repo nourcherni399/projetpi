@@ -29,7 +29,11 @@ class RendezVous
 
     /** Date choisie pour le rendez-vous (ex. lundi 17 fév.). */
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+<<<<<<< HEAD
     private ?\DateTime $dateRdv = null;
+=======
+    private ?\DateTimeInterface $dateRdv = null;
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
@@ -45,7 +49,11 @@ class RendezVous
     private ?string $adresse = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+<<<<<<< HEAD
     private ?\DateTime $dateNaissance = null;
+=======
+    private ?\DateTimeInterface $dateNaissance = null;
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
 
     #[ORM\Column(length: 30, nullable: true)]
     private ?string $telephone = null;
@@ -86,12 +94,20 @@ class RendezVous
         return $this;
     }
 
+<<<<<<< HEAD
     public function getDateRdv(): ?\DateTime
+=======
+    public function getDateRdv(): ?\DateTimeInterface
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
     {
         return $this->dateRdv;
     }
 
+<<<<<<< HEAD
     public function setDateRdv(?\DateTime $dateRdv): static
+=======
+    public function setDateRdv(?\DateTimeInterface $dateRdv): static
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
     {
         $this->dateRdv = $dateRdv;
         return $this;
@@ -141,12 +157,20 @@ class RendezVous
         return $this;
     }
 
+<<<<<<< HEAD
     public function getDateNaissance(): ?\DateTime
+=======
+    public function getDateNaissance(): ?\DateTimeInterface
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
     {
         return $this->dateNaissance;
     }
 
+<<<<<<< HEAD
     public function setDateNaissance(?\DateTime $dateNaissance): static
+=======
+    public function setDateNaissance(?\DateTimeInterface $dateNaissance): static
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
     {
         $this->dateNaissance = $dateNaissance;
         return $this;

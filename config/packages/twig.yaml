@@ -1,7 +1,11 @@
 twig:
     file_name_pattern: '*.twig'
+<<<<<<< HEAD
     strict_variables: false
     form_themes: ['bootstrap_5_layout.html.twig']
+=======
+    form_themes: ['form/form_div_layout.html.twig']
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
 
 when@test:
     twig:

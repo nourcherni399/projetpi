@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Form;
 
+<<<<<<< HEAD
+=======
+use App\Enum\Sexe;
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
 use App\Enum\UserRole;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -146,9 +150,14 @@ final class UserEditType extends AbstractType
                 'label' => 'Tarif consultation (€)',
                 'required' => false,
                 'mapped' => false,
+<<<<<<< HEAD
                 'html5' => true,
                 'constraints' => [new Range(['min' => 0, 'max' => 99999.99, 'notInRangeMessage' => 'Le tarif doit être entre {{ min }} et {{ max }}.'])],
                 'attr' => $attr + ['data-role-fields' => 'ROLE_MEDECIN'],
+=======
+                'constraints' => [new Range(['min' => 0, 'max' => 99999.99, 'notInRangeMessage' => 'Le tarif doit être entre {{ min }} et {{ max }}.'])],
+                'attr' => $attr + ['data-role-fields' => 'ROLE_MEDECIN', 'step' => '0.01'],
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
             ])
             ->add('relationAvecPatient', TextType::class, [
                 'label' => 'Relation avec le patient',
@@ -172,11 +181,21 @@ final class UserEditType extends AbstractType
                 'constraints' => [new Length(['max' => 500, 'maxMessage' => 'L\'adresse ne peut pas dépasser {{ limit }} caractères.'])],
                 'attr' => $attr + ['data-role-fields' => 'ROLE_PATIENT'],
             ])
+<<<<<<< HEAD
             ->add('sexe', TextType::class, [
                 'label' => 'Sexe',
                 'required' => false,
                 'mapped' => false,
                 'constraints' => [new Length(['max' => 20, 'maxMessage' => 'Ce champ ne peut pas dépasser {{ limit }} caractères.'])],
+=======
+            ->add('sexe', EnumType::class, [
+                'label' => 'Sexe',
+                'class' => Sexe::class,
+                'choice_label' => fn (Sexe $s) => $s->value,
+                'placeholder' => 'Choisir',
+                'required' => false,
+                'mapped' => false,
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
                 'attr' => $attr + ['data-role-fields' => 'ROLE_PATIENT'],
             ]);
 
@@ -202,4 +221,12 @@ final class UserEditType extends AbstractType
     {
         $resolver->setDefaults(['data_class' => User::class]);
     }
+<<<<<<< HEAD
 }
+=======
+<<<<<<< HEAD
+}
+=======
+}
+>>>>>>> bc1944e (Integration user - PI)
+>>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
