@@ -54,26 +54,18 @@ final class InscriptionController extends AbstractController
                 return $this->render('front/auth/register.html.twig', ['form' => $form]);
             }
 
-=======
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
             if ($this->userRepository->findOneBy(['email' => $email])) {
                 $this->addFlash('error', 'Un compte existe déjà avec cette adresse e-mail.');
                 return $this->render('front/auth/register.html.twig', ['form' => $form]);
             }
-<<<<<<< HEAD
-            
-            if (!$role instanceof UserRole || !\in_array($role, [UserRole::MEDECIN, UserRole::PATIENT, UserRole::PARENT, UserRole::USER], true)) {
-=======
 
             $role = $data['role'];
             if (!$role instanceof UserRole || !\in_array($role, [UserRole::PATIENT, UserRole::PARENT, UserRole::USER], true)) {
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
                 $this->addFlash('error', 'Profil non autorisé pour l\'inscription.');
                 return $this->render('front/auth/register.html.twig', ['form' => $form]);
             }
 
             try {
-<<<<<<< HEAD
                 $user = match ($role) {
                     UserRole::PARENT => new ParentUser(),
                     UserRole::PATIENT => new Patient(),
@@ -104,8 +96,6 @@ final class InscriptionController extends AbstractController
                     $user->setSexe($sexe instanceof \App\Enum\Sexe ? $sexe : null);
                 }
 
-                }
-
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
 
@@ -125,4 +115,5 @@ final class InscriptionController extends AbstractController
             'form' => $form,
         ]);
     }
+}
 
