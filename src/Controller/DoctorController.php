@@ -12,6 +12,7 @@ use App\Entity\Patient;
 use App\Entity\RendezVous;
 use App\Enum\StatusRendezVous;
 use App\Entity\User;
+use App\Form\DoctorDisponibiliteType;
 use App\Form\ProfileType;
 use App\Repository\DisponibiliteRepository;
 use App\Repository\NotificationRepository;
