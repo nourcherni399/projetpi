@@ -84,8 +84,4 @@ final class ProfileController extends AbstractController
         $this->addFlash('success', 'Votre compte a été désactivé. Vous pouvez le réactiver en contactant l’équipe.');
         return $this->redirectToRoute('app_logout');
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> bc1944e (Integration user - PI)
