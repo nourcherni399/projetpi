@@ -3,7 +3,7 @@
 {% block title %}Notifications - AutiCare Médecin{% endblock %}
 
 {% block doctor_content %}
-<<<<<<< HEAD
+
 <div class="space-y-6">
     <!-- En-tête moderne -->
     <div class="bg-gradient-to-r from-[#A7C7E7] via-[#B8D4ED] to-[#C5D9F2] rounded-2xl p-8 text-white shadow-xl hover:shadow-2xl transition-all duration-300">
@@ -173,70 +173,4 @@
         </div>
     </div>
     {% endif %}
-</div>
-=======
-<h1 class="text-2xl font-semibold text-[#4B5563] mb-6">Notifications et demandes de rendez-vous</h1>
-{% for message in app.flashes('success') %}
-    <div class="mb-4 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">{{ message }}</div>
-{% endfor %}
-{% for message in app.flashes('error') %}
-    <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-800">{{ message }}</div>
-{% endfor %}
-
-{% if demandes_rdv|length > 0 %}
-<section class="mb-8">
-    <h2 class="text-lg font-medium text-[#4B5563] mb-4">Demandes en attente (à accepter ou refuser)</h2>
-    <div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
-        <ul class="divide-y divide-[#E5E0D8]">
-            {% for rv in demandes_rdv %}
-            <li class="p-6 flex flex-col sm:flex-row sm:items-center gap-4">
-                <div class="flex-1 min-w-0">
-                    <p class="font-medium text-[#4B5563]">{{ rv.nom }} {{ rv.prenom }}</p>
-                    <p class="text-[#6B7280] text-sm mt-1">
-                        Créneau demandé : {{ rv.dateRdv ? rv.dateRdv|date('d/m/Y') : '—' }}
-                        {% if rv.disponibilite %} — {{ rv.disponibilite.heureDebut|date('H:i') }}-{{ rv.disponibilite.heureFin|date('H:i') }}{% endif %}
-                    </p>
-                    <p class="text-[#6B7280] text-sm">Motif : {{ rv.motif ? rv.motif.value|capitalize : '—' }}</p>
-                    {% if rv.telephone %}<p class="text-[#6B7280] text-sm">Tél. : {{ rv.telephone }}</p>{% endif %}
-                </div>
-                <div class="flex flex-wrap gap-2 shrink-0">
-                    <form method="post" action="{{ path('doctor_rendezvous_accept', { id: rv.id }) }}" class="inline">
-                        <input type="hidden" name="_token" value="{{ csrf_token('doctor_rdv_accept_' ~ rv.id) }}">
-                        <button type="submit" class="px-4 py-2 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 focus:outline focus:ring-2 focus:ring-emerald-500">Accepter</button>
-                    </form>
-                    <form method="post" action="{{ path('doctor_rendezvous_refuse', { id: rv.id }) }}" class="inline" onsubmit="return confirm('Refuser cette demande ?');">
-                        <input type="hidden" name="_token" value="{{ csrf_token('doctor_rdv_refuse_' ~ rv.id) }}">
-                        <button type="submit" class="px-4 py-2 rounded-lg border border-red-300 text-red-700 font-medium hover:bg-red-50 focus:outline focus:ring-2 focus:ring-red-500">Refuser</button>
-                    </form>
-                </div>
-            </li>
-            {% endfor %}
-        </ul>
-    </div>
-</section>
-{% endif %}
-
-<section>
-    <h2 class="text-lg font-medium text-[#4B5563] mb-4">Historique des notifications</h2>
-    {% if notifications|length > 0 %}
-    <div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
-        <ul class="divide-y divide-[#E5E0D8]">
-            {% for notif in notifications %}
-            <li class="p-4 {{ notif.lu ? 'opacity-75' : '' }}">
-                {% if notif.type == 'demande_rdv' %}
-                    <p class="text-[#4B5563] font-medium">Nouvelle demande de rendez-vous</p>
-                    <p class="text-[#6B7280] text-sm">{% if notif.rendezVous %}{{ notif.rendezVous.nom }} {{ notif.rendezVous.prenom }} — {{ notif.rendezVous.dateRdv ? notif.rendezVous.dateRdv|date('d/m/Y') : '' }}{% else %}—{% endif %}</p>
-                {% else %}
-                    <p class="text-[#6B7280] text-sm">Notification ({{ notif.type }})</p>
-                {% endif %}
-                <p class="text-[#9CA3AF] text-xs mt-1">{{ notif.createdAt|date('d/m/Y H:i') }}</p>
-            </li>
-            {% endfor %}
-        </ul>
-    </div>
-    {% else %}
-    <p class="text-[#6B7280]">Aucune notification.</p>
-    {% endif %}
-</section>
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
 {% endblock %}
