@@ -443,6 +443,7 @@ final class HomeController extends AbstractController
         ];
     }
 
+<<<<<<< HEAD
     #[Route('/blog', name: 'user_blog', methods: ['GET'])]
     public function blog(): Response
     {
@@ -589,6 +590,8 @@ final class HomeController extends AbstractController
             ))),
         ];
     }
+=======
+>>>>>>> bc1944e (Integration user - PI)
 
     #[Route('/inscription', name: 'register', methods: ['GET'])]
     public function register(): Response
@@ -601,4 +604,8 @@ final class HomeController extends AbstractController
     {
         return $this->render('front/auth/login.html.twig');
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> bc1944e (Integration user - PI)

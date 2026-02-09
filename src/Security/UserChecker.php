@@ -24,4 +24,8 @@ final class UserChecker implements UserCheckerInterface
     public function checkPostAuth(UserInterface $user): void
     {
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> bc1944e (Integration user - PI)

@@ -1,5 +1,9 @@
 twig:
     file_name_pattern: '*.twig'
+<<<<<<< HEAD
+=======
+    form_themes: ['form/form_div_layout.html.twig']
+>>>>>>> bc1944e (Integration user - PI)
 
 when@test:
     twig:

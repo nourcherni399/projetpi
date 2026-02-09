@@ -231,4 +231,8 @@ final class AdminController extends AbstractController
             UserRole::USER => new Patient(),
         };
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> bc1944e (Integration user - PI)

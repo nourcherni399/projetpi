@@ -15,10 +15,15 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+<<<<<<< HEAD
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\PositiveOrZero;
 use Symfony\Component\Validator\Constraints\Range;
+=======
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\PositiveOrZero;
+>>>>>>> bc1944e (Integration user - PI)
 
 final class ProduitType extends AbstractType
 {
@@ -27,10 +32,14 @@ final class ProduitType extends AbstractType
         $builder
             ->add('nom', TextType::class, [
                 'label' => 'Nom du produit',
+<<<<<<< HEAD
                 'constraints' => [
                     new NotBlank(message: 'Le nom est obligatoire.'),
                     new Length(['min' => 1, 'max' => 255, 'maxMessage' => 'Le nom ne peut pas dépasser {{ limit }} caractères.']),
                 ],
+=======
+                'constraints' => [new NotBlank(message: 'Le nom est obligatoire.')],
+>>>>>>> bc1944e (Integration user - PI)
                 'attr' => [
                     'class' => 'mt-1 block w-full rounded-lg border border-[#E5E0D8] bg-white px-4 py-2.5 text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]',
                     'placeholder' => 'Ex. Coussin sensoriel lesté',
@@ -39,7 +48,10 @@ final class ProduitType extends AbstractType
             ->add('description', TextareaType::class, [
                 'label' => 'Description',
                 'required' => false,
+<<<<<<< HEAD
                 'constraints' => [new Length(['max' => 65535, 'maxMessage' => 'La description ne peut pas dépasser {{ limit }} caractères.'])],
+=======
+>>>>>>> bc1944e (Integration user - PI)
                 'attr' => [
                     'class' => 'mt-1 block w-full rounded-lg border border-[#E5E0D8] bg-white px-4 py-2.5 text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]',
                     'rows' => 4,
@@ -58,10 +70,18 @@ final class ProduitType extends AbstractType
             ])
             ->add('prix', NumberType::class, [
                 'label' => 'Prix (€)',
+<<<<<<< HEAD
                 'scale' => 2,
                 'constraints' => [
                     new NotBlank(message: 'Le prix est obligatoire.'),
                     new Range(['min' => 0, 'max' => 99999.99, 'notInRangeMessage' => 'Le prix doit être entre {{ min }} et {{ max }}.']),
+=======
+                'html5' => true,
+                'scale' => 2,
+                'constraints' => [
+                    new NotBlank(message: 'Le prix est obligatoire.'),
+                    new PositiveOrZero(message: 'Le prix doit être positif ou nul.'),
+>>>>>>> bc1944e (Integration user - PI)
                 ],
                 'attr' => [
                     'class' => 'mt-1 block w-full rounded-lg border border-[#E5E0D8] bg-white px-4 py-2.5 text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]',
@@ -82,7 +102,10 @@ final class ProduitType extends AbstractType
             ->add('image', UrlType::class, [
                 'label' => 'URL de l\'image',
                 'required' => false,
+<<<<<<< HEAD
                 'constraints' => [new Length(['max' => 500, 'maxMessage' => 'L\'URL ne peut pas dépasser {{ limit }} caractères.'])],
+=======
+>>>>>>> bc1944e (Integration user - PI)
                 'attr' => [
                     'class' => 'mt-1 block w-full rounded-lg border border-[#E5E0D8] bg-white px-4 py-2.5 text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]',
                     'placeholder' => 'https://…',

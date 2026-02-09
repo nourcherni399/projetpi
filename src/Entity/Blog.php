@@ -19,9 +19,15 @@ class Blog
     #[ORM\Column(length: 255)]
     private ?string $titre = null;
 
+<<<<<<< HEAD
 #[ORM\Column(
     columnDefinition: "ENUM('recommandation', 'plainte', 'question', 'experience') NOT NULL"
 )]
+=======
+    #[ORM\Column(
+        columnDefinition: "ENUM('recommandation', 'plainte', 'question', 'experience') NOT NULL"
+    )]
+>>>>>>> bc1944e (Integration user - PI)
 private string $type;
 
     #[ORM\Column]
@@ -57,11 +63,19 @@ private string $type;
      * @var Collection<int, Commentaire>
      */
     #[ORM\OneToMany(targetEntity: Commentaire::class, mappedBy: 'blog')]
+<<<<<<< HEAD
     private Collection $commentaire;
 
     public function __construct()
     {
         $this->commentaire = new ArrayCollection();
+=======
+    private Collection $commentaires;
+
+    public function __construct()
+    {
+        $this->commentaires = new ArrayCollection();
+>>>>>>> bc1944e (Integration user - PI)
     }
 
     public function getId(): ?int
@@ -204,15 +218,26 @@ private string $type;
     /**
      * @return Collection<int, Commentaire>
      */
+<<<<<<< HEAD
     public function getCommentaire(): Collection
     {
         return $this->commentaire;
+=======
+    public function getCommentaires(): Collection
+    {
+        return $this->commentaires;
+>>>>>>> bc1944e (Integration user - PI)
     }
 
     public function addCommentaire(Commentaire $commentaire): static
     {
+<<<<<<< HEAD
         if (!$this->commentaire->contains($commentaire)) {
             $this->commentaire->add($commentaire);
+=======
+        if (!$this->commentaires->contains($commentaire)) {
+            $this->commentaires->add($commentaire);
+>>>>>>> bc1944e (Integration user - PI)
             $commentaire->setBlog($this);
         }
 
@@ -221,7 +246,11 @@ private string $type;
 
     public function removeCommentaire(Commentaire $commentaire): static
     {
+<<<<<<< HEAD
         if ($this->commentaire->removeElement($commentaire)) {
+=======
+        if ($this->commentaires->removeElement($commentaire)) {
+>>>>>>> bc1944e (Integration user - PI)
             // set the owning side to null (unless already changed)
             if ($commentaire->getBlog() === $this) {
                 $commentaire->setBlog(null);

@@ -98,4 +98,8 @@ final class InscriptionController extends AbstractController
             'form' => $form,
         ]);
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> bc1944e (Integration user - PI)
