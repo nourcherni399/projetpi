@@ -162,7 +162,7 @@ final class UserEditType extends AbstractType
                 'widget' => 'single_text',
                 'required' => false,
                 'mapped' => false,
-                'constraints' => [new LessThanOrEqual(new \DateTimeImmutable('today'), message: 'La date de naissance ne peut pas être dans le futur.')],
+                'constraints' => [new LessThanOrEqual(new \DateTime('today'), message: 'La date de naissance ne peut pas être dans le futur.')],
                 'attr' => $attr + ['data-role-fields' => 'ROLE_PATIENT'],
             ])
             ->add('adresse', TextType::class, [

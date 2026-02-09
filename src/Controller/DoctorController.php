@@ -288,7 +288,7 @@ final class DoctorController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $note->setDateModification(new \DateTimeImmutable());
+            $note->setDateModification(new \DateTime());
             $this->entityManager->flush();
             $this->addFlash('success', 'Note modifiée avec succès.');
             return $this->redirectToRoute('doctor_notes');

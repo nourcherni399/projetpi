@@ -76,8 +76,8 @@ final class ProfileType extends AbstractType
                     'label' => 'Date de naissance',
                     'widget' => 'single_text',
                     'required' => false,
-                    'constraints' => [new LessThanOrEqual(new \DateTimeImmutable('today'), message: 'La date ne peut pas être dans le futur.')],
-                    'attr' => self::ATTR + ['max' => (new \DateTimeImmutable('today'))->format('Y-m-d')],
+                    'constraints' => [new LessThanOrEqual(new \DateTime('today'), message: 'La date ne peut pas être dans le futur.')],
+                    'attr' => self::ATTR + ['max' => (new \DateTime('today'))->format('Y-m-d')],
                 ])
                 ->add('adresse', TextType::class, [
                     'label' => 'Adresse',

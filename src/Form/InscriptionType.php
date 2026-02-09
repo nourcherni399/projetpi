@@ -162,8 +162,8 @@ final class InscriptionType extends AbstractType
                 'required' => false,
                 'help' => 'La date ne doit pas être dans le futur.',
 
-                'constraints' => [new LessThanOrEqual(new \DateTimeImmutable('today'), message: 'La date de naissance ne peut pas être dans le futur.')],
-                'attr' => $attr + ['data-role-fields' => 'ROLE_PATIENT', 'max' => (new \DateTimeImmutable('today'))->format('Y-m-d')],
+                'constraints' => [new LessThanOrEqual(new \DateTime('today'), message: 'La date de naissance ne peut pas être dans le futur.')],
+                'attr' => $attr + ['data-role-fields' => 'ROLE_PATIENT', 'max' => (new \DateTime('today'))->format('Y-m-d')],
 
             ])
             ->add('adresse', TextType::class, [

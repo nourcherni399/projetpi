@@ -155,7 +155,7 @@ final class UserCreateType extends AbstractType
                 'label' => 'Date de naissance',
                 'widget' => 'single_text',
                 'required' => false,
-                'constraints' => [new LessThanOrEqual(new \DateTimeImmutable('today'), message: 'La date de naissance ne peut pas être dans le futur.')],
+                'constraints' => [new LessThanOrEqual(new \DateTime('today'), message: 'La date de naissance ne peut pas être dans le futur.')],
                 'attr' => $attr + ['data-role-fields' => 'ROLE_PATIENT'],
             ])
             ->add('adresse', TextType::class, [
