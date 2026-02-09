@@ -46,6 +46,11 @@ final class DoctorController extends AbstractController
     {
         $medecin = $this->getMedecin();
         
+        if ($medecin === null) {
+            $this->addFlash('error', 'Médecin non trouvé.');
+            return $this->redirectToRoute('login');
+        }
+        
         // Récupérer les statistiques
         $stats = [
             'total_rdv' => $this->rendezVousRepository->countByMedecin($medecin),
@@ -57,7 +62,7 @@ final class DoctorController extends AbstractController
         ];
         
         return $this->render('doctor/dashboard.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
-            'stats' => $stats
+            'stats' => $stats,
         ]));
     }
 
@@ -65,6 +70,12 @@ final class DoctorController extends AbstractController
     public function availability(Request $request): Response
     {
         $medecin = $this->getMedecin();
+        
+        if ($medecin === null) {
+            $this->addFlash('error', 'Médecin non trouvé.');
+            return $this->redirectToRoute('login');
+        }
+        
         $search = (string) $request->query->get('q', '');
         $search = \trim($search);
 
@@ -194,13 +205,15 @@ final class DoctorController extends AbstractController
     public function editAvailability(Request $request, int $id): Response
     {
         $medecin = $this->getMedecin();
+        
+        if ($medecin === null) {
+            $this->addFlash('error', 'Accès non autorisé.');
+            return $this->redirectToRoute('login');
+        }
+        
         $disponibilite = $this->disponibiliteRepository->find($id);
-        $canEdit = $disponibilite !== null && (
-            ($medecin === null && $disponibilite->getMedecin() === null)
-            || ($medecin !== null && $disponibilite->getMedecin() === $medecin)
-        );
-
-        if (!$canEdit) {
+        
+        if ($disponibilite === null || $disponibilite->getMedecin() !== $medecin) {
             $this->addFlash('error', 'Créneau introuvable.');
             return $this->redirectToRoute('doctor_availability');
         }
@@ -393,6 +406,73 @@ final class DoctorController extends AbstractController
             'patients' => $patients,
             'stats' => $stats,
         ]));
+    }
+
+    #[Route('/medecin/notes/{id}/edit', name: 'doctor_notes_edit', methods: ['GET', 'POST'])]
+    public function editNote(Request $request, int $id): Response
+    {
+        $medecin = $this->getMedecin();
+        if ($medecin === null) {
+            $this->addFlash('error', 'Accès non autorisé.');
+            return $this->redirectToRoute('login');
+        }
+
+        $note = $this->noteRepository->find($id);
+        if ($note === null || $note->getMedecin() !== $medecin) {
+            $this->addFlash('error', 'Note non trouvée.');
+            return $this->redirectToRoute('doctor_notes');
+        }
+
+        $patients = $this->rendezVousRepository->findDistinctPatientsByMedecin($medecin);
+        $form = $this->createForm(NoteType::class, $note, ['patients' => $patients]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            try {
+                $note->setDateModification(new \DateTimeImmutable());
+                $this->entityManager->flush();
+                $this->addFlash('success', 'Note modifiée avec succès.');
+                return $this->redirectToRoute('doctor_notes');
+            } catch (\Throwable $e) {
+                $this->addFlash('error', 'Une erreur est survenue lors de la modification. Veuillez réessayer.');
+            }
+        }
+
+        return $this->render('doctor/notes/edit.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
+            'note' => $note,
+            'form' => $form,
+            'patients' => $patients,
+        ]));
+    }
+
+    #[Route('/medecin/notes/{id}/delete', name: 'doctor_notes_delete', methods: ['POST'])]
+    public function deleteNote(Request $request, int $id): Response
+    {
+        $medecin = $this->getMedecin();
+        if ($medecin === null) {
+            $this->addFlash('error', 'Accès non autorisé.');
+            return $this->redirectToRoute('login');
+        }
+
+        $note = $this->noteRepository->find($id);
+        if ($note === null || $note->getMedecin() !== $medecin) {
+            $this->addFlash('error', 'Note non trouvée.');
+            return $this->redirectToRoute('doctor_notes');
+        }
+
+        if ($this->isCsrfTokenValid('delete' . $note->getId(), $request->request->get('_token'))) {
+            try {
+                $this->entityManager->remove($note);
+                $this->entityManager->flush();
+                $this->addFlash('success', 'Note supprimée avec succès.');
+            } catch (\Throwable $e) {
+                $this->addFlash('error', 'Une erreur est survenue lors de la suppression. Veuillez réessayer.');
+            }
+        } else {
+            $this->addFlash('error', 'Jeton CSRF invalide.');
+        }
+
+        return $this->redirectToRoute('doctor_notes');
     }
 
     #[Route('/medecin/rendez-vous', name: 'doctor_rendezvous', methods: ['GET'])]
@@ -596,26 +676,38 @@ final class DoctorController extends AbstractController
     {
         $user = $this->getUser();
         
-        // Contrôle de saisie: vérifier que l'utilisateur existe et est bien un médecin
         if ($user === null) {
+            error_log('getMedecin: User is null');
             return null;
         }
         
-        if (!$user instanceof Medcin) {
-            return null;
+        error_log('getMedecin: User class: ' . get_class($user));
+        error_log('getMedecin: User role: ' . ($user->getRole() ? $user->getRole()->value : 'no role'));
+        
+        // Si l'utilisateur est déjà une instance de Medcin, le retourner directement
+        if ($user instanceof Medcin) {
+            error_log('getMedecin: User is already Medcin instance');
+            return $user;
         }
         
-        // Contrôle de saisie: vérifier que le médecin est actif
-        if (!$user->isActive()) {
-            return null;
+        // Si l'utilisateur est de type User avec rôle MEDECIN, essayer de récupérer l'entité Medcin
+        if ($user instanceof User && $user->getRole() === \App\Enum\UserRole::MEDECIN) {
+            error_log('getMedecin: User has MEDECIN role, trying to reload from database');
+            
+            // Recharger l'utilisateur depuis la base de données avec la bonne classe
+            $medecin = $this->entityManager->getRepository(Medcin::class)->find($user->getId());
+            
+            if ($medecin === null) {
+                error_log('getMedecin: Could not find Medcin in database with ID: ' . $user->getId());
+                return null;
+            }
+            
+            error_log('getMedecin: Found Medcin in database: ' . get_class($medecin));
+            return $medecin;
         }
         
-        // Contrôle de saisie: vérifier que les informations essentielles sont présentes
-        if (empty($user->getNom()) || empty($user->getPrenom()) || empty($user->getEmail())) {
-            return null;
-        }
-        
-        return $user;
+        error_log('getMedecin: User is not a Medcin and does not have MEDECIN role');
+        return null;
     }
 
     /**
@@ -654,6 +746,12 @@ final class DoctorController extends AbstractController
             // Périodes
             $dateRdv = $rdv->getDateRdv();
             if ($dateRdv) {
+                // Valider que la date est raisonnable (entre 1900 et 2100)
+                $year = (int)$dateRdv->format('Y');
+                if ($year < 1900 || $year > 2100) {
+                    continue; // Ignorer les dates invalides
+                }
+                
                 if ($dateRdv->format('Y-m-d') === $today->format('Y-m-d')) {
                     $aujourdhui++;
                 }

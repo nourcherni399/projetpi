@@ -26,6 +26,7 @@ class MedcinRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('m')
             ->orderBy('m.nom', 'ASC')
             ->addOrderBy('m.prenom', 'ASC')
+            ->setMaxResults(1000) // Limite de 1000 résultats pour éviter l'épuisement de mémoire
             ->getQuery()
             ->getResult();
     }

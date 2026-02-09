@@ -199,7 +199,6 @@ final class HomeController extends AbstractController
     ];
     private const APPOINTMENT_MODE_LABELS = [
         'cabinet' => 'Au cabinet',
-        'teleconsult' => 'Téléconsultation',
     ];
 
     /** Numéro de jour PHP (1=lundi) pour chaque Jour enum. */
@@ -398,7 +397,7 @@ final class HomeController extends AbstractController
     }
 
     /**
-     * @return array{id: int, name: string, initials: string, specialty: string, specialty_class: string, rating: string, reviews: int, description: string, address: string, phone: string, email: string, price: int|float, has_cabinet: bool, has_teleconsult: bool}
+     * @return array{id: int, name: string, initials: string, specialty: string, specialty_class: string, rating: string, reviews: int, description: string, address: string, phone: string, email: string, price: int|float, has_cabinet: bool}
      */
     private function medecinToDoctorArray(Medcin $medecin): array
     {
@@ -427,7 +426,6 @@ final class HomeController extends AbstractController
             'email' => $medecin->getEmail() ?? '—',
             'price' => (int) round($medecin->getTarifConsultation() ?? 0),
             'has_cabinet' => $medecin->getAdresseCabinet() !== null && $medecin->getAdresseCabinet() !== '',
-            'has_teleconsult' => true,
         ];
     }
 

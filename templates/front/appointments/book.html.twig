@@ -34,7 +34,6 @@
             </div>
             <div class="flex gap-2 mb-4">
                 {% if doctor.has_cabinet %}<span class="px-3 py-1.5 rounded-lg border border-[#E5E0D8] text-[#6B7280] text-sm">Cabinet</span>{% endif %}
-                {% if doctor.has_teleconsult %}<span class="px-3 py-1.5 rounded-lg border border-[#E5E0D8] text-[#6B7280] text-sm">Téléconsultation</span>{% endif %}
             </div>
             <p class="font-semibold text-[#4B5563]">{{ doctor.price }}€ <span class="text-sm font-normal text-[#6B7280]">Tarif de la consultation</span></p>
         </div>
@@ -137,14 +136,10 @@
                     </label>
                 </div>
                 <p class="text-[#4B5563] font-medium mb-3">Mode de consultation</p>
-                <div class="flex gap-4 mb-6">
+                <div class="grid grid-cols-1 gap-4 mb-6">
                     <label class="rdv-mode-option flex-1 flex items-center justify-center gap-2 p-4 rounded-xl cursor-pointer">
                         <input type="radio" name="mode" value="cabinet" {% if choices.mode == 'cabinet' %}checked{% endif %} class="rounded-full border-[#E5E0D8] text-[#A7C7E7] focus:ring-[#A7C7E7]">
                         <span class="text-[#4B5563]">Au cabinet</span>
-                    </label>
-                    <label class="rdv-mode-option flex-1 flex items-center justify-center gap-2 p-4 rounded-xl cursor-pointer">
-                        <input type="radio" name="mode" value="teleconsult" {% if choices.mode == 'teleconsult' %}checked{% endif %} class="rounded-full border-[#E5E0D8] text-[#A7C7E7] focus:ring-[#A7C7E7]">
-                        <span class="text-[#4B5563]">Téléconsultation</span>
                     </label>
                 </div>
                 <div class="mb-8">
@@ -231,7 +226,7 @@
                         <li><strong class="text-[#4B5563]">Créneau:</strong> {{ choices.date_label|default('—') }}</li>
                         <li><strong class="text-[#4B5563]">Type:</strong> {{ choices.type_label }}</li>
                         <li><strong class="text-[#4B5563]">Mode:</strong> {{ choices.mode_label }}</li>
-                        <li><strong class="text-[#4B5563]">Lieu:</strong> {{ choices.mode == 'teleconsult' ? 'Téléconsultation' : doctor.address }}</li>
+                        <li><strong class="text-[#4B5563]">Lieu:</strong> {{ doctor.address }}</li>
                     </ul>
                 </div>
                 <div class="flex flex-wrap gap-4 justify-center">

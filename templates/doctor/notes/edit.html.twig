@@ -1,0 +1,78 @@
+{% extends 'layouts/doctor.html.twig' %}
+
+{% block title %}Modifier une note - AutiCare Médecin{% endblock %}
+
+{% block doctor_content %}
+<div class="max-w-4xl">
+    <div class="mb-6 flex items-center gap-4">
+        <a href="{{ path('doctor_notes') }}" class="inline-flex items-center gap-2 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded-lg">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            Retour aux notes
+        </a>
+    </div>
+    
+    <div class="bg-gradient-to-r from-[#A7C7E7] via-[#B8D4ED] to-[#C5D9F2] rounded-2xl p-8 text-white shadow-xl mb-8">
+        <h1 class="text-3xl font-bold mb-2">Modifier une note</h1>
+        <p class="text-blue-100">Modifiez les informations de votre note médicale</p>
+    </div>
+
+    <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8">
+        {{ form_start(form, {'attr': {'class': 'space-y-6'}}) }}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    {{ form_label(form.patient, 'Patient', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
+                    {{ form_widget(form.patient, {'attr': {'class': 'w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#A7C7E7] focus:border-[#A7C7E7] transition-all'}}) }}
+                    {{ form_errors(form.patient) }}
+                </div>
+                <div>
+                    {{ form_label(form.titre, 'Titre', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
+                    {{ form_widget(form.titre, {'attr': {'class': 'w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#A7C7E7] focus:border-[#A7C7E7] transition-all'}}) }}
+                    {{ form_errors(form.titre) }}
+                </div>
+            </div>
+            
+            <div>
+                {{ form_label(form.contenu, 'Contenu', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
+                {{ form_widget(form.contenu, {'attr': {'class': 'w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#A7C7E7] focus:border-[#A7C7E7] transition-all', 'rows': '6'}}) }}
+                {{ form_errors(form.contenu) }}
+            </div>
+            
+            <div class="bg-gray-50 rounded-lg p-4">
+                <div class="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Informations sur la note
+                </div>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <span class="text-gray-500">Créée le :</span>
+                        <span class="text-gray-900 ml-2">{{ note.dateCreation|date('d/m/Y H:i') }}</span>
+                    </div>
+                    {% if note.dateModification %}
+                    <div>
+                        <span class="text-gray-500">Modifiée le :</span>
+                        <span class="text-gray-900 ml-2">{{ note.dateModification|date('d/m/Y H:i') }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap gap-3 pt-4">
+                <button type="submit" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#A7C7E7] to-[#B8D4ED] text-white font-semibold rounded-xl hover:from-[#B8D4ED] hover:to-[#C5D9F2] hover:shadow-lg transition-all duration-300">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Enregistrer les modifications
+                </button>
+                <a href="{{ path('doctor_notes') }}" class="inline-flex items-center gap-2 px-6 py-3 border border-[#E5E0D8] text-[#6B7280] font-medium rounded-xl hover:bg-[#F5F1EB] transition-all">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Annuler
+                </a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

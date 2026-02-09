@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Medcin;
 use App\Entity\Patient;
 use App\Entity\ParentUser;
 use App\Enum\UserRole;
@@ -35,10 +36,17 @@ final class InscriptionController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
+            
             $email = trim((string) ($data['email'] ?? ''));
+            $role = $data['role'] ?? null;
 
             if ($email === '' || strlen($email) > 180) {
                 $this->addFlash('error', 'Adresse e-mail invalide.');
+                return $this->render('front/auth/register.html.twig', ['form' => $form]);
+            }
+
+            if (!$role instanceof UserRole) {
+                $this->addFlash('error', 'Rôle invalide.');
                 return $this->render('front/auth/register.html.twig', ['form' => $form]);
             }
 
@@ -46,15 +54,19 @@ final class InscriptionController extends AbstractController
                 $this->addFlash('error', 'Un compte existe déjà avec cette adresse e-mail.');
                 return $this->render('front/auth/register.html.twig', ['form' => $form]);
             }
-
-            $role = $data['role'];
-            if (!$role instanceof UserRole || !\in_array($role, [UserRole::PATIENT, UserRole::PARENT, UserRole::USER], true)) {
+            
+            if (!$role instanceof UserRole || !\in_array($role, [UserRole::MEDECIN, UserRole::PATIENT, UserRole::PARENT, UserRole::USER], true)) {
                 $this->addFlash('error', 'Profil non autorisé pour l\'inscription.');
                 return $this->render('front/auth/register.html.twig', ['form' => $form]);
             }
 
             try {
-                $user = $role === UserRole::PARENT ? new ParentUser() : new Patient();
+                $user = match ($role) {
+                    UserRole::MEDECIN => new Medcin(),
+                    UserRole::PARENT => new ParentUser(),
+                    UserRole::PATIENT => new Patient(),
+                    default => new Patient(),
+                };
                 $user->setNom(mb_substr(trim((string) ($data['nom'] ?? '')), 0, 255));
                 $user->setPrenom(mb_substr(trim((string) ($data['prenom'] ?? '')), 0, 255));
                 $user->setEmail($email);
@@ -77,6 +89,22 @@ final class InscriptionController extends AbstractController
                     $user->setAdresse($adresse !== null && $adresse !== '' ? mb_substr($adresse, 0, 500) : null);
                     $sexe = isset($data['sexe']) && $data['sexe'] !== '' ? trim((string) $data['sexe']) : null;
                     $user->setSexe($sexe !== null && $sexe !== '' ? mb_substr($sexe, 0, 20) : null);
+                }
+                if ($user instanceof Medcin) {
+                    $specialite = isset($data['specialite']) && $data['specialite'] !== '' ? trim((string) $data['specialite']) : null;
+                    $user->setSpecialite($specialite !== null && $specialite !== '' ? mb_substr($specialite, 0, 255) : null);
+                    
+                    $nomCabinet = isset($data['nomCabinet']) && $data['nomCabinet'] !== '' ? trim((string) $data['nomCabinet']) : null;
+                    $user->setNomCabinet($nomCabinet !== null && $nomCabinet !== '' ? mb_substr($nomCabinet, 0, 255) : null);
+                    
+                    $adresseCabinet = isset($data['adresseCabinet']) && $data['adresseCabinet'] !== '' ? trim((string) $data['adresseCabinet']) : null;
+                    $user->setAdresseCabinet($adresseCabinet !== null && $adresseCabinet !== '' ? mb_substr($adresseCabinet, 0, 500) : null);
+                    
+                    $telephoneCabinet = isset($data['telephoneCabinet']) && $data['telephoneCabinet'] !== '' ? trim((string) $data['telephoneCabinet']) : null;
+                    $user->setTelephoneCabinet($telephoneCabinet !== null && $telephoneCabinet !== '' ? mb_substr($telephoneCabinet, 0, 20) : null);
+                    
+                    $tarifConsultation = isset($data['tarifConsultation']) ? (int) $data['tarifConsultation'] : null;
+                    $user->setTarifConsultation($tarifConsultation > 0 ? $tarifConsultation : null);
                 }
 
                 $this->entityManager->persist($user);

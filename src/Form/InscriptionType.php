@@ -25,8 +25,8 @@ use Symfony\Component\Validator\Constraints\Regex;
 
 /**
  * Formulaire d'inscription publique.
- * Seuls les rôles Patient, Parent et Utilisateur sont proposés.
- * Les comptes Admin et Médecin ne peuvent être créés que par un administrateur (interface /admin/utilisateurs/new).
+ * Les rôles Patient, Parent, Utilisateur et Médecin sont proposés.
+ * Les comptes Admin ne peuvent être créés que par un administrateur (interface /admin/utilisateurs/new).
  */
 final class InscriptionType extends AbstractType
 {
@@ -95,12 +95,13 @@ final class InscriptionType extends AbstractType
                 'label' => 'Vous êtes',
                 'class' => UserRole::class,
                 'choice_label' => fn (UserRole $r) => match ($r) {
+                    UserRole::MEDECIN => 'Médecin / Professionnel de santé',
                     UserRole::PARENT => 'Parent / Proche',
                     UserRole::PATIENT => 'Personne concernée (patient)',
                     UserRole::USER => 'Utilisateur',
                     default => $r->value,
                 },
-                'choices' => [UserRole::PATIENT, UserRole::PARENT, UserRole::USER],
+                'choices' => [UserRole::MEDECIN, UserRole::PATIENT, UserRole::PARENT, UserRole::USER],
                 'placeholder' => 'Sélectionnez votre profil',
                 'constraints' => [new NotBlank(message: 'Veuillez sélectionner un profil.')],
                 'attr' => $attr + ['data-role-select' => '1'],
@@ -111,12 +112,44 @@ final class InscriptionType extends AbstractType
                 'constraints' => [new Length(['max' => 100])],
                 'attr' => $attr + ['placeholder' => 'Ex. Père, Mère, Tuteur', 'data-role-fields' => 'ROLE_PARENT'],
             ])
+            ->add('specialite', TextType::class, [
+                'label' => 'Spécialité',
+                'required' => false,
+                'constraints' => [new Length(['max' => 255])],
+                'attr' => $attr + ['placeholder' => 'Ex. Psychiatre, Psychologue', 'data-role-fields' => 'ROLE_MEDECIN'],
+            ])
+            ->add('nomCabinet', TextType::class, [
+                'label' => 'Nom du cabinet',
+                'required' => false,
+                'constraints' => [new Length(['max' => 255])],
+                'attr' => $attr + ['placeholder' => 'Nom du cabinet', 'data-role-fields' => 'ROLE_MEDECIN'],
+            ])
+            ->add('adresseCabinet', TextType::class, [
+                'label' => 'Adresse du cabinet',
+                'required' => false,
+                'constraints' => [new Length(['max' => 500])],
+                'attr' => $attr + ['placeholder' => 'Adresse du cabinet', 'data-role-fields' => 'ROLE_MEDECIN'],
+            ])
+            ->add('telephoneCabinet', TextType::class, [
+                'label' => 'Téléphone du cabinet',
+                'required' => false,
+                'constraints' => [new Length(['max' => 20])],
+                'attr' => $attr + ['placeholder' => 'Téléphone professionnel', 'data-role-fields' => 'ROLE_MEDECIN'],
+            ])
+            ->add('tarifConsultation', IntegerType::class, [
+                'label' => 'Tarif de consultation (€)',
+                'required' => false,
+                'constraints' => [new Length(['max' => 10])],
+                'attr' => $attr + ['placeholder' => '50', 'data-role-fields' => 'ROLE_MEDECIN'],
+            ])
             ->add('dateNaissance', DateType::class, [
                 'label' => 'Date de naissance',
                 'widget' => 'single_text',
                 'required' => false,
                 'help' => 'La date ne doit pas être dans le futur.',
-                'constraints' => [new LessThanOrEqual(new \DateTimeImmutable('today'), message: 'La date de naissance ne peut pas être dans le futur.')],
+                'constraints' => [
+                    new LessThanOrEqual('today', message: 'La date de naissance ne peut pas être dans le futur.')
+                ],
                 'attr' => $attr + ['data-role-fields' => 'ROLE_PATIENT'],
             ])
             ->add('adresse', TextType::class, [
@@ -139,6 +172,11 @@ final class InscriptionType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults(['data_class' => null]);
+        $resolver->setDefaults([
+            'data_class' => null,
+            'csrf_protection' => true,
+            'csrf_field_name' => '_token',
+            'csrf_token_id' => 'registration',
+        ]);
     }
 }

@@ -31,6 +31,7 @@ class RendezVousRepository extends ServiceEntityRepository
             ->andWhere('r.medecin = :medecin')
             ->setParameter('medecin', $medecin)
             ->orderBy('r.id', 'DESC')
+            ->setMaxResults(1000) // Limite de 1000 résultats pour éviter l'épuisement de mémoire
             ->getQuery()
             ->getResult();
     }
@@ -73,6 +74,7 @@ class RendezVousRepository extends ServiceEntityRepository
             ->andWhere('r.patient = :patient')
             ->setParameter('patient', $patient)
             ->orderBy('r.id', 'DESC')
+            ->setMaxResults(1000) // Limite de 1000 résultats pour éviter l'épuisement de mémoire
             ->getQuery()
             ->getResult();
     }
@@ -88,6 +90,7 @@ class RendezVousRepository extends ServiceEntityRepository
             ->setParameter('medecin', $medecin)
             ->setParameter('status', StatusRendezVous::EN_ATTENTE)
             ->orderBy('r.id', 'DESC')
+            ->setMaxResults(1000) // Limite de 1000 résultats pour éviter l'épuisement de mémoire
             ->getQuery()
             ->getResult();
     }
@@ -176,5 +179,16 @@ class RendezVousRepository extends ServiceEntityRepository
             ->setParameter('statuses', [StatusRendezVous::EN_ATTENTE, StatusRendezVous::CONFIRMER])
             ->getQuery()
             ->getSingleScalarResult();
+    }
+
+    public function findByDisponibiliteAndStatus(Disponibilite $disponibilite, StatusRendezVous $status): array
+    {
+        return $this->createQueryBuilder('r')
+            ->where('r.disponibilite = :disponibilite')
+            ->andWhere('r.status = :status')
+            ->setParameter('disponibilite', $disponibilite)
+            ->setParameter('status', $status)
+            ->getQuery()
+            ->getResult();
     }
 }
