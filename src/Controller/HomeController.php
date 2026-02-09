@@ -410,11 +410,7 @@ final class HomeController extends AbstractController
     }
 
     /**
-<<<<<<< HEAD
-     * @return array{id: int, name: string, initials: string, specialty: string, specialty_class: string, rating: string, reviews: int, description: string, address: string, phone: string, email: string, price: int|float, has_cabinet: bool}
-=======
      * @return array{id: int, name: string, initials: string, specialty: string, specialty_class: string, rating: string, reviews: int, description: string, address: string, phone: string, email: string, price: int|float, has_cabinet: bool, has_teleconsult: bool}
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
      */
     private function medecinToDoctorArray(Medcin $medecin): array
     {
