@@ -151,9 +151,4 @@ final class ModuleController extends AbstractController
 
         return $this->json(['success' => true]);
     }
-<<<<<<< Updated upstream
 }
-=======
-}
-
->>>>>>> Stashed changes
