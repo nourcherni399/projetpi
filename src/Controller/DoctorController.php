@@ -79,7 +79,7 @@ final class DoctorController extends AbstractController
         $form = $this->createForm(ProfileType::class, $user, ['data_class' => $user::class]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $user->setUpdatedAt(new \DateTimeImmutable());
+            $user->setUpdatedAt(new \DateTime());
             $this->entityManager->flush();
             $this->addFlash('success', 'Votre profil a été mis à jour avec succès.');
             return $this->redirectToRoute('doctor_profile');

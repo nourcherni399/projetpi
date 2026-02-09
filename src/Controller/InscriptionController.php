@@ -78,7 +78,7 @@ final class InscriptionController extends AbstractController
                 $user->setPassword($this->passwordHasher->hashPassword($user, $data['password']));
                 $user->setIsActive(true);
                 $user->setRole($role);
-                $now = new \DateTimeImmutable();
+                $now = new \DateTime();
                 $user->setCreatedAt($now);
                 $user->setUpdatedAt($now);
 

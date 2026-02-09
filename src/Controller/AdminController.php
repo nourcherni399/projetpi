@@ -47,7 +47,7 @@ final class AdminController extends AbstractController
         $form = $this->createForm(ProfileType::class, $user, ['data_class' => $user::class]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $user->setUpdatedAt(new \DateTimeImmutable());
+            $user->setUpdatedAt(new \DateTime());
             $this->entityManager->flush();
             $this->addFlash('success', 'Votre profil a été mis à jour avec succès.');
             return $this->redirectToRoute('admin_profile');
@@ -188,7 +188,7 @@ final class AdminController extends AbstractController
             $user->setPassword($this->passwordHasher->hashPassword($user, $data['password']));
             $user->setIsActive($data['isActive'] ?? true);
             $user->setRole($data['role']);
-            $now = new \DateTimeImmutable();
+            $now = new \DateTime();
             $user->setCreatedAt($now);
             $user->setUpdatedAt($now);
 

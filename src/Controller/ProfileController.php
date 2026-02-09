@@ -46,7 +46,7 @@ final class ProfileController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $user->setUpdatedAt(new \DateTimeImmutable());
+            $user->setUpdatedAt(new \DateTime());
             $this->entityManager->flush();
 
             $this->addFlash('success', 'Votre profil a été mis à jour avec succès.');
@@ -79,7 +79,8 @@ final class ProfileController extends AbstractController
             return $this->redirectToRoute('user_profile');
         }
         $user->setIsActive(false);
-        $user->setUpdatedAt(new \DateTimeImmutable());
+        $now = new \DateTime();
+        $user->setUpdatedAt($now);
         $this->entityManager->flush();
         $this->addFlash('success', 'Votre compte a été désactivé. Vous pouvez le réactiver en contactant l’équipe.');
         return $this->redirectToRoute('app_logout');
