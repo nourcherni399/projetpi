@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace App\Form;
 
-<<<<<<< HEAD
-=======
 use App\Enum\Sexe;
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
 use App\Enum\UserRole;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -167,13 +164,6 @@ final class UserCreateType extends AbstractType
                 'constraints' => [new Length(['max' => 500, 'maxMessage' => 'L\'adresse ne peut pas dépasser {{ limit }} caractères.'])],
                 'attr' => $attr + ['placeholder' => 'Adresse', 'data-role-fields' => 'ROLE_PATIENT'],
             ])
-<<<<<<< HEAD
-            ->add('sexe', TextType::class, [
-                'label' => 'Sexe',
-                'required' => false,
-                'constraints' => [new Length(['max' => 20, 'maxMessage' => 'Ce champ ne peut pas dépasser {{ limit }} caractères.'])],
-                'attr' => $attr + ['placeholder' => 'Ex. M, F', 'data-role-fields' => 'ROLE_PATIENT'],
-=======
             ->add('sexe', EnumType::class, [
                 'label' => 'Sexe',
                 'class' => Sexe::class,
@@ -181,7 +171,6 @@ final class UserCreateType extends AbstractType
                 'placeholder' => 'Choisir',
                 'required' => false,
                 'attr' => $attr + ['data-role-fields' => 'ROLE_PATIENT'],
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
             ]);
     }
 
@@ -191,12 +180,4 @@ final class UserCreateType extends AbstractType
             'data_class' => null,
         ]);
     }
-<<<<<<< HEAD
 }
-=======
-<<<<<<< HEAD
-}
-=======
-}
->>>>>>> bc1944e (Integration user - PI)
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3

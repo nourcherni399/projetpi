@@ -12,13 +12,6 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-use Symfony\Component\Validator\Constraints\Length;
-=======
->>>>>>> bc1944e (Integration user - PI)
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
 use Symfony\Component\Validator\Constraints\NotBlank;
 
 final class BlogType extends AbstractType
@@ -32,18 +25,7 @@ final class BlogType extends AbstractType
         $builder
             ->add('titre', TextType::class, [
                 'label' => 'Titre',
-<<<<<<< HEAD
                 'constraints' => [new NotBlank(message: 'Le titre est obligatoire.')],
-=======
-<<<<<<< HEAD
-                'constraints' => [
-                    new NotBlank(message: 'Le titre est obligatoire.'),
-                    new Length(['min' => 1, 'max' => 255, 'maxMessage' => 'Le titre ne peut pas dépasser {{ limit }} caractères.']),
-                ],
-=======
-                'constraints' => [new NotBlank(message: 'Le titre est obligatoire.')],
->>>>>>> bc1944e (Integration user - PI)
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
                 'attr' => $attr + ['placeholder' => 'Titre de l\'article'],
             ])
             ->add('type', ChoiceType::class, [
@@ -60,31 +42,13 @@ final class BlogType extends AbstractType
             ])
             ->add('contenu', TextareaType::class, [
                 'label' => 'Contenu',
-<<<<<<< HEAD
                 'constraints' => [new NotBlank(message: 'Le contenu est obligatoire.')],
-=======
-<<<<<<< HEAD
-                'constraints' => [
-                    new NotBlank(message: 'Le contenu est obligatoire.'),
-                    new Length(['min' => 1, 'max' => 65535, 'maxMessage' => 'Le contenu ne peut pas dépasser {{ limit }} caractères.']),
-                ],
-=======
-                'constraints' => [new NotBlank(message: 'Le contenu est obligatoire.')],
->>>>>>> bc1944e (Integration user - PI)
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
                 'attr' => $attr + ['rows' => 8, 'placeholder' => 'Contenu de l\'article...'],
             ])
             ->add('image', TextType::class, [
                 'label' => 'Image (URL ou chemin)',
                 'required' => false,
                 'empty_data' => '',
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-                'constraints' => [new Length(['max' => 500, 'maxMessage' => 'L\'URL ne peut pas dépasser {{ limit }} caractères.'])],
-=======
->>>>>>> bc1944e (Integration user - PI)
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
                 'attr' => $attr + ['placeholder' => 'https://... ou chemin vers l\'image'],
             ])
             ->add('isPublished', CheckboxType::class, [

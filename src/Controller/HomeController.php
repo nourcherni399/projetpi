@@ -13,10 +13,7 @@ use App\Entity\Patient;
 use App\Entity\RendezVous;
 use App\Enum\Motif;
 use App\Enum\StatusRendezVous;
-<<<<<<< HEAD
-=======
 use App\Enum\UserRole;
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
 use App\Form\BlogType;
 use App\Repository\DisponibiliteRepository;
 use App\Repository\EvenementRepository;
@@ -27,10 +24,7 @@ use App\Repository\RendezVousRepository;
 use App\Repository\ThematiqueRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-<<<<<<< HEAD
-=======
 use Symfony\Component\HttpFoundation\RedirectResponse;
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -50,10 +44,6 @@ final class HomeController extends AbstractController
     }
 
     #[Route('/', name: 'home', methods: ['GET'])]
-<<<<<<< HEAD
-    public function home(): Response
-    {
-=======
     public function home(): Response|RedirectResponse
     {
         $user = $this->getUser();
@@ -66,7 +56,6 @@ final class HomeController extends AbstractController
                 return $this->redirectToRoute('doctor_dashboard');
             }
         }
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
         return $this->render('front/home/index.html.twig');
     }
 
@@ -222,10 +211,7 @@ final class HomeController extends AbstractController
     ];
     private const APPOINTMENT_MODE_LABELS = [
         'cabinet' => 'Au cabinet',
-<<<<<<< HEAD
-=======
         'teleconsult' => 'Téléconsultation',
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
     ];
 
     /** Numéro de jour PHP (1=lundi) pour chaque Jour enum. */
@@ -286,11 +272,7 @@ final class HomeController extends AbstractController
     {
         $dispos = $this->disponibiliteRepository->findByMedecin($medecin);
         $slots = [];
-<<<<<<< HEAD
-        $today = new \DateTime('today');
-=======
         $today = new \DateTimeImmutable('today');
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
         $end = $today->modify('+4 weeks');
         $jourNumber = self::JOUR_TO_NUMBER;
 
@@ -342,11 +324,7 @@ final class HomeController extends AbstractController
         $dateRdv = null;
         if ($dateRdvStr !== '') {
             try {
-<<<<<<< HEAD
-                $dateRdv = new \DateTime($dateRdvStr);
-=======
                 $dateRdv = new \DateTimeImmutable($dateRdvStr);
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
             } catch (\Throwable) {
             }
         }
@@ -465,17 +443,8 @@ final class HomeController extends AbstractController
             'email' => $medecin->getEmail() ?? '—',
             'price' => (int) round($medecin->getTarifConsultation() ?? 0),
             'has_cabinet' => $medecin->getAdresseCabinet() !== null && $medecin->getAdresseCabinet() !== '',
-<<<<<<< HEAD
-        ];
-    }
-
-=======
             'has_teleconsult' => true,
         ];
-    }
-
-<<<<<<< HEAD
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
     #[Route('/blog', name: 'user_blog', methods: ['GET'])]
     public function blog(): Response
     {
@@ -627,6 +596,8 @@ final class HomeController extends AbstractController
 =======
 >>>>>>> bc1944e (Integration user - PI)
 >>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
+=======
+>>>>>>> cf863be161e2a713163dcf735642a0126ca9eaac
 
     #[Route('/inscription', name: 'register', methods: ['GET'])]
     public function register(): Response
@@ -639,12 +610,19 @@ final class HomeController extends AbstractController
     {
         return $this->render('front/auth/login.html.twig');
     }
-<<<<<<< HEAD
+
 }
-=======
-<<<<<<< HEAD
+
+    #[Route('/inscription', name: 'register', methods: ['GET'])]
+    public function register(): Response
+    {
+        return $this->render('front/auth/register.html.twig');
+    }
+
+    #[Route('/connexion', name: 'login', methods: ['GET'])]
+    public function login(): Response
+    {
+        return $this->render('front/auth/login.html.twig');
+    }
+
 }
-=======
-}
->>>>>>> bc1944e (Integration user - PI)
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3

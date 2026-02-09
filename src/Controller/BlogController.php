@@ -4,19 +4,6 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
-use App\Repository\BlogRepository;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
-
-#[Route('/admin/blog')]
-<<<<<<< HEAD
-=======
-=======
 use App\Entity\Blog;
 use App\Entity\Commentaire;
 use App\Entity\Module;
@@ -31,28 +18,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/blog')]
->>>>>>> bc1944e (Integration user - PI)
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
 final class BlogController extends AbstractController
 {
     public function __construct(
         private readonly BlogRepository $blogRepository,
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
-    ) {
-    }
-
-    #[Route('', name: 'admin_blog_index', methods: ['GET'])]
-    public function index(): Response
-    {
-        $blogs = $this->blogRepository->findBy([], ['dateCreation' => 'DESC']);
-        return $this->render('admin/blog/index.html.twig', ['blogs' => $blogs]);
-    }
-<<<<<<< HEAD
-=======
-=======
         private readonly ModuleRepository $moduleRepository,
         private readonly EntityManagerInterface $entityManager,
     ) {
@@ -311,6 +280,5 @@ final class BlogController extends AbstractController
 
 
 
->>>>>>> bc1944e (Integration user - PI)
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
 }
+

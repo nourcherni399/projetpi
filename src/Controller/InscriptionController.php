@@ -75,14 +75,10 @@ final class InscriptionController extends AbstractController
             try {
 <<<<<<< HEAD
                 $user = match ($role) {
-                    UserRole::MEDECIN => new Medcin(),
                     UserRole::PARENT => new ParentUser(),
                     UserRole::PATIENT => new Patient(),
                     default => new Patient(),
                 };
-=======
-                $user = $role === UserRole::PARENT ? new ParentUser() : new Patient();
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
                 $user->setNom(mb_substr(trim((string) ($data['nom'] ?? '')), 0, 255));
                 $user->setPrenom(mb_substr(trim((string) ($data['prenom'] ?? '')), 0, 255));
                 $user->setEmail($email);
@@ -103,28 +99,10 @@ final class InscriptionController extends AbstractController
                     $user->setDateNaissance($dn instanceof \DateTimeInterface ? \DateTimeImmutable::createFromInterface($dn) : null);
                     $adresse = isset($data['adresse']) && $data['adresse'] !== '' ? trim((string) $data['adresse']) : null;
                     $user->setAdresse($adresse !== null && $adresse !== '' ? mb_substr($adresse, 0, 500) : null);
-<<<<<<< HEAD
-                    $sexe = isset($data['sexe']) && $data['sexe'] !== '' ? trim((string) $data['sexe']) : null;
-                    $user->setSexe($sexe !== null && $sexe !== '' ? mb_substr($sexe, 0, 20) : null);
-                }
-                if ($user instanceof Medcin) {
-                    $specialite = isset($data['specialite']) && $data['specialite'] !== '' ? trim((string) $data['specialite']) : null;
-                    $user->setSpecialite($specialite !== null && $specialite !== '' ? mb_substr($specialite, 0, 255) : null);
                     
-                    $nomCabinet = isset($data['nomCabinet']) && $data['nomCabinet'] !== '' ? trim((string) $data['nomCabinet']) : null;
-                    $user->setNomCabinet($nomCabinet !== null && $nomCabinet !== '' ? mb_substr($nomCabinet, 0, 255) : null);
-                    
-                    $adresseCabinet = isset($data['adresseCabinet']) && $data['adresseCabinet'] !== '' ? trim((string) $data['adresseCabinet']) : null;
-                    $user->setAdresseCabinet($adresseCabinet !== null && $adresseCabinet !== '' ? mb_substr($adresseCabinet, 0, 500) : null);
-                    
-                    $telephoneCabinet = isset($data['telephoneCabinet']) && $data['telephoneCabinet'] !== '' ? trim((string) $data['telephoneCabinet']) : null;
-                    $user->setTelephoneCabinet($telephoneCabinet !== null && $telephoneCabinet !== '' ? mb_substr($telephoneCabinet, 0, 20) : null);
-                    
-                    $tarifConsultation = isset($data['tarifConsultation']) ? (int) $data['tarifConsultation'] : null;
-                    $user->setTarifConsultation($tarifConsultation > 0 ? $tarifConsultation : null);
-
                     $sexe = $data['sexe'] ?? null;
                     $user->setSexe($sexe instanceof \App\Enum\Sexe ? $sexe : null);
+                }
 
                 }
 

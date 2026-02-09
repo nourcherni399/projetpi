@@ -5,10 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\User;
-<<<<<<< HEAD
-=======
 use App\Enum\UserRole;
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
 use App\Form\ProfileType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -32,8 +29,6 @@ final class ProfileController extends AbstractController
         if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
-<<<<<<< HEAD
-=======
         if (method_exists($user, 'getRole')) {
             $role = $user->getRole();
             if ($role === UserRole::ADMIN) {
@@ -43,7 +38,6 @@ final class ProfileController extends AbstractController
                 return $this->redirectToRoute('doctor_profile');
             }
         }
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
 
         $form = $this->createForm(ProfileType::class, $user, [
             'data_class' => $user::class,
@@ -65,9 +59,6 @@ final class ProfileController extends AbstractController
             'form' => $form,
         ]);
     }
-<<<<<<< HEAD
-}
-=======
 
     #[Route('/mon-profil/desactiver', name: 'user_profile_deactivate', methods: ['POST'])]
     public function deactivate(Request $request): Response
@@ -93,9 +84,4 @@ final class ProfileController extends AbstractController
         $this->addFlash('success', 'Votre compte a été désactivé. Vous pouvez le réactiver en contactant l’équipe.');
         return $this->redirectToRoute('app_logout');
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> bc1944e (Integration user - PI)
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3

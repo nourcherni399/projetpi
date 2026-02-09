@@ -11,13 +11,6 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-use Symfony\Component\Validator\Constraints\Length;
-=======
->>>>>>> bc1944e (Integration user - PI)
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
 use Symfony\Component\Validator\Constraints\NotBlank;
 
 final class NoteType extends AbstractType
@@ -43,18 +36,7 @@ final class NoteType extends AbstractType
             ])
             ->add('contenu', TextareaType::class, [
                 'label' => 'Contenu de la note',
-<<<<<<< HEAD
                 'constraints' => [new NotBlank(message: 'Le contenu est obligatoire.')],
-=======
-<<<<<<< HEAD
-                'constraints' => [
-                    new NotBlank(message: 'Le contenu est obligatoire.'),
-                    new Length(['min' => 1, 'max' => 65535, 'maxMessage' => 'Le contenu ne peut pas dépasser {{ limit }} caractères.']),
-                ],
-=======
-                'constraints' => [new NotBlank(message: 'Le contenu est obligatoire.')],
->>>>>>> bc1944e (Integration user - PI)
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
                 'attr' => array_merge($attr, ['rows' => 4]),
             ]);
     }

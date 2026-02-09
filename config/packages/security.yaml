@@ -15,10 +15,7 @@ security:
         main:
             lazy: true
             provider: app_user_provider
-<<<<<<< HEAD
-=======
             user_checker: App\Security\UserChecker
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
             form_login:
                 login_path: app_login
                 check_path: app_login
@@ -42,12 +39,8 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-<<<<<<< HEAD
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-=======
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/medecin, roles: ROLE_MEDECIN }
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
         # - { path: ^/profile, roles: ROLE_USER }
 
 when@test:

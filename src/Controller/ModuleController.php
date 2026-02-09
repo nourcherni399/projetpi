@@ -7,25 +7,13 @@ namespace App\Controller;
 use App\Entity\Module;
 use App\Form\ModuleType;
 use App\Repository\ModuleRepository;
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
 use App\Repository\ActionHistoryRepository;
->>>>>>> bc1944e (Integration user - PI)
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
 use Symfony\Component\HttpFoundation\RedirectResponse;
->>>>>>> bc1944e (Integration user - PI)
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
 
 #[Route('/admin/modules')]
 final class ModuleController extends AbstractController
@@ -33,21 +21,6 @@ final class ModuleController extends AbstractController
     public function __construct(
         private readonly ModuleRepository $moduleRepository,
         private readonly EntityManagerInterface $entityManager,
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
-    ) {
-    }
-
-    #[Route('', name: 'admin_module_index', methods: ['GET'])]
-    public function index(): Response
-    {
-        $modules = $this->moduleRepository->findBy([], ['dateCreation' => 'DESC']);
-        return $this->render('admin/module/index.html.twig', ['modules' => $modules]);
-<<<<<<< HEAD
-=======
-=======
         private readonly ActionHistoryRepository $actionHistoryRepository,
     ) {
     }
@@ -62,8 +35,6 @@ final class ModuleController extends AbstractController
             'modules' => $modules,
             'actionHistory' => $actionHistory
         ]);
->>>>>>> bc1944e (Integration user - PI)
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
     }
 
     #[Route('/new', name: 'admin_module_new', methods: ['GET', 'POST'])]
@@ -82,16 +53,6 @@ final class ModuleController extends AbstractController
             }
             $this->entityManager->persist($module);
             $this->entityManager->flush();
-<<<<<<< HEAD
-            $this->addFlash('success', 'Le module a été créé avec succès.');
-
-            return $this->redirectToRoute('admin_module_index');
-=======
-<<<<<<< HEAD
-            $this->addFlash('success', 'Le module a été créé avec succès.');
-
-            return $this->redirectToRoute('admin_module_index');
-=======
             
             // Enregistrer l'action de création
             $this->actionHistoryRepository->createAction(
@@ -104,8 +65,6 @@ final class ModuleController extends AbstractController
             $this->addFlash('success', 'Le module a été créé avec succès.');
 
             return $this->redirectToRoute('admin_dashboard');
->>>>>>> bc1944e (Integration user - PI)
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
         }
 
         return $this->render('admin/module/new.html.twig', [
@@ -113,10 +72,6 @@ final class ModuleController extends AbstractController
             'form' => $form,
         ]);
     }
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
 
     #[Route('/{id}/edit', name: 'admin_module_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Module $module): Response
@@ -196,6 +151,4 @@ final class ModuleController extends AbstractController
 
         return $this->json(['success' => true]);
     }
->>>>>>> bc1944e (Integration user - PI)
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
 }
