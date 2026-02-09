@@ -39,18 +39,21 @@ final class InscriptionController extends AbstractController
 
             if ($email === '' || strlen($email) > 180) {
                 $this->addFlash('error', 'Adresse e-mail invalide.');
-                return $this->render('front/auth/register.html.twig', ['form' => $form]);
+                $tp = $request->query->get('_target_path') ?? $request->request->get('_target_path');
+                return $this->render('front/auth/register.html.twig', ['form' => $form, 'target_path' => $tp]);
             }
 
             if ($this->userRepository->findOneBy(['email' => $email])) {
                 $this->addFlash('error', 'Un compte existe déjà avec cette adresse e-mail.');
-                return $this->render('front/auth/register.html.twig', ['form' => $form]);
+                $tp = $request->query->get('_target_path') ?? $request->request->get('_target_path');
+                return $this->render('front/auth/register.html.twig', ['form' => $form, 'target_path' => $tp]);
             }
 
             $role = $data['role'];
             if (!$role instanceof UserRole || !\in_array($role, [UserRole::PATIENT, UserRole::PARENT, UserRole::USER], true)) {
                 $this->addFlash('error', 'Profil non autorisé pour l\'inscription.');
-                return $this->render('front/auth/register.html.twig', ['form' => $form]);
+                $tp = $request->query->get('_target_path') ?? $request->request->get('_target_path');
+                return $this->render('front/auth/register.html.twig', ['form' => $form, 'target_path' => $tp]);
             }
 
             try {
@@ -83,10 +86,15 @@ final class InscriptionController extends AbstractController
                 $this->entityManager->flush();
 
                 $this->addFlash('success', 'Votre compte a été créé. Vous pouvez maintenant vous connecter.');
+                $targetPath = $request->query->get('_target_path') ?? $request->request->get('_target_path');
+                if ($targetPath !== null && $targetPath !== '') {
+                    return $this->redirectToRoute('app_login', ['_target_path' => $targetPath]);
+                }
                 return $this->redirectToRoute('app_login');
             } catch (\Throwable $e) {
                 $this->addFlash('error', 'Une erreur est survenue lors de la création du compte. Veuillez réessayer.');
-                return $this->render('front/auth/register.html.twig', ['form' => $form]);
+                $tp = $request->query->get('_target_path') ?? $request->request->get('_target_path');
+                return $this->render('front/auth/register.html.twig', ['form' => $form, 'target_path' => $tp]);
             }
         }
 
@@ -94,8 +102,11 @@ final class InscriptionController extends AbstractController
             $this->addFlash('error', 'Veuillez corriger les erreurs dans le formulaire.');
         }
 
+        $targetPath = $request->query->get('_target_path') ?? $request->request->get('_target_path');
+
         return $this->render('front/auth/register.html.twig', [
             'form' => $form,
+            'target_path' => $targetPath,
         ]);
     }
 }

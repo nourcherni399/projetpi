@@ -14,9 +14,14 @@
 
     <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8">
         {{ form_start(form, {
-            attr: { class: 'space-y-6' },
+            attr: { class: 'space-y-6', novalidate: 'novalidate' },
             label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }
         }) }}
+        {% if form.vars.submitted and not form.vars.valid %}
+        <div class="mb-4 p-4 rounded-lg bg-red-50 border border-red-200 text-red-800 text-sm">
+            Veuillez corriger les erreurs dans le formulaire ci-dessous.
+        </div>
+        {% endif %}
         <div class="grid grid-cols-1 gap-6">
             {{ form_row(form.nomThematique) }}
             {{ form_row(form.codeThematique) }}
@@ -25,6 +30,7 @@
                 {{ form_row(form.couleur) }}
                 {{ form_row(form.sousTitre) }}
             </div>
+            {{ form_row(form.image) }}
             {{ form_row(form.ordre) }}
             <div class="flex items-center gap-2">
                 {{ form_widget(form.actif) }}

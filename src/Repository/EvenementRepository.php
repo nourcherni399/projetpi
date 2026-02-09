@@ -45,8 +45,11 @@ class EvenementRepository extends ServiceEntityRepository
             case 'theme':
                 $qb->addOrderBy('t.nomThematique', $order)->addOrderBy('e.dateEvent', 'ASC')->addOrderBy('e.heureDebut', 'ASC');
                 break;
+            case 'titre':
+                $qb->addOrderBy('e.title', $order)->addOrderBy('e.dateEvent', 'ASC')->addOrderBy('e.heureDebut', 'ASC');
+                break;
             default:
-                $qb->addOrderBy('e.dateEvent', $order)->addOrderBy('e.heureDebut', 'ASC');
+                $qb->addOrderBy('e.dateEvent', $order)->addOrderBy('e.heureDebut', $order);
                 break;
         }
 

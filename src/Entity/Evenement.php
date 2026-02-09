@@ -9,6 +9,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: EvenementRepository::class)]
 class Evenement
@@ -19,26 +20,40 @@ class Evenement
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Le titre de l\'événement est obligatoire.')]
+    #[Assert\Length(max: 255, maxMessage: 'Le titre ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\Length(max: 65535, maxMessage: 'La description ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $description = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Assert\NotNull(message: 'La date de l\'événement est obligatoire.')]
     private ?\DateTimeInterface $dateEvent = null;
 
     #[ORM\Column(type: Types::TIME_MUTABLE)]
+    #[Assert\NotNull(message: 'L\'heure de début est obligatoire.')]
     private ?\DateTimeInterface $heureDebut = null;
 
     #[ORM\Column(type: Types::TIME_MUTABLE)]
+    #[Assert\NotNull(message: 'L\'heure de fin est obligatoire.')]
     private ?\DateTimeInterface $heureFin = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\NotBlank(message: 'Ce champ est obligatoire.')]
+    #[Assert\Length(max: 255)]
     private ?string $lieu = null;
+
+    /** URL de localisation (lien Google Maps ou iframe). */
+    #[ORM\Column(length: 500, nullable: true)]
+    #[Assert\Length(max: 500)]
+    private ?string $locationUrl = null;
 
     /** Agrégation : un événement appartient à une thématique (sans cascade delete). */
     #[ORM\ManyToOne(inversedBy: 'evenements')]
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    #[Assert\NotNull(message: 'Ce champ est obligatoire.')]
     private ?Thematique $thematique = null;
 
     /** @var Collection<int, InscritEvents> */
@@ -60,7 +75,7 @@ class Evenement
         return $this->title;
     }
 
-    public function setTitle(string $title): static
+    public function setTitle(?string $title): static
     {
         $this->title = $title;
         return $this;
@@ -82,7 +97,7 @@ class Evenement
         return $this->dateEvent;
     }
 
-    public function setDateEvent(\DateTimeInterface $dateEvent): static
+    public function setDateEvent(?\DateTimeInterface $dateEvent): static
     {
         $this->dateEvent = $dateEvent;
         return $this;
@@ -93,7 +108,7 @@ class Evenement
         return $this->heureDebut;
     }
 
-    public function setHeureDebut(\DateTimeInterface $heureDebut): static
+    public function setHeureDebut(?\DateTimeInterface $heureDebut): static
     {
         $this->heureDebut = $heureDebut;
         return $this;
@@ -104,7 +119,7 @@ class Evenement
         return $this->heureFin;
     }
 
-    public function setHeureFin(\DateTimeInterface $heureFin): static
+    public function setHeureFin(?\DateTimeInterface $heureFin): static
     {
         $this->heureFin = $heureFin;
         return $this;
@@ -115,10 +130,69 @@ class Evenement
         return $this->lieu;
     }
 
-    public function setLieu(string $lieu): static
+    public function setLieu(?string $lieu): static
     {
         $this->lieu = $lieu;
         return $this;
+    }
+
+    public function getLocationUrl(): ?string
+    {
+        return $this->locationUrl;
+    }
+
+    public function setLocationUrl(?string $locationUrl): static
+    {
+        $this->locationUrl = $locationUrl;
+        return $this;
+    }
+
+    /**
+     * URL d'intégration iframe pour la carte (Google Maps).
+     */
+    public function getMapEmbedUrl(): ?string
+    {
+        $url = $this->locationUrl;
+        if ($url !== null && $url !== '') {
+            $urlLower = strtolower($url);
+            if (str_contains($urlLower, 'embed') || str_contains($urlLower, 'iframe')) {
+                return $url;
+            }
+            if (preg_match('/[?&]q=([^&]+)/', $url, $m)) {
+                return 'https://www.google.com/maps?q=' . rawurlencode(urldecode($m[1])) . '&output=embed';
+            }
+            if (preg_match('/@(-?\d+\.?\d*),(-?\d+\.?\d*)/', $url, $m)) {
+                return 'https://www.google.com/maps?q=' . $m[1] . ',' . $m[2] . '&output=embed';
+            }
+        }
+        if ($this->lieu !== null && $this->lieu !== '') {
+            return 'https://www.google.com/maps?q=' . rawurlencode($this->lieu) . '&output=embed';
+        }
+        return null;
+    }
+
+    /**
+     * URL pour ouvrir la localisation dans Google Maps (page complète).
+     */
+    public function getMapsPageUrl(): ?string
+    {
+        $url = $this->locationUrl;
+        if ($url !== null && $url !== '') {
+            $urlLower = strtolower($url);
+            if (str_contains($urlLower, 'embed') || str_contains($urlLower, 'iframe')) {
+                if (preg_match('/[?&]q=([^&]+)/', $url, $m)) {
+                    return 'https://www.google.com/maps?q=' . $m[1];
+                }
+                if (preg_match('/@(-?\d+\.?\d*),(-?\d+\.?\d*)/', $url, $m)) {
+                    return 'https://www.google.com/maps?q=' . $m[1] . ',' . $m[2];
+                }
+            }
+            return str_starts_with($url, 'http') ? $url : 'https://' . $url;
+        }
+        if ($this->lieu !== null && $this->lieu !== '') {
+            return 'https://www.google.com/maps?q=' . rawurlencode($this->lieu);
+        }
+        return null;
     }
 
     public function getThematique(): ?Thematique

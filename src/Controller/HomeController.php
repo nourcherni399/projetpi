@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Entity\Blog;
 use App\Entity\Disponibilite;
 use App\Entity\Evenement;
+use App\Entity\InscritEvents;
 use App\Entity\Medcin;
 use App\Entity\Notification;
 use App\Entity\Patient;
@@ -17,6 +18,7 @@ use App\Enum\UserRole;
 use App\Form\BlogType;
 use App\Repository\DisponibiliteRepository;
 use App\Repository\EvenementRepository;
+use App\Repository\InscritEventsRepository;
 use App\Repository\MedcinRepository;
 use App\Repository\ModuleRepository;
 use App\Repository\NotificationRepository;
@@ -35,6 +37,7 @@ final class HomeController extends AbstractController
         private readonly ModuleRepository $moduleRepository,
         private readonly ThematiqueRepository $thematiqueRepository,
         private readonly EvenementRepository $evenementRepository,
+        private readonly InscritEventsRepository $inscritEventsRepository,
         private readonly MedcinRepository $medcinRepository,
         private readonly DisponibiliteRepository $disponibiliteRepository,
         private readonly RendezVousRepository $rendezVousRepository,
@@ -184,7 +187,99 @@ final class HomeController extends AbstractController
         if ($evenement === null) {
             throw $this->createNotFoundException('Événement introuvable.');
         }
-        return $this->render('front/events/show.html.twig', ['evenement' => $evenement]);
+        $user = $this->getUser();
+        $inscription = $user !== null
+            ? $this->inscritEventsRepository->findInscriptionForUserAndEvent($user, $evenement)
+            : null;
+        $userInscrit = $inscription !== null && $inscription->getStatut() === 'accepte';
+
+        return $this->render('front/events/show.html.twig', [
+            'evenement' => $evenement,
+            'userInscrit' => $userInscrit,
+            'inscription' => $inscription,
+        ]);
+    }
+
+    #[Route('/evenements/{id}/inscrire', name: 'user_event_register', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function eventRegister(int $id, Request $request): Response
+    {
+        $user = $this->getUser();
+        if ($user === null) {
+            $this->addFlash('error', 'Connectez-vous pour vous inscrire à un événement.');
+            return $this->redirectToRoute('app_login', ['_target_path' => $this->generateUrl('user_event_show', ['id' => $id])]);
+        }
+
+        $evenement = $this->evenementRepository->find($id);
+        if ($evenement === null) {
+            throw $this->createNotFoundException('Événement introuvable.');
+        }
+
+        if (!$this->isCsrfTokenValid('event_register_' . $id, (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton de sécurité invalide.');
+            return $this->redirectToRoute('user_event_show', ['id' => $id]);
+        }
+
+        $existing = $this->inscritEventsRepository->findInscriptionForUserAndEvent($user, $evenement);
+        if ($existing !== null) {
+            if ($existing->getStatut() === 'accepte') {
+                $this->addFlash('info', 'Vous êtes déjà inscrit à cet événement.');
+                return $this->redirectToRoute('user_event_show', ['id' => $id]);
+            }
+            if ($existing->getStatut() === 'en_attente') {
+                $this->addFlash('info', 'Votre demande d\'inscription est déjà en attente de validation.');
+                return $this->redirectToRoute('user_event_show', ['id' => $id]);
+            }
+            $existing->setStatut('en_attente');
+            $existing->setDateInscrit(new \DateTime());
+            $existing->setEstInscrit(true);
+            $this->entityManager->flush();
+            $this->addFlash('success', 'Votre demande a été renvoyée. L\'administrateur la validera sous peu.');
+            return $this->redirectToRoute('user_event_show', ['id' => $id]);
+        }
+
+        $inscrit = new InscritEvents();
+        $inscrit->setUser($user);
+        $inscrit->setEvenement($evenement);
+        $inscrit->setDateInscrit(new \DateTime());
+        $inscrit->setEstInscrit(true);
+        $inscrit->setStatut('en_attente');
+        $this->entityManager->persist($inscrit);
+        $this->entityManager->flush();
+
+        $this->addFlash('success', 'Votre demande d\'inscription a été enregistrée. L\'administrateur la validera sous peu.');
+        return $this->redirectToRoute('user_event_show', ['id' => $id]);
+    }
+
+    #[Route('/evenements/{id}/desinscrire', name: 'user_event_unregister', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function eventUnregister(int $id, Request $request): Response
+    {
+        $user = $this->getUser();
+        if ($user === null) {
+            $this->addFlash('error', 'Connectez-vous pour gérer vos inscriptions.');
+            return $this->redirectToRoute('app_login');
+        }
+
+        $evenement = $this->evenementRepository->find($id);
+        if ($evenement === null) {
+            throw $this->createNotFoundException('Événement introuvable.');
+        }
+
+        if (!$this->isCsrfTokenValid('event_unregister_' . $id, (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton de sécurité invalide.');
+            return $this->redirectToRoute('user_event_show', ['id' => $id]);
+        }
+
+        $inscrit = $this->inscritEventsRepository->findInscriptionForUserAndEvent($user, $evenement);
+        if ($inscrit !== null && $inscrit->getStatut() === 'accepte') {
+            $inscrit->setEstInscrit(false);
+            $inscrit->setStatut('desinscrit');
+            $this->entityManager->flush();
+            $this->addFlash('success', 'Vous avez été désinscrit de l\'événement.');
+        } else {
+            $this->addFlash('info', 'Vous n\'étiez pas inscrit à cet événement.');
+        }
+
+        return $this->redirectToRoute('user_event_show', ['id' => $id]);
     }
 
     #[Route('/rendez-vous', name: 'user_appointments', methods: ['GET'])]

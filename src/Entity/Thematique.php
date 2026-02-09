@@ -10,6 +10,7 @@ use App\Repository\ThematiqueRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ThematiqueRepository::class)]
 #[ORM\Table(name: 'thematique')]
@@ -21,21 +22,39 @@ class Thematique
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Ce champ est obligatoire.')]
+    #[Assert\Length(max: 255, maxMessage: 'Le nom ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $nomThematique = null;
 
     #[ORM\Column(length: 50)]
+    #[Assert\NotBlank(message: 'Ce champ est obligatoire.')]
+    #[Assert\Length(max: 50, maxMessage: 'Le code ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $codeThematique = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
+    #[Assert\NotBlank(message: 'Ce champ est obligatoire.')]
+    #[Assert\Length(max: 65535, maxMessage: 'La description ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $description = null;
 
     #[ORM\Column(length: 20, nullable: true)]
+    #[Assert\NotBlank(message: 'Ce champ est obligatoire.')]
+    #[Assert\Length(max: 20)]
     private ?string $couleur = null;
 
+    /** URL ou chemin de l'image représentant la thématique */
+    #[ORM\Column(length: 500, nullable: true)]
+    #[Assert\NotBlank(message: 'Ce champ est obligatoire.')]
+    #[Assert\Length(max: 500)]
+    private ?string $image = null;
+
     #[ORM\Column(name: 'sous_titre', length: 255, nullable: true)]
+    #[Assert\NotBlank(message: 'Ce champ est obligatoire.')]
+    #[Assert\Length(max: 255)]
     private ?string $sousTitre = null;
 
     #[ORM\Column(type: 'smallint', nullable: true)]
+    #[Assert\NotNull(message: 'Ce champ est obligatoire.')]
+    #[Assert\Range(min: 0, max: 32767, notInRangeMessage: 'L\'ordre doit être entre {{ min }} et {{ max }}.')]
     private ?int $ordre = null;
 
     #[ORM\Column(type: 'boolean', options: ['default' => true])]
@@ -66,7 +85,7 @@ class Thematique
         return $this->nomThematique;
     }
 
-    public function setNomThematique(string $nomThematique): static
+    public function setNomThematique(?string $nomThematique): static
     {
         $this->nomThematique = $nomThematique;
         return $this;
@@ -77,7 +96,7 @@ class Thematique
         return $this->codeThematique;
     }
 
-    public function setCodeThematique(string $codeThematique): static
+    public function setCodeThematique(?string $codeThematique): static
     {
         $this->codeThematique = $codeThematique;
         return $this;
@@ -102,6 +121,17 @@ class Thematique
     public function setCouleur(?string $couleur): static
     {
         $this->couleur = $couleur;
+        return $this;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): static
+    {
+        $this->image = $image;
         return $this;
     }
 

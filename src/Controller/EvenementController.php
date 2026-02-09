@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Entity\Evenement;
 use App\Form\EvenementType;
 use App\Repository\EvenementRepository;
+use App\Repository\InscritEventsRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,6 +20,7 @@ final class EvenementController extends AbstractController
 {
     public function __construct(
         private readonly EvenementRepository $evenementRepository,
+        private readonly InscritEventsRepository $inscritEventsRepository,
         private readonly EntityManagerInterface $entityManager,
     ) {
     }
@@ -28,7 +30,7 @@ final class EvenementController extends AbstractController
     {
         $q = $request->query->get('q');
         $sortBy = $request->query->get('sort', 'date');
-        if (!in_array($sortBy, ['date', 'lieu', 'theme'], true)) {
+        if (!in_array($sortBy, ['date', 'lieu', 'theme', 'titre'], true)) {
             $sortBy = 'date';
         }
         $sortOrder = $request->query->get('order', 'asc');
@@ -51,7 +53,47 @@ final class EvenementController extends AbstractController
         if ($evenement === null) {
             throw new NotFoundHttpException('Événement introuvable.');
         }
-        return $this->render('admin/evenement/show.html.twig', ['evenement' => $evenement]);
+        $participants = $this->inscritEventsRepository->findByEvenementOrderByDate($evenement);
+        return $this->render('admin/evenement/show.html.twig', [
+            'evenement' => $evenement,
+            'participants' => $participants,
+        ]);
+    }
+
+    #[Route('/inscriptions/{inscriptionId}/accepter', name: 'admin_evenement_inscription_accept', requirements: ['inscriptionId' => '\d+'], methods: ['POST'])]
+    public function acceptInscription(Request $request, int $inscriptionId): Response
+    {
+        $inscription = $this->inscritEventsRepository->find($inscriptionId);
+        if ($inscription === null) {
+            throw new NotFoundHttpException('Inscription introuvable.');
+        }
+        if (!$this->isCsrfTokenValid('inscription_accept_' . $inscriptionId, (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton de sécurité invalide.');
+            return $this->redirectToRoute('admin_evenement_show', ['id' => $inscription->getEvenement()->getId()]);
+        }
+        $inscription->setStatut('accepte');
+        $inscription->setEstInscrit(true);
+        $this->entityManager->flush();
+        $this->addFlash('success', 'Inscription acceptée.');
+        return $this->redirectToRoute('admin_evenement_show', ['id' => $inscription->getEvenement()->getId()]);
+    }
+
+    #[Route('/inscriptions/{inscriptionId}/refuser', name: 'admin_evenement_inscription_refuse', requirements: ['inscriptionId' => '\d+'], methods: ['POST'])]
+    public function refuseInscription(Request $request, int $inscriptionId): Response
+    {
+        $inscription = $this->inscritEventsRepository->find($inscriptionId);
+        if ($inscription === null) {
+            throw new NotFoundHttpException('Inscription introuvable.');
+        }
+        if (!$this->isCsrfTokenValid('inscription_refuse_' . $inscriptionId, (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton de sécurité invalide.');
+            return $this->redirectToRoute('admin_evenement_show', ['id' => $inscription->getEvenement()->getId()]);
+        }
+        $inscription->setStatut('refuse');
+        $inscription->setEstInscrit(false);
+        $this->entityManager->flush();
+        $this->addFlash('success', 'Inscription refusée.');
+        return $this->redirectToRoute('admin_evenement_show', ['id' => $inscription->getEvenement()->getId()]);
     }
 
     #[Route('/new', name: 'admin_evenement_new', methods: ['GET', 'POST'])]

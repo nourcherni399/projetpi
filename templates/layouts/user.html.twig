@@ -52,6 +52,23 @@
         </div>
     </header>
     <main class="flex-1 w-full mx-auto px-4 py-8">
+        {% if user_inscription_notifications|default([]) is not empty %}
+        <div class="max-w-6xl mx-auto mb-4 space-y-2">
+            {% for notif in user_inscription_notifications %}
+            <a href="{{ path('user_event_show', { id: notif.evenement.id }) }}" class="block">
+                {% if notif.statut == 'accepte' %}
+                <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium">
+                    Votre inscription à « {{ notif.evenement.title }} » a été acceptée.
+                </div>
+                {% else %}
+                <div class="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm font-medium">
+                    Votre inscription à « {{ notif.evenement.title }} » a été refusée.
+                </div>
+                {% endif %}
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
         {% block user_content %}{% endblock %}
     </main>
     {% block footer %}

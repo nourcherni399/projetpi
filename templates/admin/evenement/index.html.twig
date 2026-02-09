@@ -19,15 +19,16 @@
         </div>
         <div>
             <label for="sort" class="block text-sm font-medium text-[#4B5563] mb-1">Tri</label>
-            <select id="sort" name="sort" class="px-4 py-2 rounded-lg border border-[#E5E0D8] bg-white text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+            <select id="sort" name="sort" class="px-4 py-2 rounded-lg border border-[#E5E0D8] bg-white text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7] js-sort-submit">
                 <option value="date" {{ sortBy|default('date') == 'date' ? 'selected' : '' }}>Date</option>
+                <option value="titre" {{ sortBy|default('date') == 'titre' ? 'selected' : '' }}>Titre</option>
                 <option value="lieu" {{ sortBy|default('date') == 'lieu' ? 'selected' : '' }}>Lieu</option>
                 <option value="theme" {{ sortBy|default('date') == 'theme' ? 'selected' : '' }}>Thématique</option>
             </select>
         </div>
         <div>
             <label for="order" class="block text-sm font-medium text-[#4B5563] mb-1">Ordre</label>
-            <select id="order" name="order" class="px-4 py-2 rounded-lg border border-[#E5E0D8] bg-white text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+            <select id="order" name="order" class="px-4 py-2 rounded-lg border border-[#E5E0D8] bg-white text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7] js-sort-submit">
                 <option value="asc" {{ sortOrder|default('asc') == 'asc' ? 'selected' : '' }}>Croissant</option>
                 <option value="desc" {{ sortOrder|default('asc') == 'desc' ? 'selected' : '' }}>Décroissant</option>
             </select>
@@ -43,26 +44,26 @@
             <thead class="bg-[#F5F1EB] border-b border-[#E5E0D8]">
                 <tr>
                     <th class="px-6 py-4 font-medium text-[#4B5563]">Titre</th>
-                    <th class="px-6 py-4 font-medium text-[#4B5563]">Date</th>
-                    <th class="px-6 py-4 font-medium text-[#4B5563]">Lieu</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563] text-center">Date</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563] text-center">Lieu</th>
                     <th class="px-6 py-4 font-medium text-[#4B5563]">Thématique</th>
-                    <th class="px-6 py-4 font-medium text-[#4B5563]">Actions</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563] text-center">Actions</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-[#E5E0D8]">
                 {% for event in evenements %}
                 <tr class="hover:bg-[#F5F1EB]/50">
                     <td class="px-6 py-4 text-[#4B5563]">{{ event.title }}</td>
-                    <td class="px-6 py-4 text-[#6B7280]">{{ event.dateEvent ? event.dateEvent|date('d/m/Y') : '—' }} {{ event.heureDebut ? event.heureDebut|date('H:i') : '' }}</td>
-                    <td class="px-6 py-4 text-[#6B7280]">{{ event.lieu }}</td>
+                    <td class="px-6 py-4 text-[#6B7280] text-center">{{ event.dateEvent ? event.dateEvent|date('d/m/Y') : '—' }} {{ event.heureDebut ? event.heureDebut|date('H:i') : '' }}</td>
+                    <td class="px-6 py-4 text-[#6B7280] text-center">{{ event.lieu }}</td>
                     <td class="px-6 py-4 text-[#6B7280]">{{ event.thematique ? event.thematique.nomThematique : '—' }}</td>
-                    <td class="px-6 py-4">
-                        <div class="flex flex-wrap gap-2">
-                            <a href="{{ path('admin_evenement_show', { id: event.id }) }}" class="text-[#A7C7E7] hover:underline font-medium text-sm">Voir</a>
-                            <a href="{{ path('admin_evenement_edit', { id: event.id }) }}" class="text-[#4B5563] hover:underline font-medium text-sm">Modifier</a>
+                    <td class="px-6 py-4 text-center">
+                        <div class="flex flex-wrap gap-2 items-center justify-center">
+                            <a href="{{ path('admin_evenement_show', { id: event.id }) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#A7C7E7] text-[#A7C7E7] font-medium text-sm hover:bg-[#A7C7E7]/10 focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Voir</a>
+                            <a href="{{ path('admin_evenement_edit', { id: event.id }) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#A7C7E7] text-white font-medium text-sm hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Modifier</a>
                             <form method="post" action="{{ path('admin_evenement_delete', { id: event.id }) }}" class="inline" onsubmit="return confirm('Supprimer cet événement ?');">
                                 <input type="hidden" name="_token" value="{{ csrf_token('delete_evenement_' ~ event.id) }}">
-                                <button type="submit" class="text-red-600 hover:underline font-medium text-sm">Supprimer</button>
+                                <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-200 text-red-600 font-medium text-sm hover:bg-red-50 focus:outline focus:ring-2 focus:ring-red-500">Supprimer</button>
                             </form>
                         </div>
                     </td>
@@ -74,4 +75,9 @@
         </table>
     </div>
 </div>
+<script>
+document.querySelectorAll('.js-sort-submit').forEach(function(el) {
+    el.addEventListener('change', function() { this.closest('form').submit(); });
+});
+</script>
 {% endblock %}

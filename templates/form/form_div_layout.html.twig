@@ -1,16 +1,16 @@
 {% extends "form_div_layout.html.twig" %}
 
-{# Personnalisation de l'affichage des erreurs #}
+{# Message sous le champ quand vide ou invalide (ex. "Ce champ est obligatoire.") #}
 {% block form_errors %}
     {% if errors|length > 0 %}
         {% if compound %}
-            <div class="alert alert-danger">
+            <div class="rounded-lg bg-red-50 border border-red-200 p-3 mt-1 text-sm text-red-700">
                 {{ block('form_errors_compound') }}
             </div>
         {% else %}
-            <div class="mt-1 text-sm text-red-600">
+            <div class="mt-1 text-sm font-medium text-red-600" role="alert">
                 {% for error in errors %}
-                    <span>{{ error.message }}</span>
+                    {{ error.message }}
                     {% if not loop.last %}<br>{% endif %}
                 {% endfor %}
             </div>
@@ -45,11 +45,11 @@
     {% endif %}
 {% endblock form_label %}
 
-{# Personnalisation des widgets #}
+{# Personnalisation des widgets : bordure rouge si le champ a une erreur #}
 {% block form_widget_simple %}
     {% set type = type|default('text') %}
-    {% if attr.class is defined %}
-        {% set attr = attr|merge({class: attr.class ~ ' is-invalid'}) %}
+    {% if form.vars.errors|length > 0 and attr.class is defined %}
+        {% set attr = attr|merge({class: (attr.class|default('')) ~ ' border-red-500 ring-2 ring-red-200'}) %}
     {% endif %}
     <input type="{{ type }}" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}"{% endif %} />
 {% endblock form_widget_simple %}
