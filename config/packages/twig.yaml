@@ -1,10 +1,8 @@
 twig:
     file_name_pattern: '*.twig'
-<<<<<<< HEAD
-=======
     form_themes: ['form/theme.html.twig']
->>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
 
 when@test:
     twig:
         strict_variables: true
+
