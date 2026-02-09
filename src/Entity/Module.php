@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\CategorieModule;
 use App\Repository\ModuleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -48,12 +49,24 @@ class Module
     /**
      * @var Collection<int, Blog>
      */
-    #[ORM\OneToMany(targetEntity: Blog::class, mappedBy: 'module')]
+    #[ORM\OneToMany(targetEntity: Blog::class, mappedBy: 'module', cascade: ['remove'])]
     private Collection $blogs;
+
+    #[ORM\Column(type: 'string', enumType: CategorieModule::class, columnDefinition: "ENUM('', 'COMPRENDRE_TSA', 'AUTONOMIE', 'COMMUNICATION', 'EMOTIONS', 'VIE_QUOTIDIENNE', 'ACCOMPAGNEMENT') NOT NULL")]
+    private CategorieModule $categorie;
+
+    /**
+     * @var Collection<int, Ressource>
+     */
+    #[ORM\OneToMany(targetEntity: Ressource::class, mappedBy: 'module', orphanRemoval: true)]
+    private Collection $ressources;
+
 
     public function __construct()
     {
         $this->blogs = new ArrayCollection();
+        $this->categorie = CategorieModule::EMPTY;
+        $this->ressources = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -193,6 +206,48 @@ class Module
             // set the owning side to null (unless already changed)
             if ($blog->getModule() === $this) {
                 $blog->setModule(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getCategorie(): CategorieModule
+    {
+        return $this->categorie;
+    }
+
+    public function setCategorie(CategorieModule $categorie): static
+    {
+        $this->categorie = $categorie;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Ressource>
+     */
+    public function getRessources(): Collection
+    {
+        return $this->ressources;
+    }
+
+    public function addRessource(Ressource $ressource): static
+    {
+        if (!$this->ressources->contains($ressource)) {
+            $this->ressources->add($ressource);
+            $ressource->setModule($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRessource(Ressource $ressource): static
+    {
+        if ($this->ressources->removeElement($ressource)) {
+            // set the owning side to null (unless already changed)
+            if ($ressource->getModule() === $this) {
+                $ressource->setModule(null);
             }
         }
 

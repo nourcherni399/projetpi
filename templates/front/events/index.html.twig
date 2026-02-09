@@ -8,242 +8,68 @@
         <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
     </div>
     <h1 class="text-3xl font-bold text-[#4B5563] mb-3">Événements & Ateliers</h1>
+    <p class="text-[#6B7280] max-w-2xl mx-auto">Découvrez nos ateliers et rencontres par thématique.</p>
 </section>
 
-{# Barre de filtres #}
-<div class="bg-white rounded-2xl border border-[#E5E0D8] shadow-sm p-5 mb-8">
-    <form method="get" action="{{ path('user_events') }}" class="flex flex-wrap gap-4 items-end">
-        <div class="flex flex-wrap gap-4 items-end flex-1 min-w-0">
-            <div class="min-w-[140px]">
-                <label for="date_from" class="block text-sm font-medium text-[#4B5563] mb-1">Date début</label>
-                <input type="date" id="date_from" name="date_from" value="{{ filters.date_from|default('') }}" class="w-full px-3 py-2 rounded-lg border border-[#E5E0D8] bg-white text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7] text-sm">
-            </div>
-            <div class="min-w-[140px]">
-                <label for="date_to" class="block text-sm font-medium text-[#4B5563] mb-1">Date fin</label>
-                <input type="date" id="date_to" name="date_to" value="{{ filters.date_to|default('') }}" class="w-full px-3 py-2 rounded-lg border border-[#E5E0D8] bg-white text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7] text-sm">
-            </div>
-            <div class="min-w-[180px]">
-                <label for="theme" class="block text-sm font-medium text-[#4B5563] mb-1">Thématique</label>
-                <select id="theme" name="theme" class="w-full px-3 py-2 rounded-lg border border-[#E5E0D8] bg-white text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7] text-sm">
-                    <option value="">Toutes les thématiques</option>
-                    {% for t in thematiques|default([]) %}
-                    <option value="{{ t.id }}" {{ filters.theme|default('') == t.id ? 'selected' : '' }}>{{ t.nomThematique }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="min-w-[160px]">
-                <label for="lieu" class="block text-sm font-medium text-[#4B5563] mb-1">Lieu</label>
-                <select id="lieu" name="lieu" class="w-full px-3 py-2 rounded-lg border border-[#E5E0D8] bg-white text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7] text-sm">
-                    <option value="">Tous les lieux</option>
-                    {% for l in lieux|default([]) %}
-                    <option value="{{ l }}" {{ filters.lieu|default('') == l ? 'selected' : '' }}>{{ l }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-        <div class="flex gap-2 shrink-0">
-            <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7] text-sm">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                Filtrer
-            </button>
-            <a href="{{ path('user_events') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7] text-sm">
-                Réinitialiser
-            </a>
-        </div>
-    </form>
-</div>
-
-{# Bascule grille / liste + affichage des thématiques #}
-<section class="mb-8">
-    <div class="flex flex-wrap items-center justify-end gap-4 mb-4">
-        <div class="flex rounded-lg border border-[#E5E0D8] overflow-hidden bg-white" role="group">
-            <button type="button" id="view-thematiques-grid" class="view-toggle px-3 py-2 bg-[#A7C7E7] text-white focus:outline focus:ring-2 focus:ring-[#A7C7E7] focus:ring-offset-1" title="Vue grille" aria-pressed="true">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" /></svg>
-            </button>
-            <button type="button" id="view-thematiques-list" class="view-toggle px-3 py-2 text-[#6B7280] hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7] focus:ring-offset-1" title="Vue liste" aria-pressed="false">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
-            </button>
-        </div>
-    </div>
-
-    {# Vue grille #}
-    <div id="thematiques-grid-view" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {% for item in grouped %}
     {% set thematique = item.thematique %}
     {% set evenements = item.evenements %}
-    {% set imageUrl = thematique.image ? (thematique.image starts with 'http' ? thematique.image : asset(thematique.image)) : null %}
-    <article class="bg-white rounded-2xl border border-[#E5E0D8] shadow-sm overflow-hidden flex flex-col transition-shadow hover:shadow-md">
-        {% if imageUrl %}
-        <div class="aspect-[16/10] w-full overflow-hidden bg-[#E5E0D8] shrink-0">
-            <img src="{{ imageUrl }}" alt="{{ thematique.nomThematique }}" class="w-full h-full object-cover" loading="lazy">
-        </div>
-        {% endif %}
-        <div class="p-5 border-b border-[#E5E0D8] {{ thematique.couleur ? 'border-l-4' : '' }}" {% if thematique.couleur %}style="border-left-color: {{ thematique.couleur }};"{% endif %}>
+    <div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden flex flex-col {{ thematique.couleur ? 'border-l-4' : '' }}" {% if thematique.couleur %}style="border-left-color: {{ thematique.couleur }};"{% endif %}>
+        <div class="p-5 border-b border-[#E5E0D8]">
             {% if thematique.couleur %}
-            <span class="inline-block w-8 h-8 rounded-lg mb-3 shadow-inner" style="background-color: {{ thematique.couleur }};" aria-hidden="true"></span>
+            <span class="inline-block w-10 h-10 rounded-lg border border-[#E5E0D8] mb-3" style="background-color: {{ thematique.couleur }};" title="Couleur"></span>
             {% endif %}
-                <h2 class="text-lg font-semibold text-[#4B5563] mb-1">{{ thematique.nomThematique }}</h2>
-                {% if thematique.sousTitre %}
-                <p class="text-[#6B7280] text-sm mb-2 line-clamp-2">{{ thematique.sousTitre }}</p>
-                {% elseif thematique.publicCible %}
-                <p class="text-[#6B7280] text-sm mb-2">{{ thematique.publicCible.value }}</p>
-                {% endif %}
-                <p class="inline-flex items-center gap-1.5 text-[#A7C7E7] font-semibold text-sm">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                    {{ evenements|length }} événement{{ evenements|length != 1 ? 's' : '' }}
-                </p>
+            <h2 class="text-lg font-semibold text-[#4B5563] mb-1">{{ thematique.nomThematique }}</h2>
+            {% if thematique.sousTitre %}
+            <p class="text-[#6B7280] text-sm mb-2">{{ thematique.sousTitre }}</p>
+            {% elseif thematique.publicCible %}
+            <p class="text-[#6B7280] text-sm mb-2">{{ thematique.publicCible.value }}</p>
+            {% endif %}
+            <p class="text-[#A7C7E7] font-medium text-sm">{{ evenements|length }} événement{{ evenements|length != 1 ? 's' : '' }}</p>
         </div>
-        <div class="p-4 flex-1 flex flex-col gap-3">
+        <div class="p-4 flex-1 space-y-3">
             {% for event in evenements %}
-            <a href="{{ path('user_event_show', { id: event.id }) }}" class="group block rounded-xl border border-[#E5E0D8] p-4 hover:bg-[#F5F1EB] hover:border-[#A7C7E7] transition-all focus:outline focus:ring-2 focus:ring-[#A7C7E7] focus:ring-offset-1">
-                <h3 class="font-semibold text-[#4B5563] text-sm mb-2 group-hover:text-[#A7C7E7] transition-colors">{{ event.title }}</h3>
-                <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-[#6B7280] text-xs">
-                    <span class="inline-flex items-center gap-1">
-                        <svg class="w-3.5 h-3.5 text-[#9CA3AF]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                        {{ event.dateEvent ? event.dateEvent|date('d/m/Y') : '—' }}
-                        {% if event.heureDebut %}{{ event.heureDebut|date('H:i') }}{% endif %}
-                    </span>
-                    <span class="inline-flex items-center gap-1">
-                        <svg class="w-3.5 h-3.5 text-[#9CA3AF]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
-                        {{ event.lieu|default('—') }}
-                    </span>
-                </div>
-                <span class="inline-flex items-center gap-1 mt-2 text-[#A7C7E7] text-xs font-medium group-hover:gap-2 transition-all">Voir les détails <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg></span>
+            <a href="{{ path('user_event_show', { id: event.id }) }}" class="block rounded-lg border border-[#E5E0D8] p-3 hover:bg-[#F5F1EB] hover:border-[#A7C7E7] transition-colors focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                <h3 class="font-semibold text-[#4B5563] text-sm mb-1">{{ event.title }}</h3>
+                <p class="text-[#6B7280] text-xs">
+                    {{ event.dateEvent ? event.dateEvent|date('d/m/Y') : '—' }}
+                    {{ event.heureDebut ? event.heureDebut|date('H:i') : '' }}
+                    · {{ event.lieu }}
+                </p>
+                <span class="inline-flex items-center gap-1 mt-2 text-[#A7C7E7] text-xs font-medium">En savoir plus →</span>
             </a>
             {% else %}
-            <div class="rounded-xl bg-[#F5F1EB]/50 border border-[#E5E0D8] p-4 text-center">
-                <p class="text-[#6B7280] text-sm">Aucun événement pour le moment.</p>
-            </div>
+            <p class="text-[#6B7280] text-sm py-2">Aucun événement pour le moment.</p>
             {% endfor %}
         </div>
-    </article>
+    </div>
     {% endfor %}
 
     {% if sansThematique|length > 0 %}
-    {# Événements sans thématique assignée — affichés dans ce bloc séparé #}
-    <article class="bg-white rounded-2xl border border-[#E5E0D8] shadow-sm overflow-hidden flex flex-col md:col-span-2 lg:col-span-3 transition-shadow hover:shadow-md">
-        <div class="p-5 border-b border-[#E5E0D8] bg-[#F5F1EB]/50">
-            <h2 class="text-lg font-semibold text-[#4B5563]">Autres événements <span class="text-sm font-normal text-[#6B7280]">(sans thématique)</span></h2>
-            <p class="inline-flex items-center gap-1.5 text-[#A7C7E7] font-semibold text-sm mt-1">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                {{ sansThematique|length }} événement{{ sansThematique|length != 1 ? 's' : '' }}
-            </p>
+    <div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden flex flex-col md:col-span-2 lg:col-span-3">
+        <div class="p-5 border-b border-[#E5E0D8]">
+            <h2 class="text-lg font-semibold text-[#4B5563]">Autres événements</h2>
+            <p class="text-[#A7C7E7] font-medium text-sm">{{ sansThematique|length }} événement{{ sansThematique|length != 1 ? 's' : '' }}</p>
         </div>
-        <div class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {% for event in sansThematique %}
-            <a href="{{ path('user_event_show', { id: event.id }) }}" class="group block rounded-xl border border-[#E5E0D8] p-4 hover:bg-[#F5F1EB] hover:border-[#A7C7E7] transition-all focus:outline focus:ring-2 focus:ring-[#A7C7E7] focus:ring-offset-1">
-                <h3 class="font-semibold text-[#4B5563] text-sm mb-2 group-hover:text-[#A7C7E7] transition-colors">{{ event.title }}</h3>
-                <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-[#6B7280] text-xs">
-                    <span class="inline-flex items-center gap-1">
-                        <svg class="w-3.5 h-3.5 text-[#9CA3AF]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                        {{ event.dateEvent ? event.dateEvent|date('d/m/Y') : '—' }}
-                        {% if event.heureDebut %}{{ event.heureDebut|date('H:i') }}{% endif %}
-                    </span>
-                    <span class="inline-flex items-center gap-1">
-                        <svg class="w-3.5 h-3.5 text-[#9CA3AF]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
-                        {{ event.lieu }}
-                    </span>
-                </div>
-                <span class="inline-flex items-center gap-1 mt-2 text-[#A7C7E7] text-xs font-medium group-hover:gap-2 transition-all">Voir les détails <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg></span>
+            <a href="{{ path('user_event_show', { id: event.id }) }}" class="block rounded-lg border border-[#E5E0D8] p-3 hover:bg-[#F5F1EB] hover:border-[#A7C7E7] transition-colors focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                <h3 class="font-semibold text-[#4B5563] text-sm mb-1">{{ event.title }}</h3>
+                <p class="text-[#6B7280] text-xs">
+                    {{ event.dateEvent ? event.dateEvent|date('d/m/Y') : '—' }}
+                    {{ event.heureDebut ? event.heureDebut|date('H:i') : '' }}
+                    · {{ event.lieu }}
+                </p>
+                <span class="inline-flex items-center gap-1 mt-2 text-[#A7C7E7] text-xs font-medium">En savoir plus →</span>
             </a>
             {% endfor %}
         </div>
-    </article>
+    </div>
     {% endif %}
-    </div>
-
-    {# Vue liste — alignement uniforme, une section par thématique #}
-    <div id="thematiques-list-view" class="hidden space-y-6">
-        {% for item in grouped %}
-            {% set thematique = item.thematique %}
-            {% set evenements = item.evenements %}
-            <div class="bg-white rounded-2xl border border-[#E5E0D8] overflow-hidden shadow-sm">
-                <div class="flex items-stretch">
-                    <span class="w-2 shrink-0 {{ thematique.couleur ? '' : 'bg-[#A7C7E7]' }}" {% if thematique.couleur %}style="background-color: {{ thematique.couleur }};"{% endif %} aria-hidden="true"></span>
-                    <div class="flex-1 min-w-0 p-5">
-                        <h2 class="text-lg font-semibold text-[#4B5563]">{{ thematique.nomThematique }}</h2>
-                        {% if thematique.sousTitre %}<p class="text-[#6B7280] text-sm mt-1">{{ thematique.sousTitre }}</p>{% endif %}
-                        <p class="inline-flex items-center gap-1.5 text-[#A7C7E7] font-semibold text-sm mt-2">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                            {{ evenements|length }} événement{{ evenements|length != 1 ? 's' : '' }}
-                        </p>
-                        <div class="mt-4 space-y-2">
-                            {% for event in evenements %}
-                            <a href="{{ path('user_event_show', { id: event.id }) }}" class="group flex items-center justify-between gap-3 rounded-xl border border-[#E5E0D8] bg-[#F9FAFB] px-4 py-3 hover:bg-[#F5F1EB] hover:border-[#A7C7E7] transition-all w-full text-left">
-                                <span class="font-semibold text-[#4B5563] text-sm group-hover:text-[#A7C7E7]">{{ event.title }}</span>
-                                <span class="inline-flex items-center gap-1 text-[#A7C7E7] text-sm font-medium shrink-0">Voir les détails <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg></span>
-                            </a>
-                            {% else %}
-                            <p class="text-[#6B7280] text-sm py-2">Aucun événement pour le moment.</p>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
-        {% if sansThematique|default([])|length > 0 %}
-            <div class="bg-white rounded-2xl border border-[#E5E0D8] overflow-hidden shadow-sm">
-                <div class="flex items-stretch">
-                    <span class="w-2 shrink-0 bg-[#9CA3AF]" aria-hidden="true"></span>
-                    <div class="flex-1 min-w-0 p-5">
-                        <h2 class="text-lg font-semibold text-[#4B5563]">Autres événements <span class="text-sm font-normal text-[#6B7280]">(sans thématique)</span></h2>
-                        <p class="inline-flex items-center gap-1.5 text-[#A7C7E7] font-semibold text-sm mt-2">
-                            {{ sansThematique|length }} événement{{ sansThematique|length != 1 ? 's' : '' }}
-                        </p>
-                        <div class="mt-4 space-y-2">
-                            {% for event in sansThematique %}
-                            <a href="{{ path('user_event_show', { id: event.id }) }}" class="group flex items-center justify-between gap-3 rounded-xl border border-[#E5E0D8] bg-[#F9FAFB] px-4 py-3 hover:bg-[#F5F1EB] hover:border-[#A7C7E7] transition-all w-full text-left">
-                                <span class="font-semibold text-[#4B5563] text-sm group-hover:text-[#A7C7E7]">{{ event.title }}</span>
-                                <span class="inline-flex items-center gap-1 text-[#A7C7E7] text-sm font-medium shrink-0">Voir les détails <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg></span>
-                            </a>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {% endif %}
-    </div>
-</section>
-
-<script>
-(function(){
-    var k = 'thematiques_view_mode';
-    var gridEl = document.getElementById('thematiques-grid-view');
-    var listEl = document.getElementById('thematiques-list-view');
-    var btnGrid = document.getElementById('view-thematiques-grid');
-    var btnList = document.getElementById('view-thematiques-list');
-    function setView(mode) {
-        var isGrid = mode === 'grid';
-        if (gridEl) gridEl.classList.toggle('hidden', !isGrid);
-        if (listEl) listEl.classList.toggle('hidden', isGrid);
-        if (btnGrid) {
-            btnGrid.classList.toggle('bg-[#A7C7E7]', isGrid);
-            btnGrid.classList.toggle('text-white', isGrid);
-            btnGrid.classList.toggle('text-[#6B7280]', !isGrid);
-            btnGrid.setAttribute('aria-pressed', isGrid ? 'true' : 'false');
-        }
-        if (btnList) {
-            btnList.classList.toggle('bg-[#A7C7E7]', !isGrid);
-            btnList.classList.toggle('text-white', !isGrid);
-            btnList.classList.toggle('text-[#6B7280]', isGrid);
-            btnList.setAttribute('aria-pressed', !isGrid ? 'true' : 'false');
-        }
-        try { localStorage.setItem(k, mode); } catch (e) {}
-    }
-    try { setView(localStorage.getItem(k) === 'list' ? 'list' : 'grid'); } catch (e) { setView('grid'); }
-    if (btnGrid) btnGrid.addEventListener('click', function() { setView('grid'); });
-    if (btnList) btnList.addEventListener('click', function() { setView('list'); });
-})();
-</script>
+</div>
 
 {% if grouped is empty and (sansThematique|default([])) is empty %}
-<div class="bg-white rounded-2xl border border-[#E5E0D8] p-12 text-center">
-    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#F5F1EB] text-[#6B7280] mb-4">
-        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
-    </div>
-    <p class="text-[#6B7280] font-medium mb-2">Aucun événement ne correspond à vos critères.</p>
-    <p class="text-[#9CA3AF] text-sm mb-4">Modifiez les filtres ou réinitialisez pour voir tous les événements.</p>
-    <a href="{{ path('user_events') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED]">Réinitialiser les filtres</a>
-</div>
+<p class="text-center text-[#6B7280] py-12">Aucun événement à venir pour le moment.</p>
 {% endif %}
 {% endblock %}

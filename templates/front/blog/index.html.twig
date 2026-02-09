@@ -1,137 +1,152 @@
 {% extends 'layouts/user.html.twig' %}
 
-{% block title %}Blog & Témoignages - AutiCare{% endblock %}
+{% block title %}Modules & Témoignages - AutiCare{% endblock %}
 
 {% block user_content %}
 <section class="text-center mb-10">
     <div class="inline-flex items-center justify-center w-16 h-16 rounded-full border-2 border-[#A7C7E7] bg-[#A7C7E7]/10 text-[#A7C7E7] mb-4">
-        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.256A8.967 8.967 0 016 18c2.295 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.256A8.967 8.967 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.256A8.967 8.967 0 016 18c2.295 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.256A8.967 8.967 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+        </svg>
     </div>
-    <h1 class="text-3xl font-bold text-[#4B5563] mb-3">Blog & Témoignages</h1>
+    <h1 class="text-3xl font-bold text-[#4B5563] mb-3">Modules & Témoignages</h1>
     <p class="text-[#6B7280] max-w-2xl mx-auto">
-        Partagez vos expériences, découvrez des conseils pratiques et rejoignez les discussions de notre communauté bienveillante.
+        Explorez nos modules d'apprentissage par catégorie. Partagez vos expériences, découvrez des conseils pratiques et rejoignez notre communauté.
     </p>
 </section>
 
 <div class="flex flex-col lg:flex-row gap-8">
     <div class="flex-1 min-w-0 space-y-8">
-        <article class="bg-[#A7C7E7]/15 rounded-2xl border border-[#A7C7E7]/30 overflow-hidden">
-            <div class="p-6 md:p-8">
-                <div class="flex flex-col md:flex-row gap-6 md:gap-8">
-                    <div class="md:w-2/5 shrink-0 flex items-center justify-center">
-                        <div class="w-full aspect-square max-w-xs bg-white/80 rounded-xl flex items-center justify-center text-[#6B7280] text-sm text-center px-4">Illustration TSA</div>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <h2 class="text-xl font-bold text-[#4B5563] mb-2">{{ featured.infographic_title }}</h2>
-                        <p class="text-[#6B7280] text-sm mb-4">{{ featured.infographic_description }}</p>
-                        <p class="text-sm text-[#6B7280] mb-3">Pas de cause unique identifiée</p>
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#A7C7E7]/30 text-[#4B5563] text-sm font-medium">
-                            TOUCHE 1 personne sur 100 • 3 garçons pour 1 fille
-                        </span>
-                    </div>
+        <!-- Section Catégories -->
+        <div class="bg-gradient-to-br from-[#A7C7E7]/10 to-[#95d7b5]/10 rounded-2xl border border-[#A7C7E7]/20 p-6">
+            <h2 class="text-2xl font-bold text-[#4B5563] mb-6 flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-[#A7C7E7]/20 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-[#A7C7E7]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
                 </div>
-            </div>
-        </article>
+                Catégories
+            </h2>
 
-        <article class="bg-white rounded-2xl shadow-sm border border-[#E5E0D8] overflow-hidden grid grid-rows-[60fr_40fr] min-h-[400px]">
-            <div class="w-full min-h-0 flex items-center justify-center bg-[#A7C7E7]/15 text-[#6B7280] text-sm text-center px-4">
-                Illustration — {{ featured.title }}
-            </div>
-            <div class="w-full min-h-0 flex flex-col p-5 md:p-6">
-                <div class="flex flex-wrap gap-2 mb-2">
-                    <span class="px-2 py-1 rounded-md text-xs font-medium bg-[#E5E0D8] text-[#4B5563]">Témoignages</span>
-                    <span class="px-2 py-1 rounded-md text-xs font-medium bg-[#E5E0D8] text-[#4B5563]">Article à la une</span>
-                </div>
-                <h3 class="text-lg font-bold text-[#4B5563] mb-1 line-clamp-2">{{ featured.title }}</h3>
-                <p class="text-[#6B7280] text-sm mb-2 line-clamp-2 flex-1 min-h-0">{{ featured.excerpt }}</p>
-                <p class="text-[#6B7280] text-xs mb-2">{{ featured.author_initials }} {{ featured.author }} • {{ featured.date }}</p>
-                <div class="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-[#E5E0D8]">
-                    <div class="flex items-center gap-4 text-sm text-[#6B7280]">
-                        <span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg> {{ featured.likes }}</span>
-                        <span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg> {{ featured.comments }}</span>
-                    </div>
-                    {% if featured.id > 0 %}
-                    <a href="{{ path('user_blog_module', { id: featured.id }) }}" class="text-[#A7C7E7] font-medium hover:underline inline-flex items-center gap-1 text-sm">Lire la suite <span>→</span></a>
-                    {% else %}
-                    <a href="#" class="text-[#A7C7E7] font-medium hover:underline inline-flex items-center gap-1 text-sm">Lire la suite <span>→</span></a>
-                    {% endif %}
-                </div>
-            </div>
-        </article>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {% for article in articles %}
-            <article class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] overflow-hidden flex flex-col">
-                <div class="aspect-[4/3] w-full shrink-0 overflow-hidden bg-[#E5E0D8]">
-                    {% if article.image_url is defined and article.image_url %}
-                    <img src="{{ asset(article.image_url) }}" alt="{{ article.image_label }}" class="w-full h-full object-cover">
-                    {% else %}
-                    <div class="w-full h-full flex items-center justify-center text-[#4B5563] font-semibold text-center px-4 {% if loop.index == 1 %}bg-[#A7C7E7]/20{% else %}bg-[#95d7b5]/30{% endif %}">
-                        {{ article.image_label }}
-                    </div>
-                    {% endif %}
-                </div>
-                <div class="p-6 flex flex-col flex-1">
-                    <div class="flex flex-wrap gap-2 mb-2">
-                        {% for tag in article.tags %}
-                        <span class="px-2 py-1 rounded-md text-xs font-medium bg-[#E5E0D8] text-[#4B5563]">{{ tag }}</span>
-                        {% endfor %}
-                    </div>
-                    <h3 class="text-lg font-bold text-[#4B5563] mb-2">{{ article.title }}</h3>
-                    <p class="text-[#6B7280] text-sm mb-3 flex-1 line-clamp-4">{{ article.excerpt }}</p>
-                    {% if article.highlight %}
-                    <p class="text-[#4B5563] text-sm font-medium mb-3">• {{ article.highlight }}</p>
-                    {% endif %}
-                    <p class="text-[#6B7280] text-xs mb-3 flex items-center gap-2">
-                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-[#E5E0D8] text-[#4B5563] text-xs font-semibold">{{ article.author_initials }}</span>
-                        {{ article.author }} • {{ article.date }}
-                    </p>
-                    <div class="flex items-center justify-between pt-2 border-t border-[#E5E0D8]">
-                        <div class="flex items-center gap-4 text-sm text-[#6B7280]">
-                            <span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg> {{ article.likes }}</span>
-                            <span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg> {{ article.comments }}</span>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for category in categories %}
+                <article class="bg-white rounded-xl shadow-lg border border-[#E5E0D8]/50 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group">
+                    <!-- Image de la catégorie -->
+                    <a href="{{ path('user_blog_categorie', {'slug': category.slug}) }}" class="block aspect-[16/9] w-full overflow-hidden bg-gradient-to-br from-[#A7C7E7]/20 to-[#95d7b5]/20 relative">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent z-10"></div>
+                        {% if category.image %}
+                            <img src="{{ asset(category.image) }}" alt="{{ category.name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        {% else %}
+                            <div class="w-full h-full flex items-center justify-center text-white">
+                                <div class="text-center z-20">
+                                    <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mb-2 mx-auto backdrop-blur-sm">
+                                        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-medium">{{ category.name }}</span>
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Badge nombre de modules -->
+                        <div class="absolute bottom-3 right-3 z-20">
+                            <span class="px-2 py-1 rounded-full text-xs font-medium bg-white/90 text-[#4B5563] backdrop-blur-sm">
+                                {{ category.count }} module{{ category.count > 1 ? 's' : '' }}
+                            </span>
                         </div>
-                        <a href="{{ path('user_blog_module', { id: article.id }) }}" class="text-[#A7C7E7] font-medium hover:underline">Lire</a>
+                    </a>
+
+                    <!-- Contenu de la catégorie -->
+                    <div class="p-5">
+                        <h3 class="text-lg font-bold text-[#4B5563] mb-3">{{ category.name }}</h3>
+                        
+                        <!-- Modules prévisualisés -->
+                        <div class="space-y-2 mb-4">
+                            {% for module in category.modules %}
+                            <div class="flex items-center gap-2 text-sm text-[#6B7280] hover:text-[#A7C7E7]">
+                                <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <a href="{{ path('user_blog_module', {'id': module.id}) }}" class="truncate hover:underline">{{ module.titre }}</a>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Bouton voir plus -->
+                        <a href="{{ path('user_blog_categorie', {'slug': category.slug}) }}"
+                           class="inline-flex items-center justify-center w-full px-4 py-2.5 rounded-lg bg-[#A7C7E7]/10 text-[#A7C7E7] font-medium hover:bg-[#A7C7E7]/20 transition-colors group">
+                            <span>Voir les {{ category.count }} module{{ category.count > 1 ? 's' : '' }}</span>
+                            <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
                     </div>
+                </article>
+                {% else %}
+                <div class="col-span-3 text-center py-12">
+                    <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                    <p class="text-[#6B7280]">Aucune catégorie disponible pour le moment.</p>
                 </div>
-            </article>
-            {% endfor %}
+                {% endfor %}
+            </div>
         </div>
     </div>
 
     <aside class="lg:w-80 shrink-0 space-y-6">
+        <!-- Recherche -->
         <div class="bg-white rounded-xl shadow-sm p-5 border border-[#E5E0D8]">
             <div class="relative">
                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                    </svg>
                 </span>
                 <input type="search" placeholder="Rechercher un article..." class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#6B7280] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
             </div>
         </div>
+        
+        <!-- Écrire un article -->
         <div id="ecrire-article" class="bg-white rounded-xl shadow-sm p-5 border border-[#E5E0D8]">
             <div class="inline-flex items-center justify-center w-12 h-12 rounded-full border-2 border-[#A7C7E7] bg-[#A7C7E7]/10 text-[#A7C7E7] mb-3">
-                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
             </div>
             <h2 class="font-semibold text-[#4B5563] mb-2">Partagez votre histoire</h2>
-            <p class="text-[#6B7280] text-sm mb-4">Votre expérience peut aider d'autres familles. Écrivez votre témoignage.</p>
-            <a href="#ecrire-article" class="inline-block px-4 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Écrire un article</a>
+            <p class="text-[#6B7280] text-sm mb-4">Votre expérience peut aider d'autres familles. Écrivez votre témoignage dans nos modules.</p>
+            {% if app.user %}
+                <a href="#" onclick="toggleForm()" class="inline-block px-4 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Écrire un article</a>
+            {% else %}
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p class="text-blue-700 mb-2">Pour écrire un article, veuillez vous <a href="{{ path('app_login') }}" class="text-blue-600 hover:text-blue-800 underline">connecter</a>.</p>
+                </div>
+            {% endif %}
         </div>
+        
+        <!-- Articles populaires -->
         <div class="bg-white rounded-xl shadow-sm p-5 border border-[#E5E0D8]">
-            <h2 class="font-semibold text-[#4B5563] mb-4">Catégories</h2>
-            <ul class="space-y-2 text-[#6B7280]">
-                {% for cat in categories %}
-                <li><a href="#" class="hover:text-[#A7C7E7]">{{ cat.name }} ({{ cat.count }})</a></li>
-                {% endfor %}
-            </ul>
-        </div>
-        <div class="bg-white rounded-xl shadow-sm p-5 border border-[#E5E0D8]">
-            <h2 class="font-semibold text-[#4B5563] mb-4">Articles populaires</h2>
+            <h2 class="font-semibold text-[#4B5563] mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                </svg>
+                Articles populaires
+            </h2>
             <ul class="space-y-3 text-sm">
                 {% for pop in popular_articles %}
-                <li><a href="{{ path('user_blog_module', { id: pop.id }) }}" class="text-[#6B7280] hover:text-[#A7C7E7] line-clamp-2">{{ pop.title }}</a></li>
+                <li class="flex items-start gap-2">
+                    <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#A7C7E7]/20 text-[#A7C7E7] text-xs font-medium mt-0.5 shrink-0">
+                        {{ loop.index }}
+                    </span>
+                    <a href="{{ path('user_blog_module', { id: pop.id }) }}" class="text-[#6B7280] hover:text-[#A7C7E7] line-clamp-2">{{ pop.title }}</a>
+                </li>
                 {% endfor %}
             </ul>
         </div>
+        
+        <!-- Tags populaires -->
         <div class="bg-white rounded-xl shadow-sm p-5 border border-[#E5E0D8]">
             <h2 class="font-semibold text-[#4B5563] mb-4">Tags populaires</h2>
             <div class="flex flex-wrap gap-2">
@@ -140,6 +155,7 @@
                 {% endfor %}
             </div>
         </div>
+        
     </aside>
 </div>
 {% endblock %}

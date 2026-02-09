@@ -18,9 +18,13 @@
         <div class="mb-4 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">{{ message }}</div>
     {% endfor %}
 
+    {% for message in app.flashes('error') %}
+        <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-800">{{ message }}</div>
+    {% endfor %}
+
     <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8">
         {{ form_start(form, {
-            attr: { class: 'space-y-6', novalidate: 'novalidate' },
+            attr: { class: 'space-y-6' },
             label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }
         }) }}
         {{ form_errors(form) }}

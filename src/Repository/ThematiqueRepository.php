@@ -17,28 +17,4 @@ class ThematiqueRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Thematique::class);
     }
-
-    /**
-     * @return list<Thematique>
-     */
-    public function search(?string $q): array
-    {
-        $qb = $this->createQueryBuilder('t')
-            ->orderBy('t.ordre', 'ASC')
-            ->addOrderBy('t.nomThematique', 'ASC');
-
-        if ($q !== null && $q !== '') {
-            $term = '%' . trim($q) . '%';
-            $qb->andWhere(
-                $qb->expr()->orX(
-                    't.nomThematique LIKE :q',
-                    't.codeThematique LIKE :q',
-                    't.sousTitre LIKE :q',
-                    't.description LIKE :q'
-                )
-            )->setParameter('q', $term);
-        }
-
-        return $qb->getQuery()->getResult();
-    }
 }

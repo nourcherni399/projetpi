@@ -52,24 +52,6 @@
         </div>
     </header>
     <main class="flex-1 w-full mx-auto px-4 py-8">
-        {% if app.user and user_inscription_notifications|default([])|length > 0 %}
-        <div class="max-w-6xl mx-auto mb-4 space-y-2">
-            {% for i in user_inscription_notifications %}
-            <div class="rounded-xl border px-4 py-3 flex flex-wrap items-center justify-between gap-3 {{ i.statut == 'accepte' ? 'bg-emerald-50 border-emerald-200' : 'bg-amber-50 border-amber-200' }}">
-                <p class="text-sm {{ i.statut == 'accepte' ? 'text-emerald-800' : 'text-amber-800' }}">
-                    {% if i.statut == 'accepte' %}
-                    <span class="font-medium">Votre inscription à « {{ i.evenement.title }} » a été acceptée.</span>
-                    {% else %}
-                    <span class="font-medium">Votre demande pour « {{ i.evenement.title }} » a été refusée.</span>
-                    {% endif %}
-                </p>
-                <a href="{{ path('user_event_show', { id: i.evenement.id }) }}" class="shrink-0 px-4 py-2 rounded-lg text-sm font-medium {{ i.statut == 'accepte' ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-amber-600 text-white hover:bg-amber-700' }} focus:outline focus:ring-2 focus:ring-offset-1 {{ i.statut == 'accepte' ? 'focus:ring-emerald-500' : 'focus:ring-amber-500' }}">
-                    {% if i.statut == 'accepte' %}Voir l'événement{% else %}Voir l'événement / Redemander{% endif %}
-                </a>
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
         {% block user_content %}{% endblock %}
     </main>
     {% block footer %}

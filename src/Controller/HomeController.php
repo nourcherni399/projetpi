@@ -15,10 +15,8 @@ use App\Enum\Motif;
 use App\Enum\StatusRendezVous;
 use App\Enum\UserRole;
 use App\Form\BlogType;
-use App\Entity\InscritEvents;
 use App\Repository\DisponibiliteRepository;
 use App\Repository\EvenementRepository;
-use App\Repository\InscritEventsRepository;
 use App\Repository\MedcinRepository;
 use App\Repository\ModuleRepository;
 use App\Repository\NotificationRepository;
@@ -41,7 +39,6 @@ final class HomeController extends AbstractController
         private readonly DisponibiliteRepository $disponibiliteRepository,
         private readonly RendezVousRepository $rendezVousRepository,
         private readonly NotificationRepository $notificationRepository,
-        private readonly InscritEventsRepository $inscritEventsRepository,
         private readonly EntityManagerInterface $entityManager,
     ) {
     }
@@ -161,60 +158,22 @@ final class HomeController extends AbstractController
     }
 
     #[Route('/evenements', name: 'user_events', methods: ['GET'])]
-    public function events(Request $request): Response
+    public function events(): Response
     {
-        $dateFrom = null;
-        $dateTo = null;
-        $dateFromStr = trim((string) $request->query->get('date_from', ''));
-        $dateToStr = trim((string) $request->query->get('date_to', ''));
-        if ($dateFromStr !== '') {
-            try {
-                $dateFrom = new \DateTimeImmutable($dateFromStr);
-            } catch (\Throwable) {
-            }
-        }
-        if ($dateToStr !== '') {
-            try {
-                $dateTo = new \DateTimeImmutable($dateToStr);
-            } catch (\Throwable) {
-            }
-        }
-        $themeId = $request->query->get('theme');
-        $themeId = is_numeric($themeId) ? (int) $themeId : null;
-        $lieu = trim((string) $request->query->get('lieu', ''));
-
-        $evenementsFiltres = $this->evenementRepository->findFiltered($dateFrom, $dateTo, $themeId, $lieu === '' ? null : $lieu);
-
         $thematiques = $this->thematiqueRepository->findBy(['actif' => true], ['ordre' => 'ASC', 'nomThematique' => 'ASC']);
-        $lieux = $this->evenementRepository->findDistinctLieux();
-
         $grouped = [];
         foreach ($thematiques as $t) {
-            if ($themeId !== null && $t->getId() !== $themeId) {
-                continue;
-            }
-            $evenements = array_values(array_filter($evenementsFiltres, static fn (Evenement $e) => $e->getThematique() && $e->getThematique()->getId() === $t->getId()));
+            $evenements = $t->getEvenements()->toArray();
+            usort($evenements, static function (Evenement $a, Evenement $b): int {
+                $d = ($a->getDateEvent() <=> $b->getDateEvent());
+                return $d !== 0 ? $d : ($a->getHeureDebut() <=> $b->getHeureDebut());
+            });
             $grouped[] = ['thematique' => $t, 'evenements' => $evenements];
         }
-        $sansThematique = array_values(array_filter($evenementsFiltres, static fn (Evenement $e) => $e->getThematique() === null));
-
-        $eventCards = [];
-        foreach ($evenementsFiltres as $ev) {
-            $eventCards[] = ['event' => $ev, 'thematique' => $ev->getThematique()];
-        }
-
+        $sansThematique = $this->evenementRepository->findBy(['thematique' => null], ['dateEvent' => 'ASC', 'heureDebut' => 'ASC']);
         return $this->render('front/events/index.html.twig', [
             'grouped' => $grouped,
             'sansThematique' => $sansThematique,
-            'eventCards' => $eventCards,
-            'thematiques' => $thematiques,
-            'lieux' => $lieux,
-            'filters' => [
-                'date_from' => $dateFromStr,
-                'date_to' => $dateToStr,
-                'theme' => $themeId,
-                'lieu' => $lieu,
-            ],
         ]);
     }
 
@@ -225,99 +184,7 @@ final class HomeController extends AbstractController
         if ($evenement === null) {
             throw $this->createNotFoundException('Événement introuvable.');
         }
-        $user = $this->getUser();
-        $inscription = $user !== null
-            ? $this->inscritEventsRepository->findInscriptionForUserAndEvent($user, $evenement)
-            : null;
-        $userInscrit = $inscription !== null && $inscription->getStatut() === 'accepte';
-
-        return $this->render('front/events/show.html.twig', [
-            'evenement' => $evenement,
-            'userInscrit' => $userInscrit,
-            'inscription' => $inscription,
-        ]);
-    }
-
-    #[Route('/evenements/{id}/inscrire', name: 'user_event_register', requirements: ['id' => '\d+'], methods: ['POST'])]
-    public function eventRegister(int $id, Request $request): Response
-    {
-        $user = $this->getUser();
-        if ($user === null) {
-            $this->addFlash('error', 'Connectez-vous pour vous inscrire à un événement.');
-            return $this->redirectToRoute('app_login', ['_target_path' => $this->generateUrl('user_event_show', ['id' => $id])]);
-        }
-
-        $evenement = $this->evenementRepository->find($id);
-        if ($evenement === null) {
-            throw $this->createNotFoundException('Événement introuvable.');
-        }
-
-        if (!$this->isCsrfTokenValid('event_register_' . $id, (string) $request->request->get('_token'))) {
-            $this->addFlash('error', 'Jeton de sécurité invalide.');
-            return $this->redirectToRoute('user_event_show', ['id' => $id]);
-        }
-
-        $existing = $this->inscritEventsRepository->findInscriptionForUserAndEvent($user, $evenement);
-        if ($existing !== null) {
-            if ($existing->getStatut() === 'accepte') {
-                $this->addFlash('info', 'Vous êtes déjà inscrit à cet événement.');
-                return $this->redirectToRoute('user_event_show', ['id' => $id]);
-            }
-            if ($existing->getStatut() === 'en_attente') {
-                $this->addFlash('info', 'Votre demande d\'inscription est déjà en attente de validation.');
-                return $this->redirectToRoute('user_event_show', ['id' => $id]);
-            }
-            $existing->setStatut('en_attente');
-            $existing->setDateInscrit(new \DateTime());
-            $existing->setEstInscrit(true);
-            $this->entityManager->flush();
-            $this->addFlash('success', 'Votre demande a été renvoyée. L\'administrateur la validera sous peu.');
-            return $this->redirectToRoute('user_event_show', ['id' => $id]);
-        }
-
-        $inscrit = new InscritEvents();
-        $inscrit->setUser($user);
-        $inscrit->setEvenement($evenement);
-        $inscrit->setDateInscrit(new \DateTime());
-        $inscrit->setEstInscrit(true);
-        $inscrit->setStatut('en_attente');
-        $this->entityManager->persist($inscrit);
-        $this->entityManager->flush();
-
-        $this->addFlash('success', 'Votre demande d\'inscription a été enregistrée. L\'administrateur la validera sous peu.');
-        return $this->redirectToRoute('user_event_show', ['id' => $id]);
-    }
-
-    #[Route('/evenements/{id}/desinscrire', name: 'user_event_unregister', requirements: ['id' => '\d+'], methods: ['POST'])]
-    public function eventUnregister(int $id, Request $request): Response
-    {
-        $user = $this->getUser();
-        if ($user === null) {
-            $this->addFlash('error', 'Connectez-vous pour gérer vos inscriptions.');
-            return $this->redirectToRoute('app_login');
-        }
-
-        $evenement = $this->evenementRepository->find($id);
-        if ($evenement === null) {
-            throw $this->createNotFoundException('Événement introuvable.');
-        }
-
-        if (!$this->isCsrfTokenValid('event_unregister_' . $id, (string) $request->request->get('_token'))) {
-            $this->addFlash('error', 'Jeton de sécurité invalide.');
-            return $this->redirectToRoute('user_event_show', ['id' => $id]);
-        }
-
-        $inscrit = $this->inscritEventsRepository->findInscriptionForUserAndEvent($user, $evenement);
-        if ($inscrit !== null && $inscrit->getStatut() === 'accepte') {
-            $inscrit->setEstInscrit(false);
-            $inscrit->setStatut('desinscrit');
-            $this->entityManager->flush();
-            $this->addFlash('success', 'Vous avez été désinscrit de l\'événement.');
-        } else {
-            $this->addFlash('info', 'Vous n\'étiez pas inscrit à cet événement.');
-        }
-
-        return $this->redirectToRoute('user_event_show', ['id' => $id]);
+        return $this->render('front/events/show.html.twig', ['evenement' => $evenement]);
     }
 
     #[Route('/rendez-vous', name: 'user_appointments', methods: ['GET'])]
@@ -576,151 +443,11 @@ final class HomeController extends AbstractController
         ];
     }
 
-    #[Route('/blog', name: 'user_blog', methods: ['GET'])]
-    public function blog(): Response
+
+    #[Route('/inscription', name: 'register', methods: ['GET'])]
+    public function register(): Response
     {
-        $modules = $this->moduleRepository->findPublishedOrderByDate();
-        $data = $this->getBlogData($modules);
-        return $this->render('front/blog/index.html.twig', [
-            'featured' => $data['featured'],
-            'articles' => $data['articles'],
-            'categories' => $data['categories'],
-            'popular_articles' => $data['popular_articles'],
-            'popular_tags' => $data['popular_tags'],
-        ]);
-    }
-
-    #[Route('/blog/module/{id}', name: 'user_blog_module', requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function blogModule(int $id): Response
-    {
-        $module = $this->moduleRepository->find($id);
-        if ($module === null || !$module->isPublished()) {
-            throw $this->createNotFoundException('Module introuvable.');
-        }
-        return $this->render('front/blog/module.html.twig', [
-            'module' => $module,
-        ]);
-    }
-
-    #[Route('/blog/module/{id}/ecrire', name: 'user_blog_ecrire', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
-    public function blogEcrire(Request $request, int $id): Response
-    {
-        $module = $this->moduleRepository->find($id);
-        if ($module === null || !$module->isPublished()) {
-            throw $this->createNotFoundException('Module introuvable.');
-        }
-
-        $blog = new Blog();
-        $blog->setModule($module);
-        $now = new \DateTime();
-        $blog->setDateCreation($now);
-        $blog->setDateModif($now);
-        $user = $this->getUser();
-        if ($user !== null) {
-            $blog->setUser($user);
-        }
-
-        $form = $this->createForm(BlogType::class, $blog);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $blog->setImage($blog->getImage() ?? '');
-            $this->entityManager->persist($blog);
-            $this->entityManager->flush();
-            $this->addFlash('success', 'Votre article a été enregistré.');
-            return $this->redirectToRoute('user_blog_module', ['id' => $id]);
-        }
-
-        return $this->render('front/blog/ecrire.html.twig', [
-            'module' => $module,
-            'form' => $form,
-        ]);
-    }
-
-    /**
-     * @param list<Module> $modules
-     * @return array{
-     *   featured: array{id: int, title: string, excerpt: string, author: string, author_initials: string, date: string, likes: int, comments: int, tags: list<string>, has_infographic: bool, infographic_title: string, infographic_description: string, infographic_stats: list<string>},
-     *   articles: list<array{id: int, title: string, excerpt: string, author: string, author_initials: string, date: string, likes: int, comments: int, tags: list<string>, highlight: string|null, image_label: string, image_url: string|null}>,
-     *   categories: list<array{name: string, count: int}>,
-     *   popular_articles: list<array{id: int, title: string}>,
-     *   popular_tags: list<string>
-     * }
-     */
-    private function getBlogData(array $modules): array
-    {
-        $defaultFeatured = [
-            'id' => 0,
-            'title' => 'Blog & Témoignages',
-            'excerpt' => 'Découvrez les modules et articles de la communauté.',
-            'author' => 'AutiCare',
-            'author_initials' => 'AG',
-            'date' => (new \DateTime())->format('d F Y'),
-            'likes' => 0,
-            'comments' => 0,
-            'tags' => ['Blog'],
-            'has_infographic' => true,
-            'infographic_title' => 'Troubles du spectre de l\'autisme (TSA)',
-            'infographic_description' => 'Ce trouble neuro-développemental peut altérer le comportement social, la communication et le langage.',
-            'infographic_stats' => ['Pas de cause unique identifiée', 'TOUCHE 1 personne sur 100 • 3 garçons pour 1 fille'],
-        ];
-
-        $featured = $defaultFeatured;
-        $articles = [];
-        $popular_articles = [];
-        $niveauLabels = ['difficile' => 'Difficile', 'moyen' => 'Moyen', 'facile' => 'Facile'];
-
-        foreach ($modules as $index => $module) {
-            $popular_articles[] = ['id' => $module->getId(), 'title' => $module->getTitre() ?? ''];
-
-            if ($index === 0) {
-                $featured = [
-                    'id' => $module->getId(),
-                    'title' => $module->getTitre() ?? '',
-                    'excerpt' => $module->getDescription() ?? '',
-                    'author' => 'AutiCare',
-                    'author_initials' => 'AG',
-                    'date' => $module->getDateCreation() ? $module->getDateCreation()->format('d F Y') : '',
-                    'likes' => 0,
-                    'comments' => 0,
-                    'tags' => ['Module', $niveauLabels[$module->getNiveau()] ?? $module->getNiveau()],
-                    'has_infographic' => true,
-                    'infographic_title' => $module->getTitre() ?? 'Troubles du spectre de l\'autisme (TSA)',
-                    'infographic_description' => $module->getDescription() ?? 'Ce trouble neuro-développemental peut altérer le comportement social, la communication et le langage.',
-                    'infographic_stats' => ['Niveau : ' . ($niveauLabels[$module->getNiveau()] ?? $module->getNiveau())],
-                ];
-            } else {
-                $articles[] = [
-                    'id' => $module->getId(),
-                    'title' => $module->getTitre() ?? '',
-                    'excerpt' => $module->getDescription() ?? '',
-                    'author' => 'AutiCare',
-                    'author_initials' => 'AG',
-                    'date' => $module->getDateCreation() ? $module->getDateCreation()->format('d F Y') : '',
-                    'likes' => 0,
-                    'comments' => 0,
-                    'tags' => [$niveauLabels[$module->getNiveau()] ?? $module->getNiveau()],
-                    'highlight' => null,
-                    'image_label' => $module->getTitre() ?? 'Module',
-                    'image_url' => $module->getImage() ?: null,
-                ];
-            }
-        }
-
-        return [
-            'featured' => $featured,
-            'articles' => $articles,
-            'categories' => [
-                ['name' => 'Facile', 'count' => \count(array_filter($modules, fn (Module $m) => $m->getNiveau() === 'facile'))],
-                ['name' => 'Moyen', 'count' => \count(array_filter($modules, fn (Module $m) => $m->getNiveau() === 'moyen'))],
-                ['name' => 'Difficile', 'count' => \count(array_filter($modules, fn (Module $m) => $m->getNiveau() === 'difficile'))],
-            ],
-            'popular_articles' => \array_slice($popular_articles, 0, 5),
-            'popular_tags' => array_values(array_unique(array_merge(
-                ['Autisme', 'Développement', 'Famille'],
-                array_map(fn (Module $m) => $niveauLabels[$m->getNiveau()] ?? $m->getNiveau(), $modules)
-            ))),
-        ];
+        return $this->render('front/auth/register.html.twig');
     }
 
     #[Route('/connexion', name: 'login', methods: ['GET'])]

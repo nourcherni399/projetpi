@@ -11,7 +11,7 @@ use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Range;
+use Symfony\Component\Validator\Constraints\PositiveOrZero;
 
 final class StockType extends AbstractType
 {
@@ -23,7 +23,7 @@ final class StockType extends AbstractType
                 'data' => 0,
                 'constraints' => [
                     new NotBlank(message: 'La quantité est obligatoire.'),
-                    new Range(['min' => 0, 'max' => 2147483647, 'notInRangeMessage' => 'La quantité doit être entre {{ min }} et {{ max }}.']),
+                    new PositiveOrZero(message: 'La quantité doit être positive ou nulle.'),
                 ],
                 'attr' => [
                     'class' => 'mt-1 block w-full rounded-lg border border-[#E5E0D8] bg-white px-4 py-2.5 text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]',

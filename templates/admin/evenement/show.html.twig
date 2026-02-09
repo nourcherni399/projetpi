@@ -20,11 +20,8 @@
             <p class="text-[#6B7280] text-sm">
                 {{ evenement.dateEvent ? evenement.dateEvent|date('d/m/Y') : '—' }}
                 {{ evenement.heureDebut ? evenement.heureDebut|date('H:i') : '' }} – {{ evenement.heureFin ? evenement.heureFin|date('H:i') : '' }}
-                · {{ evenement.lieu|default('—') }}
+                · {{ evenement.lieu }}
             </p>
-            {% if evenement.locationUrl %}
-            <p class="text-[#6B7280] text-sm mt-1"><a href="{{ evenement.locationUrl }}" target="_blank" rel="noopener" class="text-[#A7C7E7] hover:underline">URL carte</a></p>
-            {% endif %}
             {% if evenement.thematique %}
             <p class="text-[#6B7280] text-sm mt-1">Thématique : {{ evenement.thematique.nomThematique }}</p>
             {% endif %}
@@ -34,63 +31,6 @@
             <h2 class="text-sm font-medium text-[#4B5563] mb-1">Description</h2>
             <p class="text-[#6B7280] text-sm whitespace-pre-wrap">{{ evenement.description }}</p>
         </div>
-        {% endif %}
-    </div>
-
-    <div class="mt-6 bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
-        <div class="p-4 border-b border-[#E5E0D8]">
-            <h2 class="text-lg font-semibold text-[#4B5563]">Participants ({{ participants|length }})</h2>
-        </div>
-        {% if participants is not empty %}
-        <div class="overflow-x-auto">
-            <table class="w-full text-left">
-                <thead class="bg-[#F5F1EB] border-b border-[#E5E0D8]">
-                    <tr>
-                        <th class="px-6 py-3 font-medium text-[#4B5563] text-sm">Participant</th>
-                        <th class="px-6 py-3 font-medium text-[#4B5563] text-sm">Email</th>
-                        <th class="px-6 py-3 font-medium text-[#4B5563] text-sm">Date demande</th>
-                        <th class="px-6 py-3 font-medium text-[#4B5563] text-sm">Statut</th>
-                        <th class="px-6 py-3 font-medium text-[#4B5563] text-sm text-right">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-[#E5E0D8]">
-                    {% for p in participants %}
-                    <tr class="hover:bg-[#F5F1EB]/50">
-                        <td class="px-6 py-3 text-[#4B5563]">{{ p.user.prenom }} {{ p.user.nom }}</td>
-                        <td class="px-6 py-3 text-[#6B7280] text-sm">{{ p.user.email }}</td>
-                        <td class="px-6 py-3 text-[#6B7280] text-sm">{{ p.dateInscrit ? p.dateInscrit|date('d/m/Y H:i') : '—' }}</td>
-                        <td class="px-6 py-3">
-                            {% if p.statut == 'accepte' %}
-                            <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-800">Accepté</span>
-                            {% elseif p.statut == 'refuse' %}
-                            <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">Refusé</span>
-                            {% elseif p.statut == 'desinscrit' %}
-                            <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">Désinscrit</span>
-                            {% else %}
-                            <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800">En attente</span>
-                            {% endif %}
-                        </td>
-                        <td class="px-6 py-3 text-right">
-                            {% if p.statut == 'en_attente' %}
-                            <form method="post" action="{{ path('admin_evenement_inscription_accept', { inscriptionId: p.id }) }}" class="inline">
-                                <input type="hidden" name="_token" value="{{ csrf_token('inscription_accept_' ~ p.id) }}">
-                                <button type="submit" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 focus:outline focus:ring-2 focus:ring-emerald-500">Accepter</button>
-                            </form>
-                            <form method="post" action="{{ path('admin_evenement_inscription_refuse', { inscriptionId: p.id }) }}" class="inline ml-1">
-                                <input type="hidden" name="_token" value="{{ csrf_token('inscription_refuse_' ~ p.id) }}">
-                                <button type="submit" class="px-3 py-1.5 rounded-lg border border-red-200 text-red-600 text-sm font-medium hover:bg-red-50 focus:outline focus:ring-2 focus:ring-red-500">Refuser</button>
-                            </form>
-                            {% else %}
-                            <span class="text-[#9CA3AF] text-sm">—</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <p class="p-6 text-[#6B7280] text-sm">Aucun participant pour le moment.</p>
         {% endif %}
     </div>
 </div>

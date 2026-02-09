@@ -4,9 +4,6 @@
 
 {% block admin_content %}
 <div class="max-w-4xl">
-    {% for message in app.flashes('error') %}
-        <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-800">{{ message }}</div>
-    {% endfor %}
     <div class="mb-6 flex items-center gap-4 flex-wrap">
         <a href="{{ path('admin_thematique_index') }}" class="inline-flex items-center gap-2 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded-lg">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
@@ -15,21 +12,9 @@
         <a href="{{ path('admin_thematique_edit', { id: thematique.id }) }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
             Modifier
         </a>
-        <form method="post" action="{{ path('admin_thematique_delete', { id: thematique.id }) }}" class="inline" onsubmit="return confirm('Supprimer cette thématique ? Les événements liés seront conservés mais sans thématique.');">
-            <input type="hidden" name="_token" value="{{ csrf_token('admin_thematique_delete_' ~ thematique.id) }}">
-            <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-red-200 text-red-600 font-medium hover:bg-red-50 focus:outline focus:ring-2 focus:ring-red-500">
-                Supprimer
-            </button>
-        </form>
     </div>
 
     <div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden mb-8">
-        {% if thematique.image %}
-        {% set imgUrl = thematique.image starts with 'http' ? thematique.image : asset(thematique.image) %}
-        <div class="aspect-[21/9] max-h-48 bg-[#E5E0D8] overflow-hidden">
-            <img src="{{ imgUrl }}" alt="{{ thematique.nomThematique }}" class="w-full h-full object-cover">
-        </div>
-        {% endif %}
         <div class="p-6 border-b border-[#E5E0D8] flex flex-wrap items-start gap-4">
             {% if thematique.couleur %}
                 <span class="w-8 h-8 rounded-lg border border-[#E5E0D8] shrink-0" style="background-color: {{ thematique.couleur }};" title="Couleur"></span>

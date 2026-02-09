@@ -20,7 +20,7 @@
         {% if patients is empty %}
             <p class="text-[#6B7280]">Aucun patient pour l’instant. Les patients apparaîtront après un premier rendez-vous.</p>
         {% else %}
-            {{ form_start(form, { attr: { class: 'space-y-4', novalidate: 'novalidate' }, label_attr: { class: 'block text-[#4B5563] font-medium mb-1' } }) }}
+            {{ form_start(form, { attr: { class: 'space-y-4' }, label_attr: { class: 'block text-[#4B5563] font-medium mb-1' } }) }}
             {{ form_errors(form) }}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>

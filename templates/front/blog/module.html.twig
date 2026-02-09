@@ -11,37 +11,288 @@
         </a>
     </div>
 
-    <header class="mb-8">
-        <span class="inline-block px-3 py-1 rounded-lg bg-[#A7C7E7]/30 text-[#4B5563] text-sm font-medium mb-3">{{ module.niveau|capitalize }}</span>
-        <h1 class="text-3xl font-bold text-[#4B5563] mb-3">{{ module.titre }}</h1>
-        {% if module.dateCreation %}
-        <p class="text-[#6B7280] text-sm">Publié le {{ module.dateCreation|date('d/m/Y') }}</p>
-        {% endif %}
-    </header>
+    {% for message in app.flashes('success') %}
+        <div class="mb-6 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">{{ message }}</div>
+    {% endfor %}
+    {% for message in app.flashes('error') %}
+        <div class="mb-6 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-800">{{ message }}</div>
+    {% endfor %}
 
-    {% if module.image %}
-    <div class="aspect-video w-full rounded-xl overflow-hidden bg-[#E5E0D8] mb-8">
-        <img src="{{ asset(module.image) }}" alt="{{ module.titre }}" class="w-full h-full object-cover">
+    <!-- Contenu du module -->
+    <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8 mb-8">
+        <header class="mb-8">
+            <!-- Image en petit avant le titre -->
+            {% if module.image %}
+                <div class="mb-4">
+                    <img src="{{ asset(module.image) }}" alt="{{ module.titre }}" class="w-12 h-12 object-cover rounded-lg">
+                </div>
+            {% endif %}
+            
+            <div class="flex items-center gap-4 mb-3">
+                <span class="inline-block px-3 py-1 rounded-lg bg-[#A7C7E7]/30 text-[#4B5563] text-sm font-medium">{{ module.niveau|capitalize }}</span>
+                <h1 class="text-3xl font-bold text-[#4B5563]">{{ module.titre }}</h1>
+            </div>
+            {% if module.dateCreation %}
+            <p class="text-[#6B7280] text-sm">Publié le {{ module.dateCreation|date('d/m/Y') }}</p>
+            {% endif %}
+        </header>
+
+        {% if module.description %}
+        <p class="text-lg text-[#6B7280] mb-6 whitespace-normal break-words">{{ module.description }}</p>
+        {% endif %}
+
+        <div class="prose prose-[#4B5563] max-w-none mb-10 break-words">
+            {% if module.contenu %}
+            <div class="text-[#4B5563] whitespace-pre-wrap break-words">{{ module.contenu }}</div>
+            {% else %}
+            <p class="text-[#6B7280]">Aucun contenu disponible.</p>
+            {% endif %}
+        </div>
+
+        <div class="pt-8 border-t border-[#E5E0D8]">
+            {% if app.user %}
+                <button onclick="toggleForm()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.897L8 18l.8-2.685a4.5 4.5 0 011.898-1.897l8.932-8.931zm0 0L19.5 7.125" /></svg>
+                    Écrire un article
+                </button>
+            {% else %}
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p class="text-blue-700 mb-2">Pour écrire un article, veuillez vous <a href="{{ path('app_login') }}" class="text-blue-600 hover:text-blue-800 underline">connecter</a>.</p>
+                </div>
+            {% endif %}
+        </div>
     </div>
+
+    <!-- Articles du module -->
+    {% set articles = module.blogs|filter(blog => blog.isPublished) %}
+    {% if articles|length > 0 %}
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-[#4B5563] mb-4">Articles publiés pour ce module</h2>
+            <div class="space-y-4">
+                {% for article in articles|sort((a, b) => b.dateCreation <=> a.dateCreation) %}
+                    <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 hover:shadow-md transition-shadow relative">
+                        <!-- Icônes d'action fixes dans le coin supérieur droit -->
+                        <div class="absolute top-4 right-4 flex gap-2">
+                            <a href="{{ path('user_blog_edit_article', {'id': article.id, 'moduleId': module.id}) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 focus:outline focus:ring-2 focus:ring-blue-500" title="Modifier l'article">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </a>
+                            <form method="post" action="{{ path('user_blog_delete_article', {'id': article.id, 'moduleId': module.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet article ?');" class="inline">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ article.id) }}">
+                                <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 focus:outline focus:ring-2 focus:ring-red-500" title="Supprimer l'article">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="pr-16">
+                            <div class="flex items-start gap-3 mb-3">
+                                <!-- Image de l'article en petit -->
+                                {% if article.image %}
+                                    <div class="flex-shrink-0">
+                                        <img src="{{ asset(article.image) }}" alt="{{ article.titre }}" class="w-12 h-12 object-cover rounded-lg">
+                                    </div>
+                                {% endif %}
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-[#4B5563] mb-2">{{ article.titre }}</h3>
+                                    <div class="flex items-center gap-4 text-sm text-[#6B7280] mb-3">
+                                        <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
+                                            {% if article.type == 'recommandation' %}bg-blue-100 text-blue-800
+                                            {% elseif article.type == 'plainte' %}bg-red-100 text-red-800
+                                            {% elseif article.type == 'question' %}bg-yellow-100 text-yellow-800
+                                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                            {{ article.type|capitalize }}
+                                        </span>
+                                        {% if article.isUrgent %}
+                                            <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">Urgent</span>
+                                        {% endif %}
+                                        <span>Par {{ article.user ? article.user.email : 'Anonyme' }}</span>
+                                        <span>Le {{ article.dateCreation|date('d/m/Y à H:i') }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="prose prose-[#4B5563] max-w-none">
+                            <p class="text-[#4B5563] break-words whitespace-normal">{{ article.contenu|u.truncate(200, '...') }}</p>
+                            
+                            <!-- Section de commentaire - Ajout ici -->
+                            <div class="mt-6 pt-4 border-t border-[#E5E0D8] border-dashed">
+                                {% if app.user and commentaireForm %}
+                                    <div class="mb-4">
+                                        <h4 class="text-lg font-semibold text-[#4B5563] mb-3">Écrire un commentaire sur cet article</h4>
+                                        {{ form_start(commentaireForm, {
+                                            'action': path('commentaire_ajouter_module', {'moduleId': module.id}),
+                                            'method': 'POST',
+                                            'attr': {'class': 'space-y-4'}
+                                        }) }}
+                                        
+                                        {{ form_errors(commentaireForm) }}
+                                        
+                                        <div>
+                                            {{ form_widget(commentaireForm.contenu, {
+                                                'attr': {
+                                                    'placeholder': 'Partagez votre expérience ou votre avis sur ce module...',
+                                                    'class': 'w-full px-4 py-3 border border-[#E5E0D8] rounded-lg focus:ring-2 focus:ring-[#A7C7E7] focus:border-transparent resize-none',
+                                                    'rows': 4
+                                                }
+                                            }) }}
+                                            {{ form_errors(commentaireForm.contenu) }}
+                                        </div>
+                                        
+                                        <div class="flex items-center justify-between">
+                                            <div class="text-sm text-[#6B7280]">
+                                                Commenté en tant que <span class="font-medium text-[#4B5563]">{{ app.user.nom }} {{ app.user.prenom }}</span>
+                                            </div>
+                                            <button type="submit" class="px-6 py-2.5 bg-[#A7C7E7] text-white font-medium rounded-lg hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7] transition-colors">
+                                                Publier le commentaire
+                                            </button>
+                                        </div>
+                                        
+                                        {{ form_end(commentaireForm) }}
+                                    </div>
+                                {% else %}
+                                    <div class="flex items-center gap-3 cursor-pointer group" onclick="document.getElementById('loginPrompt').scrollIntoView({behavior: 'smooth'});">
+                                        <div class="flex-shrink-0">
+                                            <svg class="w-5 h-5 text-[#9CA3AF]/70 group-hover:text-[#6B7280] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                            </svg>
+                                        </div>
+                                        <span class="text-[#9CA3AF]/70 text-sm italic group-hover:text-[#6B7280]/80 transition-colors">
+                                            Écrire un commentaire...
+                                        </span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Message d'invitation pour non connectés -->
+                            {% if not app.user %}
+                                <div id="loginPrompt" class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                        <h3 class="text-lg font-semibold text-blue-900">Connectez-vous pour commenter</h3>
+                                    </div>
+                                    <p class="text-blue-700 mb-4">Pour laisser un commentaire sur ce module, veuillez vous connecter à votre compte.</p>
+                                    <div class="flex gap-3">
+                                        <a href="{{ path('app_login') }}" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                                            Se connecter
+                                        </a>
+                                        <a href="{{ path('register') }}" class="px-4 py-2 border border-blue-600 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors">
+                                            Créer un compte
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            <div class="mt-3 flex justify-end">
+                                <a href="{{ path('user_blog_show_article', {'id': article.id}) }}" class="inline-flex items-center gap-2 text-[#A7C7E7] hover:text-[#B8D4ED] font-medium text-sm focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded-lg">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                    </svg>
+                                    Lire la suite
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
     {% endif %}
 
-    {% if module.description %}
-    <p class="text-lg text-[#6B7280] mb-6">{{ module.description }}</p>
+    <!-- Formulaire d'écriture d'article -->
+    {% if articleForm is not null %}
+    <div class="mb-8" id="articleFormContainer" style="display: none;">
+        <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8">
+            <h2 class="text-xl font-semibold text-[#4B5563] mb-4">Écrire un article pour ce module</h2>
+            {{ form_start(articleForm, {
+                attr: { class: 'space-y-6' },
+                label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }
+            }) }}
+            {{ form_errors(articleForm) }}
+
+            <div>
+                {{ form_label(articleForm.titre) }}
+                {{ form_widget(articleForm.titre) }}
+                {{ form_errors(articleForm.titre) }}
+            </div>
+
+            <div>
+                {{ form_label(articleForm.type) }}
+                {{ form_widget(articleForm.type) }}
+                {{ form_errors(articleForm.type) }}
+            </div>
+
+            <div>
+                {{ form_label(articleForm.contenu) }}
+                {{ form_widget(articleForm.contenu) }}
+                {{ form_errors(articleForm.contenu) }}
+            </div>
+
+            <div>
+                {{ form_label(articleForm.image) }}
+                {{ form_widget(articleForm.image) }}
+                {{ form_errors(articleForm.image) }}
+            </div>
+
+            <div class="flex items-center gap-2">
+                {{ form_widget(articleForm.isPublished) }}
+                {{ form_label(articleForm.isPublished) }}
+                {{ form_errors(articleForm.isPublished) }}
+            </div>
+
+            <div class="flex items-center gap-2">
+                {{ form_widget(articleForm.isUrgent) }}
+                {{ form_label(articleForm.isUrgent) }}
+                {{ form_errors(articleForm.isUrgent) }}
+            </div>
+
+            <div class="flex items-center gap-2">
+                {{ form_widget(articleForm.isVisible) }}
+                {{ form_label(articleForm.isVisible) }}
+                {{ form_errors(articleForm.isVisible) }}
+            </div>
+
+            <div class="flex flex-wrap gap-3 pt-4">
+                <button type="submit" class="px-5 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                    Publier l'article
+                </button>
+                <button type="button" onclick="toggleForm()" class="px-5 py-2.5 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                    Annuler
+                </button>
+            </div>
+            {{ form_end(articleForm) }}
+        </div>
     {% endif %}
-
-    <div class="prose prose-[#4B5563] max-w-none mb-10">
-        {% if module.contenu %}
-        <div class="text-[#4B5563] whitespace-pre-wrap">{{ module.contenu }}</div>
-        {% else %}
-        <p class="text-[#6B7280]">Aucun contenu disponible.</p>
-        {% endif %}
     </div>
 
-    <div class="pt-8 border-t border-[#E5E0D8]">
-        <a href="{{ path('user_blog_ecrire', { id: module.id }) }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.897L8 18l.8-2.685a4.5 4.5 0 011.898-1.897l8.932-8.931zm0 0L19.5 7.125" /></svg>
-            Écrire un article
-        </a>
-    </div>
-</article>
+    <script>
+function toggleForm() {
+    const formContainer = document.getElementById('articleFormContainer');
+    if (formContainer) {
+        if (formContainer.style.display === 'none') {
+            formContainer.style.display = 'block';
+            formContainer.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            formContainer.style.display = 'none';
+        }
+    }
+}
+
+// Afficher le formulaire si un message de succès est présent (après soumission)
+document.addEventListener('DOMContentLoaded', function() {
+    const successMessages = document.querySelectorAll('.bg-emerald-50');
+    if (successMessages.length > 0) {
+        // Attendre un peu que le message soit visible puis afficher le formulaire
+        setTimeout(() => {
+            const formContainer = document.getElementById('articleFormContainer');
+            if (formContainer) {
+                formContainer.style.display = 'block';
+            }
+        }, 100);
+    }
+});
+</script>
 {% endblock %}

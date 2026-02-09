@@ -33,12 +33,8 @@ class Evenement
     #[ORM\Column(type: Types::TIME_MUTABLE)]
     private ?\DateTimeInterface $heureFin = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(length: 255)]
     private ?string $lieu = null;
-
-    /** URL de localisation (lien Google Maps ou URL d'intégration iframe). */
-    #[ORM\Column(length: 500, nullable: true)]
-    private ?string $locationUrl = null;
 
     /** Agrégation : un événement appartient à une thématique (sans cascade delete). */
     #[ORM\ManyToOne(inversedBy: 'evenements')]
@@ -86,7 +82,7 @@ class Evenement
         return $this->dateEvent;
     }
 
-    public function setDateEvent(?\DateTimeInterface $dateEvent): static
+    public function setDateEvent(\DateTimeInterface $dateEvent): static
     {
         $this->dateEvent = $dateEvent;
         return $this;
@@ -97,7 +93,7 @@ class Evenement
         return $this->heureDebut;
     }
 
-    public function setHeureDebut(?\DateTimeInterface $heureDebut): static
+    public function setHeureDebut(\DateTimeInterface $heureDebut): static
     {
         $this->heureDebut = $heureDebut;
         return $this;
@@ -108,7 +104,7 @@ class Evenement
         return $this->heureFin;
     }
 
-    public function setHeureFin(?\DateTimeInterface $heureFin): static
+    public function setHeureFin(\DateTimeInterface $heureFin): static
     {
         $this->heureFin = $heureFin;
         return $this;
@@ -119,49 +115,10 @@ class Evenement
         return $this->lieu;
     }
 
-    public function setLieu(?string $lieu): static
+    public function setLieu(string $lieu): static
     {
         $this->lieu = $lieu;
         return $this;
-    }
-
-    public function getLocationUrl(): ?string
-    {
-        return $this->locationUrl;
-    }
-
-    public function setLocationUrl(?string $locationUrl): static
-    {
-        $this->locationUrl = $locationUrl;
-        return $this;
-    }
-
-    /**
-     * Retourne une URL d'intégration (iframe) pour afficher la même localisation sur la carte.
-     * Utilise locationUrl si possible (lien précis), sinon le lieu (adresse).
-     */
-    public function getMapEmbedUrl(): ?string
-    {
-        $url = $this->locationUrl;
-        if ($url !== null && $url !== '') {
-            $urlLower = strtolower($url);
-            if (str_contains($urlLower, 'embed') || str_contains($urlLower, 'iframe')) {
-                return $url;
-            }
-            if (preg_match('/[?&]q=([^&]+)/', $url, $m)) {
-                return 'https://maps.google.com/maps?q=' . rawurlencode(urldecode($m[1])) . '&output=embed';
-            }
-            if (preg_match('/[?&]query=([^&]+)/', $url, $m)) {
-                return 'https://maps.google.com/maps?q=' . rawurlencode(urldecode($m[1])) . '&output=embed';
-            }
-            if (preg_match('/@(-?\d+\.?\d*),(-?\d+\.?\d*)/', $url, $m)) {
-                return 'https://maps.google.com/maps?q=' . $m[1] . ',' . $m[2] . '&output=embed';
-            }
-        }
-        if ($this->lieu !== null && $this->lieu !== '') {
-            return 'https://maps.google.com/maps?q=' . rawurlencode($this->lieu) . '&output=embed';
-        }
-        return null;
     }
 
     public function getThematique(): ?Thematique

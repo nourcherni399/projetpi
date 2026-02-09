@@ -83,10 +83,6 @@ final class InscriptionController extends AbstractController
                 $this->entityManager->flush();
 
                 $this->addFlash('success', 'Votre compte a été créé. Vous pouvez maintenant vous connecter.');
-                $targetPath = $request->query->get('_target_path');
-                if ($targetPath !== null && $targetPath !== '') {
-                    return $this->redirectToRoute('app_login', ['_target_path' => $targetPath]);
-                }
                 return $this->redirectToRoute('app_login');
             } catch (\Throwable $e) {
                 $this->addFlash('error', 'Une erreur est survenue lors de la création du compte. Veuillez réessayer.');
