@@ -197,3 +197,42 @@ class Module
         }
         return $this;
     }
+
+    public function getCategorie(): CategorieModule
+    {
+        return $this->categorie;
+    }
+
+    public function setCategorie(CategorieModule $categorie): static
+    {
+        $this->categorie = $categorie;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Ressource>
+     */
+    public function getRessources(): Collection
+    {
+        return $this->ressources;
+    }
+
+    public function addRessource(Ressource $ressource): static
+    {
+        if (!$this->ressources->contains($ressource)) {
+            $this->ressources->add($ressource);
+            $ressource->setModule($this);
+        }
+        return $this;
+    }
+
+    public function removeRessource(Ressource $ressource): static
+    {
+        if ($this->ressources->removeElement($ressource)) {
+            if ($ressource->getModule() === $this) {
+                $ressource->setModule(null);
+            }
+        }
+        return $this;
+    }
+}
