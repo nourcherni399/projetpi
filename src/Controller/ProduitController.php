@@ -12,7 +12,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+<<<<<<< HEAD
 use Symfony\Component\String\Slugger\SluggerInterface;
+=======
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
 
 #[Route('/admin/produits')]
 final class ProduitController extends AbstractController
@@ -20,7 +23,10 @@ final class ProduitController extends AbstractController
     public function __construct(
         private readonly ProduitRepository $produitRepository,
         private readonly EntityManagerInterface $entityManager,
+<<<<<<< HEAD
         private readonly SluggerInterface $slugger,
+=======
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
     ) {
     }
 
@@ -39,6 +45,7 @@ final class ProduitController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+<<<<<<< HEAD
             $imageFile = $form->get('image')->getData();
             
             if ($imageFile) {
@@ -57,6 +64,8 @@ final class ProduitController extends AbstractController
                 }
             }
             
+=======
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
             $this->entityManager->persist($produit);
             $this->entityManager->flush();
             $this->addFlash('success', 'Le produit a été créé avec succès.');
@@ -69,6 +78,7 @@ final class ProduitController extends AbstractController
             'form' => $form,
         ]);
     }
+<<<<<<< HEAD
 
     #[Route('/{id}', name: 'admin_produit_show', methods: ['GET'])]
     public function show(Produit $produit): Response
@@ -153,4 +163,6 @@ final class ProduitController extends AbstractController
 
         return $this->redirectToRoute('admin_produit_index');
     }
+=======
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
 }

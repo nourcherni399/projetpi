@@ -7,6 +7,7 @@
 {% for message in app.flashes('success') %}
     <div class="mb-4 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">{{ message }}</div>
 {% endfor %}
+<<<<<<< HEAD
 <div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
     <div class="p-4 border-b border-[#E5E0D8] flex flex-wrap gap-4 justify-between">
         <input type="search" placeholder="Rechercher une thématique…" class="px-4 py-2 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#4B5563] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7] max-w-xs">
@@ -38,5 +39,43 @@
             </tbody>
         </table>
     </div>
+=======
+<div class="mb-6 flex flex-wrap gap-4 justify-between items-center">
+    <form method="get" action="{{ path('admin_thematique_index') }}" class="flex flex-wrap gap-2 items-center">
+        <input type="search" name="q" value="{{ q|default('') }}" placeholder="Rechercher une thématique…" class="px-4 py-2 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#4B5563] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7] max-w-xs">
+        <button type="submit" class="px-4 py-2 rounded-lg border border-[#E5E0D8] text-[#4B5563] font-medium hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Rechercher</button>
+    </form>
+    <a href="{{ path('admin_thematique_new') }}" class="px-4 py-2 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Nouvel élément</a>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for thematique in thematiques %}
+    <a href="{{ path('admin_thematique_show', { id: thematique.id }) }}" class="group block bg-white rounded-xl border border-[#E5E0D8] overflow-hidden hover:shadow-md transition-shadow duration-200 focus:outline focus:ring-2 focus:ring-[#A7C7E7] focus:ring-offset-2 {{ thematique.couleur ? 'border-l-4' : '' }}" {% if thematique.couleur %}style="border-left-color: {{ thematique.couleur }};"{% endif %}>
+        <div class="p-5 flex flex-col h-full relative">
+            <span class="absolute top-4 right-4 flex items-center justify-center w-8 h-8 rounded-full bg-[#A7C7E7] text-white text-sm font-semibold">{{ thematique.id }}</span>
+            <h2 class="text-lg font-semibold text-[#4B5563] pr-10 mb-1">{{ thematique.nomThematique }}</h2>
+            <p class="text-[#6B7280] text-sm mb-2">Code : {{ thematique.codeThematique }}</p>
+            {% if thematique.sousTitre %}
+            <p class="text-[#6B7280] text-sm mb-2">{{ thematique.sousTitre }}</p>
+            {% elseif thematique.publicCible %}
+            <p class="text-[#6B7280] text-sm mb-2">{{ thematique.publicCible.value }}</p>
+            {% endif %}
+            <div class="mt-auto pt-3 flex flex-wrap items-center gap-2">
+                <span class="text-[#A7C7E7] font-medium text-sm">{{ thematique.evenements|length }} événement{{ thematique.evenements|length != 1 ? 's' : '' }}</span>
+                {% if thematique.couleur %}
+                <span class="w-3 h-3 rounded-full shrink-0" style="background-color: {{ thematique.couleur }};" title="{{ thematique.couleur }}"></span>
+                {% endif %}
+                {% if not thematique.actif %}
+                <span class="ml-auto text-xs px-2 py-1 rounded bg-[#E5E0D8] text-[#6B7280]">Masquée</span>
+                {% endif %}
+            </div>
+        </div>
+    </a>
+    {% else %}
+    <div class="col-span-full bg-white rounded-xl border border-[#E5E0D8] px-6 py-12 text-center text-[#6B7280]">
+        Aucune thématique.
+    </div>
+    {% endfor %}
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
 </div>
 {% endblock %}

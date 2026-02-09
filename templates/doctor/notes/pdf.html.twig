@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Notes Patients - {{ medecin.prenom|default('') }} {{ medecin.nom|default('') }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.4;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #4B5563;
+            padding-bottom: 20px;
+        }
+        
+        .header h1 {
+            color: #4B5563;
+            font-size: 24px;
+            margin: 0;
+        }
+        
+        .header p {
+            color: #6B7280;
+            font-size: 14px;
+            margin: 5px 0 0 0;
+        }
+        
+        .notes-section {
+            margin-bottom: 30px;
+        }
+        
+        .notes-section h2 {
+            color: #4B5563;
+            font-size: 18px;
+            margin-bottom: 15px;
+            border-left: 4px solid #A7C7E7;
+            padding-left: 10px;
+        }
+        
+        .note-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #E5E0D8;
+            border-radius: 8px;
+            background-color: #FAFAFA;
+        }
+        
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .patient-name {
+            font-weight: bold;
+            color: #4B5563;
+            font-size: 14px;
+        }
+        
+        .note-date {
+            color: #6B7280;
+            font-size: 11px;
+        }
+        
+        .note-content {
+            color: #374151;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        
+        .no-notes {
+            text-align: center;
+            color: #6B7280;
+            font-style: italic;
+            padding: 40px 0;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #E5E0D8;
+            text-align: center;
+            color: #6B7280;
+            font-size: 10px;
+        }
+        
+        .page-break {
+            page-break-before: always;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Notes Patients</h1>
+        <p>Dr. {{ medecin.prenom|default('') }} {{ medecin.nom|default('') }}</p>
+        <p>Généré le {{ date|date('d/m/Y H:i') }}</p>
+    </div>
+
+    {% if notes is empty %}
+        <div class="no-notes">
+            Aucune note enregistrée pour le moment.
+        </div>
+    {% else %}
+        {% set current_patient = null %}
+        {% for note in notes %}
+            {% if current_patient is null or note.patient.id != current_patient.id %}
+                {% if current_patient is not null %}
+                    </div>
+                    <div class="page-break">
+                {% endif %}
+                
+                {% set current_patient = note.patient %}
+                <div class="notes-section">
+                    <h2>{{ note.patient.prenom|default('') }} {{ note.patient.nom|default('') }}</h2>
+                    {% if note.patient.email %}
+                        <p style="color: #6B7280; margin-bottom: 15px;">{{ note.patient.email }}</p>
+                    {% endif %}
+            {% endif %}
+            
+            <div class="note-item">
+                <div class="note-header">
+                    <span class="patient-name">Note du {{ note.dateCreation|date('d/m/Y H:i') }}</span>
+                </div>
+                <div class="note-content">{{ note.contenu|nl2br }}</div>
+            </div>
+        {% endfor %}
+        
+        {% if current_patient is not null %}
+            </div>
+        {% endif %}
+    {% endif %}
+
+    <div class="footer">
+        <p>Document généré par AutiCare - Système de gestion médicale</p>
+        <p>Page {{ pdf.pageNumber }} sur {{ pdf.pageCount }}</p>
+    </div>
+</body>
+</html>

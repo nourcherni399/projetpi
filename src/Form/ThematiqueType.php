@@ -8,13 +8,25 @@ use App\Entity\Enum\NiveauDifficulte;
 use App\Entity\Enum\PublicCible;
 use App\Entity\Thematique;
 use Symfony\Component\Form\AbstractType;
+<<<<<<< HEAD
+=======
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+<<<<<<< HEAD
 use Symfony\Component\Validator\Constraints\NotBlank;
+=======
+use Symfony\Component\Validator\Constraints\File;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Range;
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
 
 final class ThematiqueType extends AbstractType
 {
@@ -27,34 +39,76 @@ final class ThematiqueType extends AbstractType
         $builder
             ->add('nomThematique', TextType::class, [
                 'label' => 'Nom de la thématique',
+<<<<<<< HEAD
                 'constraints' => [new NotBlank(message: 'Le nom est obligatoire.')],
+=======
+                'constraints' => [
+                    new NotBlank(message: 'Le nom est obligatoire.'),
+                    new Length(['min' => 1, 'max' => 255, 'maxMessage' => 'Le nom ne peut pas dépasser {{ limit }} caractères.']),
+                ],
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
                 'attr' => $attr + ['placeholder' => 'Ex. Sensoriel'],
             ])
             ->add('codeThematique', TextType::class, [
                 'label' => 'Code thématique',
+<<<<<<< HEAD
                 'constraints' => [new NotBlank(message: 'Le code est obligatoire.')],
+=======
+                'constraints' => [
+                    new NotBlank(message: 'Le code est obligatoire.'),
+                    new Length(['min' => 1, 'max' => 50, 'maxMessage' => 'Le code ne peut pas dépasser {{ limit }} caractères.']),
+                ],
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
                 'attr' => $attr + ['placeholder' => 'Ex. SENS'],
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Description',
+<<<<<<< HEAD
                 'required' => false,
+=======
+                'constraints' => [
+                    new NotBlank(message: 'La description est obligatoire.'),
+                    new Length(['min' => 1, 'max' => 65535, 'maxMessage' => 'La description ne peut pas dépasser {{ limit }} caractères.']),
+                ],
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
                 'attr' => $attr + ['rows' => 3, 'placeholder' => 'Description…'],
             ])
             ->add('couleur', TextType::class, [
                 'label' => 'Couleur',
                 'required' => false,
+<<<<<<< HEAD
                 'attr' => $attr + ['placeholder' => 'Ex. #A7C7E7'],
             ])
             ->add('icone', TextType::class, [
                 'label' => 'Icône',
                 'required' => false,
                 'attr' => $attr + ['placeholder' => 'Ex. star'],
+=======
+                'constraints' => [new Length(['max' => 20, 'maxMessage' => 'La couleur ne peut pas dépasser {{ limit }} caractères.'])],
+                'attr' => $attr + ['placeholder' => 'Ex. #A7C7E7'],
+            ])
+            ->add('sousTitre', TextType::class, [
+                'label' => 'Sous-titre',
+                'required' => false,
+                'constraints' => [new Length(['max' => 255, 'maxMessage' => 'Le sous-titre ne peut pas dépasser {{ limit }} caractères.'])],
+                'attr' => $attr + ['placeholder' => 'Ex. Sous-titre optionnel'],
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
             ])
             ->add('ordre', IntegerType::class, [
                 'label' => 'Ordre d\'affichage',
                 'required' => false,
+<<<<<<< HEAD
                 'attr' => $attr + ['min' => 0, 'placeholder' => '0'],
             ])
+=======
+                'constraints' => [new Range(['min' => 0, 'max' => 32767, 'notInRangeMessage' => 'L\'ordre doit être entre {{ min }} et {{ max }}.'])],
+                'attr' => $attr + ['min' => 0, 'placeholder' => '0'],
+            ])
+            ->add('actif', CheckboxType::class, [
+                'label' => 'Visible sur le site',
+                'required' => false,
+            ])
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
             ->add('publicCible', EnumType::class, [
                 'label' => 'Public cible',
                 'class' => PublicCible::class,
@@ -67,7 +121,11 @@ final class ThematiqueType extends AbstractType
                     PublicCible::AUTRE => 'Autre',
                 },
                 'placeholder' => 'Choisir un public',
+<<<<<<< HEAD
                 'required' => false,
+=======
+                'constraints' => [new NotBlank(message: 'Le public cible est obligatoire.')],
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
                 'attr' => $attr,
             ])
             ->add('niveauDifficulte', EnumType::class, [
@@ -79,7 +137,25 @@ final class ThematiqueType extends AbstractType
                     NiveauDifficulte::AVANCE => 'Avancé',
                 },
                 'placeholder' => 'Choisir un niveau',
+<<<<<<< HEAD
                 'required' => false,
+=======
+                'constraints' => [new NotBlank(message: 'Le niveau de difficulté est obligatoire.')],
+                'attr' => $attr,
+            ])
+            ->add('imageFile', FileType::class, [
+                'label' => 'Image de la thématique',
+                'mapped' => false,
+                'required' => !$options['is_edit'],
+                'constraints' => [
+                    new File([
+                        'maxSize' => '2M',
+                        'mimeTypes' => ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+                        'mimeTypesMessage' => 'Choisissez une image (JPG, PNG, WebP ou GIF).',
+                    ]),
+                    ...($options['is_edit'] ? [] : [new NotBlank(message: 'L\'image est obligatoire.')]),
+                ],
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
                 'attr' => $attr,
             ]);
     }
@@ -88,6 +164,12 @@ final class ThematiqueType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Thematique::class,
+<<<<<<< HEAD
         ]);
+=======
+            'is_edit' => false,
+        ]);
+        $resolver->setAllowedTypes('is_edit', 'bool');
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
     }
 }

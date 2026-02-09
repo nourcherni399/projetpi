@@ -7,8 +7,11 @@ namespace App\Entity;
 use App\Enum\Categorie;
 use App\Repository\ProduitRepository;
 use Doctrine\ORM\Mapping as ORM;
+<<<<<<< HEAD
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints as Assert;
+=======
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
 
 #[ORM\Entity(repositoryClass: ProduitRepository::class)]
 class Produit
@@ -36,8 +39,11 @@ class Produit
     #[ORM\Column(length: 500, nullable: true)]
     private ?string $image = null;
 
+<<<<<<< HEAD
     private ?File $imageFile = null;
 
+=======
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
     #[ORM\ManyToOne(inversedBy: 'produits')]
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?User $user = null;
@@ -140,6 +146,7 @@ class Produit
         $this->stock = $stock;
         return $this;
     }
+<<<<<<< HEAD
 
     public function getImageFile(): ?File
     {
@@ -151,4 +158,6 @@ class Produit
         $this->imageFile = $imageFile;
         return $this;
     }
+=======
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
 }

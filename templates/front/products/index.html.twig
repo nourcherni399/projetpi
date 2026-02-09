@@ -18,6 +18,7 @@
         <div class="bg-white rounded-xl shadow-sm p-5 border border-[#E5E0D8]">
             <h2 class="font-semibold text-[#4B5563] mb-4">Catégories</h2>
             <ul class="space-y-3 text-[#6B7280]">
+<<<<<<< HEAD
                 <li>
                     <a href="{{ path('user_products_index') }}" class="block px-3 py-2 rounded-lg {% if not selectedCategorie %}bg-[#A7C7E7] text-white{% else %}hover:bg-[#F5F1EB]{% endif %}">
                         Toutes les catégories
@@ -30,10 +31,33 @@
                     </a>
                 </li>
                 {% endfor %}
+=======
+                <li class="flex items-center gap-2">
+                    <input type="checkbox" id="cat1" class="rounded border-[#E5E0D8] text-[#A7C7E7] focus:ring-[#A7C7E7]">
+                    <label for="cat1">Apaisement (24)</label>
+                </li>
+                <li class="flex items-center gap-2">
+                    <input type="checkbox" id="cat2" class="rounded border-[#E5E0D8] text-[#A7C7E7] focus:ring-[#A7C7E7]">
+                    <label for="cat2">Concentration (18)</label>
+                </li>
+                <li class="flex items-center gap-2">
+                    <input type="checkbox" id="cat3" class="rounded border-[#E5E0D8] text-[#A7C7E7] focus:ring-[#A7C7E7]">
+                    <label for="cat3">Stimulation sensorielle (32)</label>
+                </li>
+                <li class="flex items-center gap-2">
+                    <input type="checkbox" id="cat4" class="rounded border-[#E5E0D8] text-[#A7C7E7] focus:ring-[#A7C7E7]">
+                    <label for="cat4">Protection auditive (12)</label>
+                </li>
+                <li class="flex items-center gap-2">
+                    <input type="checkbox" id="cat5" class="rounded border-[#E5E0D8] text-[#A7C7E7] focus:ring-[#A7C7E7]">
+                    <label for="cat5">Communication (8)</label>
+                </li>
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
             </ul>
         </div>
         <div class="bg-white rounded-xl shadow-sm p-5 border border-[#E5E0D8]">
             <h2 class="font-semibold text-[#4B5563] mb-4">Prix</h2>
+<<<<<<< HEAD
             <div class="space-y-3 text-[#6B7280] text-sm">
                 <a href="{{ path('user_products') }}" class="block px-3 py-2 rounded-lg {% if minPrice|default(null) is null and maxPrice|default(null) is null %}bg-[#A7C7E7] text-white{% else %}hover:bg-[#F5F1EB]{% endif %}">Tous les prix</a>
                 <a href="{{ path('user_products', {minPrice: 0, maxPrice: 500000}) }}" class="block px-3 py-2 rounded-lg {% if minPrice|default(null) == '0' and maxPrice|default(null) == '500000' %}bg-[#A7C7E7] text-white{% else %}hover:bg-[#F5F1EB]{% endif %}">0 — 500K د.ت</a>
@@ -85,6 +109,77 @@
                     <p class="text-[#6B7280]">Aucun produit trouvé dans cette catégorie.</p>
                 </div>
             {% endif %}
+=======
+            <div class="space-y-2">
+                <input type="range" min="0" max="100" value="50" class="w-full h-2 rounded-lg appearance-none bg-[#E5E0D8] accent-[#A7C7E7]">
+                <div class="flex justify-between text-sm text-[#6B7280]">0 € — 100 €</div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm p-5 border border-[#E5E0D8]">
+            <h2 class="font-semibold text-[#4B5563] mb-4">Tranche d'âge</h2>
+            <p class="text-sm text-[#6B7280]">Options à venir</p>
+        </div>
+    </aside>
+
+    <div class="flex-1 min-w-0">
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <p class="text-[#6B7280]">9 produits trouvés</p>
+            <div class="flex items-center gap-2">
+                <select class="px-4 py-2 rounded-lg border border-[#E5E0D8] bg-white text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                    <option>Plus populaires</option>
+                </select>
+                <button type="button" class="p-2 rounded-lg bg-[#A7C7E7] text-white" title="Vue grille">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                </button>
+                <button type="button" class="p-2 rounded-lg bg-[#E5E0D8] text-[#6B7280]" title="Vue liste">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+                </button>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <article class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] overflow-hidden flex flex-col">
+                <div class="aspect-square bg-[#F5F1EB] flex items-center justify-center text-[#6B7280] text-sm">Image</div>
+                <div class="p-4 relative flex-1 flex flex-col">
+                    <span class="absolute top-2 left-4 px-2 py-0.5 rounded text-xs font-medium text-white bg-[#5eead4]/90">Apaisement</span>
+                    <h2 class="font-semibold text-[#4B5563] mt-6">Coussin Sensoriel Lesté</h2>
+                    <p class="text-[#6B7280] text-sm mt-1">★ 4.8 (24)</p>
+                    <p class="text-[#6B7280] text-sm mt-2 flex-1">Coussin lesté offrant une pression profonde apaisante, idéal pour réduire l'anxiété et favoriser le calme.</p>
+                    <p class="font-semibold text-[#A7C7E7] mt-3">45 €</p>
+                    <div class="flex gap-2 mt-4">
+                        <a href="{{ path('user_product_show', { id: 1 }) }}" class="inline-flex items-center justify-center gap-1 flex-1 px-4 py-2 rounded-lg bg-[#A7C7E7] text-white text-sm font-medium hover:bg-[#B8D4ED]">Voir détails</a>
+                        <button type="button" class="p-2 rounded-lg border border-[#E5E0D8] text-[#6B7280] hover:bg-[#F5F1EB]" aria-label="Ajouter au panier"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg></button>
+                    </div>
+                </div>
+            </article>
+            <article class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] overflow-hidden flex flex-col">
+                <div class="aspect-square bg-[#F5F1EB] flex items-center justify-center text-[#6B7280] text-sm">Image</div>
+                <div class="p-4 relative flex-1 flex flex-col">
+                    <span class="absolute top-2 left-4 px-2 py-0.5 rounded text-xs font-medium text-white bg-[#A7C7E7]">Concentration</span>
+                    <h2 class="font-semibold text-[#4B5563] mt-6">Fidget Cube Premium</h2>
+                    <p class="text-[#6B7280] text-sm mt-1">★ 4.9 (56)</p>
+                    <p class="text-[#6B7280] text-sm mt-2 flex-1">Cube multi-sensoriel avec 6 faces interactives pour améliorer la concentration et réduire le stress.</p>
+                    <p class="font-semibold text-[#A7C7E7] mt-3">18 €</p>
+                    <div class="flex gap-2 mt-4">
+                        <a href="{{ path('user_product_show', { id: 2 }) }}" class="inline-flex items-center justify-center gap-1 flex-1 px-4 py-2 rounded-lg bg-[#A7C7E7] text-white text-sm font-medium hover:bg-[#B8D4ED]">Voir détails</a>
+                        <button type="button" class="p-2 rounded-lg border border-[#E5E0D8] text-[#6B7280] hover:bg-[#F5F1EB]" aria-label="Ajouter au panier"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg></button>
+                    </div>
+                </div>
+            </article>
+            <article class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] overflow-hidden flex flex-col">
+                <div class="aspect-square bg-[#F5F1EB] flex items-center justify-center text-[#6B7280] text-sm">Image</div>
+                <div class="p-4 relative flex-1 flex flex-col">
+                    <span class="absolute top-2 left-4 px-2 py-0.5 rounded text-xs font-medium text-white bg-[#D8B4FE]">Protection</span>
+                    <h2 class="font-semibold text-[#4B5563] mt-6">Casque Anti-Bruit Enfant</h2>
+                    <p class="text-[#6B7280] text-sm mt-1">★ 4.7 (42)</p>
+                    <p class="text-[#6B7280] text-sm mt-2 flex-1">Casque confortable réduisant les stimuli sonores pour un environnement plus calme et sécurisant.</p>
+                    <p class="font-semibold text-[#A7C7E7] mt-3">35 €</p>
+                    <div class="flex gap-2 mt-4">
+                        <a href="{{ path('user_product_show', { id: 3 }) }}" class="inline-flex items-center justify-center gap-1 flex-1 px-4 py-2 rounded-lg bg-[#A7C7E7] text-white text-sm font-medium hover:bg-[#B8D4ED]">Voir détails</a>
+                        <button type="button" class="p-2 rounded-lg border border-[#E5E0D8] text-[#6B7280] hover:bg-[#F5F1EB]" aria-label="Ajouter au panier"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg></button>
+                    </div>
+                </div>
+            </article>
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
         </div>
     </div>
 </div>

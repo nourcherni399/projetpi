@@ -3,6 +3,7 @@
 {% block title %}Prendre rendez-vous - {{ doctor.name }} - AutiCare{% endblock %}
 
 {% block user_content %}
+<<<<<<< HEAD
 {% set stepParams = { id: doctor.id } %}
 {% set stepParams = stepParams|merge({ etape: 1, date: choices.date, time: choices.time }) %}
 <style>
@@ -111,17 +112,344 @@
                         timeBtns.forEach(function(b) { b.classList.remove('rdv-selected'); });
                         this.classList.add('rdv-selected');
                         if (timeInput) timeInput.value = this.getAttribute('data-time');
+=======
+{% set stepParams = { id: doctor.id, etape: 1, disponibilite_id: choices.disponibilite_id, date_rdv: choices.date_rdv, date_label: choices.date_label } %}
+{% set linkStep2 = stepParams|merge({ etape: 2, type: choices.type, mode: choices.mode, motif: choices.motif }) %}
+{% set linkStep3 = stepParams|merge({ etape: 3, type: choices.type, mode: choices.mode, motif: choices.motif }) %}
+<style>
+.rdv-slot.rdv-selected { 
+    border-color: #A7C7E7 !important; 
+    background: linear-gradient(135deg, rgba(167,199,231,0.15) 0%, rgba(184,212,237,0.15) 100%) !important; 
+    color: #4B5563 !important;
+    transform: scale(1.02);
+    box-shadow: 0 8px 25px rgba(167,199,231,0.3);
+}
+.rdv-type-option:has(input:checked), .rdv-mode-option:has(input:checked) { 
+    border-color: #A7C7E7 !important; 
+    background: linear-gradient(135deg, rgba(167,199,231,0.1) 0%, rgba(184,212,237,0.1) 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(167,199,231,0.25);
+}
+.rdv-type-option, .rdv-mode-option { 
+    border: 2px solid #E5E0D8; 
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+.rdv-type-option:hover, .rdv-mode-option:hover { 
+    border-color: #A7C7E7; 
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(167,199,231,0.2);
+}
+.rdv-type-option::before, .rdv-mode-option::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(167,199,231,0.1), transparent);
+    transition: left 0.5s;
+}
+.rdv-type-option:hover::before, .rdv-mode-option:hover::before {
+    left: 100%;
+}
+
+@keyframes slideInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+.animate-slideUp {
+    animation: slideInUp 0.6s ease-out;
+}
+.animate-fadeScale {
+    animation: fadeInScale 0.5s ease-out;
+}
+.animate-pulse-once {
+    animation: pulse 0.3s ease-in-out;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .rdv-slot {
+        padding: 1rem !important;
+        flex-direction: column !important;
+        text-align: center !important;
+        gap: 0.5rem !important;
+    }
+    .rdv-type-option, .rdv-mode-option {
+        padding: 0.75rem !important;
+    }
+}
+@media (max-width: 480px) {
+    .rdv-slot {
+        padding: 0.75rem !important;
+    }
+    .rdv-type-option, .rdv-mode-option {
+        padding: 0.5rem !important;
+        font-size: 0.875rem !important;
+    }
+}
+</style>
+<div class="flex flex-col lg:flex-row gap-8 mb-12 animate-slideUp">
+    <aside class="lg:w-96 shrink-0">
+        <a href="{{ path('user_appointments') }}" class="inline-flex items-center gap-2 text-[#6B7280] hover:text-[#A7C7E7] mb-4 focus:outline-none focus:ring-2 focus:ring-[#A7C7E7] rounded-lg px-3 py-2 transition-all duration-300 hover:bg-[#F5F1EB] group">
+            <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            Retour à la liste
+        </a>
+        <div class="bg-white rounded-3xl shadow-xl border border-[#E5E0D8] p-8 sticky top-4 hover:shadow-2xl transition-all duration-500 animate-fadeScale">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="relative group">
+                    <span class="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[#A7C7E7] to-[#B8D4ED] text-white font-bold text-lg shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">{{ doctor.initials }}</span>
+                    <div class="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
+                </div>
+                <div>
+                    <h2 class="font-bold text-xl text-[#4B5563] group-hover:text-[#A7C7E7] transition-colors duration-300">{{ doctor.name }}</h2>
+                    <span class="inline-block px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-[#A7C7E7]/20 to-[#B8D4ED]/30 text-[#4B5563] shadow-sm hover:shadow-md transition-shadow duration-300">{{ doctor.specialty }}</span>
+                </div>
+            </div>
+            
+            <div class="space-y-4 text-sm text-[#6B7280] mb-6">
+                <p class="flex items-center gap-3 p-3 rounded-xl hover:bg-[#F5F1EB] transition-colors duration-300 group">
+                    <svg class="w-5 h-5 shrink-0 text-[#A7C7E7] group-hover:scale-110 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg> 
+                    <span class="group-hover:text-[#4B5563] transition-colors duration-300">{{ doctor.address }}</span>
+                </p>
+                <p class="flex items-center gap-3 p-3 rounded-xl hover:bg-[#F5F1EB] transition-colors duration-300 group">
+                    <svg class="w-5 h-5 shrink-0 text-[#A7C7E7] group-hover:scale-110 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg> 
+                    <span class="group-hover:text-[#4B5563] transition-colors duration-300">{{ doctor.phone }}</span>
+                </p>
+                <p class="flex items-center gap-3 p-3 rounded-xl hover:bg-[#F5F1EB] transition-colors duration-300 group">
+                    <svg class="w-5 h-5 shrink-0 text-[#A7C7E7] group-hover:scale-110 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg> 
+                    <span class="group-hover:text-[#4B5563] transition-colors duration-300">{{ doctor.email }}</span>
+                </p>
+            </div>
+            
+            <!-- Amélioration: Statistiques de disponibilité -->
+            {% if doctor.availability_stats %}
+            <div class="bg-gradient-to-r from-[#F5F1EB] to-[#FAF8F5] rounded-2xl p-5 border border-[#E5E0D8] hover:shadow-md transition-all duration-300">
+                <h3 class="font-bold text-[#4B5563] mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-[#A7C7E7]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Disponibilités
+                </h3>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div class="bg-white/60 rounded-lg p-3 hover:bg-white/80 transition-colors duration-300">
+                        <span class="text-[#6B7280] block text-xs mb-1">Créneaux/semaine</span>
+                        <span class="font-bold text-[#4B5563] text-lg">{{ doctor.availability_stats.total_slots_per_week }}</span>
+                    </div>
+                    <div class="bg-white/60 rounded-lg p-3 hover:bg-white/80 transition-colors duration-300">
+                        <span class="text-[#6B7280] block text-xs mb-1">Jours disponibles</span>
+                        <span class="font-medium text-[#4B5563]">{{ doctor.availability_stats.available_days|join(', ') }}</span>
+                    </div>
+                    <div class="bg-white/60 rounded-lg p-3 hover:bg-white/80 transition-colors duration-300">
+                        <span class="text-[#6B7280] block text-xs mb-1">Prochain RDV</span>
+                        <span class="font-medium text-[#4B5563]">{{ doctor.availability_stats.next_available_date }}</span>
+                    </div>
+                    <div class="bg-white/60 rounded-lg p-3 hover:bg-white/80 transition-colors duration-300">
+                        <span class="text-[#6B7280] block text-xs mb-1">Temps de réponse</span>
+                        <span class="font-medium text-[#4B5563]">{{ doctor.availability_stats.response_time }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Amélioration: Langues et spécialisations -->
+            <div class="space-y-4 text-sm mb-6">
+                {% if doctor.languages|length > 0 %}
+                <div class="flex flex-wrap gap-2">
+                    {% for lang in doctor.languages %}
+                    <span class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#F5F1EB] to-[#FAF8F5] text-[#6B7280] hover:bg-gradient-to-r hover:from-[#E5E0D8] hover:to-[#F5F1EB] transition-all duration-300 hover:scale-105 hover:shadow-sm">{{ lang }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% if doctor.specializations|length > 0 %}
+                <div class="flex flex-wrap gap-2">
+                    {% for spec in doctor.specializations %}
+                    <span class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#A7C7E7]/20 to-[#B8D4ED]/30 text-[#4B5563] hover:from-[#A7C7E7]/30 hover:to-[#B8D4ED]/40 transition-all duration-300 hover:scale-105 hover:shadow-sm">{{ spec }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Amélioration: Notes et avis -->
+            <div class="flex items-center gap-4 mb-6 p-4 rounded-xl bg-gradient-to-r from-[#F5F1EB]/50 to-[#FAF8F5]/50 hover:from-[#F5F1EB] hover:to-[#FAF8F5] transition-all duration-300">
+                <div class="flex items-center gap-2 group">
+                    <div class="flex items-center gap-1">
+                        {% for i in range(1, 5) %}
+                        <svg class="w-5 h-5 {% if i <= doctor.rating|round(0, 'floor') %}text-yellow-500{% else %}text-gray-300{% endif %} group-hover:scale-110 transition-transform duration-200" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.954.69l-1.519-4.674a1 1 0 00-.95-.69H4.149a1 1 0 00-.95.69L.635 7.163a1 1 0 00.954.69l1.519 4.674z"/>
+                        </svg>
+                        {% endfor %}
+                    </div>
+                    <span class="font-bold text-xl text-[#4B5563] group-hover:text-[#A7C7E7] transition-colors duration-300">{{ doctor.rating }}</span>
+                </div>
+                <span class="text-[#6B7280] group-hover:text-[#4B5563] transition-colors duration-300">({{ doctor.reviews_count }} avis)</span>
+            </div>
+            
+            <div class="text-center p-6 rounded-2xl bg-gradient-to-r from-[#A7C7E7] to-[#B8D4ED] text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <p class="font-bold text-2xl mb-1">{{ doctor.price }}€</p>
+                <p class="text-sm opacity-90">Tarif de la consultation</p>
+            </div>
+            
+            <!-- Amélioration: Site web -->
+            {% if doctor.website %}
+            <div class="mt-4 pt-4 border-t border-[#E5E0D8]">
+                <a href="{{ doctor.website }}" target="_blank" class="inline-flex items-center gap-2 text-[#A7C7E7] hover:text-[#B8D4ED] transition-colors">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <span>Site web</span>
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </aside>
+
+    <div class="flex-1 min-w-0 animate-slideUp" style="animation-delay: 0.2s">
+        <div class="flex flex-wrap items-center justify-center gap-2 mb-8 text-sm p-4 bg-white rounded-2xl shadow-lg border border-[#E5E0D8]">
+            <a href="{{ path('user_appointment_book', stepParams) }}" class="flex items-center gap-2 px-3 py-2 rounded-lg {% if step >= 1 %}text-[#A7C7E7] font-medium bg-[#A7C7E7]/10{% else %}text-[#6B7280] hover:bg-[#F5F1EB]{% endif %} transition-all duration-300 group">
+                {% if step > 1 %}
+                <svg class="w-5 h-5 text-green-500 animate-pulse-once" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                {% else %}
+                <span class="flex items-center justify-center w-7 h-7 rounded-full {% if step == 1 %}bg-gradient-to-r from-[#A7C7E7] to-[#B8D4ED] text-white shadow-lg group-hover:scale-110{% else %}bg-[#E5E0D8] text-[#6B7280]{% endif %} text-xs font-bold transition-all duration-300">1</span>
+                {% endif %}
+                <span class="group-hover:text-[#A7C7E7] transition-colors duration-300">Créneau</span>
+            </a>
+            <span class="text-[#E5E0D8] font-bold">›</span>
+            <a href="{{ path('user_appointment_book', linkStep2) }}" class="flex items-center gap-2 px-3 py-2 rounded-lg {% if step >= 2 %}text-[#A7C7E7] font-medium bg-[#A7C7E7]/10{% else %}text-[#6B7280] hover:bg-[#F5F1EB]{% endif %} transition-all duration-300 group">
+                {% if step > 2 %}
+                <svg class="w-5 h-5 text-green-500 animate-pulse-once" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                {% else %}
+                <span class="flex items-center justify-center w-7 h-7 rounded-full {% if step == 2 %}bg-gradient-to-r from-[#A7C7E7] to-[#B8D4ED] text-white shadow-lg group-hover:scale-110{% else %}bg-[#E5E0D8] text-[#6B7280]{% endif %} text-xs font-bold transition-all duration-300">2</span>
+                {% endif %}
+                <span class="group-hover:text-[#A7C7E7] transition-colors duration-300">Type</span>
+            </a>
+            <span class="text-[#E5E0D8] font-bold">›</span>
+            <a href="{{ path('user_appointment_book', linkStep3) }}" class="flex items-center gap-2 px-3 py-2 rounded-lg {% if step >= 3 %}text-[#A7C7E7] font-medium bg-[#A7C7E7]/10{% else %}text-[#6B7280] hover:bg-[#F5F1EB]{% endif %} transition-all duration-300 group">
+                {% if step > 3 %}
+                <svg class="w-5 h-5 text-green-500 animate-pulse-once" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                {% else %}
+                <span class="flex items-center justify-center w-7 h-7 rounded-full {% if step == 3 %}bg-gradient-to-r from-[#A7C7E7] to-[#B8D4ED] text-white shadow-lg group-hover:scale-110{% else %}bg-[#E5E0D8] text-[#6B7280]{% endif %} text-xs font-bold transition-all duration-300">3</span>
+                {% endif %}
+                <span class="group-hover:text-[#A7C7E7] transition-colors duration-300">Vos informations</span>
+            </a>
+            <span class="text-[#E5E0D8] font-bold">›</span>
+            <span class="flex items-center gap-2 px-3 py-2 rounded-lg {% if step == 4 %}text-[#A7C7E7] font-medium bg-[#A7C7E7]/10{% else %}text-[#6B7280]{% endif %} transition-all duration-300 group">
+                <span class="flex items-center justify-center w-7 h-7 rounded-full {% if step == 4 %}bg-gradient-to-r from-[#A7C7E7] to-[#B8D4ED] text-white shadow-lg group-hover:scale-110{% else %}bg-[#E5E0D8] text-[#6B7280]{% endif %} text-xs font-bold transition-all duration-300">4</span>
+                <span class="group-hover:text-[#A7C7E7] transition-colors duration-300">Confirmation</span>
+            </span>
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-xl border border-[#E5E0D8] p-8 md:p-10 animate-fadeScale" style="animation-delay: 0.4s">
+            {% if step == 1 %}
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-[#4B5563] mb-6 bg-gradient-to-r from-[#4B5563] to-[#A7C7E7] bg-clip-text text-transparent">Choisissez votre créneau</h2>
+                
+                {% if recommendations.best_slots|length > 0 %}
+                <div class="mb-8 p-6 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 shadow-lg hover:shadow-xl transition-all duration-300">
+                    <h3 class="font-bold text-blue-800 mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        </svg>
+                        Créneaux recommandés pour vous
+                    </h3>
+                    <div class="space-y-3">
+                        {% for slot in recommendations.best_slots %}
+                        <div class="flex items-center justify-between p-4 bg-white rounded-xl border border-blue-200 hover:border-blue-400 hover:shadow-md cursor-pointer transition-all duration-300 hover:scale-102">
+                            <span class="text-sm font-semibold text-blue-700">{{ slot.label }}</span>
+                            <span class="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">Temps d'attente: {{ slot.wait_time_estimate }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="flex items-center gap-3 mb-6">
+                    <svg class="w-6 h-6 text-[#A7C7E7]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="text-[#6B7280] font-medium">Tous les créneaux disponibles ({{ slots|length }})</p>
+                </div>
+            </div>
+            
+            {% if slots is defined and slots|length > 0 %}
+            <form method="get" action="{{ path('user_appointment_book', { id: doctor.id }) }}" id="rdv-form-step1">
+                <input type="hidden" name="etape" value="2">
+                <input type="hidden" name="disponibilite_id" id="rdv-dispo" value="{{ choices.disponibilite_id|default(slots[0].disponibilite_id) }}">
+                <input type="hidden" name="date_rdv" id="rdv-date" value="{{ choices.date_rdv|default(slots[0].date_rdv) }}">
+                <input type="hidden" name="date_label" id="rdv-label" value="{{ choices.date_label|default(slots[0].label) }}">
+                
+                <div class="space-y-4">
+                    {% for slot in slots %}
+                    <label class="rdv-slot group flex items-center justify-between p-5 rounded-2xl border-2 cursor-pointer transition-all duration-300 hover:border-[#A7C7E7] hover:bg-[#A7C7E7]/5 hover:shadow-lg hover:-translate-y-1" 
+                           data-dispo="{{ slot.disponibilite_id }}" 
+                           data-date="{{ slot.date_rdv }}" 
+                           data-label="{{ slot.label }}"
+                           {% if slot.is_recommended %}bg-gradient-to-r from-[#A7C7E7]/10 to-[#B8D4ED]/10 border-[#A7C7E7] shadow-md{% endif %}>
+                        <div class="flex-1">
+                            <div class="font-bold text-[#4B5563] text-lg group-hover:text-[#A7C7E7] transition-colors duration-300">{{ slot.label }}</div>
+                            {% if slot.urgency_suitable %}
+                            <span class="inline-block mt-2 px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md animate-pulse">Urgence</span>
+                            {% endif %}
+                        </div>
+                        <div class="text-right">
+                            <span class="text-sm text-[#6B7280] bg-[#F5F1EB] px-3 py-1 rounded-full">{{ slot.wait_time_estimate }}</span>
+                        </div>
+                    </label>
+                    {% endfor %}
+                </div>
+                
+                <div class="flex justify-center mt-8">
+                    <button type="submit" class="group px-8 py-4 rounded-xl bg-gradient-to-r from-[#A7C7E7] to-[#B8D4ED] text-white font-bold hover:from-[#B8D4ED] hover:to-[#C9E1F3] shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex items-center gap-2">
+                        Continuer
+                        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </button>
+                </div>
+            </form>
+                var date = document.getElementById('rdv-date');
+                var label = document.getElementById('rdv-label');
+                var btns = document.querySelectorAll('.rdv-slot');
+                btns.forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        btns.forEach(function(b) { b.classList.remove('rdv-selected'); });
+                        this.classList.add('rdv-selected');
+                        if (dispo) dispo.value = this.getAttribute('data-dispo');
+                        if (date) date.value = this.getAttribute('data-date');
+                        if (label) label.value = this.getAttribute('data-label');
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
                     });
                 });
             })();
             </script>
+<<<<<<< HEAD
+=======
+            {% else %}
+            <p class="text-[#6B7280] mb-6">Aucun créneau disponible pour les 4 prochaines semaines. Revenez plus tard ou choisissez un autre médecin.</p>
+            <a href="{{ path('user_appointments') }}" class="inline-flex px-6 py-3 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED]">Voir les autres médecins</a>
+            {% endif %}
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
             {% endif %}
 
             {% if step == 2 %}
             <form method="get" action="{{ path('user_appointment_book', { id: doctor.id }) }}" id="rdv-form-step2">
                 <input type="hidden" name="etape" value="3">
+<<<<<<< HEAD
                 <input type="hidden" name="date" value="{{ choices.date }}">
                 <input type="hidden" name="time" value="{{ choices.time }}">
+=======
+                <input type="hidden" name="disponibilite_id" value="{{ choices.disponibilite_id }}">
+                <input type="hidden" name="date_rdv" value="{{ choices.date_rdv }}">
+                <input type="hidden" name="date_label" value="{{ choices.date_label }}">
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
                 <h2 class="text-xl font-bold text-[#4B5563] mb-6">Type de consultation</h2>
                 <p class="text-[#4B5563] font-medium mb-3">Type de rendez-vous</p>
                 <div class="space-y-3 mb-6">
@@ -152,10 +480,13 @@
                         <input type="radio" name="mode" value="cabinet" {% if choices.mode == 'cabinet' %}checked{% endif %} class="rounded-full border-[#E5E0D8] text-[#A7C7E7] focus:ring-[#A7C7E7]">
                         <span class="text-[#4B5563]">Au cabinet</span>
                     </label>
+<<<<<<< HEAD
                     <label class="rdv-mode-option flex-1 flex items-center justify-center gap-2 p-4 rounded-xl cursor-pointer">
                         <input type="radio" name="mode" value="teleconsult" {% if choices.mode == 'teleconsult' %}checked{% endif %} class="rounded-full border-[#E5E0D8] text-[#A7C7E7] focus:ring-[#A7C7E7]">
                         <span class="text-[#4B5563]">Téléconsultation</span>
                     </label>
+=======
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
                 </div>
                 <div class="mb-8">
                     <label class="block text-[#4B5563] font-medium mb-2">Motif de la consultation</label>
@@ -175,6 +506,7 @@
 
             {% if step == 3 %}
             <h2 class="text-xl font-bold text-[#4B5563] mb-6">Vos informations</h2>
+<<<<<<< HEAD
             <form class="space-y-4 mb-8">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -218,10 +550,63 @@
                 <a href="{{ path('user_appointment_book', linkStep2) }}" class="px-6 py-3 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB]">&lt; Retour</a>
                 <a href="{{ path('user_appointment_book', { id: doctor.id, etape: 4, date: choices.date, time: choices.time, type: choices.type, mode: choices.mode, motif: choices.motif }) }}" class="px-6 py-3 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED]">Confirmer le rendez-vous</a>
             </div>
+=======
+            <form method="post" action="{{ path('user_appointment_submit', { id: doctor.id }) }}" class="space-y-4 mb-8" novalidate>
+                <input type="hidden" name="_token" value="{{ csrf_token('rdv_submit') }}">
+                <input type="hidden" name="disponibilite_id" value="{{ choices.disponibilite_id }}">
+                <input type="hidden" name="date_rdv" value="{{ choices.date_rdv }}">
+                <input type="hidden" name="date_label" value="{{ choices.date_label }}">
+                <input type="hidden" name="type" value="{{ choices.type }}">
+                <input type="hidden" name="mode" value="{{ choices.mode }}">
+                <input type="hidden" name="motif" value="{{ choices.motif }}">
+                <input type="hidden" name="motif_key" value="{{ choices.type == 'urgent' ? 'urgence' : (choices.type == 'suivi' ? 'suivie' : 'normal') }}">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[#4B5563] font-medium mb-1">Nom <span class="text-red-500">*</span></label>
+                        <input type="text" name="nom" placeholder="Votre nom" class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-white text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                    </div>
+                    <div>
+                        <label class="block text-[#4B5563] font-medium mb-1">Prénom <span class="text-red-500">*</span></label>
+                        <input type="text" name="prenom" placeholder="Votre prénom" class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-white text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[#4B5563] font-medium mb-1">Téléphone</label>
+                    <input type="tel" name="telephone" placeholder="06 12 34 56 78" class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-white text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                </div>
+                <div>
+                    <label class="block text-[#4B5563] font-medium mb-1">Adresse</label>
+                    <input type="text" name="adresse" placeholder="Adresse (optionnel)" class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-white text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                </div>
+                <div>
+                    <label class="block text-[#4B5563] font-medium mb-1">Date de naissance du patient</label>
+                    <input type="date" name="date_naissance" class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-white text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                </div>
+                <div>
+                    <label class="block text-[#4B5563] font-medium mb-1">Notes (optionnel)</label>
+                    <textarea name="note" rows="3" placeholder="Informations utiles pour le praticien..." class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-white text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]"></textarea>
+                </div>
+                <div class="bg-[#F5F1EB] rounded-xl p-4 mb-6">
+                    <h3 class="font-semibold text-[#4B5563] mb-3">Récapitulatif</h3>
+                    <ul class="text-[#6B7280] text-sm space-y-1">
+                        <li>Créneau: {{ choices.date_label|default('—') }}</li>
+                        <li>Type: {{ choices.type_label }}</li>
+                        <li>Mode: {{ choices.mode_label }}</li>
+                        {% if choices.motif %}<li>Motif: {{ choices.motif }}</li>{% endif %}
+                        <li class="font-semibold text-[#4B5563] pt-2">Tarif: {{ doctor.price }}€</li>
+                    </ul>
+                </div>
+                <div class="flex justify-between">
+                    <a href="{{ path('user_appointment_book', linkStep2) }}" class="px-6 py-3 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB]">&lt; Retour</a>
+                    <button type="submit" class="px-6 py-3 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED]">Envoyer ma demande</button>
+                </div>
+            </form>
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
             {% endif %}
 
             {% if step == 4 %}
             <div class="text-center py-8">
+<<<<<<< HEAD
                 <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-100 text-emerald-600 mb-6">
                     <svg class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                 </div>
@@ -242,6 +627,26 @@
                 <div class="flex flex-wrap gap-4 justify-center">
                     <a href="{{ path('user_appointments') }}" class="inline-flex px-6 py-3 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED]">Voir mes rendez-vous</a>
                     <a href="{{ path('home') }}" class="inline-flex px-6 py-3 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB]">Retour à l'accueil</a>
+=======
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-amber-100 text-amber-600 mb-6">
+                    <svg class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+                <h2 class="text-2xl font-bold text-[#4B5563] mb-2">Demande envoyée</h2>
+                <p class="text-[#6B7280] mb-8">Le médecin va recevoir votre demande et pourra l'accepter ou la refuser. Vous serez notifié de sa réponse.</p>
+                <div class="bg-[#F5F1EB] rounded-xl p-6 mb-8 text-left max-w-md mx-auto">
+                    <h3 class="font-semibold text-[#4B5563] mb-3">Détails de la demande</h3>
+                    <ul class="text-[#6B7280] text-sm space-y-2">
+                        <li><strong class="text-[#4B5563]">Praticien:</strong> {{ doctor.name }}</li>
+                        <li><strong class="text-[#4B5563]">Créneau:</strong> {{ choices.date_label|default('—') }}</li>
+                        <li><strong class="text-[#4B5563]">Type:</strong> {{ choices.type_label }}</li>
+                        <li><strong class="text-[#4B5563]">Mode:</strong> {{ choices.mode_label }}</li>
+                        <li><strong class="text-[#4B5563]">Lieu:</strong> {{ doctor.address }}</li>
+                    </ul>
+                </div>
+                <div class="flex flex-wrap gap-4 justify-center">
+                    <a href="{{ path('user_appointments') }}" class="inline-flex px-6 py-3 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED]">Prendre un autre RDV</a>
+                    <a href="{{ path('home') }}" class="inline-flex px-6 py-3 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB]">Accueil</a>
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
                 </div>
             </div>
             {% endif %}

@@ -33,7 +33,11 @@ class Evenement
     #[ORM\Column(type: Types::TIME_MUTABLE)]
     private ?\DateTimeInterface $heureFin = null;
 
+<<<<<<< HEAD
     #[ORM\Column(length: 255)]
+=======
+    #[ORM\Column(length: 255, nullable: true)]
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
     private ?string $lieu = null;
 
     /** Agrégation : un événement appartient à une thématique (sans cascade delete). */
@@ -82,7 +86,11 @@ class Evenement
         return $this->dateEvent;
     }
 
+<<<<<<< HEAD
     public function setDateEvent(\DateTimeInterface $dateEvent): static
+=======
+    public function setDateEvent(?\DateTimeInterface $dateEvent): static
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
     {
         $this->dateEvent = $dateEvent;
         return $this;
@@ -93,7 +101,11 @@ class Evenement
         return $this->heureDebut;
     }
 
+<<<<<<< HEAD
     public function setHeureDebut(\DateTimeInterface $heureDebut): static
+=======
+    public function setHeureDebut(?\DateTimeInterface $heureDebut): static
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
     {
         $this->heureDebut = $heureDebut;
         return $this;
@@ -104,7 +116,11 @@ class Evenement
         return $this->heureFin;
     }
 
+<<<<<<< HEAD
     public function setHeureFin(\DateTimeInterface $heureFin): static
+=======
+    public function setHeureFin(?\DateTimeInterface $heureFin): static
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
     {
         $this->heureFin = $heureFin;
         return $this;
@@ -115,7 +131,11 @@ class Evenement
         return $this->lieu;
     }
 
+<<<<<<< HEAD
     public function setLieu(string $lieu): static
+=======
+    public function setLieu(?string $lieu): static
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
     {
         $this->lieu = $lieu;
         return $this;

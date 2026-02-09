@@ -32,18 +32,36 @@ class Thematique
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $couleur = null;
 
+<<<<<<< HEAD
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $icone = null;
+=======
+    #[ORM\Column(name: 'sous_titre', length: 255, nullable: true)]
+    private ?string $sousTitre = null;
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
 
     #[ORM\Column(type: 'smallint', nullable: true)]
     private ?int $ordre = null;
 
+<<<<<<< HEAD
+=======
+    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    private bool $actif = true;
+
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
     #[ORM\Column(type: 'string', enumType: PublicCible::class, columnDefinition: "ENUM('Enfant', 'Parent', 'Médecin', 'Éducateur', 'Aidant', 'Autre')", nullable: true)]
     private ?PublicCible $publicCible = null;
 
     #[ORM\Column(type: 'string', enumType: NiveauDifficulte::class, columnDefinition: "ENUM('Débutant', 'Intermédiaire', 'Avancé')", nullable: true)]
     private ?NiveauDifficulte $niveauDifficulte = null;
 
+<<<<<<< HEAD
+=======
+    /** Image illustrant la thématique (chemin ou URL). Affichée sur les cartes événements. */
+    #[ORM\Column(length: 500, nullable: true)]
+    private ?string $image = null;
+
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
     /** @var Collection<int, Evenement> */
     #[ORM\OneToMany(targetEntity: Evenement::class, mappedBy: 'thematique')]
     private Collection $evenements;
@@ -102,6 +120,7 @@ class Thematique
         return $this;
     }
 
+<<<<<<< HEAD
     public function getIcone(): ?string
     {
         return $this->icone;
@@ -110,6 +129,16 @@ class Thematique
     public function setIcone(?string $icone): static
     {
         $this->icone = $icone;
+=======
+    public function getSousTitre(): ?string
+    {
+        return $this->sousTitre;
+    }
+
+    public function setSousTitre(?string $sousTitre): static
+    {
+        $this->sousTitre = $sousTitre;
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
         return $this;
     }
 
@@ -124,6 +153,20 @@ class Thematique
         return $this;
     }
 
+<<<<<<< HEAD
+=======
+    public function isActif(): bool
+    {
+        return $this->actif;
+    }
+
+    public function setActif(bool $actif): static
+    {
+        $this->actif = $actif;
+        return $this;
+    }
+
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
     public function getPublicCible(): ?PublicCible
     {
         return $this->publicCible;
@@ -146,6 +189,20 @@ class Thematique
         return $this;
     }
 
+<<<<<<< HEAD
+=======
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): static
+    {
+        $this->image = $image;
+        return $this;
+    }
+
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
     /** @return Collection<int, Evenement> */
     public function getEvenements(): Collection
     {

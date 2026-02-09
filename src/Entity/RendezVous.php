@@ -27,6 +27,13 @@ class RendezVous
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?Disponibilite $disponibilite = null;
 
+<<<<<<< HEAD
+=======
+    /** Date choisie pour le rendez-vous (ex. lundi 17 fév.). */
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $dateRdv = null;
+
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?Patient $patient = null;
@@ -82,6 +89,20 @@ class RendezVous
         return $this;
     }
 
+<<<<<<< HEAD
+=======
+    public function getDateRdv(): ?\DateTimeInterface
+    {
+        return $this->dateRdv;
+    }
+
+    public function setDateRdv(?\DateTimeInterface $dateRdv): static
+    {
+        $this->dateRdv = $dateRdv;
+        return $this;
+    }
+
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
     public function getPatient(): ?Patient
     {
         return $this->patient;

@@ -14,6 +14,7 @@
 
     <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8">
         {{ form_start(form, {
+<<<<<<< HEAD
             attr: { class: 'space-y-6' },
             label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }
         }) }}
@@ -48,6 +49,22 @@
                 {{ form_widget(form.image) }}
                 {% include 'admin/produit/_form_errors.html.twig' %}
             </div>
+=======
+            attr: { class: 'space-y-6', novalidate: 'novalidate' },
+            label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }
+        }) }}
+        <div class="grid grid-cols-1 gap-6">
+            {{ form_row(form.nom) }}
+            {{ form_row(form.description) }}
+            {{ form_row(form.categorie) }}
+            {{ form_row(form.prix) }}
+            <div class="flex items-center gap-2">
+                {{ form_widget(form.disponibilite) }}
+                {{ form_label(form.disponibilite) }}
+                {{ form_errors(form.disponibilite) }}
+            </div>
+            {{ form_row(form.image) }}
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
         </div>
         <div class="flex flex-wrap gap-3 pt-4">
             <button type="submit" class="px-5 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">

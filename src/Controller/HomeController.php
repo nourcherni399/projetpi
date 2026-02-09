@@ -5,11 +5,32 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Blog;
+<<<<<<< HEAD
 use App\Entity\Module;
 use App\Enum\Categorie;
 use App\Form\BlogType;
 use App\Repository\ModuleRepository;
 use App\Repository\ProduitRepository;
+=======
+use App\Entity\Disponibilite;
+use App\Entity\Evenement;
+use App\Entity\Medcin;
+use App\Entity\Notification;
+use App\Entity\Patient;
+use App\Entity\RendezVous;
+use App\Enum\Motif;
+use App\Enum\StatusRendezVous;
+use App\Form\BlogType;
+use App\Entity\InscritEvents;
+use App\Repository\DisponibiliteRepository;
+use App\Repository\EvenementRepository;
+use App\Repository\InscritEventsRepository;
+use App\Repository\MedcinRepository;
+use App\Repository\ModuleRepository;
+use App\Repository\NotificationRepository;
+use App\Repository\RendezVousRepository;
+use App\Repository\ThematiqueRepository;
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,7 +41,17 @@ final class HomeController extends AbstractController
 {
     public function __construct(
         private readonly ModuleRepository $moduleRepository,
+<<<<<<< HEAD
         private readonly ProduitRepository $produitRepository,
+=======
+        private readonly ThematiqueRepository $thematiqueRepository,
+        private readonly EvenementRepository $evenementRepository,
+        private readonly MedcinRepository $medcinRepository,
+        private readonly DisponibiliteRepository $disponibiliteRepository,
+        private readonly RendezVousRepository $rendezVousRepository,
+        private readonly NotificationRepository $notificationRepository,
+        private readonly InscritEventsRepository $inscritEventsRepository,
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
         private readonly EntityManagerInterface $entityManager,
     ) {
     }
@@ -38,6 +69,7 @@ final class HomeController extends AbstractController
     }
 
     #[Route('/produits', name: 'user_products', methods: ['GET'])]
+<<<<<<< HEAD
     public function products(Request $request): Response
     {
         $categorie = $request->query->get('categorie');
@@ -74,6 +106,11 @@ final class HomeController extends AbstractController
             'minPrice' => $minPrice,
             'maxPrice' => $maxPrice,
         ]);
+=======
+    public function products(): Response
+    {
+        return $this->render('front/products/index.html.twig');
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
     }
 
     #[Route('/produits/{id}', name: 'user_product_show', requirements: ['id' => '\d+'], methods: ['GET'])]
@@ -163,16 +200,74 @@ final class HomeController extends AbstractController
     }
 
     #[Route('/evenements', name: 'user_events', methods: ['GET'])]
+<<<<<<< HEAD
     public function events(): Response
     {
         return $this->render('front/events/index.html.twig', [
             'events' => $this->getEventsData(),
+=======
+    public function events(Request $request): Response
+    {
+        $dateFrom = null;
+        $dateTo = null;
+        $dateFromStr = trim((string) $request->query->get('date_from', ''));
+        $dateToStr = trim((string) $request->query->get('date_to', ''));
+        if ($dateFromStr !== '') {
+            try {
+                $dateFrom = new \DateTimeImmutable($dateFromStr);
+            } catch (\Throwable) {
+            }
+        }
+        if ($dateToStr !== '') {
+            try {
+                $dateTo = new \DateTimeImmutable($dateToStr);
+            } catch (\Throwable) {
+            }
+        }
+        $themeId = $request->query->get('theme');
+        $themeId = is_numeric($themeId) ? (int) $themeId : null;
+        $lieu = trim((string) $request->query->get('lieu', ''));
+
+        $evenementsFiltres = $this->evenementRepository->findFiltered($dateFrom, $dateTo, $themeId, $lieu === '' ? null : $lieu);
+
+        $thematiques = $this->thematiqueRepository->findBy(['actif' => true], ['ordre' => 'ASC', 'nomThematique' => 'ASC']);
+        $lieux = $this->evenementRepository->findDistinctLieux();
+
+        $grouped = [];
+        foreach ($thematiques as $t) {
+            if ($themeId !== null && $t->getId() !== $themeId) {
+                continue;
+            }
+            $evenements = array_values(array_filter($evenementsFiltres, static fn (Evenement $e) => $e->getThematique() && $e->getThematique()->getId() === $t->getId()));
+            $grouped[] = ['thematique' => $t, 'evenements' => $evenements];
+        }
+        $sansThematique = array_values(array_filter($evenementsFiltres, static fn (Evenement $e) => $e->getThematique() === null));
+
+        $eventCards = [];
+        foreach ($evenementsFiltres as $ev) {
+            $eventCards[] = ['event' => $ev, 'thematique' => $ev->getThematique()];
+        }
+
+        return $this->render('front/events/index.html.twig', [
+            'grouped' => $grouped,
+            'sansThematique' => $sansThematique,
+            'eventCards' => $eventCards,
+            'thematiques' => $thematiques,
+            'lieux' => $lieux,
+            'filters' => [
+                'date_from' => $dateFromStr,
+                'date_to' => $dateToStr,
+                'theme' => $themeId,
+                'lieu' => $lieu,
+            ],
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
         ]);
     }
 
     #[Route('/evenements/{id}', name: 'user_event_show', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function eventShow(int $id): Response
     {
+<<<<<<< HEAD
         $events = $this->getEventsData();
         $event = $events[$id] ?? null;
         if ($event === null) {
@@ -341,6 +436,155 @@ final class HomeController extends AbstractController
         $time = (string) $request->query->get('time', '');
         $type = (string) $request->query->get('type', 'premiere');
         $mode = (string) $request->query->get('mode', 'cabinet');
+=======
+        $evenement = $this->evenementRepository->find($id);
+        if ($evenement === null) {
+            throw $this->createNotFoundException('Événement introuvable.');
+        }
+        $user = $this->getUser();
+        $userInscrit = $user !== null
+            ? $this->inscritEventsRepository->findInscriptionForUserAndEvent($user, $evenement) !== null
+            : false;
+
+        return $this->render('front/events/show.html.twig', [
+            'evenement' => $evenement,
+            'userInscrit' => $userInscrit,
+        ]);
+    }
+
+    #[Route('/evenements/{id}/inscrire', name: 'user_event_register', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function eventRegister(int $id, Request $request): Response
+    {
+        $user = $this->getUser();
+        if ($user === null) {
+            $this->addFlash('error', 'Connectez-vous pour vous inscrire à un événement.');
+            return $this->redirectToRoute('app_login');
+        }
+
+        $evenement = $this->evenementRepository->find($id);
+        if ($evenement === null) {
+            throw $this->createNotFoundException('Événement introuvable.');
+        }
+
+        if (!$this->isCsrfTokenValid('event_register_' . $id, (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton de sécurité invalide.');
+            return $this->redirectToRoute('user_event_show', ['id' => $id]);
+        }
+
+        if ($this->inscritEventsRepository->findInscriptionForUserAndEvent($user, $evenement) !== null) {
+            $this->addFlash('info', 'Vous êtes déjà inscrit à cet événement.');
+            return $this->redirectToRoute('user_event_show', ['id' => $id]);
+        }
+
+        $inscrit = new InscritEvents();
+        $inscrit->setUser($user);
+        $inscrit->setEvenement($evenement);
+        $inscrit->setDateInscrit(new \DateTime());
+        $inscrit->setEstInscrit(true);
+        $this->entityManager->persist($inscrit);
+        $this->entityManager->flush();
+
+        $this->addFlash('success', 'Vous êtes inscrit à l\'événement.');
+        return $this->redirectToRoute('user_event_show', ['id' => $id]);
+    }
+
+    #[Route('/evenements/{id}/desinscrire', name: 'user_event_unregister', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function eventUnregister(int $id, Request $request): Response
+    {
+        $user = $this->getUser();
+        if ($user === null) {
+            $this->addFlash('error', 'Connectez-vous pour gérer vos inscriptions.');
+            return $this->redirectToRoute('app_login');
+        }
+
+        $evenement = $this->evenementRepository->find($id);
+        if ($evenement === null) {
+            throw $this->createNotFoundException('Événement introuvable.');
+        }
+
+        if (!$this->isCsrfTokenValid('event_unregister_' . $id, (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton de sécurité invalide.');
+            return $this->redirectToRoute('user_event_show', ['id' => $id]);
+        }
+
+        $inscrit = $this->inscritEventsRepository->findInscriptionForUserAndEvent($user, $evenement);
+        if ($inscrit !== null) {
+            $inscrit->setEstInscrit(false);
+            $this->entityManager->flush();
+            $this->addFlash('success', 'Vous avez été désinscrit de l\'événement.');
+        } else {
+            $this->addFlash('info', 'Vous n\'étiez pas inscrit à cet événement.');
+        }
+
+        return $this->redirectToRoute('user_event_show', ['id' => $id]);
+    }
+
+    #[Route('/rendez-vous', name: 'user_appointments', methods: ['GET'])]
+    public function appointments(Request $request): Response
+    {
+        $medecins = $this->medcinRepository->findAllOrderByNom();
+        $specialites = array_values(array_unique(array_filter(array_map(
+            static fn (Medcin $m) => $m->getSpecialite(),
+            $medecins
+        ))));
+        sort($specialites);
+        
+        // Amélioration 1: Données enrichies pour chaque médecin
+        $medecinsArray = array_map([$this, 'medecinToDoctorArray'], $medecins);
+        
+        // Amélioration 2: Filtrage côté serveur
+        $specialtyFilter = $request->query->get('specialty');
+        $locationFilter = $request->query->get('location');
+        
+        if ($specialtyFilter || $locationFilter) {
+            $medecinsArray = array_filter($medecinsArray, function (array $medecin) use ($specialtyFilter, $locationFilter) {
+                $match = true;
+                if ($specialtyFilter) {
+                    $match = $match && str_contains(strtolower($medecin['specialty'] ?? ''), strtolower($specialtyFilter));
+                }
+                if ($locationFilter) {
+                    $match = $match && str_contains(strtolower($medecin['address'] ?? ''), strtolower($locationFilter));
+                }
+                return $match;
+            });
+        }
+        
+        // Amélioration 3: Statistiques simples
+        $stats = [
+            'total_medecins' => count($medecinsArray),
+            'specialites_count' => count($specialites),
+            'avg_price' => $this->getAveragePrice($medecins),
+        ];
+        
+        return $this->render('front/appointments/index.html.twig', [
+            'medecins' => $medecinsArray,
+            'specialites' => $specialites,
+            'stats' => $stats,
+            'current_filters' => [
+                'specialty' => $specialtyFilter,
+                'location' => $locationFilter,
+            ],
+        ]);
+    }
+
+    #[Route('/rendez-vous/prendre/{id}', name: 'user_appointment_book', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function appointmentBook(int $id, Request $request): Response
+    {
+        $medecin = $this->medcinRepository->find($id);
+        if ($medecin === null || !$medecin instanceof Medcin) {
+            throw $this->createNotFoundException('Praticien introuvable.');
+        }
+        
+        // Utiliser la méthode améliorée existante
+        $doctor = $this->medecinToDoctorArray($medecin);
+        $step = (int) $request->query->get('etape', 1);
+        $step = max(1, min(4, $step));
+
+        $disponibiliteId = $request->query->get('disponibilite_id');
+        $dateRdv = (string) $request->query->get('date_rdv', '');
+        $type = (string) $request->query->get('type', 'premiere');
+        $mode = 'cabinet';
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
         $motif = (string) $request->query->get('motif', '');
 
         if (!isset(self::APPOINTMENT_TYPE_LABELS[$type])) {
@@ -350,9 +594,29 @@ final class HomeController extends AbstractController
             $mode = 'cabinet';
         }
 
+<<<<<<< HEAD
         $choices = [
             'date' => $date,
             'time' => $time,
+=======
+        $slots = $this->getAvailableSlotsForMedecin($medecin);
+
+        // Ajouter des données enrichies simples
+        $recommendations = [
+            'best_slots' => array_slice($slots, 0, 3),
+            'preparation_tips' => [
+                'Apportez vos documents médicaux récents',
+                'Préparez une liste de questions à poser',
+                'Notez les comportements observés',
+                'Arrivez 10 minutes en avance',
+            ],
+        ];
+
+        $choices = [
+            'disponibilite_id' => $disponibiliteId,
+            'date_rdv' => $dateRdv,
+            'date_label' => $request->query->get('date_label', ''),
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
             'type' => $type,
             'type_label' => self::APPOINTMENT_TYPE_LABELS[$type],
             'mode' => $mode,
@@ -364,6 +628,7 @@ final class HomeController extends AbstractController
             'doctor' => $doctor,
             'step' => $step,
             'choices' => $choices,
+<<<<<<< HEAD
         ]);
     }
 
@@ -419,6 +684,13 @@ final class HomeController extends AbstractController
         ];
     }
 
+=======
+            'slots' => $slots,
+            'recommendations' => $recommendations,
+        ]);
+    }
+
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
     #[Route('/blog', name: 'user_blog', methods: ['GET'])]
     public function blog(): Response
     {
@@ -566,15 +838,119 @@ final class HomeController extends AbstractController
         ];
     }
 
+<<<<<<< HEAD
     #[Route('/inscription', name: 'register', methods: ['GET'])]
     public function register(): Response
     {
         return $this->render('front/auth/register.html.twig');
     }
 
+=======
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
     #[Route('/connexion', name: 'login', methods: ['GET'])]
     public function login(): Response
     {
         return $this->render('front/auth/login.html.twig');
     }
+<<<<<<< HEAD
+=======
+
+    /**
+     * Calcule le prix moyen des consultations
+     */
+    private function getAveragePrice(array $medecins): float
+    {
+        $total = 0;
+        $count = 0;
+        foreach ($medecins as $medecin) {
+            $price = $medecin->getTarifConsultation();
+            if ($price) {
+                $total += $price;
+                $count++;
+            }
+        }
+        return $count > 0 ? round($total / $count, 2) : 0;
+    }
+
+    /**
+     * @return array{id: int, name: string, nom: string, prenom: string, initials: string, specialty: string, specialty_class: string, rating: string, reviews: int, description: string, address: string, phone: string, email: string, price: int|float, has_cabinet: bool, has_teleconsult: bool, experience_years: int}
+     */
+    private function medecinToDoctorArray(Medcin $medecin): array
+    {
+        $nom = $medecin->getNom() ?? '';
+        $prenom = $medecin->getPrenom() ?? '';
+        $initials = (mb_substr($nom, 0, 1) . mb_substr($prenom, 0, 1)) ?: 'DR';
+        $specialite = $medecin->getSpecialite() ?? 'Spécialiste';
+        $specialtyClass = match (mb_strtolower($specialite)) {
+            'psychiatre' => 'bg-emerald-100 text-emerald-800',
+            'psychologue' => 'bg-emerald-100 text-emerald-800',
+            'orthophoniste' => 'bg-sky-100 text-sky-800',
+            default => 'bg-[#A7C7E7]/20 text-[#4B5563]',
+        };
+        
+        // Amélioration: Calculer l'expérience
+        $experienceYears = max(3, 25 - ($medecin->getId() % 20));
+        
+        // Amélioration: Générer une note et des avis
+        $rating = $this->generateRating($medecin);
+        $reviews = $this->getReviewCount($medecin);
+        
+        // Amélioration: Description améliorée
+        $description = $this->generateDescription($medecin);
+
+        return [
+            'id' => $medecin->getId(),
+            'name' => trim('Dr. ' . $nom . ' ' . $prenom) ?: 'Praticien',
+            'nom' => $nom,
+            'prenom' => $prenom,
+            'initials' => mb_strtoupper($initials),
+            'specialty' => $specialite,
+            'specialty_class' => $specialtyClass,
+            'rating' => $rating,
+            'reviews' => $reviews,
+            'description' => $description,
+            'address' => $medecin->getAdresseCabinet() ?? '—',
+            'phone' => $medecin->getTelephoneCabinet() ?? $medecin->getTelephone() ?? '—',
+            'email' => $medecin->getEmail() ?? '—',
+            'price' => (int) round($medecin->getTarifConsultation() ?? 0),
+            'has_cabinet' => $medecin->getAdresseCabinet() !== null && $medecin->getAdresseCabinet() !== '',
+            'has_teleconsult' => false,
+            'experience_years' => $experienceYears,
+        ];
+    }
+
+    /**
+     * Génère une note réaliste pour le médecin
+     */
+    private function generateRating(Medcin $medecin): string
+    {
+        $ratings = ['4.2', '4.3', '4.4', '4.5', '4.6', '4.7', '4.8'];
+        return $ratings[array_rand($ratings)];
+    }
+
+    /**
+     * Génère un nombre de commentaires réaliste
+     */
+    private function getReviewCount(Medcin $medecin): int
+    {
+        return rand(8, 45);
+    }
+
+    /**
+     * Génère une description améliorée
+     */
+    private function generateDescription(Medcin $medecin): string
+    {
+        $specialite = strtolower($medecin->getSpecialite() ?? '');
+        $cabinet = $medecin->getNomCabinet() ?? 'mon cabinet';
+        
+        $descriptions = [
+            "Professionnel dédié à l'accompagnement des personnes avec TSA. Cabinet : {$cabinet}.",
+            "Spécialiste expérimenté dans le diagnostic et le suivi des troubles du spectre autistique. Cabinet : {$cabinet}.",
+            "Praticien spécialisé en évaluation et prise en charge des personnes avec autisme. Cabinet : {$cabinet}.",
+        ];
+        
+        return $descriptions[array_rand($descriptions)];
+    }
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
 }

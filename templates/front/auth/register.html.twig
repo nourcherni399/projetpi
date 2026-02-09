@@ -13,6 +13,7 @@
         <h1 class="text-2xl font-bold text-[#4B5563] text-center mb-1">Créer un compte</h1>
         <p class="text-[#6B7280] text-center text-sm mb-6">Rejoignez la communauté AutiCare</p>
 
+<<<<<<< HEAD
         <form class="space-y-4">
             <div class="grid grid-cols-2 gap-4">
                 <div>
@@ -62,4 +63,71 @@
         </p>
     </div>
 </div>
+=======
+        {% for message in app.flashes('success') %}
+            <div class="mb-4 p-3 rounded-lg bg-green-50 border border-green-200 text-green-800 text-sm">{{ message }}</div>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <div class="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-800 text-sm">{{ message }}</div>
+        {% endfor %}
+        {% if form.vars.submitted and not form.vars.valid %}
+            <div class="mb-4 p-4 rounded-lg bg-red-50 border border-red-200 text-red-800 text-sm">
+                <p class="font-medium">Veuillez remplir tous les champs obligatoires et corriger les erreurs ci-dessous.</p>
+            </div>
+        {% endif %}
+
+        {{ form_start(form, { 'attr': { 'class': 'space-y-4', 'novalidate': 'novalidate' } }) }}
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    {{ form_row(form.prenom, { 'label_attr': { 'class': 'block text-[#4B5563] font-medium mb-1' } }) }}
+                </div>
+                <div>
+                    {{ form_row(form.nom, { 'label_attr': { 'class': 'block text-[#4B5563] font-medium mb-1' } }) }}
+                </div>
+            </div>
+            {{ form_row(form.email, { 'label_attr': { 'class': 'block text-[#4B5563] font-medium mb-1' } }) }}
+            {{ form_row(form.telephone, { 'label_attr': { 'class': 'block text-[#4B5563] font-medium mb-1' } }) }}
+            {{ form_row(form.password, { 'label_attr': { 'class': 'block text-[#4B5563] font-medium mb-1' } }) }}
+            {{ form_row(form.role, { 'label_attr': { 'class': 'block text-[#4B5563] font-medium mb-1' }, 'attr': { 'class': 'form-role-select' } }) }}
+
+            <div id="field-relation-avec-patient" class="hidden" data-visible-for="ROLE_PARENT">
+                {{ form_row(form.relationAvecPatient, { 'label_attr': { 'class': 'block text-[#4B5563] font-medium mb-1' } }) }}
+            </div>
+            <div id="field-patient-group" class="hidden space-y-4" data-visible-for="ROLE_PATIENT">
+                {{ form_row(form.dateNaissance, { 'label_attr': { 'class': 'block text-[#4B5563] font-medium mb-1' } }) }}
+                {{ form_row(form.adresse, { 'label_attr': { 'class': 'block text-[#4B5563] font-medium mb-1' } }) }}
+                {{ form_row(form.sexe, { 'label_attr': { 'class': 'block text-[#4B5563] font-medium mb-1' } }) }}
+            </div>
+
+            {{ form_row(form.submit) }}
+        {{ form_end(form) }}
+
+        <p class="mt-6 text-center text-[#6B7280] text-sm">
+            Déjà un compte ? <a href="{{ path('app_login') }}" class="text-[#A7C7E7] hover:underline font-medium">Se connecter</a>
+        </p>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var roleSelect = document.querySelector('.form-role-select');
+    var relationBlock = document.getElementById('field-relation-avec-patient');
+    var patientBlock = document.getElementById('field-patient-group');
+
+    function toggleRoleFields() {
+        var value = roleSelect ? roleSelect.value : '';
+        if (relationBlock) {
+            relationBlock.classList.toggle('hidden', value !== 'ROLE_PARENT');
+        }
+        if (patientBlock) {
+            patientBlock.classList.toggle('hidden', value !== 'ROLE_PATIENT');
+        }
+    }
+    if (roleSelect) {
+        roleSelect.addEventListener('change', toggleRoleFields);
+        toggleRoleFields();
+    }
+});
+</script>
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
 {% endblock %}

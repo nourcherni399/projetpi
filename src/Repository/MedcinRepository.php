@@ -17,4 +17,19 @@ class MedcinRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Medcin::class);
     }
+<<<<<<< HEAD
+=======
+
+    /**
+     * @return list<Medcin>
+     */
+    public function findAllOrderByNom(): array
+    {
+        return $this->createQueryBuilder('m')
+            ->orderBy('m.nom', 'ASC')
+            ->addOrderBy('m.prenom', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+>>>>>>> 72089269acfd37b80d1154606c1f9a5afd193770
 }
