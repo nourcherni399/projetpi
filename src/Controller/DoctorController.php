@@ -329,124 +329,21 @@ final class DoctorController extends AbstractController
         return $this->redirectToRoute('doctor_notes');
     }
 
-=======
-        ]));
-    }
-
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
     #[Route('/medecin/rendez-vous', name: 'doctor_rendezvous', methods: ['GET'])]
     public function rendezvous(): Response
     {
         $medecin = $this->getMedecin();
         if ($medecin === null) {
-<<<<<<< HEAD
-            $this->addFlash('error', 'Accès non autorisé.');
-=======
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
             return $this->redirectToRoute('login');
         }
 
         $rendezVous = $this->rendezVousRepository->findByMedecinOrderByIdDesc($medecin);
-<<<<<<< HEAD
-        
-        // Calculer les statistiques améliorées pour les rendez-vous
-        $stats = $this->calculateRendezVousStats($rendezVous, $medecin);
-        
-        // Ajouter des données pour le design amélioré
-        $upcomingRdv = array_filter($rendezVous, function($rdv) {
-            return $rdv->getDateRdv() && $rdv->getDateRdv() >= new \DateTime('today');
-        });
-        
-        $todayRdv = array_filter($rendezVous, function($rdv) {
-            return $rdv->getDateRdv() && $rdv->getDateRdv()->format('Y-m-d') === (new \DateTime('today'))->format('Y-m-d');
-        });
-
-        return $this->render('doctor/rendezvous/index.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
-            'rendez_vous' => $rendezVous,
-            'stats' => $stats,
-            'upcoming_count' => count($upcomingRdv),
-            'today_count' => count($todayRdv),
-            'recent_rdv' => array_slice($rendezVous, 0, 5),
-        ]));
-    }
-
-    #[Route('/medecin/rendez-vous/{id}/accepter', name: 'doctor_rendezvous_accept', requirements: ['id' => '\d+'], methods: ['POST'])]
-    public function rendezvousAccept(Request $request, int $id): Response
-    {
-        $medecin = $this->getMedecin();
-        if ($medecin === null) {
-            $this->addFlash('error', 'Accès non autorisé.');
-            return $this->redirectToRoute('login');
-        }
-
-        // Contrôle: vérifier que l'ID est valide
-        if ($id <= 0) {
-            $this->addFlash('error', 'Identifiant de rendez-vous invalide.');
-            return $this->redirectToRoute('doctor_notifications');
-        }
-
-        $rdv = $this->rendezVousRepository->find($id);
-        if ($rdv === null) {
-            $this->addFlash('error', 'Rendez-vous introuvable.');
-            return $this->redirectToRoute('doctor_notifications');
-        }
-
-        // Contrôle: vérifier que le rendez-vous appartient bien au médecin connecté
-        if ($rdv->getMedecin() !== $medecin) {
-            $this->addFlash('error', 'Ce rendez-vous ne vous appartient pas.');
-            return $this->redirectToRoute('doctor_notifications');
-        }
-
-        // Contrôle: vérifier que le rendez-vous est bien en attente
-        if ($rdv->getStatus() !== StatusRendezVous::EN_ATTENTE) {
-            $this->addFlash('error', 'Ce rendez-vous a déjà été traité.');
-            return $this->redirectToRoute('doctor_notifications');
-        }
-
-        // Contrôle: vérifier que la date du rendez-vous n'est pas passée
-        if ($rdv->getDateRdv() && $rdv->getDateRdv() < new \DateTime('today')) {
-            $this->addFlash('error', 'Ce rendez-vous est dans le passé et ne peut plus être accepté.');
-            return $this->redirectToRoute('doctor_notifications');
-        }
-
-        // Contrôle: vérifier le token CSRF
-        $token = $request->request->get('_token');
-        if (!\is_string($token) || !$this->isCsrfTokenValid('doctor_rdv_accept_' . $id, $token)) {
-            $this->addFlash('error', 'Jeton de sécurité invalide. Veuillez réessayer.');
-            return $this->redirectToRoute('doctor_notifications');
-        }
-
-        try {
-            $rdv->setStatus(StatusRendezVous::CONFIRMER);
-            $this->entityManager->flush();
-
-            $patient = $rdv->getPatient();
-            if ($patient instanceof Patient) {
-                $notif = new Notification();
-                $notif->setDestinataire($patient);
-                $notif->setType(Notification::TYPE_RDV_ACCEPTE);
-                $notif->setRendezVous($rdv);
-                $this->entityManager->persist($notif);
-                $this->entityManager->flush();
-            }
-
-            $this->markDoctorNotificationForRdvAsRead($medecin, $rdv);
-            $this->addFlash('success', 'Rendez-vous accepté avec succès. Le patient a été notifié.');
-            return $this->redirectToRoute('doctor_notifications');
-        } catch (\Throwable $e) {
-            $this->addFlash('error', 'Une erreur est survenue lors de l\'acceptation. Veuillez réessayer.');
-            return $this->redirectToRoute('doctor_notifications');
-        }
-    }
-
-=======
 
         return $this->render('doctor/rendezvous/index.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
             'rendez_vous' => $rendezVous,
         ]));
     }
 
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
     #[Route('/medecin/notifications', name: 'doctor_notifications', methods: ['GET'])]
     public function notifications(): Response
     {
@@ -454,22 +351,7 @@ final class DoctorController extends AbstractController
         if ($medecin === null) {
             return $this->redirectToRoute('login');
         }
-<<<<<<< HEAD
 
-        $notifications = $this->notificationRepository->findByDestinataireOrderByCreatedDesc($medecin);
-        $demandesRdv = $this->rendezVousRepository->findEnAttenteByMedecin($medecin);
-        
-        // Calculer les statistiques pour les notifications
-        $stats = $this->calculateNotificationsStats($notifications, $demandesRdv, $medecin);
-
-        return $this->render('doctor/notifications/index.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
-            'notifications' => $notifications,
-            'demandes_rdv' => $demandesRdv,
-            'stats' => $stats,
-        ]));
-    }
-
-=======
         $notifications = $this->notificationRepository->findByDestinataireOrderByCreatedDesc($medecin);
         $demandesRdv = $this->rendezVousRepository->findEnAttenteByMedecin($medecin);
         return $this->render('doctor/notifications/index.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
@@ -513,70 +395,11 @@ final class DoctorController extends AbstractController
         return $this->redirectToRoute('doctor_notifications');
     }
 
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
     #[Route('/medecin/rendez-vous/{id}/refuser', name: 'doctor_rendezvous_refuse', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function rendezvousRefuse(Request $request, int $id): Response
     {
         $medecin = $this->getMedecin();
         if ($medecin === null) {
-<<<<<<< HEAD
-            $this->addFlash('error', 'Accès non autorisé.');
-            return $this->redirectToRoute('login');
-        }
-
-        // Contrôle: vérifier que l'ID est valide
-        if ($id <= 0) {
-            $this->addFlash('error', 'Identifiant de rendez-vous invalide.');
-            return $this->redirectToRoute('doctor_notifications');
-        }
-
-        $rdv = $this->rendezVousRepository->find($id);
-        if ($rdv === null) {
-            $this->addFlash('error', 'Rendez-vous introuvable.');
-            return $this->redirectToRoute('doctor_notifications');
-        }
-
-        // Contrôle: vérifier que le rendez-vous appartient bien au médecin connecté
-        if ($rdv->getMedecin() !== $medecin) {
-            $this->addFlash('error', 'Ce rendez-vous ne vous appartient pas.');
-            return $this->redirectToRoute('doctor_notifications');
-        }
-
-        // Contrôle: vérifier que le rendez-vous est bien en attente
-        if ($rdv->getStatus() !== StatusRendezVous::EN_ATTENTE) {
-            $this->addFlash('error', 'Ce rendez-vous a déjà été traité.');
-            return $this->redirectToRoute('doctor_notifications');
-        }
-
-        // Contrôle: vérifier le token CSRF
-        $token = $request->request->get('_token');
-        if (!\is_string($token) || !$this->isCsrfTokenValid('doctor_rdv_refuse_' . $id, $token)) {
-            $this->addFlash('error', 'Jeton de sécurité invalide. Veuillez réessayer.');
-            return $this->redirectToRoute('doctor_notifications');
-        }
-
-        try {
-            $rdv->setStatus(StatusRendezVous::ANNULER);
-            $this->entityManager->flush();
-
-            $patient = $rdv->getPatient();
-            if ($patient instanceof Patient) {
-                $notif = new Notification();
-                $notif->setDestinataire($patient);
-                $notif->setType(Notification::TYPE_RDV_REFUSE);
-                $notif->setRendezVous($rdv);
-                $this->entityManager->persist($notif);
-                $this->entityManager->flush();
-            }
-
-            $this->markDoctorNotificationForRdvAsRead($medecin, $rdv);
-            $this->addFlash('success', 'Demande refusée avec succès. Le patient a été notifié.');
-            return $this->redirectToRoute('doctor_notifications');
-        } catch (\Throwable $e) {
-            $this->addFlash('error', 'Une erreur est survenue lors du refus. Veuillez réessayer.');
-            return $this->redirectToRoute('doctor_notifications');
-        }
-=======
             return $this->redirectToRoute('login');
         }
         $rdv = $this->rendezVousRepository->find($id);
@@ -605,7 +428,6 @@ final class DoctorController extends AbstractController
         $this->markDoctorNotificationForRdvAsRead($medecin, $rdv);
         $this->addFlash('success', 'Demande refusée. Le patient a été notifié.');
         return $this->redirectToRoute('doctor_notifications');
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
     }
 
     private function markDoctorNotificationForRdvAsRead(Medcin $medecin, RendezVous $rdv): void
@@ -623,39 +445,28 @@ final class DoctorController extends AbstractController
     private function getMedecin(): ?Medcin
     {
         $user = $this->getUser();
-<<<<<<< HEAD
         
         if ($user === null) {
-            error_log('getMedecin: User is null');
             return null;
         }
         
-        error_log('getMedecin: User class: ' . get_class($user));
-        error_log('getMedecin: User role: ' . ($user->getRole() ? $user->getRole()->value : 'no role'));
-        
         // Si l'utilisateur est déjà une instance de Medcin, le retourner directement
         if ($user instanceof Medcin) {
-            error_log('getMedecin: User is already Medcin instance');
             return $user;
         }
         
         // Si l'utilisateur est de type User avec rôle MEDECIN, essayer de récupérer l'entité Medcin
         if ($user instanceof User && $user->getRole() === \App\Enum\UserRole::MEDECIN) {
-            error_log('getMedecin: User has MEDECIN role, trying to reload from database');
-            
             // Recharger l'utilisateur depuis la base de données avec la bonne classe
             $medecin = $this->entityManager->getRepository(Medcin::class)->find($user->getId());
             
             if ($medecin === null) {
-                error_log('getMedecin: Could not find Medcin in database with ID: ' . $user->getId());
                 return null;
             }
             
-            error_log('getMedecin: Found Medcin in database: ' . get_class($medecin));
             return $medecin;
         }
         
-        error_log('getMedecin: User is not a Medcin and does not have MEDECIN role');
         return null;
     }
 
@@ -834,8 +645,5 @@ final class DoctorController extends AbstractController
             'urgent_demandes' => $urgentDemandes,
             'unread_rate' => $totalNotifications > 0 ? round(($unreadNotifications / $totalNotifications) * 100, 1) : 0,
         ];
-=======
-        return $user instanceof Medcin ? $user : null;
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
     }
 }
