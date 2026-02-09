@@ -161,22 +161,48 @@ final class HomeController extends AbstractController
     }
 
     #[Route('/evenements', name: 'user_events', methods: ['GET'])]
-    public function events(): Response
+    public function events(Request $request): Response
     {
         $thematiques = $this->thematiqueRepository->findBy(['actif' => true], ['ordre' => 'ASC', 'nomThematique' => 'ASC']);
+
+        $dateFrom = null;
+        $dateTo = null;
+        $lieu = $request->query->get('lieu');
+        $thematiqueId = $request->query->getInt('thematique');
+        if ($request->query->get('date_from') !== null && $request->query->get('date_from') !== '') {
+            $d = \DateTimeImmutable::createFromFormat('Y-m-d', $request->query->get('date_from'));
+            if ($d) {
+                $dateFrom = $d;
+            }
+        }
+        if ($request->query->get('date_to') !== null && $request->query->get('date_to') !== '') {
+            $d = \DateTimeImmutable::createFromFormat('Y-m-d', $request->query->get('date_to'));
+            if ($d) {
+                $dateTo = $d;
+            }
+        }
+
+        $allFiltered = $this->evenementRepository->findFilteredForFront($dateFrom, $dateTo, $lieu, $thematiqueId > 0 ? $thematiqueId : null);
+
         $grouped = [];
         foreach ($thematiques as $t) {
-            $evenements = $t->getEvenements()->toArray();
-            usort($evenements, static function (Evenement $a, Evenement $b): int {
-                $d = ($a->getDateEvent() <=> $b->getDateEvent());
-                return $d !== 0 ? $d : ($a->getHeureDebut() <=> $b->getHeureDebut());
-            });
-            $grouped[] = ['thematique' => $t, 'evenements' => $evenements];
+            if ($thematiqueId > 0 && (int) $t->getId() !== $thematiqueId) {
+                continue;
+            }
+            $evenements = array_filter($allFiltered, static fn (Evenement $e) => $e->getThematique() !== null && $e->getThematique()->getId() === $t->getId());
+            $grouped[] = ['thematique' => $t, 'evenements' => array_values($evenements)];
         }
-        $sansThematique = $this->evenementRepository->findBy(['thematique' => null], ['dateEvent' => 'ASC', 'heureDebut' => 'ASC']);
+        $sansThematique = array_filter($allFiltered, static fn (Evenement $e) => $e->getThematique() === null);
+        $sansThematique = array_values($sansThematique);
+
         return $this->render('front/events/index.html.twig', [
             'grouped' => $grouped,
             'sansThematique' => $sansThematique,
+            'thematiques' => $thematiques,
+            'filter_date_from' => $request->query->get('date_from'),
+            'filter_date_to' => $request->query->get('date_to'),
+            'filter_lieu' => $lieu,
+            'filter_thematique' => $thematiqueId,
         ]);
     }
 

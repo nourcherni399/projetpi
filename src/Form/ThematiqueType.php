@@ -15,11 +15,6 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\NotNull;
-use Symfony\Component\Validator\Constraints\Range;
-use Symfony\Component\Validator\Constraints\Regex;
 
 final class ThematiqueType extends AbstractType
 {
@@ -33,72 +28,36 @@ final class ThematiqueType extends AbstractType
             ->add('nomThematique', TextType::class, [
                 'label' => 'Nom de la thématique',
                 'required' => true,
-                'constraints' => [
-                    new NotBlank(message: 'Ce champ est obligatoire.'),
-                    new Length(['min' => 1, 'max' => 255, 'maxMessage' => 'Le nom ne peut pas dépasser {{ limit }} caractères.']),
-                ],
                 'attr' => $attr + ['placeholder' => 'Ex. Sensoriel'],
             ])
             ->add('codeThematique', TextType::class, [
                 'label' => 'Code thématique',
                 'required' => true,
-                'constraints' => [
-                    new NotBlank(message: 'Ce champ est obligatoire.'),
-                    new Length(['min' => 1, 'max' => 50, 'maxMessage' => 'Le code ne peut pas dépasser {{ limit }} caractères.']),
-                    new Regex(
-                        pattern: '/^[A-Za-z0-9_\-\s]+$/',
-                        message: 'Le code ne peut contenir que des lettres, chiffres, tirets et underscores.'
-                    ),
-                ],
                 'attr' => $attr + ['placeholder' => 'Ex. SENS'],
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Description',
                 'required' => true,
-                'constraints' => [
-                    new NotBlank(message: 'Ce champ est obligatoire.'),
-                    new Length(['min' => 1, 'max' => 65535, 'maxMessage' => 'La description ne peut pas dépasser {{ limit }} caractères.']),
-                ],
                 'attr' => $attr + ['rows' => 3, 'placeholder' => 'Description…'],
             ])
             ->add('couleur', TextType::class, [
                 'label' => 'Couleur',
                 'required' => true,
-                'constraints' => [
-                    new NotBlank(message: 'Ce champ est obligatoire.'),
-                    new Length(['min' => 1, 'max' => 20, 'maxMessage' => 'La couleur ne peut pas dépasser {{ limit }} caractères.']),
-                    new Regex(
-                        pattern: '/^#?[A-Fa-f0-9]{3,8}$/',
-                        message: 'La couleur doit être un code hexadécimal (ex. #A7C7E7).'
-                    ),
-                ],
                 'attr' => $attr + ['placeholder' => 'Ex. #A7C7E7'],
             ])
             ->add('image', TextType::class, [
                 'label' => 'Image (URL ou chemin)',
                 'required' => true,
-                'constraints' => [
-                    new NotBlank(message: 'Ce champ est obligatoire.'),
-                    new Length(['min' => 1, 'max' => 500, 'maxMessage' => 'L\'URL ne peut pas dépasser {{ limit }} caractères.']),
-                ],
                 'attr' => $attr + ['placeholder' => 'Ex. /images/thematiques/sensoriel.jpg ou https://…'],
             ])
             ->add('sousTitre', TextType::class, [
                 'label' => 'Sous-titre',
                 'required' => true,
-                'constraints' => [
-                    new NotBlank(message: 'Ce champ est obligatoire.'),
-                    new Length(['min' => 1, 'max' => 255, 'maxMessage' => 'Le sous-titre ne peut pas dépasser {{ limit }} caractères.']),
-                ],
                 'attr' => $attr + ['placeholder' => 'Ex. Sous-titre'],
             ])
             ->add('ordre', IntegerType::class, [
                 'label' => 'Ordre d\'affichage',
                 'required' => true,
-                'constraints' => [
-                    new NotNull(message: 'Ce champ est obligatoire.'),
-                    new Range(['min' => 0, 'max' => 32767, 'notInRangeMessage' => 'L\'ordre doit être entre {{ min }} et {{ max }}.']),
-                ],
                 'attr' => $attr + ['min' => 0, 'max' => 32767, 'placeholder' => '0'],
             ])
             ->add('actif', CheckboxType::class, [

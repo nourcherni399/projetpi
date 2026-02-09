@@ -55,4 +55,31 @@ class EvenementRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getResult();
     }
+
+    /**
+     * Filtre pour le front : date (from/to), lieu (contient), thématique (id).
+     * @return Evenement[]
+     */
+    public function findFilteredForFront(?\DateTimeInterface $dateFrom, ?\DateTimeInterface $dateTo, ?string $lieu, ?int $thematiqueId): array
+    {
+        $qb = $this->createQueryBuilder('e')
+            ->leftJoin('e.thematique', 't')
+            ->orderBy('e.dateEvent', 'ASC')
+            ->addOrderBy('e.heureDebut', 'ASC');
+
+        if ($dateFrom !== null) {
+            $qb->andWhere('e.dateEvent >= :dateFrom')->setParameter('dateFrom', $dateFrom);
+        }
+        if ($dateTo !== null) {
+            $qb->andWhere('e.dateEvent <= :dateTo')->setParameter('dateTo', $dateTo);
+        }
+        if ($lieu !== null && trim($lieu) !== '') {
+            $qb->andWhere('e.lieu LIKE :lieu')->setParameter('lieu', '%' . addcslashes(trim($lieu), '%_') . '%');
+        }
+        if ($thematiqueId !== null && $thematiqueId > 0) {
+            $qb->andWhere('e.thematique = :tid')->setParameter('tid', $thematiqueId);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
 }

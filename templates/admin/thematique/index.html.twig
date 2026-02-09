@@ -7,10 +7,13 @@
 {% for message in app.flashes('success') %}
     <div class="mb-4 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">{{ message }}</div>
 {% endfor %}
-<div class="mb-6 flex flex-wrap gap-4 justify-between items-center">
-    <input type="search" placeholder="Rechercher une thématique…" class="px-4 py-2 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#4B5563] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7] max-w-xs">
-    <a href="{{ path('admin_thematique_new') }}" class="px-4 py-2 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Nouvel élément</a>
-</div>
+<form method="get" action="{{ path('admin_thematique_index') }}" class="mb-6 flex flex-wrap gap-4 justify-between items-center">
+    <input type="search" name="q" value="{{ q|default('') }}" placeholder="Rechercher une thématique…" class="px-4 py-2 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#4B5563] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7] max-w-xs w-full min-w-[200px]">
+    <div class="flex gap-2">
+        <button type="submit" class="px-4 py-2 rounded-lg bg-[#F5F1EB] border border-[#E5E0D8] text-[#4B5563] font-medium hover:bg-[#E5E0D8] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Rechercher</button>
+        <a href="{{ path('admin_thematique_new') }}" class="px-4 py-2 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Nouvel élément</a>
+    </div>
+</form>
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
     {% for thematique in thematiques %}

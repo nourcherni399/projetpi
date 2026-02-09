@@ -24,10 +24,14 @@ final class ThematiqueController extends AbstractController
     }
 
     #[Route('', name: 'admin_thematique_index', methods: ['GET'])]
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $thematiques = $this->thematiqueRepository->findBy([], ['ordre' => 'ASC', 'nomThematique' => 'ASC']);
-        return $this->render('admin/thematique/index.html.twig', ['thematiques' => $thematiques]);
+        $q = $request->query->get('q');
+        $thematiques = $this->thematiqueRepository->search($q);
+        return $this->render('admin/thematique/index.html.twig', [
+            'thematiques' => $thematiques,
+            'q' => $q,
+        ]);
     }
 
     #[Route('/new', name: 'admin_thematique_new', methods: ['GET', 'POST'])]

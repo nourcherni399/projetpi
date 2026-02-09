@@ -15,9 +15,7 @@
 
         {% if app.session.flashbag.has('error') %}
             <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                {% for message in app.session.flashbag.get('error') %}
-                    <p class="text-red-600 text-sm">{{ message }}</p>
-                {% endfor %}
+                <p class="text-red-600 text-sm">{{ app.session.flashbag.get('error')|first }}</p>
             </div>
         {% endif %}
 
