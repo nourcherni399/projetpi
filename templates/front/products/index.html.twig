@@ -35,12 +35,12 @@
         <div class="bg-white rounded-xl shadow-sm p-5 border border-[#E5E0D8]">
             <h2 class="font-semibold text-[#4B5563] mb-4">Prix</h2>
             <div class="space-y-3 text-[#6B7280] text-sm">
-                <a href="{{ path('user_products') }}" class="block px-3 py-2 rounded-lg {% if minPrice|default(null) is null and maxPrice|default(null) is null %}bg-[#A7C7E7] text-white{% else %}hover:bg-[#F5F1EB]{% endif %}">Tous les prix</a>
-                <a href="{{ path('user_products', {minPrice: 0, maxPrice: 500000}) }}" class="block px-3 py-2 rounded-lg {% if minPrice|default(null) == '0' and maxPrice|default(null) == '500000' %}bg-[#A7C7E7] text-white{% else %}hover:bg-[#F5F1EB]{% endif %}">0 — 500K د.ت</a>
-                <a href="{{ path('user_products', {minPrice: 500000, maxPrice: 1000000}) }}" class="block px-3 py-2 rounded-lg {% if minPrice|default(null) == '500000' and maxPrice|default(null) == '1000000' %}bg-[#A7C7E7] text-white{% else %}hover:bg-[#F5F1EB]{% endif %}">500K — 1M د.ت</a>
-                <a href="{{ path('user_products', {minPrice: 1000000, maxPrice: 2000000}) }}" class="block px-3 py-2 rounded-lg {% if minPrice|default(null) == '1000000' and maxPrice|default(null) == '2000000' %}bg-[#A7C7E7] text-white{% else %}hover:bg-[#F5F1EB]{% endif %}">1M — 2M د.ت</a>
-                <a href="{{ path('user_products', {minPrice: 2000000, maxPrice: 5000000}) }}" class="block px-3 py-2 rounded-lg {% if minPrice|default(null) == '2000000' and maxPrice|default(null) == '5000000' %}bg-[#A7C7E7] text-white{% else %}hover:bg-[#F5F1EB]{% endif %}">2M — 5M د.ت</a>
-                <a href="{{ path('user_products', {minPrice: 5000000, maxPrice: 10000000}) }}" class="block px-3 py-2 rounded-lg {% if minPrice|default(null) == '5000000' and maxPrice|default(null) == '10000000' %}bg-[#A7C7E7] text-white{% else %}hover:bg-[#F5F1EB]{% endif %}">5M — 10M د.ت</a>
+                <a href="{{ path('user_products_index') }}" class="block px-3 py-2 rounded-lg {% if minPrice|default(null) is null and maxPrice|default(null) is null %}bg-[#A7C7E7] text-white{% else %}hover:bg-[#F5F1EB]{% endif %}">Tous les prix</a>
+                <a href="{{ path('user_products_index', {minPrice: 0, maxPrice: 500000}) }}" class="block px-3 py-2 rounded-lg {% if minPrice|default(null) == '0' and maxPrice|default(null) == '500000' %}bg-[#A7C7E7] text-white{% else %}hover:bg-[#F5F1EB]{% endif %}">0 — 500K د.ت</a>
+                <a href="{{ path('user_products_index', {minPrice: 500000, maxPrice: 1000000}) }}" class="block px-3 py-2 rounded-lg {% if minPrice|default(null) == '500000' and maxPrice|default(null) == '1000000' %}bg-[#A7C7E7] text-white{% else %}hover:bg-[#F5F1EB]{% endif %}">500K — 1M د.ت</a>
+                <a href="{{ path('user_products_index', {minPrice: 1000000, maxPrice: 2000000}) }}" class="block px-3 py-2 rounded-lg {% if minPrice|default(null) == '1000000' and maxPrice|default(null) == '2000000' %}bg-[#A7C7E7] text-white{% else %}hover:bg-[#F5F1EB]{% endif %}">1M — 2M د.ت</a>
+                <a href="{{ path('user_products_index', {minPrice: 2000000, maxPrice: 5000000}) }}" class="block px-3 py-2 rounded-lg {% if minPrice|default(null) == '2000000' and maxPrice|default(null) == '5000000' %}bg-[#A7C7E7] text-white{% else %}hover:bg-[#F5F1EB]{% endif %}">2M — 5M د.ت</a>
+                <a href="{{ path('user_products_index', {minPrice: 5000000, maxPrice: 10000000}) }}" class="block px-3 py-2 rounded-lg {% if minPrice|default(null) == '5000000' and maxPrice|default(null) == '10000000' %}bg-[#A7C7E7] text-white{% else %}hover:bg-[#F5F1EB]{% endif %}">5M — 10M د.ت</a>
             </div>
         </div>
     </aside>
