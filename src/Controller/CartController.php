@@ -30,20 +30,7 @@ final class CartController extends AbstractController
     #[Route('', name: 'index', methods: ['GET'])]
     public function index(Request $request): Response
     {
-        $user = $this->getUser();
-        if (!$user) {
-            return $this->redirectToRoute('login');
-        }
-
-        $cart = $this->cartRepository->findOneBy(['user' => $user]);
-        
-        if (!$cart) {
-            $cart = new Cart();
-            $cart->setUser($user);
-            $this->entityManager->persist($cart);
-            $this->entityManager->flush();
-        }
-
+        $cart = $request->getSession()->get('cart', []);
         return $this->render('front/cart/index.html.twig', [
             'cart' => $cart,
         ]);
@@ -52,43 +39,24 @@ final class CartController extends AbstractController
     #[Route('/ajouter/{id}', name: 'add', methods: ['POST'])]
     public function add(Produit $produit, Request $request): RedirectResponse
     {
-        $user = $this->getUser();
-        if (!$user) {
-            $this->addFlash('error', 'Vous devez être connecté pour ajouter des produits au panier.');
-            return $this->redirectToRoute('login');
-        }
-
-        $cart = $this->cartRepository->findOneBy(['user' => $user]);
+        $session = $request->getSession();
+        $cart = $session->get('cart', []);
         
-        if (!$cart) {
-            $cart = new Cart();
-            $cart->setUser($user);
-            $this->entityManager->persist($cart);
-        }
-
-        // Vérifier si le produit est déjà dans le panier
-        $existingItem = null;
-        foreach ($cart->getItems() as $item) {
-            if ($item->getProduit()->getId() === $produit->getId()) {
-                $existingItem = $item;
-                break;
-            }
-        }
-
-        if ($existingItem) {
-            // Augmenter la quantité
-            $existingItem->setQuantite($existingItem->getQuantite() + 1);
+        $key = 'produit_' . $produit->getId();
+        if (isset($cart[$key])) {
+            $cart[$key]['quantity']++;
         } else {
-            // Ajouter un nouvel item
-            $cartItem = new CartItem();
-            $cartItem->setProduit($produit);
-            $cartItem->setQuantite(1);
-            $cart->addItem($cartItem);
-            $this->entityManager->persist($cartItem);
+            $cart[$key] = [
+                'id' => $produit->getId(),
+                'nom' => $produit->getNom(),
+                'prix' => $produit->getPrix(),
+                'image' => $produit->getImage(),
+                'quantity' => 1,
+            ];
         }
-
-        $cart->setUpdatedAt(new \DateTimeImmutable());
-        $this->entityManager->flush();
+        
+        $session->set('cart', $cart);
+        return $this->redirectToRoute('cart_index');
         
         $this->addFlash('success', 'Produit ajouté au panier!');
         return $this->redirectToRoute('cart_index');
@@ -97,28 +65,15 @@ final class CartController extends AbstractController
     #[Route('/supprimer/{id}', name: 'remove', methods: ['POST'])]
     public function removeItem(Request $request, int $id): RedirectResponse
     {
-        $user = $this->getUser();
-        if (!$user) {
-            return $this->redirectToRoute('login');
-        }
-
-        $cart = $this->cartRepository->findOneBy(['user' => $user]);
-        if (!$cart) {
-            return $this->redirectToRoute('cart_index');
-        }
-
-        // Trouver l'item à supprimer
-        foreach ($cart->getItems() as $item) {
-            if ($item->getProduit()->getId() === $id) {
-                $cart->removeItem($item);
-                $this->entityManager->remove($item);
-                break;
-            }
-        }
-
-        $cart->setUpdatedAt(new \DateTimeImmutable());
-        $this->entityManager->flush();
+        $session = $request->getSession();
+        $cart = $session->get('cart', []);
         
+        $key = 'produit_' . $id;
+        if (isset($cart[$key])) {
+            unset($cart[$key]);
+        }
+        
+        $session->set('cart', $cart);
         $this->addFlash('success', 'Produit supprimé du panier!');
         return $this->redirectToRoute('cart_index');
     }
@@ -126,50 +81,28 @@ final class CartController extends AbstractController
     #[Route('/mettre-a-jour/{id}', name: 'update', methods: ['POST'])]
     public function updateQuantity(Request $request, int $id): RedirectResponse
     {
-        $user = $this->getUser();
-        if (!$user) {
-            return $this->redirectToRoute('login');
-        }
-
-        $cart = $this->cartRepository->findOneBy(['user' => $user]);
-        if (!$cart) {
-            return $this->redirectToRoute('cart_index');
-        }
-
+        $session = $request->getSession();
+        $cart = $session->get('cart', []);
+        
         $quantity = (int)$request->request->get('quantite', 1);
         if ($quantity < 1) {
             $quantity = 1;
         }
         
-        // Trouver l'item à mettre à jour
-        foreach ($cart->getItems() as $item) {
-            if ($item->getProduit()->getId() === $id) {
-                $item->setQuantite($quantity);
-                break;
-            }
+        $key = 'produit_' . $id;
+        if (isset($cart[$key])) {
+            $cart[$key]['quantity'] = $quantity;
         }
-
-        $cart->setUpdatedAt(new \DateTimeImmutable());
-        $this->entityManager->flush();
         
+        $session->set('cart', $cart);
         return $this->redirectToRoute('cart_index');
     }
 
     #[Route('/vider', name: 'clear', methods: ['POST'])]
     public function clear(Request $request): RedirectResponse
     {
-        $user = $this->getUser();
-        if (!$user) {
-            return $this->redirectToRoute('login');
-        }
-
-        $cart = $this->cartRepository->findOneBy(['user' => $user]);
-        if ($cart) {
-            $cart->clear();
-            $cart->setUpdatedAt(new \DateTimeImmutable());
-            $this->entityManager->flush();
-        }
-        
+        $session = $request->getSession();
+        $session->set('cart', []);
         $this->addFlash('success', 'Panier vidé!');
         return $this->redirectToRoute('cart_index');
     }

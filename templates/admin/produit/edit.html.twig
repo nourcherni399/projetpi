@@ -10,7 +10,6 @@
             Retour
         </a>
     </div>
-    
     <h1 class="text-2xl font-semibold text-[#4B5563] mb-6">Modifier le produit</h1>
 
     <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8">
@@ -18,43 +17,17 @@
             attr: { class: 'space-y-6' },
             label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }
         }) }}
-        
         <div class="grid grid-cols-1 gap-6">
-            <div>
-                {{ form_label(form.nom) }}
-                {{ form_widget(form.nom) }}
-                {% include 'admin/produit/_form_errors.html.twig' %}
-            </div>
-            
-            <div>
-                {{ form_label(form.description) }}
-                {{ form_widget(form.description) }}
-                {% include 'admin/produit/_form_errors.html.twig' %}
-            </div>
-            
-            <div>
-                {{ form_label(form.categorie) }}
-                {{ form_widget(form.categorie) }}
-                {% include 'admin/produit/_form_errors.html.twig' %}
-            </div>
-            
-            <div>
-                {{ form_label(form.prix) }}
-                {{ form_widget(form.prix) }}
-                {% include 'admin/produit/_form_errors.html.twig' %}
-            </div>
-            
+            {{ form_row(form.nom) }}
+            {{ form_row(form.description) }}
+            {{ form_row(form.categorie) }}
+            {{ form_row(form.prix) }}
             <div class="flex items-center gap-2">
                 {{ form_widget(form.disponibilite) }}
                 {{ form_label(form.disponibilite) }}
-                {% include 'admin/produit/_form_errors.html.twig' %}
+                {{ form_errors(form.disponibilite) }}
             </div>
-            
-            <div>
-                {{ form_label(form.image) }}
-                {{ form_widget(form.image) }}
-                {% include 'admin/produit/_form_errors.html.twig' %}
-            </div>
+            {{ form_row(form.image) }}
             
             {% if produit.image %}
             <div>
@@ -63,7 +36,6 @@
             </div>
             {% endif %}
         </div>
-        
         <div class="flex flex-wrap gap-3 pt-4">
             <button type="submit" class="px-5 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
                 Enregistrer les modifications
@@ -72,7 +44,6 @@
                 Annuler
             </a>
         </div>
-        
         {{ form_end(form) }}
     </div>
 </div>

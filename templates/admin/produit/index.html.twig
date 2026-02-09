@@ -3,55 +3,36 @@
 {% block title %}Produits - AutiCare Admin{% endblock %}
 
 {% block admin_content %}
-
 <h1 class="text-2xl font-semibold text-[#4B5563] mb-6">Gestion des produits</h1>
-
 {% for message in app.flashes('success') %}
     <div class="mb-4 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">{{ message }}</div>
 {% endfor %}
-
 <div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
     <div class="p-4 border-b border-[#E5E0D8] flex flex-wrap gap-4 justify-between items-center">
         <input type="search" id="searchInput" placeholder="Rechercher un produit…" class="px-4 py-2 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#4B5563] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7] max-w-xs">
-
         <div class="flex gap-2">
             <button id="myProductsBtn" type="button" class="px-4 py-2 rounded-lg bg-[#6B7280] text-white font-medium hover:bg-[#4B5563] focus:outline focus:ring-2 focus:ring-[#6B7280]">
                 Mes produits
             </button>
-
             <button id="allProductsBtn" type="button" class="px-4 py-2 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7] hidden">
                 Tous les produits
             </button>
-
             <a href="{{ path('produit_list') }}" class="px-4 py-2 rounded-lg bg-emerald-500 text-white font-medium hover:bg-emerald-600 focus:outline focus:ring-2 focus:ring-emerald-500">
                 Afficher les produits
             </a>
-
-            <a href="{{ path('admin_stats_index') }}" class="px-4 py-2 rounded-lg bg-purple-500 text-white font-medium hover:bg-purple-600 focus:outline focus:ring-2 focus:ring-purple-500">
-                <svg class="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 00-2-2h-2a2 2 0 00-2 2v14a2 2 0 002 2h2a2 2 0 002-2z" />
-                </svg>
-                Voir Stat
-            </a>
-
             <button id="deleteSelectedBtn" type="button" class="px-4 py-2 rounded-lg bg-red-500 text-white font-medium hover:bg-red-600 focus:outline focus:ring-2 focus:ring-red-500 hidden">
                 Supprimer la sélection
             </button>
-
             <a href="{{ path('admin_produit_new') }}" class="px-4 py-2 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Nouveau produit</a>
         </div>
     </div>
-
     <div class="overflow-x-auto">
         <form id="deleteForm" method="POST" action="{{ path('admin_produit_bulk_delete') }}">
             <input type="hidden" name="_token" value="{{ csrf_token('bulk_delete') }}">
-            
             <table class="w-full text-left">
                 <thead class="bg-[#F5F1EB] border-b border-[#E5E0D8]">
                     <tr>
-                        <th class="px-6 py-4 font-medium text-[#4B5563]">
-                            <input type="checkbox" id="selectAll" class="rounded border-[#E5E0D8]">
-                        </th>
+                        <th class="px-6 py-4 font-medium text-[#4B5563]"></th>
                         <th class="px-6 py-4 font-medium text-[#4B5563]">Photo</th>
                         <th class="px-6 py-4 font-medium text-[#4B5563]">Produit</th>
                         <th class="px-6 py-4 font-medium text-[#4B5563]">Description</th>
@@ -61,14 +42,12 @@
                         <th class="px-6 py-4 font-medium text-[#4B5563]">Actions</th>
                     </tr>
                 </thead>
-
                 <tbody class="divide-y divide-[#E5E0D8]" id="produitTableBody">
                     {% for produit in produits %}
                     <tr class="hover:bg-[#F5F1EB]/50 produit-row" data-nom="{{ produit.nom|lower }}" data-categorie="{{ produit.categorie ? produit.categorie.label|lower : '' }}" data-description="{{ produit.description|lower }}" data-prix="{{ produit.prix }}" data-disponibilite="{{ produit.disponibilite ? 'oui' : 'non' }}" data-user-id="{{ produit.user ? produit.user.id : '' }}">
                         <td class="px-6 py-4">
                             <input type="checkbox" name="ids[]" value="{{ produit.id }}" class="selectItem rounded border-[#E5E0D8]">
                         </td>
-
                         <td class="px-6 py-4">
                             <a href="{{ path('admin_produit_show', {id: produit.id}) }}" class="inline-block hover:opacity-80">
                                 {% if produit.image %}
@@ -78,23 +57,16 @@
                                 {% endif %}
                             </a>
                         </td>
-
                         <td class="px-6 py-4 text-[#4B5563]">{{ produit.nom }}</td>
-
                         <td class="px-6 py-4 text-[#6B7280] max-w-md">{{ produit.description ? produit.description : '—' }}</td>
-
                         <td class="px-6 py-4 text-[#6B7280]">{{ produit.categorie ? produit.categorie.label : '—' }}</td>
-
                         <td class="px-6 py-4 text-[#6B7280]">{{ produit.prix|number_format(2, ',', ' ') }} د.ت</td>
-
                         <td class="px-6 py-4 text-[#6B7280]">{{ produit.disponibilite ? 'Oui' : 'Non' }}</td>
-
                         <td class="px-6 py-4">
                             <div class="flex gap-2">
                                 <a href="{{ path('admin_produit_edit', {id: produit.id}) }}" class="px-3 py-1 rounded bg-[#A7C7E7] text-white text-sm font-medium hover:bg-[#B8D4ED]">
                                     Modifier
                                 </a>
-
                                 <a href="{{ path('admin_produit_confirm_delete', {id: produit.id}) }}" class="px-3 py-1 rounded bg-red-500 text-white text-sm font-medium hover:bg-red-600">
                                     Supprimer
                                 </a>
@@ -113,7 +85,6 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
-    const selectAllCheckbox = document.getElementById('selectAll');
     const selectItemCheckboxes = document.querySelectorAll('.selectItem');
     const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
     const deleteForm = document.getElementById('deleteForm');
@@ -145,14 +116,6 @@ document.addEventListener('DOMContentLoaded', function() {
         applyFilters();
     });
 
-    // Sélectionner/désélectionner tout
-    selectAllCheckbox.addEventListener('change', function() {
-        selectItemCheckboxes.forEach(checkbox => {
-            checkbox.checked = this.checked;
-        });
-        updateDeleteButton();
-    });
-
     function applyFilters() {
         const searchTerm = searchInput.value.toLowerCase();
         
@@ -163,13 +126,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const prix = row.getAttribute('data-prix');
             const disponibilite = row.getAttribute('data-disponibilite');
             const userId = row.getAttribute('data-user-id');
-
+            
             const matchesSearch = nom.includes(searchTerm) || 
                                 categorie.includes(searchTerm) || 
                                 description.includes(searchTerm) ||
                                 prix.includes(searchTerm) ||
                                 disponibilite.includes(searchTerm);
-
+            
             const matchesFilter = filterMode === 'all' || userId === currentUserId;
             
             row.style.display = (matchesSearch && matchesFilter) ? '' : 'none';
@@ -192,10 +155,6 @@ document.addEventListener('DOMContentLoaded', function() {
             deleteForm.submit();
         }
     });
-
-    // Appliquer les filtres au chargement
-    applyFilters();
 });
 </script>
-
 {% endblock %}
