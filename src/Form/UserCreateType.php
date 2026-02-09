@@ -180,8 +180,4 @@ final class UserCreateType extends AbstractType
             'data_class' => null,
         ]);
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> bc1944e (Integration user - PI)
