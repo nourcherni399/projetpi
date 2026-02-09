@@ -1,5 +1,82 @@
 {# Afficher les erreurs spécifiques sous chaque champ #}
 {% if app.session.flashbag.has('nom_vide') %}
+    <div class="text-red-600 text-sm mt-1">Vous devez entrer un nom valide.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('nom_nombre') %}
+    <div class="text-red-600 text-sm mt-1">Vous devez entrer un nom valide.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('nom_court') %}
+    <div class="text-red-600 text-sm mt-1">Vous devez entrer un nom valide.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('nom_long') %}
+    <div class="text-red-600 text-sm mt-1">Vous devez entrer un nom valide.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('nom_caracteres') %}
+    <div class="text-red-600 text-sm mt-1">Vous devez entrer un nom valide.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('description_vide') %}
+    <div class="text-red-600 text-sm mt-1">Vous devez entrer une description valide.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('description_courte') %}
+    <div class="text-red-600 text-sm mt-1">Vous devez entrer une description valide.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('description_longue') %}
+    <div class="text-red-600 text-sm mt-1">Vous devez entrer une description valide.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('prix_vide') %}
+    <div class="text-red-600 text-sm mt-1">Vous devez entrer un prix valide.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('prix_non_numerique') %}
+    <div class="text-red-600 text-sm mt-1">Vous devez entrer un prix valide.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('prix_negatif') %}
+    <div class="text-red-600 text-sm mt-1">Vous devez entrer un prix valide.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('prix_trop_eleve') %}
+    <div class="text-red-600 text-sm mt-1">Vous devez entrer un prix valide.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('categorie_vide') %}
+    <div class="text-red-600 text-sm mt-1">Vous devez choisir une catégorie valide.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('disponibilite_vide') %}
+    <div class="text-red-600 text-sm mt-1">Vous devez indiquer la disponibilité.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('image_manquante') %}
+    <div class="text-red-600 text-sm mt-1">Vous devez ajouter une image valide.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('image_trop_grosse') %}
+    <div class="text-red-600 text-sm mt-1">Vous devez ajouter une image valide.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('image_format_invalide') %}
+    <div class="text-red-600 text-sm mt-1">Vous devez ajouter une image valide.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('image_trop_petite') %}
+    <div class="text-red-600 text-sm mt-1">Vous devez ajouter une image valide.</div>
+{% endif %}
+
+{% if app.session.flashbag.has('image_trop_grande') %}
+    <div class="text-red-600 text-sm mt-1">Vous devez ajouter une image valide.</div>
+{% endif %}
+
+{# Afficher les erreurs spécifiques sous chaque champ #}
+{% if app.session.flashbag.has('nom_vide') %}
     <div class="text-red-600 text-sm mt-1">Nom requis</div>
 {% endif %}
 
