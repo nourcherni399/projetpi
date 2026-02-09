@@ -9,10 +9,6 @@
 {% endfor %}
 <div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
     <div class="p-4 border-b border-[#E5E0D8] flex flex-wrap gap-4 justify-between">
-<<<<<<< HEAD
-        <input type="search" placeholder="Rechercher un module…" class="px-4 py-2 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#4B5563] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7] max-w-xs">
-        <a href="{{ path('admin_module_new') }}" class="px-4 py-2 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Nouveau module</a>
-=======
         <div class="flex-1 max-w-xs">
             <div class="relative">
                 <input 
@@ -45,30 +41,11 @@
                 Exporter PDF
             </button>
         </div>
->>>>>>> bc1944e (Integration user - PI)
     </div>
     <div class="overflow-x-auto">
         <table class="w-full text-left">
             <thead class="bg-[#F5F1EB] border-b border-[#E5E0D8]">
                 <tr>
-<<<<<<< HEAD
-                    <th class="px-6 py-4 font-medium text-[#4B5563]">Titre</th>
-                    <th class="px-6 py-4 font-medium text-[#4B5563]">Niveau</th>
-                    <th class="px-6 py-4 font-medium text-[#4B5563]">Publié</th>
-                    <th class="px-6 py-4 font-medium text-[#4B5563]">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-[#E5E0D8]">
-                {% for module in modules %}
-                <tr class="hover:bg-[#F5F1EB]/50">
-                    <td class="px-6 py-4 text-[#4B5563]">{{ module.titre }}</td>
-                    <td class="px-6 py-4 text-[#6B7280]">{{ module.niveau }}</td>
-                    <td class="px-6 py-4 text-[#6B7280]">{{ module.isPublished ? 'Oui' : 'Non' }}</td>
-                    <td class="px-6 py-4"><span class="text-[#6B7280] text-sm">—</span></td>
-                </tr>
-                {% else %}
-                <tr><td colspan="4" class="px-6 py-8 text-center text-[#6B7280]">Aucun module.</td></tr>
-=======
                     <th class="px-6 py-4 font-medium text-[#4B5563]">Image</th>
                     <th class="px-6 py-4 font-medium text-[#4B5563]">Titre</th>
                     <th class="px-6 py-4 font-medium text-[#4B5563]">Description</th>
@@ -144,15 +121,11 @@
                 </tr>
                 {% else %}
                 <tr><td colspan="8" class="px-6 py-8 text-center text-[#6B7280]">Aucun module.</td></tr>
->>>>>>> bc1944e (Integration user - PI)
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
-<<<<<<< HEAD
-{% endblock %}
-=======
 
 <!-- Historique des actions - AFFICHAGE COMME DANS L'IMAGE -->
 <div class="mt-8 bg-white rounded-xl shadow-sm border border-[#E5E0D8] overflow-hidden">
@@ -209,8 +182,6 @@
         <button class="text-sm text-[#A7C7E7] hover:text-[#B8D4ED] font-medium">Voir tout l'historique →</button>
     </div>
 </div>
-
-
 
 <!-- Visualisations avec sphères et chartes -->
 <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -619,4 +590,3 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- Inclusion de Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}
->>>>>>> bc1944e (Integration user - PI)

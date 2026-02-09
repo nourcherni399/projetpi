@@ -2,10 +2,7 @@
 
 namespace App\Entity;
 
-<<<<<<< HEAD
-=======
 use App\Enum\CategorieModule;
->>>>>>> bc1944e (Integration user - PI)
 use App\Repository\ModuleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -52,14 +49,6 @@ class Module
     /**
      * @var Collection<int, Blog>
      */
-<<<<<<< HEAD
-    #[ORM\OneToMany(targetEntity: Blog::class, mappedBy: 'module')]
-    private Collection $blogs;
-
-    public function __construct()
-    {
-        $this->blogs = new ArrayCollection();
-=======
     #[ORM\OneToMany(targetEntity: Blog::class, mappedBy: 'module', cascade: ['remove'])]
     private Collection $blogs;
 
@@ -72,13 +61,11 @@ class Module
     #[ORM\OneToMany(targetEntity: Ressource::class, mappedBy: 'module', orphanRemoval: true)]
     private Collection $ressources;
 
-
     public function __construct()
     {
         $this->blogs = new ArrayCollection();
         $this->categorie = CategorieModule::EMPTY;
         $this->ressources = new ArrayCollection();
->>>>>>> bc1944e (Integration user - PI)
     }
 
     public function getId(): ?int
@@ -94,7 +81,6 @@ class Module
     public function setTitre(string $titre): static
     {
         $this->titre = $titre;
-
         return $this;
     }
 
@@ -106,7 +92,6 @@ class Module
     public function setDescription(string $description): static
     {
         $this->description = $description;
-
         return $this;
     }
 
@@ -118,7 +103,6 @@ class Module
     public function setContenu(string $contenu): static
     {
         $this->contenu = $contenu;
-
         return $this;
     }
 
@@ -130,7 +114,6 @@ class Module
     public function setNiveau(string $niveau): static
     {
         $this->niveau = $niveau;
-
         return $this;
     }
 
@@ -142,7 +125,6 @@ class Module
     public function setImage(string $image): static
     {
         $this->image = $image;
-
         return $this;
     }
 
@@ -154,7 +136,6 @@ class Module
     public function setIsPublished(bool $isPublished): static
     {
         $this->isPublished = $isPublished;
-
         return $this;
     }
 
@@ -166,7 +147,6 @@ class Module
     public function setDateCreation(\DateTime $dateCreation): static
     {
         $this->dateCreation = $dateCreation;
-
         return $this;
     }
 
@@ -178,7 +158,6 @@ class Module
     public function setDateModif(\DateTime $dateModif): static
     {
         $this->dateModif = $dateModif;
-
         return $this;
     }
 
@@ -190,7 +169,6 @@ class Module
     public function setAdmin(?Admin $admin): static
     {
         $this->admin = $admin;
-
         return $this;
     }
 
@@ -208,23 +186,18 @@ class Module
             $this->blogs->add($blog);
             $blog->setModule($this);
         }
-
         return $this;
     }
 
     public function removeBlog(Blog $blog): static
     {
         if ($this->blogs->removeElement($blog)) {
-            // set the owning side to null (unless already changed)
             if ($blog->getModule() === $this) {
                 $blog->setModule(null);
             }
         }
-
         return $this;
     }
-<<<<<<< HEAD
-=======
 
     public function getCategorie(): CategorieModule
     {
@@ -234,7 +207,6 @@ class Module
     public function setCategorie(CategorieModule $categorie): static
     {
         $this->categorie = $categorie;
-
         return $this;
     }
 
@@ -252,20 +224,17 @@ class Module
             $this->ressources->add($ressource);
             $ressource->setModule($this);
         }
-
         return $this;
     }
 
     public function removeRessource(Ressource $ressource): static
     {
         if ($this->ressources->removeElement($ressource)) {
-            // set the owning side to null (unless already changed)
             if ($ressource->getModule() === $this) {
                 $ressource->setModule(null);
             }
         }
-
         return $this;
     }
->>>>>>> bc1944e (Integration user - PI)
 }
+

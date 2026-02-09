@@ -7,9 +7,6 @@ namespace App\Enum;
 enum Sexe: string
 {
     case FEMME = 'Femme';
-    case HOMME = 'Homme';
-<<<<<<< HEAD
+        case HOMME = 'Homme';
 }
-=======
-}
->>>>>>> bc1944e (Integration user - PI)
+

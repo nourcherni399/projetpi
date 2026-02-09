@@ -1,8 +1,8 @@
 <?php
 
 namespace App\Entity;
-use App\Entity\Enum\TypePost;
 
+use App\Entity\Enum\TypePost;
 use App\Repository\BlogRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -19,16 +19,10 @@ class Blog
     #[ORM\Column(length: 255)]
     private ?string $titre = null;
 
-<<<<<<< HEAD
-#[ORM\Column(
-    columnDefinition: "ENUM('recommandation', 'plainte', 'question', 'experience') NOT NULL"
-)]
-=======
     #[ORM\Column(
         columnDefinition: "ENUM('recommandation', 'plainte', 'question', 'experience') NOT NULL"
     )]
->>>>>>> bc1944e (Integration user - PI)
-private string $type;
+    private string $type;
 
     #[ORM\Column]
     private ?bool $isPublished = null;
@@ -63,19 +57,11 @@ private string $type;
      * @var Collection<int, Commentaire>
      */
     #[ORM\OneToMany(targetEntity: Commentaire::class, mappedBy: 'blog')]
-<<<<<<< HEAD
-    private Collection $commentaire;
-
-    public function __construct()
-    {
-        $this->commentaire = new ArrayCollection();
-=======
     private Collection $commentaires;
 
     public function __construct()
     {
         $this->commentaires = new ArrayCollection();
->>>>>>> bc1944e (Integration user - PI)
     }
 
     public function getId(): ?int
@@ -91,7 +77,6 @@ private string $type;
     public function setTitre(string $titre): static
     {
         $this->titre = $titre;
-
         return $this;
     }
 
@@ -103,7 +88,6 @@ private string $type;
     public function setType(string $type): static
     {
         $this->type = $type;
-
         return $this;
     }
 
@@ -115,7 +99,6 @@ private string $type;
     public function setIsPublished(bool $isPublished): static
     {
         $this->isPublished = $isPublished;
-
         return $this;
     }
 
@@ -127,7 +110,6 @@ private string $type;
     public function setImage(string $image): static
     {
         $this->image = $image;
-
         return $this;
     }
 
@@ -139,7 +121,6 @@ private string $type;
     public function setIsUrgent(?bool $isUrgent): static
     {
         $this->isUrgent = $isUrgent;
-
         return $this;
     }
 
@@ -151,7 +132,6 @@ private string $type;
     public function setIsVisible(bool $isVisible): static
     {
         $this->isVisible = $isVisible;
-
         return $this;
     }
 
@@ -163,7 +143,6 @@ private string $type;
     public function setDateCreation(\DateTime $dateCreation): static
     {
         $this->dateCreation = $dateCreation;
-
         return $this;
     }
 
@@ -175,7 +154,6 @@ private string $type;
     public function setDateModif(\DateTime $dateModif): static
     {
         $this->dateModif = $dateModif;
-
         return $this;
     }
 
@@ -187,7 +165,6 @@ private string $type;
     public function setContenu(string $contenu): static
     {
         $this->contenu = $contenu;
-
         return $this;
     }
 
@@ -199,7 +176,6 @@ private string $type;
     public function setModule(?Module $module): static
     {
         $this->module = $module;
-
         return $this;
     }
 
@@ -211,52 +187,33 @@ private string $type;
     public function setUser(?User $user): static
     {
         $this->user = $user;
-
         return $this;
     }
 
     /**
      * @return Collection<int, Commentaire>
      */
-<<<<<<< HEAD
-    public function getCommentaire(): Collection
-    {
-        return $this->commentaire;
-=======
     public function getCommentaires(): Collection
     {
         return $this->commentaires;
->>>>>>> bc1944e (Integration user - PI)
     }
 
     public function addCommentaire(Commentaire $commentaire): static
     {
-<<<<<<< HEAD
-        if (!$this->commentaire->contains($commentaire)) {
-            $this->commentaire->add($commentaire);
-=======
         if (!$this->commentaires->contains($commentaire)) {
             $this->commentaires->add($commentaire);
->>>>>>> bc1944e (Integration user - PI)
             $commentaire->setBlog($this);
         }
-
         return $this;
     }
 
     public function removeCommentaire(Commentaire $commentaire): static
     {
-<<<<<<< HEAD
-        if ($this->commentaire->removeElement($commentaire)) {
-=======
         if ($this->commentaires->removeElement($commentaire)) {
->>>>>>> bc1944e (Integration user - PI)
-            // set the owning side to null (unless already changed)
             if ($commentaire->getBlog() === $this) {
                 $commentaire->setBlog(null);
             }
         }
-
         return $this;
     }
 }

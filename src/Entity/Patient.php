@@ -88,9 +88,6 @@ class Patient extends User
             }
         }
         return $this;
-    }
-<<<<<<< HEAD
-}
-=======
-}
->>>>>>> bc1944e (Integration user - PI)
+    }}
+
+    
