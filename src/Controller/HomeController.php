@@ -445,6 +445,8 @@ final class HomeController extends AbstractController
             'has_cabinet' => $medecin->getAdresseCabinet() !== null && $medecin->getAdresseCabinet() !== '',
             'has_teleconsult' => true,
         ];
+    }
+
     #[Route('/blog', name: 'user_blog', methods: ['GET'])]
     public function blog(): Response
     {
@@ -591,38 +593,4 @@ final class HomeController extends AbstractController
             ))),
         ];
     }
-<<<<<<< HEAD
-=======
-=======
->>>>>>> bc1944e (Integration user - PI)
->>>>>>> 95dad675f769b1ba531a1349a5f6084dd26c4be3
-=======
->>>>>>> cf863be161e2a713163dcf735642a0126ca9eaac
-
-    #[Route('/inscription', name: 'register', methods: ['GET'])]
-    public function register(): Response
-    {
-        return $this->render('front/auth/register.html.twig');
-    }
-
-    #[Route('/connexion', name: 'login', methods: ['GET'])]
-    public function login(): Response
-    {
-        return $this->render('front/auth/login.html.twig');
-    }
-
-}
-
-    #[Route('/inscription', name: 'register', methods: ['GET'])]
-    public function register(): Response
-    {
-        return $this->render('front/auth/register.html.twig');
-    }
-
-    #[Route('/connexion', name: 'login', methods: ['GET'])]
-    public function login(): Response
-    {
-        return $this->render('front/auth/login.html.twig');
-    }
-
 }
