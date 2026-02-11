@@ -39,6 +39,7 @@ services:
         arguments:
             $appUrl: '%env(default:app_url_default:APP_URL)%'
 
+<<<<<<< HEAD
     App\Service\LibreTranslateService:
         arguments:
             $cache: '@cache.app'
@@ -66,6 +67,8 @@ services:
         arguments:
             $apiKey: '%env(default:groq_api_key_default:GROQ_API_KEY)%'
 
+=======
+>>>>>>> 05f2c2d (last but not least)
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 

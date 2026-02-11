@@ -28,7 +28,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Attribute\Route;
+<<<<<<< HEAD
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+=======
+>>>>>>> 05f2c2d (last but not least)
 use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/blog')]
@@ -42,6 +45,7 @@ final class BlogController extends AbstractController
         private readonly CommentaireReactionRepository $commentaireReactionRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly SluggerInterface $slugger,
+<<<<<<< HEAD
         private readonly PexelsService $pexelsService,
         private readonly GroqBlogGeneratorService $groqBlogGenerator,
         private readonly GroqSpellCheckService $groqSpellCheck,
@@ -117,6 +121,14 @@ final class BlogController extends AbstractController
     #[Route('', name: 'user_blog', methods: ['GET'])]
     public function index(Request $request): Response
     {
+=======
+    ) {
+    }
+
+    #[Route('', name: 'user_blog', methods: ['GET'])]
+    public function index(Request $request): Response
+    {
+>>>>>>> 05f2c2d (last but not least)
         // Terme de recherche pour les modules
         $searchTerm = trim((string) $request->query->get('q', ''));
 
@@ -182,12 +194,17 @@ final class BlogController extends AbstractController
         }
 
         $searchTerm = trim((string) $request->query->get('q', ''));
+<<<<<<< HEAD
         $locale = $request->getSession()->get('blog_locale', 'fr');
         $wikiUrl = $this->wikipediaService->getArticleUrlForModule($module, $locale)
             ?? $this->wikipediaService->getFallbackUrl($locale);
 
         $commentaireForms = [];
         $articleForm = null;
+=======
+
+        $commentaireForms = [];
+>>>>>>> 05f2c2d (last but not least)
         $user = $this->getUser();
 
         if ($user !== null) {
@@ -207,6 +224,7 @@ final class BlogController extends AbstractController
                 ]);
                 $commentaireForms[$blog->getId()] = $form->createView();
             }
+<<<<<<< HEAD
 
             $newArticle = new Blog();
             $newArticle->setModule($module);
@@ -299,17 +317,22 @@ final class BlogController extends AbstractController
         if ($user !== null) {
             $savedArticleIds = $this->favorisArticleRepository->findBlogIdsByUser($user);
             $reactedCommentTypes = $this->commentaireReactionRepository->findReactionTypesByUser($user);
+=======
+>>>>>>> 05f2c2d (last but not least)
         }
 
         return $this->render('front/blog/module.html.twig', [
             'module' => $module,
             'commentaireForms' => $commentaireForms,
             'searchTerm' => $searchTerm,
+<<<<<<< HEAD
             'articleForm' => $articleForm,
             'isModuleSaved' => $isModuleSaved,
             'savedArticleIds' => $savedArticleIds,
             'reactedCommentTypes' => $reactedCommentTypes,
             'wikiUrl' => $wikiUrl,
+=======
+>>>>>>> 05f2c2d (last but not least)
         ]);
     }
 
@@ -344,6 +367,7 @@ final class BlogController extends AbstractController
         return $response;
     }
 
+<<<<<<< HEAD
     #[Route('/module/{id}/summary', name: 'module_summary', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function moduleSummary(Module $module, GroqSummaryService $groqService): JsonResponse
     {
@@ -415,6 +439,8 @@ final class BlogController extends AbstractController
         return $this->redirectToRoute('user_blog_module', ['id' => $module->getId()]);
     }
 
+=======
+>>>>>>> 05f2c2d (last but not least)
     #[Route('/module/{id}/ecrire', name: 'user_blog_ecrire', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
     public function ecrire(Request $request, int $id): Response
     {
@@ -438,8 +464,11 @@ final class BlogController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $imageFile = $form->get('image')->getData();
+<<<<<<< HEAD
             $pexelsUrl = trim((string) $form->get('pexels_image_url')->getData());
 
+=======
+>>>>>>> 05f2c2d (last but not least)
             if ($imageFile) {
                 $saved = $this->handleImageUpload($imageFile, $blog);
                 if (!$saved) {
@@ -448,6 +477,7 @@ final class BlogController extends AbstractController
                         'form' => $form,
                     ]);
                 }
+<<<<<<< HEAD
             } elseif ($pexelsUrl !== '' && filter_var($pexelsUrl, FILTER_VALIDATE_URL)) {
                 $targetDir = $this->getParameter('uploads_blogs_directory');
                 $filename = $this->pexelsService->downloadAndSave($pexelsUrl, $targetDir);
@@ -460,6 +490,8 @@ final class BlogController extends AbstractController
                         'form' => $form,
                     ]);
                 }
+=======
+>>>>>>> 05f2c2d (last but not least)
             }
 
             if ($blog->getImage() === null) {
@@ -485,6 +517,7 @@ final class BlogController extends AbstractController
             throw $this->createAccessDeniedException('Vous ne pouvez modifier que vos propres articles.');
         }
 
+<<<<<<< HEAD
         $sessionKey = 'spell_check_draft_' . $blog->getId();
         $session = $request->getSession();
         if ($request->isMethod('GET') && $session->has($sessionKey)) {
@@ -500,6 +533,8 @@ final class BlogController extends AbstractController
             }
         }
 
+=======
+>>>>>>> 05f2c2d (last but not least)
         $form = $this->createForm(BlogType::class, $blog);
         $form->handleRequest($request);
 
@@ -507,8 +542,11 @@ final class BlogController extends AbstractController
             $blog->setDateModif(new \DateTime());
 
             $imageFile = $form->get('image')->getData();
+<<<<<<< HEAD
             $pexelsUrl = trim((string) $form->get('pexels_image_url')->getData());
 
+=======
+>>>>>>> 05f2c2d (last but not least)
             if ($imageFile) {
                 $saved = $this->handleImageUpload($imageFile, $blog);
                 if (!$saved) {
@@ -517,6 +555,7 @@ final class BlogController extends AbstractController
                         'form' => $form,
                     ]);
                 }
+<<<<<<< HEAD
             } elseif ($pexelsUrl !== '' && filter_var($pexelsUrl, FILTER_VALIDATE_URL)) {
                 $targetDir = $this->getParameter('uploads_blogs_directory');
                 $filename = $this->pexelsService->downloadAndSave($pexelsUrl, $targetDir);
@@ -529,6 +568,8 @@ final class BlogController extends AbstractController
                         'form' => $form,
                     ]);
                 }
+=======
+>>>>>>> 05f2c2d (last but not least)
             }
 
             if ($blog->getImage() === null) {
@@ -684,6 +725,52 @@ final class BlogController extends AbstractController
         return $images[$slug] ?? 'images/logo.png';
     }
     
+<<<<<<< HEAD
+    private function handleImageUpload(\Symfony\Component\HttpFoundation\File\UploadedFile $imageFile, Blog $blog): bool
+    {
+        $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+        $safeFilename = $this->slugger->slug($originalFilename);
+        $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
+
+        try {
+            $dir = $this->getParameter('uploads_blogs_directory');
+            if (!is_dir($dir)) {
+                mkdir($dir, 0755, true);
+            }
+            $imageFile->move($dir, $newFilename);
+            $blog->setImage('uploads/blog/' . $newFilename);
+            return true;
+        } catch (\Throwable $e) {
+            $this->addFlash('error', 'Erreur lors de l\'upload de l\'image.');
+            return false;
+        }
+=======
+    /**
+     * Récupère les articles populaires (blogs)
+     */
+    private function getPopularArticles(): array
+    {
+        $blogs = $this->blogRepository->findBy(
+            [
+                'isPublished' => true,
+                'isVisible' => true,
+            ],
+            ['dateCreation' => 'DESC'],
+            5
+        );
+
+        $popular = [];
+        foreach ($blogs as $blog) {
+            $popular[] = [
+                'id' => $blog->getId(),
+                'title' => $blog->getTitre() ?? 'Article sans titre',
+            ];
+        }
+
+        return $popular;
+>>>>>>> 05f2c2d (last but not least)
+    }
+
     private function handleImageUpload(\Symfony\Component\HttpFoundation\File\UploadedFile $imageFile, Blog $blog): bool
     {
         $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
