@@ -1,5 +1,66 @@
 {% extends 'base.html.twig' %}
 
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+    window.initThematiqueCharts = function() {
+        var el = document.getElementById('thematique-chart-data');
+        if (!el || typeof Chart === 'undefined') return;
+        try { var data = JSON.parse(el.textContent); } catch (e) { return; }
+        var repCtx = document.getElementById('thematiqueRepartitionChart');
+        if (repCtx) {
+            if (repCtx.chart) repCtx.chart.destroy();
+            repCtx.chart = new Chart(repCtx.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(data.repartition || {}),
+                    datasets: [{
+                        data: Object.values(data.repartition || {}),
+                        backgroundColor: ['#2ECC71', '#B0B5B9'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { padding: 16, font: { size: 12 } } },
+                        tooltip: { callbacks: { label: function(c) { return (c.label || '') + ': ' + (c.parsed || 0) + ' thématique(s)'; } } }
+                    }
+                }
+            });
+        }
+        var evCtx = document.getElementById('eventsByThematiqueChart');
+        if (evCtx) {
+            if (evCtx.chart) evCtx.chart.destroy();
+            var labels = (data.eventLabels && data.eventLabels.length) ? data.eventLabels : ['Aucune'];
+            var values = (data.eventValues && data.eventValues.length) ? data.eventValues : [1];
+            var colors = ['#2ECC71', '#F39C12', '#B0B5B9', '#3498DB', '#9B59B6', '#1ABC9C', '#E74C3C', '#95A5A6'];
+            var bgColors = values.length ? values.map(function(_, i) { return colors[i % colors.length]; }) : ['#B0B5B9'];
+            evCtx.chart = new Chart(evCtx.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{ data: values, backgroundColor: bgColors, borderWidth: 2, borderColor: '#ffffff' }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { padding: 16, font: { size: 12 } } },
+                        tooltip: { callbacks: { label: function(c) { return (c.label || '') + ': ' + (c.parsed || 0) + ' événement(s)'; } } }
+                    }
+                }
+            });
+        }
+    };
+    document.addEventListener('DOMContentLoaded', window.initThematiqueCharts);
+    document.addEventListener('turbo:load', window.initThematiqueCharts);
+    </script>
+{% endblock %}
+
 {% block body %}
 <div class="min-h-screen flex flex-col bg-[#F5F1EB]">
     <header class="bg-white border-b border-[#E5E0D8] shrink-0">
@@ -39,7 +100,7 @@
                 </details>
                 <div class="flex items-center gap-3">
                     <a href="{{ path('admin_profile') }}" class="flex items-center gap-3 hover:opacity-90 transition-opacity group" title="Modifier mon profil">
-                        <span class="flex items-center justify-center w-10 h-10 rounded-full bg-[#A7C7E7] text-white font-semibold text-sm group-hover:ring-2 group-hover:ring-[#A7C7E7] group-hover:ring-offset-1 transition-all">{{ app.user ? (app.user.prenom|slice(0,1) ~ app.user.nom|slice(0,1))|upper : 'AD' }}</span>
+                        <span class="flex items-center justify-center w-10 h-10 rounded-full overflow-hidden bg-[#A7C7E7] text-white font-semibold text-sm group-hover:ring-2 group-hover:ring-[#A7C7E7] group-hover:ring-offset-1 transition-all shrink-0">{% if app.user and app.user.image %}<img src="{{ asset(app.user.image) }}" alt="" class="w-full h-full object-cover">{% else %}{{ app.user ? (app.user.prenom|slice(0,1) ~ app.user.nom|slice(0,1))|upper : 'AD' }}{% endif %}</span>
                         <div>
                             <p class="font-medium text-[#4B5563] text-sm group-hover:text-[#A7C7E7]">{{ app.user ? app.user.prenom ~ ' ' ~ app.user.nom : 'Admin' }}</p>
                             <p class="text-[#6B7280] text-xs">{{ app.user ? app.user.email : 'admin@auticare.fr' }}</p>

@@ -27,15 +27,24 @@ class EvenementRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('e')
             ->leftJoin('e.thematique', 't');
 
-        if ($q !== null && $q !== '') {
-            $qb->andWhere(
-                $qb->expr()->orX(
-                    $qb->expr()->like('e.title', ':q'),
-                    $qb->expr()->like('e.description', ':q'),
-                    $qb->expr()->like('e.lieu', ':q'),
-                    $qb->expr()->like('t.nomThematique', ':q')
-                )
-            )->setParameter('q', '%' . addcslashes($q, '%_') . '%');
+        $searchDate = null;
+        if ($q !== null && trim($q) !== '') {
+            $qTrimmed = trim($q);
+            $searchDate = $this->parseSearchAsDate($qTrimmed);
+
+            if ($searchDate !== null) {
+                $qb->andWhere('e.dateEvent = :searchDate');
+                $qb->setParameter('searchDate', $searchDate);
+            } else {
+                $qb->andWhere(
+                    $qb->expr()->orX(
+                        $qb->expr()->like('e.title', ':q'),
+                        $qb->expr()->like('e.description', ':q'),
+                        $qb->expr()->like('e.lieu', ':q'),
+                        $qb->expr()->like('t.nomThematique', ':q')
+                    )
+                )->setParameter('q', '%' . addcslashes($qTrimmed, '%_') . '%');
+            }
         }
 
         switch ($sortBy) {
@@ -45,22 +54,78 @@ class EvenementRepository extends ServiceEntityRepository
             case 'theme':
                 $qb->addOrderBy('t.nomThematique', $order)->addOrderBy('e.dateEvent', 'ASC')->addOrderBy('e.heureDebut', 'ASC');
                 break;
-<<<<<<< HEAD
             case 'titre':
                 $qb->addOrderBy('e.title', $order)->addOrderBy('e.dateEvent', 'ASC')->addOrderBy('e.heureDebut', 'ASC');
                 break;
             default:
                 $qb->addOrderBy('e.dateEvent', $order)->addOrderBy('e.heureDebut', $order);
-=======
-            default:
-                $qb->addOrderBy('e.dateEvent', $order)->addOrderBy('e.heureDebut', 'ASC');
->>>>>>> origin/integreModule
                 break;
         }
 
         return $qb->getQuery()->getResult();
     }
-<<<<<<< HEAD
+
+    public function countAll(): int
+    {
+        return (int) $this->createQueryBuilder('e')
+            ->select('COUNT(e.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function countUpcoming(): int
+    {
+        $today = (new \DateTime())->setTime(0, 0, 0);
+        return (int) $this->createQueryBuilder('e')
+            ->select('COUNT(e.id)')
+            ->andWhere('e.dateEvent >= :today')
+            ->setParameter('today', $today)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function countPast(): int
+    {
+        $today = (new \DateTime())->setTime(0, 0, 0);
+        return (int) $this->createQueryBuilder('e')
+            ->select('COUNT(e.id)')
+            ->andWhere('e.dateEvent < :today')
+            ->setParameter('today', $today)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Returns array of [thematique_id => event_count] (thematique_id can be null for events without theme).
+     *
+     * @return array<int|string, int>
+     */
+    public function countByThematique(): array
+    {
+        $rows = $this->createQueryBuilder('e')
+            ->select('IDENTITY(e.thematique) AS theme_id', 'COUNT(e.id) AS cnt')
+            ->groupBy('e.thematique')
+            ->getQuery()
+            ->getResult();
+        $out = [];
+        foreach ($rows as $row) {
+            $id = $row['theme_id'] ?? 'sans_theme';
+            $out[$id] = (int) $row['cnt'];
+        }
+        return $out;
+    }
+
+    private function parseSearchAsDate(string $q): ?\DateTimeInterface
+    {
+        $formats = ['d/m/Y H:i', 'd/m/Y', 'Y-m-d H:i', 'Y-m-d', 'd-m-Y H:i', 'd-m-Y'];
+        foreach ($formats as $format) {
+            $d = \DateTimeImmutable::createFromFormat($format, trim($q));
+            if ($d !== false) {
+                return $d->setTime(0, 0, 0);
+            }
+        }
+        return null;
+    }
 
     /**
      * Filtre pour le front : date (from/to), lieu (contient), thématique (id).
@@ -80,7 +145,17 @@ class EvenementRepository extends ServiceEntityRepository
             $qb->andWhere('e.dateEvent <= :dateTo')->setParameter('dateTo', $dateTo);
         }
         if ($lieu !== null && trim($lieu) !== '') {
-            $qb->andWhere('e.lieu LIKE :lieu')->setParameter('lieu', '%' . addcslashes(trim($lieu), '%_') . '%');
+            $lieuTrimmed = trim($lieu);
+            $lieuNormalized = str_replace(["'", "'", "`", "\u{2019}"], "'", $lieuTrimmed);
+            $words = array_filter(preg_split('/\s+/u', $lieuNormalized, -1, PREG_SPLIT_NO_EMPTY));
+            if ($words !== []) {
+                $qb->andWhere('e.lieu IS NOT NULL');
+                foreach ($words as $i => $word) {
+                    $pattern = '%' . addcslashes($word, '%_') . '%';
+                    $paramName = 'lieuWord' . $i;
+                    $qb->andWhere('LOWER(e.lieu) LIKE :' . $paramName)->setParameter($paramName, mb_strtolower($pattern));
+                }
+            }
         }
         if ($thematiqueId !== null && $thematiqueId > 0) {
             $qb->andWhere('e.thematique = :tid')->setParameter('tid', $thematiqueId);
@@ -88,6 +163,4 @@ class EvenementRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getResult();
     }
-=======
->>>>>>> origin/integreModule
 }

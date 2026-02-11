@@ -23,14 +23,19 @@ class RendezVousRepository extends ServiceEntityRepository
     }
 
     /**
+     * Liste des rendez-vous d'un médecin, triés par date.
+     *
      * @return list<RendezVous>
      */
-    public function findByMedecinOrderByIdDesc(Medcin $medecin): array
+    public function findByMedecinOrderByDate(Medcin $medecin, string $direction = 'ASC'): array
     {
+        $dir = strtoupper($direction) === 'DESC' ? 'DESC' : 'ASC';
+
         return $this->createQueryBuilder('r')
             ->andWhere('r.medecin = :medecin')
             ->setParameter('medecin', $medecin)
-            ->orderBy('r.id', 'DESC')
+            ->orderBy('r.dateRdv', $dir)
+            ->addOrderBy('r.id', 'DESC')
             ->getQuery()
             ->getResult();
     }
@@ -67,6 +72,21 @@ class RendezVousRepository extends ServiceEntityRepository
     /**
      * @return list<RendezVous>
      */
+    public function findByMedecinAndPatient(Medcin $medecin, Patient $patient): array
+    {
+        return $this->createQueryBuilder('r')
+            ->andWhere('r.medecin = :medecin')
+            ->andWhere('r.patient = :patient')
+            ->setParameter('medecin', $medecin)
+            ->setParameter('patient', $patient)
+            ->orderBy('r.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return list<RendezVous>
+     */
     public function findByPatientOrderByIdDesc(Patient $patient): array
     {
         return $this->createQueryBuilder('r')
@@ -92,6 +112,21 @@ class RendezVousRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * @return list<RendezVous>
+     */
+    public function findByDisponibiliteAndStatus(Disponibilite $disponibilite, StatusRendezVous $status): array
+    {
+        return $this->createQueryBuilder('r')
+            ->andWhere('r.disponibilite = :dispo')
+            ->andWhere('r.status = :status')
+            ->setParameter('dispo', $disponibilite)
+            ->setParameter('status', $status)
+            ->orderBy('r.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
     /** Créneau (disponibilite + date) déjà pris (en_attente ou confirmer). */
     public function isSlotTaken(Disponibilite $disponibilite, \DateTimeInterface $date): bool
     {
@@ -107,8 +142,6 @@ class RendezVousRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
         return $count > 0;
     }
-<<<<<<< HEAD
-=======
 
     public function countByMedecin(Medcin $medecin): int
     {
@@ -127,7 +160,7 @@ class RendezVousRepository extends ServiceEntityRepository
             ->andWhere('r.medecin = :medecin')
             ->andWhere('r.dateRdv = :today')
             ->setParameter('medecin', $medecin)
-            ->setParameter('today', new \DateTime())
+            ->setParameter('today', new \DateTime('today'))
             ->getQuery()
             ->getSingleScalarResult();
     }
@@ -153,7 +186,7 @@ class RendezVousRepository extends ServiceEntityRepository
             ->andWhere('r.dateRdv >= :today')
             ->andWhere('r.status IN (:statuses)')
             ->setParameter('medecin', $medecin)
-            ->setParameter('today', new \DateTime())
+            ->setParameter('today', new \DateTime('today'))
             ->setParameter('statuses', [StatusRendezVous::EN_ATTENTE, StatusRendezVous::CONFIRMER])
             ->orderBy('r.dateRdv', 'ASC')
             ->setMaxResults($limit)
@@ -165,7 +198,7 @@ class RendezVousRepository extends ServiceEntityRepository
     {
         $startOfWeek = new \DateTime('monday this week');
         $endOfWeek = new \DateTime('sunday this week');
-        
+
         return (int) $this->createQueryBuilder('r')
             ->select('COUNT(r.id)')
             ->andWhere('r.medecin = :medecin')
@@ -179,5 +212,23 @@ class RendezVousRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult();
     }
->>>>>>> origin/integreModule
+
+    /**
+     * Rendez-vous récents ayant une note patient non vide (notes saisies lors de la réservation).
+     *
+     * @return list<RendezVous>
+     */
+    public function findRecentWithPatientNotesByMedecin(Medcin $medecin, int $limit = 5): array
+    {
+        return $this->createQueryBuilder('r')
+            ->andWhere('r.medecin = :medecin')
+            ->andWhere('r.notePatient IS NOT NULL')
+            ->andWhere("r.notePatient != ''")
+            ->andWhere("r.notePatient != 'vide'")
+            ->setParameter('medecin', $medecin)
+            ->orderBy('r.id', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 }

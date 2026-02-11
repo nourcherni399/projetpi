@@ -1,0 +1,69 @@
+{% extends 'layouts/user.html.twig' %}
+
+{% block title %}Commander - {{ produit.nom }} - AutiCare{% endblock %}
+
+{% block user_content %}
+<section class="text-center mb-8">
+    <h1 class="text-3xl font-bold text-[#4B5563] mb-2">Formulaire de commande</h1>
+    <p class="text-[#6B7280]">Remplissez vos coordonnées pour finaliser la commande.</p>
+</section>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="lg:col-span-2">
+        {{ form_start(form, { attr: { class: 'space-y-6', novalidate: 'novalidate' } }) }}
+            <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6 space-y-4">
+                <h2 class="text-xl font-semibold text-[#4B5563] mb-4">Informations personnelles</h2>
+                {{ form_row(form.nom) }}
+                {{ form_row(form.email) }}
+                {{ form_row(form.telephone) }}
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6 space-y-4">
+                <h2 class="text-xl font-semibold text-[#4B5563] mb-4">Adresse de livraison</h2>
+                {{ form_row(form.adresse) }}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {{ form_row(form.codePostal) }}
+                    {{ form_row(form.ville) }}
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6 space-y-4">
+                <h2 class="text-xl font-semibold text-[#4B5563] mb-4">Mode de paiement</h2>
+                {{ form_row(form.modePayment) }}
+            </div>
+
+            <div class="flex flex-wrap gap-4">
+                <button type="submit" class="px-6 py-3 bg-[#A7C7E7] text-white rounded-lg font-semibold hover:bg-[#B8D4ED] transition">
+                    Confirmer la commande
+                </button>
+                <a href="{{ path('user_product_show', { id: produit.id }) }}" class="px-6 py-3 border border-[#A7C7E7] text-[#A7C7E7] rounded-lg font-semibold hover:bg-[#F5F1EB] transition inline-block">
+                    Retour au produit
+                </a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+
+    <div>
+        <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6 sticky top-20">
+            <h3 class="text-lg font-semibold text-[#4B5563] mb-4">Votre commande</h3>
+            <div class="flex gap-4 pb-4 border-b border-[#E5E0D8]">
+                <div class="w-20 h-20 rounded-lg bg-[#F5F1EB] flex-shrink-0 overflow-hidden">
+                    {% if produit.image %}
+                        <img src="{{ asset(produit.image) }}" alt="{{ produit.nom }}" class="w-full h-full object-cover">
+                    {% else %}
+                        <span class="flex items-center justify-center w-full h-full text-[#9CA3AF] text-xs">—</span>
+                    {% endif %}
+                </div>
+                <div class="min-w-0 flex-1">
+                    <p class="font-medium text-[#4B5563]">{{ produit.nom }}</p>
+                    <p class="text-[#A7C7E7] font-semibold">{{ produit.prix|number_format(2, ',', ' ') }} د.ت</p>
+                </div>
+            </div>
+            <div class="pt-4 flex justify-between text-lg font-bold text-[#4B5563]">
+                <span>Total</span>
+                <span class="text-[#A7C7E7]">{{ produit.prix|number_format(2, ',', ' ') }} د.ت</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -58,6 +58,15 @@
                 {{ form_widget(form.telephone) }}
                 {{ form_errors(form.telephone) }}
             </div>
+            <div>
+                {{ form_label(form.image, null, {'label_attr': {'class': 'block text-[#4B5563] font-medium mb-2'}}) }}
+                {% if user.image %}
+                    <p class="text-sm text-[#6B7280] mb-2">Photo actuelle :</p>
+                    <img src="{{ asset(user.image) }}" alt="Photo actuelle" class="w-20 h-20 rounded-xl object-cover border border-[#E5E0D8] mb-3">
+                {% endif %}
+                {{ form_widget(form.image) }}
+                {{ form_errors(form.image) }}
+            </div>
             {% if form.specialite is defined %}
                 <div class="pt-6 border-t border-[#E5E0D8]">
                     <div class="flex items-center gap-2 mb-4">

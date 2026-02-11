@@ -10,10 +10,6 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/integreModule
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\InheritanceType('SINGLE_TABLE')]
 #[ORM\DiscriminatorColumn(name: 'type', type: 'string')]
@@ -70,13 +66,15 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', enumType: UserRole::class, columnDefinition: "ENUM('ROLE_ADMIN', 'ROLE_PARENT', 'ROLE_PATIENT', 'ROLE_MEDECIN', 'ROLE_USER')")]
     private ?UserRole $role = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $image = null;
+
     public function __construct()
     {
         $this->blogs = new ArrayCollection();
         $this->commentaires = new ArrayCollection();
         $this->produits = new ArrayCollection();
     }
-    
 
     public function getId(): ?int
     {
@@ -88,7 +86,7 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->nom;
     }
 
-    public function setNom(string $nom): static
+    public function setNom(?string $nom): static
     {
         $this->nom = $nom;
         return $this;
@@ -99,7 +97,7 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->prenom;
     }
 
-    public function setPrenom(string $prenom): static
+    public function setPrenom(?string $prenom): static
     {
         $this->prenom = $prenom;
         return $this;
@@ -110,7 +108,7 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->email;
     }
 
-    public function setEmail(string $email): static
+    public function setEmail(?string $email): static
     {
         $this->email = $email;
         return $this;
@@ -121,7 +119,7 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->telephone;
     }
 
-    public function setTelephone(int $telephone): static
+    public function setTelephone(?int $telephone): static
     {
         $this->telephone = $telephone;
         return $this;
@@ -179,6 +177,28 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setRole(UserRole $role): static
     {
         $this->role = $role;
+        return $this;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): static
+    {
+        $this->image = $image;
+        return $this;
+    }
+
+    public function getGoogleId(): ?string
+    {
+        return $this->googleId;
+    }
+
+    public function setGoogleId(?string $googleId): static
+    {
+        $this->googleId = $googleId;
         return $this;
     }
 
@@ -263,7 +283,7 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
         if ($this->role) {
             $roles[] = $this->role->value;
         }
-        
+
         // guarantee every user at least has ROLE_USER
         $roles[] = 'ROLE_USER';
 

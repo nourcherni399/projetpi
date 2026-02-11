@@ -15,7 +15,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/blog')]
 final class BlogController extends AbstractController
@@ -24,19 +26,24 @@ final class BlogController extends AbstractController
         private readonly BlogRepository $blogRepository,
         private readonly ModuleRepository $moduleRepository,
         private readonly EntityManagerInterface $entityManager,
+        private readonly SluggerInterface $slugger,
     ) {
     }
 
     #[Route('', name: 'user_blog', methods: ['GET'])]
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        // Terme de recherche pour les modules
+        $searchTerm = trim((string) $request->query->get('q', ''));
+
         // Récupérer toutes les catégories avec leurs modules
-        $categoriesData = $this->getCategoriesWithModules();
+        $categoriesData = $this->getCategoriesWithModules($searchTerm);
         
         return $this->render('front/blog/index.html.twig', [
             'categories' => $categoriesData,
             'popular_articles' => $this->getPopularArticles(),
             'popular_tags' => ['Module', 'Autisme', 'TSA', 'Éducation', 'Communication', 'Témoignage'],
+            'searchTerm' => $searchTerm,
         ]);
     }
 
@@ -78,43 +85,66 @@ final class BlogController extends AbstractController
             throw $this->createNotFoundException('Module introuvable.');
         }
 
-        $articleForm = null;
-        $commentaireForm = null;
+        $searchTerm = trim((string) $request->query->get('q', ''));
+
+        $commentaireForms = [];
         $user = $this->getUser();
-        
-        // Créer le formulaire d'article SEULEMENT si l'utilisateur est connecté
+
         if ($user !== null) {
-            $blog = new Blog();
-            $blog->setModule($module);
-            $now = new \DateTime();
-            $blog->setDateCreation($now);
-            $blog->setDateModif($now);
-            $blog->setUser($user);
+            foreach ($module->getBlogs() as $blog) {
+                if (!$blog->isPublished()) {
+                    continue;
+                }
 
-            $form = $this->createForm(BlogType::class, $blog);
-            $form->handleRequest($request);
+                if ($searchTerm !== '' && stripos($blog->getTitre() ?? '', $searchTerm) === false) {
+                    continue;
+                }
 
-            if ($form->isSubmitted() && $form->isValid()) {
-                $blog->setImage($blog->getImage() ?? '');
-                $this->entityManager->persist($blog);
-                $this->entityManager->flush();
-                $this->addFlash('success', 'Votre article a été publié avec succès.');
-                return $this->redirectToRoute('user_blog_module', ['id' => $id]);
+                $commentaire = new Commentaire();
+                $form = $this->createForm(CommentaireType::class, $commentaire, [
+                    'action' => $this->generateUrl('commentaire_ajouter_module', ['moduleId' => $blog->getId()]),
+                    'method' => 'POST',
+                ]);
+                $commentaireForms[$blog->getId()] = $form->createView();
             }
-            
-            $articleForm = $form->createView();
-            
-            // Créer aussi un formulaire de commentaire pour le module
-            $commentaire = new Commentaire();
-            $commentaire->setBlog(null); // Pas d'article spécifique
-            $commentaireForm = $this->createForm(CommentaireType::class, $commentaire);
         }
 
         return $this->render('front/blog/module.html.twig', [
             'module' => $module,
-            'articleForm' => $articleForm, // null si pas connecté
-            'commentaireForm' => $commentaireForm ? $commentaireForm->createView() : null
+            'commentaireForms' => $commentaireForms,
+            'searchTerm' => $searchTerm,
         ]);
+    }
+
+    #[Route('/module/{id}/download', name: 'user_blog_module_download', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function downloadModule(Module $module): Response
+    {
+        if (!$module->isPublished()) {
+            throw $this->createNotFoundException('Module introuvable.');
+        }
+
+        $contentLines = [
+            'Titre du module : ' . ($module->getTitre() ?? ''),
+            '',
+            'Description :',
+            $module->getDescription() ?? '',
+            '',
+            'Contenu :',
+            $module->getContenu() ?? '',
+        ];
+
+        $content = implode("\n", $contentLines);
+
+        $response = new Response($content);
+        $disposition = $response->headers->makeDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            sprintf('module-%d.txt', $module->getId())
+        );
+
+        $response->headers->set('Content-Type', 'text/plain; charset=UTF-8');
+        $response->headers->set('Content-Disposition', $disposition);
+
+        return $response;
     }
 
     #[Route('/module/{id}/ecrire', name: 'user_blog_ecrire', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
@@ -139,7 +169,20 @@ final class BlogController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $blog->setImage($blog->getImage() ?? '');
+            $imageFile = $form->get('image')->getData();
+            if ($imageFile) {
+                $saved = $this->handleImageUpload($imageFile, $blog);
+                if (!$saved) {
+                    return $this->render('front/blog/ecrire.html.twig', [
+                        'module' => $module,
+                        'form' => $form,
+                    ]);
+                }
+            }
+
+            if ($blog->getImage() === null) {
+                $blog->setImage('');
+            }
             $this->entityManager->persist($blog);
             $this->entityManager->flush();
             $this->addFlash('success', 'Votre article a été enregistré.');
@@ -155,12 +198,31 @@ final class BlogController extends AbstractController
     #[Route('/article/{id}/edit', name: 'user_blog_edit_article', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
     public function editArticle(Request $request, Blog $blog): Response
     {
+        $user = $this->getUser();
+        if ($blog->getUser() !== $user && !$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException('Vous ne pouvez modifier que vos propres articles.');
+        }
+
         $form = $this->createForm(BlogType::class, $blog);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $blog->setDateModif(new \DateTime());
-            $blog->setImage($blog->getImage() ?? '');
+
+            $imageFile = $form->get('image')->getData();
+            if ($imageFile) {
+                $saved = $this->handleImageUpload($imageFile, $blog);
+                if (!$saved) {
+                    return $this->render('front/blog/edit_article.html.twig', [
+                        'article' => $blog,
+                        'form' => $form,
+                    ]);
+                }
+            }
+
+            if ($blog->getImage() === null) {
+                $blog->setImage('');
+            }
             $this->entityManager->flush();
             $this->addFlash('success', 'L\'article a été modifié avec succès.');
             return $this->redirectToRoute('user_blog_module', ['id' => $blog->getModule()->getId()]);
@@ -175,6 +237,11 @@ final class BlogController extends AbstractController
     #[Route('/article/{id}/delete', name: 'user_blog_delete_article', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function deleteArticle(Request $request, Blog $blog): Response
     {
+        $user = $this->getUser();
+        if ($blog->getUser() !== $user && !$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException('Vous ne pouvez supprimer que vos propres articles.');
+        }
+
         if ($this->isCsrfTokenValid('delete' . $blog->getId(), $request->request->get('_token'))) {
             $moduleId = $blog->getModule()->getId();
             $this->entityManager->remove($blog);
@@ -205,12 +272,45 @@ final class BlogController extends AbstractController
         ]);
     }
 
+    #[Route('/article/{id}/download', name: 'user_blog_article_download', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function downloadArticle(Blog $blog): Response
+    {
+        if (!$blog->isPublished() || !$blog->isVisible()) {
+            throw $this->createNotFoundException('Article non trouvé');
+        }
+
+        $module = $blog->getModule();
+
+        $contentLines = [
+            'Titre de l\'article : ' . ($blog->getTitre() ?? ''),
+            '',
+            'Module : ' . ($module?->getTitre() ?? 'Sans module'),
+            '',
+            'Contenu :',
+            $blog->getContenu() ?? '',
+        ];
+
+        $content = implode("\n", $contentLines);
+
+        $response = new Response($content);
+        $disposition = $response->headers->makeDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            sprintf('article-%d.txt', $blog->getId())
+        );
+
+        $response->headers->set('Content-Type', 'text/plain; charset=UTF-8');
+        $response->headers->set('Content-Disposition', $disposition);
+
+        return $response;
+    }
+
     /**
      * Récupère toutes les catégories avec leurs modules
      */
-    private function getCategoriesWithModules(): array
+    private function getCategoriesWithModules(string $searchTerm = ''): array
     {
         $categories = [];
+        $searchTerm = trim($searchTerm);
         
         // Liste de toutes les catégories de l'énumération (sauf EMPTY)
         $categorieEnums = [
@@ -227,6 +327,14 @@ final class BlogController extends AbstractController
                 'categorie' => $catEnum,
                 'isPublished' => true
             ], ['dateCreation' => 'DESC']);
+
+            // Filtrer par titre de module si un terme de recherche est fourni
+            if ($searchTerm !== '') {
+                $modules = array_filter($modules, static function (Module $module) use ($searchTerm): bool {
+                    $title = $module->getTitre() ?? '';
+                    return stripos($title, $searchTerm) !== false;
+                });
+            }
             
             if (count($modules) > 0) {
                 $categories[] = [
@@ -260,23 +368,49 @@ final class BlogController extends AbstractController
     }
     
     /**
-     * Récupère les articles populaires
+     * Récupère les articles populaires (blogs)
      */
     private function getPopularArticles(): array
     {
-        $modules = $this->moduleRepository->findBy(['isPublished' => true], ['dateCreation' => 'DESC'], 5);
-        
+        $blogs = $this->blogRepository->findBy(
+            [
+                'isPublished' => true,
+                'isVisible' => true,
+            ],
+            ['dateCreation' => 'DESC'],
+            5
+        );
+
         $popular = [];
-        foreach ($modules as $module) {
+        foreach ($blogs as $blog) {
             $popular[] = [
-                'id' => $module->getId(),
-                'title' => $module->getTitre() ?? 'Module sans titre',
+                'id' => $blog->getId(),
+                'title' => $blog->getTitre() ?? 'Article sans titre',
             ];
         }
-        
+
         return $popular;
     }
 
+    private function handleImageUpload(\Symfony\Component\HttpFoundation\File\UploadedFile $imageFile, Blog $blog): bool
+    {
+        $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+        $safeFilename = $this->slugger->slug($originalFilename);
+        $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
+
+        try {
+            $dir = $this->getParameter('uploads_blogs_directory');
+            if (!is_dir($dir)) {
+                mkdir($dir, 0755, true);
+            }
+            $imageFile->move($dir, $newFilename);
+            $blog->setImage('uploads/blog/' . $newFilename);
+            return true;
+        } catch (\Throwable $e) {
+            $this->addFlash('error', 'Erreur lors de l\'upload de l\'image.');
+            return false;
+        }
+    }
 
 
 

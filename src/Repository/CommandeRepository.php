@@ -28,4 +28,15 @@ class CommandeRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     }
+
+    /**
+     * @return Commande[]
+     */
+    public function findAllOrderedByDate(): array
+    {
+        return $this->createQueryBuilder('c')
+            ->orderBy('c.dateCreation', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 }

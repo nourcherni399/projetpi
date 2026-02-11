@@ -8,8 +8,4 @@ enum Sexe: string
 {
     case FEMME = 'Femme';
     case HOMME = 'Homme';
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> origin/integreModule

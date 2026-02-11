@@ -1,0 +1,65 @@
+{% extends 'layouts/user.html.twig' %}
+
+{% block title %}Mes notifications - AutiCare{% endblock %}
+
+{% block user_content %}
+<div class="max-w-4xl mx-auto">
+    <h1 class="text-2xl font-bold text-[#4B5563] mb-2">Mes notifications</h1>
+    <p class="text-[#6B7280] mb-6">Retrouvez ici vos inscriptions aux événements et les réponses à vos demandes de rendez-vous.</p>
+
+    {% set _event_notifs = user_inscription_notifications|default([]) %}
+    {% set _rdv_notifs = user_rdv_notifications|default([]) %}
+    {% if _event_notifs is empty and _rdv_notifs is empty %}
+    <div class="bg-white rounded-2xl border border-[#E5E0D8] p-12 text-center">
+        <span class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#F5F1EB] text-[#9CA3AF] mb-4" aria-hidden="true">
+            <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
+        </span>
+        <p class="text-[#6B7280] font-medium">Aucune notification pour le moment</p>
+        <p class="text-[#9CA3AF] text-sm mt-1">Vos inscriptions aux événements et les réponses à vos demandes de rendez-vous apparaîtront ici.</p>
+    </div>
+    {% else %}
+    <div class="space-y-3">
+        {% for notif in _event_notifs %}
+        <a href="{{ path('user_event_show', { id: notif.eventId }) }}" class="block focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded-xl">
+            {% if notif.type == 'acceptee' %}
+            <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium flex items-center gap-3">
+                <span class="shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100 text-emerald-600" aria-hidden="true">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </span>
+                <span>{{ notif.message }}</span>
+            </div>
+            {% elseif notif.type == 'liste_attente' %}
+            <div class="p-4 rounded-xl bg-sky-50 border border-sky-200 text-sky-800 text-sm font-medium flex items-center gap-3">
+                <span class="shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-sky-100 text-sky-600" aria-hidden="true">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </span>
+                <span>{{ notif.message }}</span>
+            </div>
+            {% else %}
+            <div class="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm font-medium flex items-center gap-3">
+                <span class="shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-amber-100 text-amber-600" aria-hidden="true">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </span>
+                <span>{{ notif.message }}</span>
+            </div>
+            {% endif %}
+        </a>
+        {% endfor %}
+        {% for notif in _rdv_notifs %}
+        <div class="p-4 rounded-xl text-sm font-medium flex items-center gap-3 {% if notif.type == 'rdv_accepte' %}bg-emerald-50 border border-emerald-200 text-emerald-800{% else %}bg-amber-50 border border-amber-200 text-amber-800{% endif %}">
+            {% if notif.type == 'rdv_accepte' %}
+            <span class="shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100 text-emerald-600" aria-hidden="true">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </span>
+            {% else %}
+            <span class="shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-amber-100 text-amber-600" aria-hidden="true">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </span>
+            {% endif %}
+            <span>{{ notif.message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

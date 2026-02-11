@@ -14,40 +14,20 @@
 
     <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8">
         {{ form_start(form, {
-            attr: { class: 'space-y-6' },
+            attr: { class: 'space-y-6', novalidate: 'novalidate' },
             label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }
         }) }}
         <div class="grid grid-cols-1 gap-6">
-            <div class="space-y-2">
-                {{ form_label(form.nom) }}
-                {{ form_widget(form.nom) }}
-                {% include 'admin/produit/_form_errors.html.twig' %}
-            </div>
-            <div class="space-y-2">
-                {{ form_label(form.description) }}
-                {{ form_widget(form.description) }}
-                {% include 'admin/produit/_form_errors.html.twig' %}
-            </div>
-            <div class="space-y-2">
-                {{ form_label(form.categorie) }}
-                {{ form_widget(form.categorie) }}
-                {% include 'admin/produit/_form_errors.html.twig' %}
-            </div>
-            <div class="space-y-2">
-                {{ form_label(form.prix) }}
-                {{ form_widget(form.prix) }}
-                {% include 'admin/produit/_form_errors.html.twig' %}
-            </div>
+            {{ form_row(form.nom) }}
+            {{ form_row(form.description) }}
+            {{ form_row(form.categorie) }}
+            {{ form_row(form.prix) }}
             <div class="flex items-center gap-2">
                 {{ form_widget(form.disponibilite) }}
                 {{ form_label(form.disponibilite) }}
-                {% include 'admin/produit/_form_errors.html.twig' %}
+                {{ form_errors(form.disponibilite) }}
             </div>
-            <div class="space-y-2">
-                {{ form_label(form.image) }}
-                {{ form_widget(form.image) }}
-                {% include 'admin/produit/_form_errors.html.twig' %}
-            </div>
+            {{ form_row(form.image) }}
             
             {% if produit.image %}
             <div class="space-y-2">

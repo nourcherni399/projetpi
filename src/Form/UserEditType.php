@@ -9,17 +9,18 @@ use App\Enum\UserRole;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Email;
+use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\LessThanOrEqual;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -53,7 +54,7 @@ final class UserEditType extends AbstractType
                 ],
                 'attr' => $attr + ['placeholder' => 'Prénom'],
             ])
-            ->add('email', EmailType::class, [
+            ->add('email', TextType::class, [
                 'label' => 'Email',
                 'constraints' => [
                     new NotBlank(message: 'L\'email est obligatoire.'),
@@ -62,13 +63,34 @@ final class UserEditType extends AbstractType
                 ],
                 'attr' => $attr + ['placeholder' => 'email@exemple.fr'],
             ])
-            ->add('telephone', IntegerType::class, [
+            ->add('telephone', TextType::class, [
                 'label' => 'Téléphone',
                 'constraints' => [
                     new NotBlank(message: 'Le téléphone est obligatoire.'),
-                    new Range(['min' => 10000000, 'max' => 999999999999, 'notInRangeMessage' => 'Le téléphone doit contenir entre 8 et 12 chiffres.']),
+                    new Regex(['pattern' => '/^\d{8,12}$/', 'message' => 'Le téléphone doit contenir entre 8 et 12 chiffres.']),
                 ],
                 'attr' => $attr + ['placeholder' => '612345678'],
+            ])
+        ;
+        $builder->get('telephone')->addModelTransformer(new CallbackTransformer(
+            static fn (?int $v) => $v !== null ? (string) $v : '',
+            static fn (?string $v) => $v !== null && $v !== '' ? (int) $v : 0,
+        ));
+        $builder
+            ->add('image', FileType::class, [
+                'label' => 'Photo de profil',
+                'required' => false,
+                'mapped' => false,
+                'constraints' => [
+                    new File([
+                        'maxSize' => '5M',
+                        'mimeTypes' => ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'],
+                        'mimeTypesMessage' => 'Veuillez uploader une image valide (JPEG, PNG, GIF ou WebP).',
+                        'maxSizeMessage' => 'L\'image ne doit pas dépasser 5 Mo.',
+                        'uploadErrorMessage' => 'Une erreur est survenue lors de l\'upload.',
+                    ]),
+                ],
+                'attr' => $attr + ['accept' => 'image/*'],
             ])
             ->add('plainPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
@@ -205,7 +227,3 @@ final class UserEditType extends AbstractType
         $resolver->setDefaults(['data_class' => User::class]);
     }
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/integreModule

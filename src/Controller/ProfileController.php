@@ -11,19 +11,20 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[IsGranted('ROLE_USER')]
 final class ProfileController extends AbstractController
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
+        private readonly SluggerInterface $slugger,
     ) {
     }
 
-<<<<<<< HEAD
-=======
     #[Route('/admin/profil', name: 'admin_profile', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function adminProfile(Request $request): Response
@@ -40,6 +41,10 @@ final class ProfileController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $imageFile = $form->get('image')->getData();
+            if ($imageFile instanceof UploadedFile) {
+                $this->handleImageUpload($imageFile, $user);
+            }
             $user->setUpdatedAt(new \DateTimeImmutable());
             $this->entityManager->flush();
 
@@ -70,6 +75,10 @@ final class ProfileController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $imageFile = $form->get('image')->getData();
+            if ($imageFile instanceof UploadedFile) {
+                $this->handleImageUpload($imageFile, $user);
+            }
             $user->setUpdatedAt(new \DateTimeImmutable());
             $this->entityManager->flush();
 
@@ -78,13 +87,12 @@ final class ProfileController extends AbstractController
             return $this->redirectToRoute('doctor_profile');
         }
 
-        return $this->render('medecin/profile/edit.html.twig', [
+        return $this->render('doctor/profile/edit.html.twig', [
             'user' => $user,
             'form' => $form,
         ]);
     }
 
->>>>>>> origin/integreModule
     #[Route('/mon-profil', name: 'user_profile', methods: ['GET', 'POST'])]
     public function edit(Request $request): Response
     {
@@ -109,6 +117,10 @@ final class ProfileController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $imageFile = $form->get('image')->getData();
+            if ($imageFile instanceof UploadedFile) {
+                $this->handleImageUpload($imageFile, $user);
+            }
             $user->setUpdatedAt(new \DateTimeImmutable());
             $this->entityManager->flush();
 
@@ -144,11 +156,27 @@ final class ProfileController extends AbstractController
         $user->setIsActive(false);
         $user->setUpdatedAt(new \DateTimeImmutable());
         $this->entityManager->flush();
-        $this->addFlash('success', 'Votre compte a été désactivé. Vous pouvez le réactiver en contactant l’équipe.');
+        $this->addFlash('success', 'Votre compte a été désactivé. Vous pouvez le réactiver en contactant l\'équipe.');
         return $this->redirectToRoute('app_logout');
     }
-<<<<<<< HEAD
+
+    private function handleImageUpload(UploadedFile $imageFile, User $user): bool
+    {
+        $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+        $safeFilename = $this->slugger->slug($originalFilename);
+        $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
+
+        try {
+            $dir = $this->getParameter('uploads_users_directory');
+            if (!is_dir($dir)) {
+                mkdir($dir, 0755, true);
+            }
+            $imageFile->move($dir, $newFilename);
+            $user->setImage('uploads/users/' . $newFilename);
+            return true;
+        } catch (\Throwable $e) {
+            $this->addFlash('error', 'Erreur lors de l\'upload de la photo.');
+            return false;
+        }
+    }
 }
-=======
-}
->>>>>>> origin/integreModule

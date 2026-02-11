@@ -56,7 +56,12 @@ private string $type;
     /**
      * @var Collection<int, Commentaire>
      */
-    #[ORM\OneToMany(targetEntity: Commentaire::class, mappedBy: 'blog')]
+    #[ORM\OneToMany(
+        targetEntity: Commentaire::class,
+        mappedBy: 'blog',
+        orphanRemoval: true,
+        cascade: ['persist', 'remove']
+    )]
     private Collection $commentaires;
 
     public function __construct()
@@ -170,9 +175,9 @@ private string $type;
         return $this->contenu;
     }
 
-    public function setContenu(string $contenu): static
+    public function setContenu(?string $contenu): static
     {
-        $this->contenu = $contenu;
+        $this->contenu = $contenu ?? '';
 
         return $this;
     }

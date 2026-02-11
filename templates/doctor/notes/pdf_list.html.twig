@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Notes patients - AutiCare</title>
+    <style>
+        body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #333; margin: 20px; }
+        h1 { font-size: 18px; color: #4B5563; border-bottom: 2px solid #A7C7E7; padding-bottom: 8px; }
+        .meta { color: #6B7280; font-size: 10px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+        th, td { border: 1px solid #E5E0D8; padding: 8px 10px; text-align: left; }
+        th { background: #F5F1EB; font-weight: 600; color: #4B5563; }
+        tr:nth-child(even) { background: #FAFAF9; }
+        .contenu { max-width: 400px; word-wrap: break-word; }
+        .footer { margin-top: 24px; font-size: 9px; color: #9CA3AF; }
+    </style>
+</head>
+<body>
+    <h1>Notes patients</h1>
+    <p class="meta">Exporté le {{ "now"|date("d/m/Y à H:i") }} — Dr {{ medecin.prenom }} {{ medecin.nom }} — {{ notes|length }} note(s)</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Patient</th>
+                <th>Date</th>
+                <th>Contenu</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for note in notes %}
+            <tr>
+                <td>{{ note.patient ? (note.patient.nom ~ ' ' ~ note.patient.prenom) : '—' }}</td>
+                <td>{{ note.dateCreation ? note.dateCreation|date('d/m/Y H:i') : '—' }}</td>
+                <td class="contenu">{{ note.contenu|nl2br }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="3">Aucune note.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p class="footer">AutiCare — Document confidentiel</p>
+</body>
+</html>

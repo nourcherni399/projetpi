@@ -5,22 +5,16 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Enum\UserRole;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-<<<<<<< HEAD
 use Symfony\Component\HttpFoundation\Request;
-=======
->>>>>>> origin/integreModule
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use App\EventSubscriber\LoginValidationSubscriber;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 final class AuthController extends AbstractController
 {
     #[Route('/connexion', name: 'app_login', methods: ['GET', 'POST'])]
-<<<<<<< HEAD
     public function login(Request $request, AuthenticationUtils $authenticationUtils): Response
-=======
-    public function login(AuthenticationUtils $authenticationUtils): Response
->>>>>>> origin/integreModule
     {
         $user = $this->getUser();
         if ($user instanceof User) {
@@ -33,25 +27,26 @@ final class AuthController extends AbstractController
             }
             return $this->redirectToRoute('home');
         }
-<<<<<<< HEAD
 
         $targetPath = $request->query->get('_target_path') ?? $request->request->get('_target_path');
         if ($targetPath !== null && $targetPath !== '') {
             $request->getSession()->set('_security.main.target_path', $targetPath);
         }
 
-=======
->>>>>>> origin/integreModule
+        $session = $request->getSession();
+        $validationErrors = $session->remove(LoginValidationSubscriber::SESSION_VALIDATION_ERRORS);
+        $lastUsernameFromValidation = $session->remove(LoginValidationSubscriber::SESSION_LAST_USERNAME);
+
         $error = $authenticationUtils->getLastAuthenticationError();
-        $lastUsername = $authenticationUtils->getLastUsername();
+        $lastUsername = $lastUsernameFromValidation !== null && $lastUsernameFromValidation !== ''
+            ? $lastUsernameFromValidation
+            : $authenticationUtils->getLastUsername();
 
         return $this->render('front/auth/login.html.twig', [
             'last_username' => $lastUsername,
             'error' => $error,
-<<<<<<< HEAD
+            'errors' => $validationErrors ?? [],
             'target_path' => $targetPath,
-=======
->>>>>>> origin/integreModule
         ]);
     }
 
@@ -61,7 +56,7 @@ final class AuthController extends AbstractController
         throw new \LogicException('Cette méthode peut être vide - elle sera interceptée par la clé logout du pare-feu.');
     }
 
-    #[Route('/confirmer-compte', name: 'app_confirm_pin', methods: ['GET', 'POST'])]
+    #[Route('/confirmer-compte', name: 'app_confirm_pin', methods: ['GET'])]
     public function confirmPinRedirect(): Response
     {
         return $this->redirectToRoute('app_login', [], Response::HTTP_MOVED_PERMANENTLY);

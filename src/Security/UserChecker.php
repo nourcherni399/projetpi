@@ -17,15 +17,11 @@ final class UserChecker implements UserCheckerInterface
             return;
         }
         if ($user->isActive() === false) {
-            throw new CustomUserMessageAuthenticationException('Votre compte est désactivé. Contactez l’équipe pour le réactiver.');
+            throw new CustomUserMessageAuthenticationException('Votre compte est désactivé. Contactez l\'équipe pour le réactiver.');
         }
     }
 
     public function checkPostAuth(UserInterface $user): void
     {
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> origin/integreModule

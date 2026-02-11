@@ -47,9 +47,11 @@ final class DoctorDisponibiliteType extends AbstractType
             ])
             ->add('duree', IntegerType::class, [
                 'label' => 'Durée (minutes)',
-                'required' => false,
-                'data' => 30,
-                'constraints' => [new PositiveOrZero()],
+                'required' => true,
+                'constraints' => [
+                    new NotBlank(message: 'La durée est obligatoire.'),
+                    new PositiveOrZero(message: 'La durée doit être positive ou nulle.'),
+                ],
                 'attr' => $attr + ['placeholder' => '30', 'min' => 0],
             ])
             ->add('estDispo', CheckboxType::class, [

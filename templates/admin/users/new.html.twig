@@ -14,17 +14,17 @@
 
     <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8">
         {{ form_start(form, {
-            attr: { class: 'space-y-6' },
+            attr: { class: 'space-y-6', novalidate: 'novalidate' },
             label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }
         }) }}
         <div class="grid grid-cols-1 gap-6">
-            <h2 class="text-lg font-semibold text-[#4B5563] border-b border-[#E5E0D8] pb-2">Attributs utilisateur</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {{ form_row(form.nom) }}
                 {{ form_row(form.prenom) }}
             </div>
             {{ form_row(form.email) }}
             {{ form_row(form.telephone) }}
+            {{ form_row(form.image) }}
             {{ form_row(form.password.first) }}
             {{ form_row(form.password.second) }}
             <div class="flex items-center gap-2">

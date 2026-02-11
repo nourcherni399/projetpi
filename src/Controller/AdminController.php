@@ -10,37 +10,41 @@ use App\Entity\Patient;
 use App\Entity\ParentUser;
 use App\Entity\User;
 use App\Enum\UserRole;
-<<<<<<< HEAD
 use App\Form\ProfileType;
-=======
->>>>>>> origin/integreModule
 use App\Form\UserCreateType;
 use App\Form\UserEditType;
+use App\Repository\EvenementRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 final class AdminController extends AbstractController
 {
     public function __construct(
         private readonly UserRepository $userRepository,
+        private readonly EvenementRepository $evenementRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly UserPasswordHasherInterface $passwordHasher,
+        private readonly SluggerInterface $slugger,
     ) {
     }
 
     #[Route('/admin', name: 'admin_dashboard', methods: ['GET'])]
     public function dashboard(): Response
     {
-        return $this->render('admin/dashboard/index.html.twig');
+        $totalEvenements = $this->evenementRepository->countAll();
+        return $this->render('admin/dashboard/index.html.twig', [
+            'totalEvenements' => $totalEvenements,
+        ]);
     }
 
-<<<<<<< HEAD
     #[Route('/admin/mon-profil', name: 'admin_profile', methods: ['GET', 'POST'])]
     public function profile(Request $request): Response
     {
@@ -62,8 +66,6 @@ final class AdminController extends AbstractController
         ]);
     }
 
-=======
->>>>>>> origin/integreModule
     #[Route('/admin/utilisateurs', name: 'admin_users', methods: ['GET'])]
     public function users(Request $request): Response
     {
@@ -117,6 +119,10 @@ final class AdminController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $imageFile = $form->get('image')->getData();
+            if ($imageFile instanceof UploadedFile) {
+                $this->handleUserImageUpload($imageFile, $user);
+            }
             $plainPassword = $form->get('plainPassword')->getData();
             if ($plainPassword !== null && is_array($plainPassword) && trim((string) ($plainPassword['first'] ?? '')) !== '') {
                 $user->setPassword($this->passwordHasher->hashPassword($user, (string) $plainPassword['first']));
@@ -215,6 +221,11 @@ final class AdminController extends AbstractController
                 $user->setSexe($data['sexe'] ?? null);
             }
 
+            $imageFile = $form->get('image')->getData();
+            if ($imageFile instanceof UploadedFile) {
+                $this->handleUserImageUpload($imageFile, $user);
+            }
+
             $this->entityManager->persist($user);
             $this->entityManager->flush();
             $this->addFlash('success', 'L\'utilisateur a été créé avec succès.');
@@ -236,5 +247,25 @@ final class AdminController extends AbstractController
             UserRole::PARENT => new ParentUser(),
             UserRole::USER => new Patient(),
         };
+    }
+
+    private function handleUserImageUpload(UploadedFile $imageFile, User $user): bool
+    {
+        $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+        $safeFilename = $this->slugger->slug($originalFilename);
+        $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
+
+        try {
+            $dir = $this->getParameter('uploads_users_directory');
+            if (!is_dir($dir)) {
+                mkdir($dir, 0755, true);
+            }
+            $imageFile->move($dir, $newFilename);
+            $user->setImage('uploads/users/' . $newFilename);
+            return true;
+        } catch (\Throwable $e) {
+            $this->addFlash('error', 'Erreur lors de l\'upload de la photo.');
+            return false;
+        }
     }
 }

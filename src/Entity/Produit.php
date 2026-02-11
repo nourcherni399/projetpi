@@ -7,10 +7,7 @@ namespace App\Entity;
 use App\Enum\Categorie;
 use App\Repository\ProduitRepository;
 use Doctrine\ORM\Mapping as ORM;
-<<<<<<< HEAD
-=======
 use Symfony\Component\HttpFoundation\File\File;
->>>>>>> origin/integreModule
 
 #[ORM\Entity(repositoryClass: ProduitRepository::class)]
 class Produit
@@ -38,11 +35,8 @@ class Produit
     #[ORM\Column(length: 500, nullable: true)]
     private ?string $image = null;
 
-<<<<<<< HEAD
-=======
     private ?File $imageFile = null;
 
->>>>>>> origin/integreModule
     #[ORM\ManyToOne(inversedBy: 'produits')]
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?User $user = null;
@@ -60,7 +54,7 @@ class Produit
         return $this->nom;
     }
 
-    public function setNom(string $nom): static
+    public function setNom(?string $nom): static
     {
         $this->nom = $nom;
         return $this;
@@ -93,7 +87,7 @@ class Produit
         return $this->prix;
     }
 
-    public function setPrix(float $prix): static
+    public function setPrix(?float $prix): static
     {
         $this->prix = $prix;
         return $this;
@@ -145,8 +139,6 @@ class Produit
         $this->stock = $stock;
         return $this;
     }
-<<<<<<< HEAD
-=======
 
     public function getImageFile(): ?File
     {
@@ -158,5 +150,4 @@ class Produit
         $this->imageFile = $imageFile;
         return $this;
     }
->>>>>>> origin/integreModule
 }

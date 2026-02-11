@@ -7,10 +7,7 @@ namespace App\Controller;
 use App\Entity\Evenement;
 use App\Form\EvenementType;
 use App\Repository\EvenementRepository;
-<<<<<<< HEAD
 use App\Repository\InscritEventsRepository;
-=======
->>>>>>> origin/integreModule
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,10 +20,7 @@ final class EvenementController extends AbstractController
 {
     public function __construct(
         private readonly EvenementRepository $evenementRepository,
-<<<<<<< HEAD
         private readonly InscritEventsRepository $inscritEventsRepository,
-=======
->>>>>>> origin/integreModule
         private readonly EntityManagerInterface $entityManager,
     ) {
     }
@@ -36,11 +30,7 @@ final class EvenementController extends AbstractController
     {
         $q = $request->query->get('q');
         $sortBy = $request->query->get('sort', 'date');
-<<<<<<< HEAD
         if (!in_array($sortBy, ['date', 'lieu', 'theme', 'titre'], true)) {
-=======
-        if (!in_array($sortBy, ['date', 'lieu', 'theme'], true)) {
->>>>>>> origin/integreModule
             $sortBy = 'date';
         }
         $sortOrder = $request->query->get('order', 'asc');
@@ -48,11 +38,45 @@ final class EvenementController extends AbstractController
             $sortOrder = 'asc';
         }
         $evenements = $this->evenementRepository->searchAndSort($q, $sortBy, $sortOrder);
+        $totalEvenements = $this->evenementRepository->countAll();
+        $evenementsAvenir = $this->evenementRepository->countUpcoming();
+        $evenementsPasses = $this->evenementRepository->countPast();
+        $inscriptionsAcceptees = $this->inscritEventsRepository->countByStatut('accepte');
+        $inscriptionsEnAttente = $this->inscritEventsRepository->countByStatut('en_attente');
+        $totalInscriptions = $this->inscritEventsRepository->countTotalInscriptions();
+
         return $this->render('admin/evenement/index.html.twig', [
             'evenements' => $evenements,
             'q' => $q,
             'sortBy' => $sortBy,
             'sortOrder' => $sortOrder,
+            'totalEvenements' => $totalEvenements,
+            'evenementsAvenir' => $evenementsAvenir,
+            'evenementsPasses' => $evenementsPasses,
+            'inscriptionsAcceptees' => $inscriptionsAcceptees,
+            'inscriptionsEnAttente' => $inscriptionsEnAttente,
+            'totalInscriptions' => $totalInscriptions,
+        ]);
+    }
+
+    #[Route('/new', name: 'admin_evenement_new', methods: ['GET', 'POST'])]
+    public function new(Request $request): Response
+    {
+        $evenement = new Evenement();
+        $form = $this->createForm(EvenementType::class, $evenement);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->entityManager->persist($evenement);
+            $this->entityManager->flush();
+            $this->addFlash('success', 'L\'événement a été créé avec succès.');
+
+            return $this->redirectToRoute('admin_evenement_index');
+        }
+
+        return $this->render('admin/evenement/new.html.twig', [
+            'evenement' => $evenement,
+            'form' => $form,
         ]);
     }
 
@@ -63,11 +87,41 @@ final class EvenementController extends AbstractController
         if ($evenement === null) {
             throw new NotFoundHttpException('Événement introuvable.');
         }
-<<<<<<< HEAD
         $participants = $this->inscritEventsRepository->findByEvenementOrderByDate($evenement);
         return $this->render('admin/evenement/show.html.twig', [
             'evenement' => $evenement,
             'participants' => $participants,
+        ]);
+    }
+
+    #[Route('/{id}/liste-participants.pdf', name: 'admin_evenement_participants_pdf', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function participantsPdf(int $id): Response
+    {
+        $evenement = $this->evenementRepository->find($id);
+        if ($evenement === null) {
+            throw new NotFoundHttpException('Événement introuvable.');
+        }
+        $participants = $this->inscritEventsRepository->findByEvenementOrderByDate($evenement);
+        if (!class_exists(\Dompdf\Dompdf::class)) {
+            $this->addFlash('error', 'Export PDF indisponible : installez "composer require dompdf/dompdf" puis réessayez.');
+            return $this->redirectToRoute('admin_evenement_show', ['id' => $id]);
+        }
+        $html = $this->renderView('admin/evenement/participants_pdf.html.twig', [
+            'evenement' => $evenement,
+            'participants' => $participants,
+        ]);
+        $dompdf = new \Dompdf\Dompdf();
+        $dompdf->getOptions()->set('isHtml5ParserEnabled', true);
+        $dompdf->getOptions()->set('defaultFont', 'DejaVu Sans');
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+        $pdf = $dompdf->output();
+        $datePart = $evenement->getDateEvent() ? $evenement->getDateEvent()->format('Y-m-d') : date('Y-m-d');
+        $filename = 'participants-' . preg_replace('/[^a-zA-Z0-9\-]/', '-', (string) $evenement->getTitle()) . '-' . $datePart . '.pdf';
+        return new Response($pdf, Response::HTTP_OK, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ]);
     }
 
@@ -105,30 +159,6 @@ final class EvenementController extends AbstractController
         $this->entityManager->flush();
         $this->addFlash('success', 'Inscription refusée.');
         return $this->redirectToRoute('admin_evenement_show', ['id' => $inscription->getEvenement()->getId()]);
-=======
-        return $this->render('admin/evenement/show.html.twig', ['evenement' => $evenement]);
->>>>>>> origin/integreModule
-    }
-
-    #[Route('/new', name: 'admin_evenement_new', methods: ['GET', 'POST'])]
-    public function new(Request $request): Response
-    {
-        $evenement = new Evenement();
-        $form = $this->createForm(EvenementType::class, $evenement);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->entityManager->persist($evenement);
-            $this->entityManager->flush();
-            $this->addFlash('success', 'L\'événement a été créé avec succès.');
-
-            return $this->redirectToRoute('admin_evenement_index');
-        }
-
-        return $this->render('admin/evenement/new.html.twig', [
-            'evenement' => $evenement,
-            'form' => $form,
-        ]);
     }
 
     #[Route('/{id}/edit', name: 'admin_evenement_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]

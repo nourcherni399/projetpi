@@ -4,15 +4,9 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-<<<<<<< HEAD
-use App\Entity\Blog;
 use App\Entity\Disponibilite;
 use App\Entity\Evenement;
 use App\Entity\InscritEvents;
-=======
-use App\Entity\Disponibilite;
-use App\Entity\Evenement;
->>>>>>> origin/integreModule
 use App\Entity\Medcin;
 use App\Entity\Notification;
 use App\Entity\Patient;
@@ -20,20 +14,13 @@ use App\Entity\RendezVous;
 use App\Enum\Motif;
 use App\Enum\StatusRendezVous;
 use App\Enum\UserRole;
-<<<<<<< HEAD
-use App\Form\BlogType;
 use App\Repository\DisponibiliteRepository;
 use App\Repository\EvenementRepository;
 use App\Repository\InscritEventsRepository;
 use App\Repository\MedcinRepository;
-use App\Repository\ModuleRepository;
 use App\Repository\NotificationRepository;
-=======
-use App\Repository\DisponibiliteRepository;
-use App\Repository\EvenementRepository;
-use App\Repository\MedcinRepository;
->>>>>>> origin/integreModule
 use App\Repository\RendezVousRepository;
+use App\Repository\ProduitRepository;
 use App\Repository\ThematiqueRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -45,22 +32,14 @@ use Symfony\Component\Routing\Attribute\Route;
 final class HomeController extends AbstractController
 {
     public function __construct(
-<<<<<<< HEAD
-        private readonly ModuleRepository $moduleRepository,
+        private readonly ProduitRepository $produitRepository,
         private readonly ThematiqueRepository $thematiqueRepository,
         private readonly EvenementRepository $evenementRepository,
         private readonly InscritEventsRepository $inscritEventsRepository,
-        private readonly MedcinRepository $medcinRepository,
+        private readonly MedcinRepository $medecinRepository,
         private readonly DisponibiliteRepository $disponibiliteRepository,
         private readonly RendezVousRepository $rendezVousRepository,
         private readonly NotificationRepository $notificationRepository,
-=======
-        private readonly MedcinRepository $medcinRepository,
-        private readonly EvenementRepository $evenementRepository,
-        private readonly ThematiqueRepository $thematiqueRepository,
-        private readonly DisponibiliteRepository $disponibiliteRepository,
-        private readonly RendezVousRepository $rendezVousRepository,
->>>>>>> origin/integreModule
         private readonly EntityManagerInterface $entityManager,
     ) {
     }
@@ -87,23 +66,23 @@ final class HomeController extends AbstractController
         return $this->render('front/about/index.html.twig');
     }
 
-<<<<<<< HEAD
-    #[Route('/produits', name: 'user_products', methods: ['GET'])]
-    public function products(): Response
+    #[Route('/notifications', name: 'user_notifications', methods: ['GET'])]
+    public function notifications(): Response|RedirectResponse
     {
-        return $this->render('front/products/index.html.twig');
+        if (!$this->getUser()) {
+            return $this->redirectToRoute('app_login', ['_target_path' => $this->generateUrl('user_notifications')]);
+        }
+        return $this->render('front/notifications/index.html.twig');
     }
 
     #[Route('/produits/{id}', name: 'user_product_show', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function productShow(int $id): Response
     {
-        $products = $this->getProductsData();
-        $product = $products[$id] ?? null;
-        if ($product === null) {
+        $produit = $this->produitRepository->find($id);
+        if ($produit === null) {
             throw $this->createNotFoundException('Produit introuvable.');
         }
-        $product['id'] = $id;
-        return $this->render('front/products/show.html.twig', ['product' => $product]);
+        return $this->render('front/products/show.html.twig', ['produit' => $produit]);
     }
 
     /** @return array<int, array{name: string, category: string, category_class: string, rating: string, reviews: int, description: string, price: int, description_long: string, characteristics: list<string>, benefits: list<string>}> */
@@ -187,16 +166,25 @@ final class HomeController extends AbstractController
 
         $dateFrom = null;
         $dateTo = null;
-        $lieu = $request->query->get('lieu');
+        $lieuRaw = $request->query->get('lieu');
+        $lieu = null;
+        if (is_string($lieuRaw)) {
+            $lieuTrimmed = trim($lieuRaw);
+            if ($lieuTrimmed !== '') {
+                $lieu = $lieuTrimmed;
+            }
+        }
         $thematiqueId = $request->query->getInt('thematique');
-        if ($request->query->get('date_from') !== null && $request->query->get('date_from') !== '') {
-            $d = \DateTimeImmutable::createFromFormat('Y-m-d', $request->query->get('date_from'));
+        $dateFromStr = $request->query->get('date_from');
+        $dateToStr = $request->query->get('date_to');
+        if ($dateFromStr !== null && $dateFromStr !== '') {
+            $d = \DateTimeImmutable::createFromFormat('Y-m-d', $dateFromStr);
             if ($d) {
                 $dateFrom = $d;
             }
         }
-        if ($request->query->get('date_to') !== null && $request->query->get('date_to') !== '') {
-            $d = \DateTimeImmutable::createFromFormat('Y-m-d', $request->query->get('date_to'));
+        if ($dateToStr !== null && $dateToStr !== '') {
+            $d = \DateTimeImmutable::createFromFormat('Y-m-d', $dateToStr);
             if ($d) {
                 $dateTo = $d;
             }
@@ -204,13 +192,18 @@ final class HomeController extends AbstractController
 
         $allFiltered = $this->evenementRepository->findFilteredForFront($dateFrom, $dateTo, $lieu, $thematiqueId > 0 ? $thematiqueId : null);
 
+        $hasActiveFilters = $lieu !== null || $dateFrom !== null || $dateTo !== null || $thematiqueId > 0;
+
         $grouped = [];
         foreach ($thematiques as $t) {
             if ($thematiqueId > 0 && (int) $t->getId() !== $thematiqueId) {
                 continue;
             }
             $evenements = array_filter($allFiltered, static fn (Evenement $e) => $e->getThematique() !== null && $e->getThematique()->getId() === $t->getId());
-            $grouped[] = ['thematique' => $t, 'evenements' => array_values($evenements)];
+            $evenements = array_values($evenements);
+            if (!$hasActiveFilters || \count($evenements) > 0) {
+                $grouped[] = ['thematique' => $t, 'evenements' => $evenements];
+            }
         }
         $sansThematique = array_filter($allFiltered, static fn (Evenement $e) => $e->getThematique() === null);
         $sansThematique = array_values($sansThematique);
@@ -219,29 +212,12 @@ final class HomeController extends AbstractController
             'grouped' => $grouped,
             'sansThematique' => $sansThematique,
             'thematiques' => $thematiques,
-            'filter_date_from' => $request->query->get('date_from'),
-            'filter_date_to' => $request->query->get('date_to'),
-            'filter_lieu' => $lieu,
+            'filter_date_from' => $dateFromStr ?? $request->query->get('date_from'),
+            'filter_date_to' => $dateToStr ?? $request->query->get('date_to'),
+            'filter_lieu' => $lieu ?? '',
             'filter_thematique' => $thematiqueId,
-=======
-    #[Route('/evenements', name: 'user_events', methods: ['GET'])]
-    public function events(): Response
-    {
-        $thematiques = $this->thematiqueRepository->findBy(['actif' => true], ['ordre' => 'ASC', 'nomThematique' => 'ASC']);
-        $grouped = [];
-        foreach ($thematiques as $t) {
-            $evenements = $t->getEvenements()->toArray();
-            usort($evenements, static function (Evenement $a, Evenement $b): int {
-                $d = ($a->getDateEvent() <=> $b->getDateEvent());
-                return $d !== 0 ? $d : ($a->getHeureDebut() <=> $b->getHeureDebut());
-            });
-            $grouped[] = ['thematique' => $t, 'evenements' => $evenements];
-        }
-        $sansThematique = $this->evenementRepository->findBy(['thematique' => null], ['dateEvent' => 'ASC', 'heureDebut' => 'ASC']);
-        return $this->render('front/events/index.html.twig', [
-            'grouped' => $grouped,
-            'sansThematique' => $sansThematique,
->>>>>>> origin/integreModule
+            'has_active_filters' => $hasActiveFilters,
+            'total_filtered' => \count($allFiltered),
         ]);
     }
 
@@ -252,7 +228,6 @@ final class HomeController extends AbstractController
         if ($evenement === null) {
             throw $this->createNotFoundException('Événement introuvable.');
         }
-<<<<<<< HEAD
         $user = $this->getUser();
         $inscription = $user !== null
             ? $this->inscritEventsRepository->findInscriptionForUserAndEvent($user, $evenement)
@@ -346,15 +321,12 @@ final class HomeController extends AbstractController
         }
 
         return $this->redirectToRoute('user_event_show', ['id' => $id]);
-=======
-        return $this->render('front/events/show.html.twig', ['evenement' => $evenement]);
->>>>>>> origin/integreModule
     }
 
     #[Route('/rendez-vous', name: 'user_appointments', methods: ['GET'])]
     public function appointments(): Response
     {
-        $medecins = $this->medcinRepository->findAllOrderByNom();
+        $medecins = $this->medecinRepository->findAllOrderByNom();
         $specialites = array_values(array_unique(array_filter(array_map(
             static fn (Medcin $m) => $m->getSpecialite(),
             $medecins
@@ -366,7 +338,6 @@ final class HomeController extends AbstractController
         ]);
     }
 
-    /** Labels pour type de consultation et mode (affichage récap/confirmation). */
     private const APPOINTMENT_TYPE_LABELS = [
         'premiere' => 'Première consultation',
         'bilan' => 'Bilan complet',
@@ -375,10 +346,8 @@ final class HomeController extends AbstractController
     ];
     private const APPOINTMENT_MODE_LABELS = [
         'cabinet' => 'Au cabinet',
-        'teleconsult' => 'Téléconsultation',
     ];
 
-    /** Numéro de jour PHP (1=lundi) pour chaque Jour enum. */
     private const JOUR_TO_NUMBER = [
         'lundi' => 1, 'mardi' => 2, 'mercredi' => 3, 'jeudi' => 4,
         'vendredi' => 5, 'samedi' => 6, 'dimanche' => 7,
@@ -387,7 +356,7 @@ final class HomeController extends AbstractController
     #[Route('/rendez-vous/prendre/{id}', name: 'user_appointment_book', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function appointmentBook(int $id, Request $request): Response
     {
-        $medecin = $this->medcinRepository->find($id);
+        $medecin = $this->medecinRepository->find($id);
         if ($medecin === null || !$medecin instanceof Medcin) {
             throw $this->createNotFoundException('Praticien introuvable.');
         }
@@ -396,23 +365,51 @@ final class HomeController extends AbstractController
         $step = max(1, min(4, $step));
 
         $disponibiliteId = $request->query->get('disponibilite_id');
-        $dateRdv = (string) $request->query->get('date_rdv', '');
+        $dateRdvStr = (string) $request->query->get('date_rdv', '');
         $type = (string) $request->query->get('type', 'premiere');
         $mode = (string) $request->query->get('mode', 'cabinet');
         $motif = (string) $request->query->get('motif', '');
+        $motifError = null;
 
         if (!isset(self::APPOINTMENT_TYPE_LABELS[$type])) {
             $type = 'premiere';
         }
-        if (!isset(self::APPOINTMENT_MODE_LABELS[$mode])) {
-            $mode = 'cabinet';
-        }
+        $mode = 'cabinet';
 
         $slots = $this->getAvailableSlotsForMedecin($medecin);
 
+        // Obligation de passer par chaque étape : étape 2+ exige un créneau valide
+        if ($step >= 2) {
+            $dispoIdInt = (int) $disponibiliteId;
+            $slotOk = false;
+            if ($dispoIdInt > 0 && $dateRdvStr !== '') {
+                $disponibilite = $this->disponibiliteRepository->find($dispoIdInt);
+                if ($disponibilite !== null && $disponibilite->getMedecin() === $medecin) {
+                    try {
+                        $dateRdvTest = new \DateTimeImmutable($dateRdvStr);
+                        if (!$this->rendezVousRepository->isSlotTaken($disponibilite, $dateRdvTest)) {
+                            $slotOk = true;
+                        }
+                    } catch (\Throwable) {
+                    }
+                }
+            }
+            if (!$slotOk) {
+                $step = 1;
+                $disponibiliteId = null;
+                $dateRdvStr = '';
+            }
+        }
+
+        // Contrôle de saisie : motif obligatoire avant de passer à l'étape 3
+        if ($step === 3 && $motif === '') {
+            $motifError = 'Le motif de la consultation est obligatoire.';
+            $step = 2;
+        }
+
         $choices = [
             'disponibilite_id' => $disponibiliteId,
-            'date_rdv' => $dateRdv,
+            'date_rdv' => $dateRdvStr,
             'date_label' => $request->query->get('date_label', ''),
             'type' => $type,
             'type_label' => self::APPOINTMENT_TYPE_LABELS[$type],
@@ -421,11 +418,28 @@ final class HomeController extends AbstractController
             'motif' => $motif,
         ];
 
+        $formRdv = [];
+        $formErrors = [];
+        if ($step === 3) {
+            $session = $request->getSession();
+            if ($session->has('rdv_form_data')) {
+                $formRdv = $session->get('rdv_form_data', []);
+                $session->remove('rdv_form_data');
+            }
+            if ($session->has('rdv_form_errors')) {
+                $formErrors = $session->get('rdv_form_errors', []);
+                $session->remove('rdv_form_errors');
+            }
+        }
+
         return $this->render('front/appointments/book.html.twig', [
             'doctor' => $doctor,
             'step' => $step,
             'choices' => $choices,
             'slots' => $slots,
+            'form_rdv' => $formRdv,
+            'form_errors' => $formErrors,
+            'motif_error' => $motifError,
         ]);
     }
 
@@ -465,14 +479,41 @@ final class HomeController extends AbstractController
                 $iter = $iter->modify('+1 day');
             }
         }
-        usort($slots, static fn (array $a, array $b): int => strcmp($a['date_rdv'] . $a['disponibilite_id'], $b['date_rdv'] . $b['disponibilite_id']));
+        $seen = [];
+        $slots = array_values(array_filter($slots, static function (array $s) use (&$seen): bool {
+            $key = $s['disponibilite_id'] . '-' . $s['date_rdv'];
+            if (isset($seen[$key])) {
+                return false;
+            }
+            $seen[$key] = true;
+            return true;
+        }));
+        usort($slots, static fn (array $a, array $b): int => strcmp($a['date_rdv'], $b['date_rdv']));
+        // Une seule occurrence par créneau récurrent (jour + horaire) : on garde le premier (date la plus proche)
+        $slotByRecurrence = [];
+        foreach ($slots as $s) {
+            $pos = strrpos($s['label'], ', ');
+            if ($pos === false) {
+                $recurrenceKey = $s['label'];
+            } else {
+                $partBeforeComma = trim(substr($s['label'], 0, $pos));
+                $partAfterComma = trim(substr($s['label'], $pos + 2));
+                $dayOnly = preg_replace('/\s+\d{2}\/\d{2}\/\d{4}$/', '', $partBeforeComma);
+                $recurrenceKey = trim($dayOnly) . ' ' . $partAfterComma;
+            }
+            if (!isset($slotByRecurrence[$recurrenceKey])) {
+                $slotByRecurrence[$recurrenceKey] = $s;
+            }
+        }
+        $slots = array_values($slotByRecurrence);
+        usort($slots, static fn (array $a, array $b): int => strcmp($a['date_rdv'], $b['date_rdv']));
         return $slots;
     }
 
     #[Route('/rendez-vous/prendre/{id}/confirmer', name: 'user_appointment_submit', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function appointmentSubmit(int $id, Request $request): Response
     {
-        $medecin = $this->medcinRepository->find($id);
+        $medecin = $this->medecinRepository->find($id);
         if ($medecin === null || !$medecin instanceof Medcin) {
             throw $this->createNotFoundException('Praticien introuvable.');
         }
@@ -480,7 +521,7 @@ final class HomeController extends AbstractController
         $disponibiliteId = (int) $request->request->get('disponibilite_id', 0);
         $dateRdvStr = (string) $request->request->get('date_rdv', '');
         $disponibilite = $disponibiliteId > 0 ? $this->disponibiliteRepository->find($disponibiliteId) : null;
-<<<<<<< HEAD
+
         if ($disponibilite === null || $disponibilite->getMedecin() !== $medecin) {
             $this->addFlash('error', 'Créneau invalide.');
             return $this->redirectToRoute('user_appointment_book', ['id' => $id]);
@@ -498,23 +539,6 @@ final class HomeController extends AbstractController
             return $this->redirectToRoute('user_appointment_book', ['id' => $id]);
         }
 
-=======
-        
-        // Convertir la chaîne en DateTime
-        $dateRdv = null;
-        if ($dateRdvStr !== '') {
-            try {
-                $dateRdv = new \DateTime($dateRdvStr);
-            } catch (\Throwable) {
-            }
-        }
-        
-        if ($disponibilite === null || $dateRdv === null) {
-            $this->addFlash('error', 'Créneau ou date invalide.');
-            return $this->redirectToRoute('user_appointment_book', ['id' => $id]);
-        }
-        
->>>>>>> origin/integreModule
         if ($this->rendezVousRepository->isSlotTaken($disponibilite, $dateRdv)) {
             $this->addFlash('error', 'Ce créneau n\'est plus disponible.');
             return $this->redirectToRoute('user_appointment_book', ['id' => $id]);
@@ -522,40 +546,104 @@ final class HomeController extends AbstractController
 
         $nom = trim((string) $request->request->get('nom', ''));
         $prenom = trim((string) $request->request->get('prenom', ''));
-        if ($nom === '' || $prenom === '') {
-            $this->addFlash('error', 'Nom et prénom obligatoires.');
-<<<<<<< HEAD
-            return $this->redirectToRoute('user_appointment_book', ['id' => $id, 'etape' => 3] + array_filter([
-=======
-            return $this->redirectToRoute('user_appointment_book', [
+        $telephone = trim((string) $request->request->get('telephone', ''));
+        $adresse = trim((string) $request->request->get('adresse', ''));
+        $note = trim((string) $request->request->get('note', ''));
+        $dateNaissanceStr = trim((string) $request->request->get('date_naissance', ''));
+
+        $errors = [];
+        $errorsByField = [];
+        if ($nom === '') {
+            $errors[] = 'Le nom est obligatoire.';
+            $errorsByField['nom'] = 'Le nom est obligatoire.';
+        } elseif (mb_strlen($nom) < 2) {
+            $errors[] = 'Le nom doit contenir au moins 2 caractères.';
+            $errorsByField['nom'] = 'Le nom doit contenir au moins 2 caractères.';
+        } elseif (mb_strlen($nom) > 255) {
+            $errors[] = 'Le nom ne peut pas dépasser 255 caractères.';
+            $errorsByField['nom'] = 'Le nom ne peut pas dépasser 255 caractères.';
+        }
+        if ($prenom === '') {
+            $errors[] = 'Le prénom est obligatoire.';
+            $errorsByField['prenom'] = 'Le prénom est obligatoire.';
+        } elseif (mb_strlen($prenom) < 2) {
+            $errors[] = 'Le prénom doit contenir au moins 2 caractères.';
+            $errorsByField['prenom'] = 'Le prénom doit contenir au moins 2 caractères.';
+        } elseif (mb_strlen($prenom) > 255) {
+            $errors[] = 'Le prénom ne peut pas dépasser 255 caractères.';
+            $errorsByField['prenom'] = 'Le prénom ne peut pas dépasser 255 caractères.';
+        }
+        if ($telephone === '') {
+            $errors[] = 'Le téléphone est obligatoire.';
+            $errorsByField['telephone'] = 'Le téléphone est obligatoire.';
+        } elseif (mb_strlen($telephone) > 30) {
+            $errors[] = 'Le téléphone ne peut pas dépasser 30 caractères.';
+            $errorsByField['telephone'] = 'Le téléphone ne peut pas dépasser 30 caractères.';
+        } elseif (!preg_match('/^[\d\s\-\+\.\(\)]+$/', $telephone)) {
+            $errors[] = 'Le téléphone contient des caractères non autorisés.';
+            $errorsByField['telephone'] = 'Le téléphone contient des caractères non autorisés.';
+        } elseif (preg_match_all('/\d/', $telephone) < 8) {
+            $errors[] = 'Le numéro de téléphone doit contenir au moins 8 chiffres.';
+            $errorsByField['telephone'] = 'Le numéro de téléphone doit contenir au moins 8 chiffres.';
+        }
+        if ($adresse === '') {
+            $errors[] = 'L\'adresse est obligatoire.';
+            $errorsByField['adresse'] = 'L\'adresse est obligatoire.';
+        } elseif (mb_strlen($adresse) > 500) {
+            $errors[] = 'L\'adresse ne peut pas dépasser 500 caractères.';
+            $errorsByField['adresse'] = 'L\'adresse ne peut pas dépasser 500 caractères.';
+        }
+        if ($dateNaissanceStr === '') {
+            $errors[] = 'La date de naissance est obligatoire.';
+            $errorsByField['date_naissance'] = 'La date de naissance est obligatoire.';
+        } else {
+            try {
+                $dateNaissanceTest = new \DateTimeImmutable($dateNaissanceStr);
+                if ($dateNaissanceTest > new \DateTimeImmutable('today')) {
+                    $errors[] = 'La date de naissance ne peut pas être dans le futur.';
+                    $errorsByField['date_naissance'] = 'La date de naissance ne peut pas être dans le futur.';
+                }
+            } catch (\Throwable) {
+                $errors[] = 'La date de naissance est invalide.';
+                $errorsByField['date_naissance'] = 'La date de naissance est invalide.';
+            }
+        }
+        if (mb_strlen($note) > 5000) {
+            $errors[] = 'La note ne peut pas dépasser 5000 caractères.';
+            $errorsByField['note'] = 'La note ne peut pas dépasser 5000 caractères.';
+        }
+
+        if ($errors !== []) {
+            $session = $request->getSession();
+            $session->set('rdv_form_data', [
+                'nom' => $nom,
+                'prenom' => $prenom,
+                'telephone' => $telephone,
+                'adresse' => $adresse,
+                'note' => $note,
+                'date_naissance' => $dateNaissanceStr,
+            ]);
+            $session->set('rdv_form_errors', $errorsByField);
+            // Toujours inclure le créneau pour rester sur l'étape 3 et afficher les erreurs
+            $redirectParams = [
                 'id' => $id,
                 'etape' => 3,
->>>>>>> origin/integreModule
-                'disponibilite_id' => $disponibiliteId ?: null,
-                'date_rdv' => $dateRdvStr ?: null,
-                'type' => $request->request->get('type'),
-                'mode' => $request->request->get('mode'),
-                'motif' => $request->request->get('motif'),
-<<<<<<< HEAD
-            ]));
+                'disponibilite_id' => $disponibiliteId,
+                'date_rdv' => $dateRdvStr,
+                'date_label' => (string) $request->request->get('date_label', ''),
+                'type' => (string) $request->request->get('type', 'premiere'),
+                'mode' => (string) $request->request->get('mode', 'cabinet'),
+                'motif' => (string) $request->request->get('motif', ''),
+            ];
+            return $this->redirectToRoute('user_appointment_book', $redirectParams);
         }
 
-=======
-            ]);
-        }
-
-        // Validation du token CSRF
->>>>>>> origin/integreModule
         $token = $request->request->get('_token');
         if (!\is_string($token) || !$this->isCsrfTokenValid('rdv_submit', $token)) {
             $this->addFlash('error', 'Session expirée. Veuillez recommencer.');
             return $this->redirectToRoute('user_appointment_book', ['id' => $id]);
         }
 
-<<<<<<< HEAD
-=======
-        // Détermination du motif
->>>>>>> origin/integreModule
         $motifKey = (string) $request->request->get('motif_key', 'normal');
         $motif = match ($motifKey) {
             'urgence' => Motif::URGENCE,
@@ -563,7 +651,6 @@ final class HomeController extends AbstractController
             default => Motif::NORMAL,
         };
 
-<<<<<<< HEAD
         $rdv = new RendezVous();
         $rdv->setMedecin($medecin);
         $rdv->setDisponibilite($disponibilite);
@@ -572,13 +659,12 @@ final class HomeController extends AbstractController
         $rdv->setPrenom($prenom);
         $rdv->setStatus(StatusRendezVous::EN_ATTENTE);
         $rdv->setMotif($motif);
-        $rdv->setTelephone((string) $request->request->get('telephone', ''));
-        $rdv->setAdresse((string) $request->request->get('adresse', ''));
-        $rdv->setNotePatient((string) $request->request->get('note', 'vide'));
-        $dateNaissance = $request->request->get('date_naissance');
-        if ($dateNaissance !== null && $dateNaissance !== '') {
+        $rdv->setTelephone($telephone !== '' ? $telephone : null);
+        $rdv->setAdresse($adresse !== '' ? $adresse : null);
+        $rdv->setNotePatient($note !== '' ? $note : 'vide');
+        if ($dateNaissanceStr !== '') {
             try {
-                $rdv->setDateNaissance(new \DateTime($dateNaissance));
+                $rdv->setDateNaissance(new \DateTimeImmutable($dateNaissanceStr));
             } catch (\Throwable) {
             }
         }
@@ -598,50 +684,7 @@ final class HomeController extends AbstractController
         $this->entityManager->flush();
 
         $this->addFlash('success', 'Votre demande de rendez-vous a été envoyée. Le médecin vous répondra sous peu.');
-=======
-        // Création du rendez-vous
-        $rendezVous = new RendezVous();
-        $rendezVous->setMedecin($medecin);
-        $rendezVous->setDisponibilite($disponibilite);
-        $rendezVous->setDateRdv($dateRdv);
-        $rendezVous->setNom($nom);
-        $rendezVous->setPrenom($prenom);
-        $rendezVous->setStatus(StatusRendezVous::EN_ATTENTE);
-        $rendezVous->setMotif($motif);
-        $rendezVous->setTelephone((string) $request->request->get('telephone', ''));
-        $rendezVous->setAdresse((string) $request->request->get('adresse', ''));
-        $rendezVous->setNotePatient((string) $request->request->get('note', ''));
-        
-        // Gestion de la date de naissance
-        $dateNaissance = $request->request->get('date_naissance');
-        if ($dateNaissance !== null && $dateNaissance !== '') {
-            try {
-                $rendezVous->setDateNaissance(new \DateTime($dateNaissance));
-            } catch (\Throwable) {
-            }
-        }
-        
-        // Association avec le patient connecté
-        $user = $this->getUser();
-        if ($user instanceof Patient) {
-            $rendezVous->setPatient($user);
-        }
 
-        // Sauvegarde en base de données
-        $this->entityManager->persist($rendezVous);
-        $this->entityManager->flush();
-
-        // Création de la notification pour le médecin
-        $notification = new Notification();
-        $notification->setDestinataire($medecin);
-        $notification->setType(Notification::TYPE_DEMANDE_RDV);
-        $notification->setRendezVous($rendezVous);
-        $this->entityManager->persist($notification);
-        $this->entityManager->flush();
-
-        $this->addFlash('success', 'Votre demande de rendez-vous a été envoyée. Le médecin vous répondra sous peu.');
-        
->>>>>>> origin/integreModule
         return $this->redirectToRoute('user_appointment_book', [
             'id' => $id,
             'etape' => 4,
@@ -683,23 +726,7 @@ final class HomeController extends AbstractController
             'email' => $medecin->getEmail() ?? '—',
             'price' => (int) round($medecin->getTarifConsultation() ?? 0),
             'has_cabinet' => $medecin->getAdresseCabinet() !== null && $medecin->getAdresseCabinet() !== '',
-            'has_teleconsult' => true,
+            'has_teleconsult' => false,
         ];
-    }
-
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/integreModule
-    #[Route('/inscription', name: 'register', methods: ['GET'])]
-    public function register(): Response
-    {
-        return $this->render('front/auth/register.html.twig');
-    }
-
-    #[Route('/connexion', name: 'login', methods: ['GET'])]
-    public function login(): Response
-    {
-        return $this->render('front/auth/login.html.twig');
     }
 }
