@@ -4,13 +4,9 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
-<<<<<<< HEAD
 use App\Entity\Evenement;
 use App\Entity\InscritEvents;
 use App\Entity\User;
-=======
-use App\Entity\InscritEvents;
->>>>>>> origin/integreModule
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -23,7 +19,6 @@ class InscritEventsRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, InscritEvents::class);
     }
-<<<<<<< HEAD
 
     /**
      * Inscriptions en attente de validation (admin), triées par date.
@@ -41,17 +36,17 @@ class InscritEventsRepository extends ServiceEntityRepository
     }
 
     /**
-     * Inscriptions acceptées ou refusées pour les bandeaux utilisateur.
+     * Inscriptions acceptées, refusées ou en attente pour les bandeaux utilisateur.
      *
      * @return InscritEvents[]
      */
-    public function findAccepteOrRefuseForUser(User $user): array
+    public function findAccepteRefuseOuEnAttenteForUser(User $user): array
     {
         return $this->createQueryBuilder('i')
             ->andWhere('i.user = :user')
             ->andWhere('i.statut IN (:statuts)')
             ->setParameter('user', $user)
-            ->setParameter('statuts', ['accepte', 'refuse'])
+            ->setParameter('statuts', ['accepte', 'refuse', 'en_attente'])
             ->orderBy('i.dateInscrit', 'DESC')
             ->getQuery()
             ->getResult();
@@ -81,6 +76,22 @@ class InscritEventsRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
-=======
->>>>>>> origin/integreModule
+
+    public function countByStatut(string $statut): int
+    {
+        return (int) $this->createQueryBuilder('i')
+            ->select('COUNT(i.id)')
+            ->andWhere('i.statut = :statut')
+            ->setParameter('statut', $statut)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function countTotalInscriptions(): int
+    {
+        return (int) $this->createQueryBuilder('i')
+            ->select('COUNT(i.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }

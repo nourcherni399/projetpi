@@ -21,7 +21,7 @@
                 </a>
                 <div class="flex items-center gap-3">
                     <a href="{{ path('doctor_profile') }}" class="flex items-center gap-3 hover:opacity-90 transition-opacity group" title="Modifier mon profil">
-                        <span class="flex items-center justify-center w-10 h-10 rounded-full bg-[#A7C7E7] text-white font-semibold text-sm group-hover:ring-2 group-hover:ring-[#A7C7E7] group-hover:ring-offset-1 transition-all">{{ app.user ? (app.user.prenom|slice(0,1) ~ app.user.nom|slice(0,1))|upper : 'DR' }}</span>
+                        <span class="flex items-center justify-center w-10 h-10 rounded-full overflow-hidden bg-[#A7C7E7] text-white font-semibold text-sm group-hover:ring-2 group-hover:ring-[#A7C7E7] group-hover:ring-offset-1 transition-all shrink-0">{% if app.user and app.user.image %}<img src="{{ asset(app.user.image) }}" alt="" class="w-full h-full object-cover">{% else %}{{ app.user ? (app.user.prenom|slice(0,1) ~ app.user.nom|slice(0,1))|upper : 'DR' }}{% endif %}</span>
                         <div>
                             <p class="font-medium text-[#4B5563] text-sm group-hover:text-[#A7C7E7]">{{ app.user ? app.user.prenom ~ ' ' ~ app.user.nom : 'Médecin' }}</p>
                             <p class="text-[#6B7280] text-xs">{{ app.user ? app.user.email : 'Espace professionnel' }}</p>

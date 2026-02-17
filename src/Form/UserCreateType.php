@@ -9,9 +9,8 @@ use App\Enum\UserRole;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
@@ -19,6 +18,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Email;
+use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\LessThanOrEqual;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -50,7 +50,7 @@ final class UserCreateType extends AbstractType
                 ],
                 'attr' => $attr + ['placeholder' => 'Prénom'],
             ])
-            ->add('email', EmailType::class, [
+            ->add('email', TextType::class, [
                 'label' => 'Email',
                 'constraints' => [
                     new NotBlank(message: 'L\'email est obligatoire.'),
@@ -59,13 +59,28 @@ final class UserCreateType extends AbstractType
                 ],
                 'attr' => $attr + ['placeholder' => 'email@exemple.fr'],
             ])
-            ->add('telephone', IntegerType::class, [
+            ->add('telephone', TextType::class, [
                 'label' => 'Téléphone',
                 'constraints' => [
                     new NotBlank(message: 'Le téléphone est obligatoire.'),
-                    new Range(['min' => 10000000, 'max' => 999999999999, 'notInRangeMessage' => 'Le téléphone doit contenir entre 8 et 12 chiffres.']),
+                    new Regex(['pattern' => '/^\d{8,12}$/', 'message' => 'Le téléphone doit contenir entre 8 et 12 chiffres.']),
                 ],
                 'attr' => $attr + ['placeholder' => '612345678'],
+            ])
+            ->add('image', FileType::class, [
+                'label' => 'Photo de profil',
+                'required' => false,
+                'mapped' => false,
+                'constraints' => [
+                    new File([
+                        'maxSize' => '5M',
+                        'mimeTypes' => ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'],
+                        'mimeTypesMessage' => 'Veuillez uploader une image valide (JPEG, PNG, GIF ou WebP).',
+                        'maxSizeMessage' => 'L\'image ne doit pas dépasser 5 Mo.',
+                        'uploadErrorMessage' => 'Une erreur est survenue lors de l\'upload.',
+                    ]),
+                ],
+                'attr' => $attr + ['accept' => 'image/*'],
             ])
             ->add('password', RepeatedType::class, [
                 'type' => PasswordType::class,
@@ -141,7 +156,7 @@ final class UserCreateType extends AbstractType
                 'label' => 'Tarif consultation (€)',
                 'required' => false,
                 'constraints' => [new Range(['min' => 0, 'max' => 99999.99, 'notInRangeMessage' => 'Le tarif doit être entre {{ min }} et {{ max }}.'])],
-                'attr' => $attr + ['placeholder' => '0', 'step' => '0.01', 'min' => 0, 'data-role-fields' => 'ROLE_MEDECIN'],
+                'attr' => $attr + ['placeholder' => '0', 'data-role-fields' => 'ROLE_MEDECIN'],
             ])
             // — Attributs Parent
             ->add('relationAvecPatient', TextType::class, [

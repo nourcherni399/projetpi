@@ -14,9 +14,22 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class NotificationRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    /**
+     * Notifications de type RDV (accepté/refusé) pour un destinataire, pour affichage bandeau utilisateur.
+     *
+     * @return list<Notification>
+     */
+    public function findRdvForDestinataireOrderByCreatedDesc(User $user, int $limit = 15): array
     {
-        parent::__construct($registry, Notification::class);
+        return $this->createQueryBuilder('n')
+            ->andWhere('n.destinataire = :user')
+            ->andWhere('n.type IN (:types)')
+            ->setParameter('user', $user)
+            ->setParameter('types', [Notification::TYPE_RDV_ACCEPTE, Notification::TYPE_RDV_REFUSE])
+            ->orderBy('n.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
     }
 
     /**

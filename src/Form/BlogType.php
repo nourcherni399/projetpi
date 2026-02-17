@@ -8,11 +8,14 @@ use App\Entity\Blog;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Length;
 
 final class BlogType extends AbstractType
 {
@@ -20,16 +23,28 @@ final class BlogType extends AbstractType
     {
         $attr = [
             'class' => 'mt-1 block w-full rounded-lg border border-[#E5E0D8] bg-white px-4 py-2.5 text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]',
+            'novalidate' => 'novalidate',
         ];
 
         $builder
             ->add('titre', TextType::class, [
                 'label' => 'Titre',
-                'constraints' => [new NotBlank(message: 'Le titre est obligatoire.')],
+                'required' => false,
+                'constraints' => [
+                    new NotBlank(message: 'Le titre est obligatoire.'),
+                    new Length([
+                        'min' => 3,
+                        'max' => 255,
+                        'minMessage' => 'Le titre doit contenir au moins {{ limit }} caractères.',
+                        'maxMessage' => 'Le titre ne peut pas dépasser {{ limit }} caractères.',
+                    ]),
+                ],
+                'empty_data' => '',
                 'attr' => $attr + ['placeholder' => 'Titre de l\'article'],
             ])
             ->add('type', ChoiceType::class, [
                 'label' => 'Type',
+                'required' => false,
                 'choices' => [
                     'Recommandation' => 'recommandation',
                     'Plainte' => 'plainte',
@@ -42,14 +57,37 @@ final class BlogType extends AbstractType
             ])
             ->add('contenu', TextareaType::class, [
                 'label' => 'Contenu',
-                'constraints' => [new NotBlank(message: 'Le contenu est obligatoire.')],
+                'required' => false,
+                'constraints' => [
+                    new NotBlank(message: 'Le contenu est obligatoire.'),
+                    new Length([
+                        'min' => 20,
+                        'minMessage' => 'Le contenu doit contenir au moins {{ limit }} caractères.',
+                    ]),
+                ],
+                'empty_data' => '',
                 'attr' => $attr + ['rows' => 8, 'placeholder' => 'Contenu de l\'article...'],
             ])
-            ->add('image', TextType::class, [
-                'label' => 'Image (URL ou chemin)',
+            ->add('image', FileType::class, [
+                'label' => 'Image de l\'article',
                 'required' => false,
-                'empty_data' => '',
-                'attr' => $attr + ['placeholder' => 'https://... ou chemin vers l\'image'],
+                'mapped' => false,
+                'constraints' => [
+                    new File([
+                        'maxSize' => '5M',
+                        'mimeTypes' => [
+                            'image/jpeg',
+                            'image/jpg',
+                            'image/png',
+                            'image/gif',
+                            'image/webp',
+                        ],
+                        'mimeTypesMessage' => 'Veuillez uploader une image valide (JPEG, PNG, GIF ou WebP).',
+                        'maxSizeMessage' => 'L\'image ne doit pas dépasser 5MB.',
+                        'uploadErrorMessage' => 'Une erreur est survenue lors de l\'upload de l\'image.',
+                    ]),
+                ],
+                'attr' => $attr + ['accept' => 'image/*'],
             ])
             ->add('isPublished', CheckboxType::class, [
                 'label' => 'Publier l\'article',

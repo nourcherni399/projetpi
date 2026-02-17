@@ -1,0 +1,75 @@
+{% extends 'layouts/user.html.twig' %}
+
+{% block title %}Récapitulatif de la commande - AutiCare{% endblock %}
+
+{% block user_content %}
+<section class="text-center mb-10">
+    <h1 class="text-3xl font-bold text-[#4B5563] mb-3">Récapitulatif de votre commande</h1>
+    <p class="text-[#6B7280]">Vérifiez les informations ci-dessous puis procédez au paiement ou modifiez si besoin.</p>
+</section>
+
+<div class="max-w-4xl mx-auto space-y-8">
+    <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
+        <h2 class="text-xl font-semibold text-[#4B5563] mb-4">Informations de la commande</h2>
+        <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[#6B7280]">
+            <div>
+                <dt class="text-sm font-medium text-[#4B5563]">Nom complet</dt>
+                <dd>{{ orderData.nom }}</dd>
+            </div>
+            <div>
+                <dt class="text-sm font-medium text-[#4B5563]">Email</dt>
+                <dd>{{ orderData.email }}</dd>
+            </div>
+            <div>
+                <dt class="text-sm font-medium text-[#4B5563]">Téléphone</dt>
+                <dd>{{ orderData.telephone }}</dd>
+            </div>
+            <div class="sm:col-span-2">
+                <dt class="text-sm font-medium text-[#4B5563]">Adresse de livraison</dt>
+                <dd>{{ orderData.adresse }}, {{ orderData.codePostal }} {{ orderData.ville }}</dd>
+            </div>
+            <div>
+                <dt class="text-sm font-medium text-[#4B5563]">Mode de paiement</dt>
+                <dd>
+                    {% if orderData.modePayment == 'carte_visa' %}Visa
+                    {% elseif orderData.modePayment == 'carte_mastercard' %}MasterCard
+                    {% elseif orderData.modePayment == 'carte_amex' %}American Express
+                    {% else %}À la livraison (paiement à réception)
+                    {% endif %}
+                </dd>
+            </div>
+        </dl>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
+        <h2 class="text-xl font-semibold text-[#4B5563] mb-4">Détail du panier</h2>
+        <ul class="space-y-3 mb-6 pb-6 border-b border-[#E5E0D8]">
+            {% for item in cart.items %}
+            <li class="flex justify-between text-[#6B7280]">
+                <span>{{ item.produit.nom }} x {{ item.quantite }}</span>
+                <span>{{ item.totalPrice|number_format(2, ',', ' ') }} د.ت</span>
+            </li>
+            {% endfor %}
+        </ul>
+        <div class="flex justify-between text-lg font-bold text-[#4B5563]">
+            <span>Total</span>
+            <span class="text-[#A7C7E7]">{{ totalPrice|number_format(2, ',', ' ') }} د.ت</span>
+        </div>
+    </div>
+
+    <div class="flex flex-wrap gap-4 justify-center sm:justify-between">
+        <a href="{{ path('order_checkout_cancel') }}" class="px-6 py-3 border border-red-500 text-red-600 rounded-lg font-semibold hover:bg-red-50 transition inline-block">
+            Annuler la commande
+        </a>
+        <a href="{{ path('order_checkout') }}" class="px-6 py-3 border border-[#A7C7E7] text-[#A7C7E7] rounded-lg font-semibold hover:bg-[#F5F1EB] transition inline-block">
+            Modifier les informations
+        </a>
+        <form method="POST" action="{{ path('order_confirm') }}" class="inline">
+            <input type="hidden" name="_token" value="{{ csrf_token('order_confirm') }}">
+            <button type="submit" class="px-6 py-3 bg-[#A7C7E7] text-white rounded-lg font-semibold hover:bg-[#B8D4ED] transition">
+                Procéder au paiement
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

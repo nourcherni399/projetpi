@@ -1,0 +1,41 @@
+{% extends 'layouts/doctor.html.twig' %}
+
+{% block title %}Note - {{ note.patient ? (note.patient.prenom ~ ' ' ~ note.patient.nom) : 'Patient' }} - AutiCare Médecin{% endblock %}
+
+{% block doctor_content %}
+<div class="space-y-6">
+    <div class="flex items-center gap-4">
+        <a href="{{ path('doctor_notes') }}" class="inline-flex items-center gap-2 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded-lg">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            Retour aux notes
+        </a>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-[#E5E0D8] shadow-lg overflow-hidden">
+        <div class="p-6 border-b border-[#E5E0D8] bg-[#F5F1EB]">
+            <h1 class="text-2xl font-bold text-[#4B5563]">Détail de la note</h1>
+            <p class="text-[#6B7280] text-sm mt-1">
+                {% if note.patient %}
+                    Patient : {{ note.patient.prenom }} {{ note.patient.nom }}
+                {% else %}
+                    Patient non renseigné
+                {% endif %}
+                — {{ note.dateCreation ? note.dateCreation|date('d/m/Y à H:i') : '—' }}
+            </p>
+        </div>
+        <div class="p-6">
+            <div class="prose prose-[#4B5563] max-w-none">
+                <p class="text-[#6B7280] whitespace-pre-wrap">{{ note.contenu ?? '—' }}</p>
+            </div>
+            <div class="mt-6 pt-4 border-t border-[#E5E0D8] flex flex-wrap gap-2">
+                <a href="{{ path('doctor_note_export_pdf', { id: note.id }) }}" class="inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 focus:outline focus:ring-2 focus:ring-red-500" title="Télécharger cette note en PDF">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    Télécharger en PDF
+                </a>
+                <a href="{{ path('doctor_note_edit', { id: note.id }) }}" class="inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Modifier</a>
+                <a href="{{ path('doctor_notes') }}" class="inline-flex items-center gap-1 px-4 py-2 rounded-lg border border-[#E5E0D8] text-[#4B5563] font-medium hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Retour à la liste</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

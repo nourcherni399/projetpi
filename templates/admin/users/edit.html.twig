@@ -25,7 +25,7 @@
         {{ form_start(form, {
             method: 'POST',
             action: path('admin_user_edit', { id: user.id }),
-            attr: { class: 'space-y-6' },
+            attr: { class: 'space-y-6', novalidate: 'novalidate' },
             label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }
         }) }}
         <div class="grid grid-cols-1 gap-6">
@@ -35,6 +35,15 @@
             </div>
             {{ form_row(form.email) }}
             {{ form_row(form.telephone) }}
+            <div>
+                {{ form_label(form.image, null, {'label_attr': {'class': 'block text-[#4B5563] font-medium mb-1'}}) }}
+                {% if user.image %}
+                    <p class="text-sm text-[#6B7280] mb-2">Photo actuelle :</p>
+                    <img src="{{ asset(user.image) }}" alt="Photo actuelle" class="w-20 h-20 rounded-xl object-cover border border-[#E5E0D8] mb-3">
+                {% endif %}
+                {{ form_widget(form.image) }}
+                {{ form_errors(form.image) }}
+            </div>
             {{ form_row(form.plainPassword.first) }}
             {{ form_row(form.plainPassword.second) }}
             <div class="flex items-center gap-2">

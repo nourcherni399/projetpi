@@ -34,25 +34,40 @@
             </div>
             <div class="flex gap-2 mb-4">
                 {% if doctor.has_cabinet %}<span class="px-3 py-1.5 rounded-lg border border-[#E5E0D8] text-[#6B7280] text-sm">Cabinet</span>{% endif %}
-                {% if doctor.has_teleconsult %}<span class="px-3 py-1.5 rounded-lg border border-[#E5E0D8] text-[#6B7280] text-sm">Téléconsultation</span>{% endif %}
             </div>
             <p class="font-semibold text-[#4B5563]">{{ doctor.price }}€ <span class="text-sm font-normal text-[#6B7280]">Tarif de la consultation</span></p>
         </div>
     </aside>
 
     <div class="flex-1 min-w-0">
+        {% for message in app.flashes('error') %}
+        <div class="mb-4 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-sm flex items-start gap-2" role="alert">
+            <svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+        {% for message in app.flashes('success') %}
+        <div class="mb-4 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-start gap-2" role="alert">
+            <svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+        <div id="rdv-step-alert" class="hidden mb-4 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm flex items-center gap-2" role="alert">
+            <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+            <span>Veuillez d'abord compléter l'étape 1 (choisir un créneau) avant de passer à cette étape.</span>
+        </div>
         <div class="flex flex-wrap items-center gap-2 mb-8 text-sm">
             <a href="{{ path('user_appointment_book', stepParams) }}" class="flex items-center gap-1 {% if step >= 1 %}text-[#A7C7E7] font-medium{% else %}text-[#6B7280]{% endif %}">
                 {% if step > 1 %}<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>{% else %}<span class="flex items-center justify-center w-6 h-6 rounded-full bg-[#A7C7E7] text-white text-xs">1</span>{% endif %}
                 Créneau
             </a>
             <span class="text-[#E5E0D8]">›</span>
-            <a href="{{ path('user_appointment_book', linkStep2) }}" class="flex items-center gap-1 {% if step >= 2 %}text-[#A7C7E7] font-medium{% else %}text-[#6B7280]{% endif %}">
+            <a href="{{ path('user_appointment_book', linkStep2) }}" class="rdv-step-link flex items-center gap-1 {% if step >= 2 %}text-[#A7C7E7] font-medium{% else %}text-[#6B7280]{% endif %}" data-step="2">
                 {% if step > 2 %}<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>{% else %}<span class="flex items-center justify-center w-6 h-6 rounded-full {% if step == 2 %}bg-[#A7C7E7] text-white{% else %}bg-[#E5E0D8] text-[#6B7280]{% endif %} text-xs">2</span>{% endif %}
                 Type
             </a>
             <span class="text-[#E5E0D8]">›</span>
-            <a href="{{ path('user_appointment_book', linkStep3) }}" class="flex items-center gap-1 {% if step >= 3 %}text-[#A7C7E7] font-medium{% else %}text-[#6B7280]{% endif %}">
+            <a href="{{ path('user_appointment_book', linkStep3) }}" class="rdv-step-link flex items-center gap-1 {% if step >= 3 %}text-[#A7C7E7] font-medium{% else %}text-[#6B7280]{% endif %}" data-step="3">
                 {% if step > 3 %}<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>{% else %}<span class="flex items-center justify-center w-6 h-6 rounded-full {% if step == 3 %}bg-[#A7C7E7] text-white{% else %}bg-[#E5E0D8] text-[#6B7280]{% endif %} text-xs">3</span>{% endif %}
                 Vos informations
             </a>
@@ -70,25 +85,29 @@
             {% if slots is defined and slots|length > 0 %}
             <form method="get" action="{{ path('user_appointment_book', { id: doctor.id }) }}" id="rdv-form-step1">
                 <input type="hidden" name="etape" value="2">
-                <input type="hidden" name="disponibilite_id" id="rdv-dispo" value="{{ choices.disponibilite_id|default(slots[0].disponibilite_id) }}">
-                <input type="hidden" name="date_rdv" id="rdv-date" value="{{ choices.date_rdv|default(slots[0].date_rdv) }}">
-                <input type="hidden" name="date_label" id="rdv-label" value="{{ choices.date_label|default(slots[0].label) }}">
+                <input type="hidden" name="disponibilite_id" id="rdv-dispo" value="{{ choices.disponibilite_id|default('') }}">
+                <input type="hidden" name="date_rdv" id="rdv-date" value="{{ choices.date_rdv|default('') }}">
+                <input type="hidden" name="date_label" id="rdv-label" value="{{ choices.date_label|default('') }}">
                 <div class="flex flex-wrap gap-2 mb-8">
                     {% for slot in slots %}
                     <button type="button" class="rdv-slot px-4 py-3 rounded-lg border-2 border-[#E5E0D8] text-[#6B7280] hover:border-[#A7C7E7] font-medium transition-colors text-left {% if choices.disponibilite_id == slot.disponibilite_id and choices.date_rdv == slot.date_rdv %}rdv-selected{% endif %}" data-dispo="{{ slot.disponibilite_id }}" data-date="{{ slot.date_rdv }}" data-label="{{ slot.label }}">{{ slot.label }}</button>
                     {% endfor %}
                 </div>
                 <div class="flex justify-end">
-                    <button type="submit" class="inline-flex items-center gap-1 px-6 py-3 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED]">Continuer <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg></button>
+                    <button type="submit" id="rdv-btn-continuer-step1" class="inline-flex items-center gap-1 px-6 py-3 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] disabled:opacity-50 disabled:cursor-not-allowed" {% if not choices.disponibilite_id or not choices.date_rdv %}disabled{% endif %} title="Choisissez un créneau ci-dessus pour continuer">Continuer <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg></button>
                 </div>
             </form>
             <script>
             (function() {
-                var form = document.getElementById('rdv-form-step1');
                 var dispo = document.getElementById('rdv-dispo');
                 var date = document.getElementById('rdv-date');
                 var label = document.getElementById('rdv-label');
+                var btnContinuer = document.getElementById('rdv-btn-continuer-step1');
                 var btns = document.querySelectorAll('.rdv-slot');
+                function updateContinuerState() {
+                    var hasSlot = dispo && date && dispo.value && date.value;
+                    if (btnContinuer) btnContinuer.disabled = !hasSlot;
+                }
                 btns.forEach(function(btn) {
                     btn.addEventListener('click', function() {
                         btns.forEach(function(b) { b.classList.remove('rdv-selected'); });
@@ -96,14 +115,37 @@
                         if (dispo) dispo.value = this.getAttribute('data-dispo');
                         if (date) date.value = this.getAttribute('data-date');
                         if (label) label.value = this.getAttribute('data-label');
+                        updateContinuerState();
                     });
                 });
+                updateContinuerState();
             })();
             </script>
             {% else %}
             <p class="text-[#6B7280] mb-6">Aucun créneau disponible pour les 4 prochaines semaines. Revenez plus tard ou choisissez un autre médecin.</p>
             <a href="{{ path('user_appointments') }}" class="inline-flex px-6 py-3 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED]">Voir les autres médecins</a>
             {% endif %}
+            <script>
+            (function() {
+                var formStep1 = document.getElementById('rdv-form-step1');
+                var alertEl = document.getElementById('rdv-step-alert');
+                var dispoInput = document.getElementById('rdv-dispo');
+                var dateInput = document.getElementById('rdv-date');
+                document.querySelectorAll('.rdv-step-link').forEach(function(link) {
+                    link.addEventListener('click', function(e) {
+                        if (formStep1 && alertEl && link.getAttribute('data-step') !== '1') {
+                            var hasSlot = (dispoInput && dateInput && dispoInput.value && dateInput.value);
+                            if (!hasSlot) {
+                                e.preventDefault();
+                                alertEl.classList.remove('hidden');
+                                alertEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                setTimeout(function() { alertEl.classList.add('hidden'); }, 6000);
+                            }
+                        }
+                    });
+                });
+            })();
+            </script>
             {% endif %}
 
             {% if step == 2 %}
@@ -136,25 +178,20 @@
                         <span class="text-[#6B7280] text-sm">Durée: 30 min</span>
                     </label>
                 </div>
+                <input type="hidden" name="mode" value="cabinet">
                 <p class="text-[#4B5563] font-medium mb-3">Mode de consultation</p>
-                <div class="flex gap-4 mb-6">
-                    <label class="rdv-mode-option flex-1 flex items-center justify-center gap-2 p-4 rounded-xl cursor-pointer">
-                        <input type="radio" name="mode" value="cabinet" {% if choices.mode == 'cabinet' %}checked{% endif %} class="rounded-full border-[#E5E0D8] text-[#A7C7E7] focus:ring-[#A7C7E7]">
-                        <span class="text-[#4B5563]">Au cabinet</span>
-                    </label>
-                    <label class="rdv-mode-option flex-1 flex items-center justify-center gap-2 p-4 rounded-xl cursor-pointer">
-                        <input type="radio" name="mode" value="teleconsult" {% if choices.mode == 'teleconsult' %}checked{% endif %} class="rounded-full border-[#E5E0D8] text-[#A7C7E7] focus:ring-[#A7C7E7]">
-                        <span class="text-[#4B5563]">Téléconsultation</span>
-                    </label>
-                </div>
+                <p class="text-[#6B7280] mb-6">Au cabinet</p>
                 <div class="mb-8">
-                    <label class="block text-[#4B5563] font-medium mb-2">Motif de la consultation</label>
-                    <select name="motif" class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-white text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                    <label class="block text-[#4B5563] font-medium mb-2">Motif de la consultation <span class="text-red-500">*</span></label>
+                    <select name="motif" class="w-full px-4 py-2.5 rounded-lg border {% if motif_error|default('') %}border-red-500{% else %}border-[#E5E0D8]{% endif %} bg-white text-[#6B7280] focus:outline focus:ring-2 {% if motif_error|default('') %}focus:ring-red-500{% else %}focus:ring-[#A7C7E7]{% endif %}">
                         <option value="">Sélectionnez un motif</option>
                         <option value="Diagnostic TSA" {% if choices.motif == 'Diagnostic TSA' %}selected{% endif %}>Diagnostic TSA</option>
                         <option value="Suivi thérapeutique" {% if choices.motif == 'Suivi thérapeutique' %}selected{% endif %}>Suivi thérapeutique</option>
                         <option value="Bilan" {% if choices.motif == 'Bilan' %}selected{% endif %}>Bilan</option>
                     </select>
+                    {% if motif_error|default('') %}
+                        <p class="mt-1 text-sm text-red-600">{{ motif_error }}</p>
+                    {% endif %}
                 </div>
                 <div class="flex justify-between">
                     <a href="{{ path('user_appointment_book', stepParams) }}" class="px-6 py-3 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB]">&lt; Retour</a>
@@ -165,7 +202,7 @@
 
             {% if step == 3 %}
             <h2 class="text-xl font-bold text-[#4B5563] mb-6">Vos informations</h2>
-            <form method="post" action="{{ path('user_appointment_submit', { id: doctor.id }) }}" class="space-y-4 mb-8">
+            <form method="post" action="{{ path('user_appointment_submit', { id: doctor.id }) }}" class="space-y-4 mb-8" novalidate="novalidate">
                 <input type="hidden" name="_token" value="{{ csrf_token('rdv_submit') }}">
                 <input type="hidden" name="disponibilite_id" value="{{ choices.disponibilite_id }}">
                 <input type="hidden" name="date_rdv" value="{{ choices.date_rdv }}">
@@ -177,28 +214,34 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-[#4B5563] font-medium mb-1">Nom <span class="text-red-500">*</span></label>
-                        <input type="text" name="nom" required placeholder="Votre nom" class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-white text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                        <input type="text" name="nom" value="{{ form_rdv.nom|default('')|e('html_attr') }}" placeholder="Votre nom" class="w-full px-4 py-2.5 rounded-lg border bg-white text-[#6B7280] focus:outline focus:ring-2 {% if form_errors.nom|default('') %}border-red-500 focus:ring-red-500{% else %}border-[#E5E0D8] focus:ring-[#A7C7E7]{% endif %}">
+                        {% if form_errors.nom|default('') %}<p class="mt-1 text-sm text-red-600">{{ form_errors.nom }}</p>{% endif %}
                     </div>
                     <div>
                         <label class="block text-[#4B5563] font-medium mb-1">Prénom <span class="text-red-500">*</span></label>
-                        <input type="text" name="prenom" required placeholder="Votre prénom" class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-white text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                        <input type="text" name="prenom" value="{{ form_rdv.prenom|default('')|e('html_attr') }}" placeholder="Votre prénom" class="w-full px-4 py-2.5 rounded-lg border bg-white text-[#6B7280] focus:outline focus:ring-2 {% if form_errors.prenom|default('') %}border-red-500 focus:ring-red-500{% else %}border-[#E5E0D8] focus:ring-[#A7C7E7]{% endif %}">
+                        {% if form_errors.prenom|default('') %}<p class="mt-1 text-sm text-red-600">{{ form_errors.prenom }}</p>{% endif %}
                     </div>
                 </div>
                 <div>
-                    <label class="block text-[#4B5563] font-medium mb-1">Téléphone</label>
-                    <input type="tel" name="telephone" placeholder="06 12 34 56 78" class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-white text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                    <label class="block text-[#4B5563] font-medium mb-1">Téléphone <span class="text-red-500">*</span></label>
+                    <input type="tel" name="telephone" value="{{ form_rdv.telephone|default('')|e('html_attr') }}" placeholder="06 12 34 56 78" class="w-full px-4 py-2.5 rounded-lg border bg-white text-[#6B7280] focus:outline focus:ring-2 {% if form_errors.telephone|default('') %}border-red-500 focus:ring-red-500{% else %}border-[#E5E0D8] focus:ring-[#A7C7E7]{% endif %}">
+                    {% if form_errors.telephone|default('') %}<p class="mt-1 text-sm text-red-600">{{ form_errors.telephone }}</p>{% endif %}
                 </div>
                 <div>
-                    <label class="block text-[#4B5563] font-medium mb-1">Adresse</label>
-                    <input type="text" name="adresse" placeholder="Adresse (optionnel)" class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-white text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                    <label class="block text-[#4B5563] font-medium mb-1">Adresse <span class="text-red-500">*</span></label>
+                    <input type="text" name="adresse" value="{{ form_rdv.adresse|default('')|e('html_attr') }}" placeholder="Votre adresse" class="w-full px-4 py-2.5 rounded-lg border bg-white text-[#6B7280] focus:outline focus:ring-2 {% if form_errors.adresse|default('') %}border-red-500 focus:ring-red-500{% else %}border-[#E5E0D8] focus:ring-[#A7C7E7]{% endif %}">
+                    {% if form_errors.adresse|default('') %}<p class="mt-1 text-sm text-red-600">{{ form_errors.adresse }}</p>{% endif %}
                 </div>
                 <div>
-                    <label class="block text-[#4B5563] font-medium mb-1">Date de naissance du patient</label>
-                    <input type="date" name="date_naissance" class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-white text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                    <label class="block text-[#4B5563] font-medium mb-1">Date de naissance du patient <span class="text-red-500">*</span></label>
+                    <input type="date" name="date_naissance" value="{{ form_rdv.date_naissance|default('')|e('html_attr') }}" class="w-full px-4 py-2.5 rounded-lg border bg-white text-[#6B7280] focus:outline focus:ring-2 {% if form_errors.date_naissance|default('') %}border-red-500 focus:ring-red-500{% else %}border-[#E5E0D8] focus:ring-[#A7C7E7]{% endif %}">
+                    {% if form_errors.date_naissance|default('') %}<p class="mt-1 text-sm text-red-600">{{ form_errors.date_naissance }}</p>{% endif %}
                 </div>
                 <div>
                     <label class="block text-[#4B5563] font-medium mb-1">Notes (optionnel)</label>
-                    <textarea name="note" rows="3" placeholder="Informations utiles pour le praticien..." class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-white text-[#6B7280] focus:outline focus:ring-2 focus:ring-[#A7C7E7]"></textarea>
+                    <textarea name="note" rows="3" placeholder="Informations utiles pour le praticien..." class="w-full px-4 py-2.5 rounded-lg border bg-white text-[#6B7280] focus:outline focus:ring-2 {% if form_errors.note|default('') %}border-red-500 focus:ring-red-500{% else %}border-[#E5E0D8] focus:ring-[#A7C7E7]{% endif %}">{{ form_rdv.note|default('')|e('html') }}</textarea>
+                    {% if form_errors.note|default('') %}<p class="mt-1 text-sm text-red-600">{{ form_errors.note }}</p>{% endif %}
                 </div>
                 <div class="bg-[#F5F1EB] rounded-xl p-4 mb-6">
                     <h3 class="font-semibold text-[#4B5563] mb-3">Récapitulatif</h3>
@@ -231,7 +274,7 @@
                         <li><strong class="text-[#4B5563]">Créneau:</strong> {{ choices.date_label|default('—') }}</li>
                         <li><strong class="text-[#4B5563]">Type:</strong> {{ choices.type_label }}</li>
                         <li><strong class="text-[#4B5563]">Mode:</strong> {{ choices.mode_label }}</li>
-                        <li><strong class="text-[#4B5563]">Lieu:</strong> {{ choices.mode == 'teleconsult' ? 'Téléconsultation' : doctor.address }}</li>
+                        <li><strong class="text-[#4B5563]">Lieu:</strong> {{ doctor.address }}</li>
                     </ul>
                 </div>
                 <div class="flex flex-wrap gap-4 justify-center">

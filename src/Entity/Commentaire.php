@@ -31,7 +31,7 @@ class Commentaire
     private ?User $user = null;
 
     #[ORM\ManyToOne(inversedBy: 'commentaires')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Blog $blog = null;
 
     public function getId(): ?int
@@ -44,9 +44,9 @@ class Commentaire
         return $this->contenu;
     }
 
-    public function setContenu(string $contenu): static
+    public function setContenu(?string $contenu): static
     {
-        $this->contenu = $contenu;
+        $this->contenu = $contenu ?? '';
 
         return $this;
     }
@@ -113,6 +113,8 @@ class Commentaire
 
     public function __construct()
     {
-        $this->dateCreation = new \DateTime();
+        $now = new \DateTime();
+        $this->dateCreation = $now;
+        $this->dateModif = $now;
     }
 }

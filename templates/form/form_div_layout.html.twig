@@ -51,9 +51,12 @@
     <input type="{{ type }}" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}"{% endif %} />
 {% endblock form_widget_simple %}
 
-{# Personnalisation des textarea #}
+{# Personnalisation des textarea : bordure rouge si le champ a une erreur #}
 {% block textarea_widget %}
     {% set attr = attr|merge({class: (attr.class|default('') ~ ' form-control')|trim}) %}
+    {% if form.vars.errors|length > 0 and attr.class is defined %}
+        {% set attr = attr|merge({class: (attr.class|default('')) ~ ' border-red-500 ring-2 ring-red-200'}) %}
+    {% endif %}
     <textarea {{ block('widget_attributes') }}>{{ value }}</textarea>
 {% endblock textarea_widget %}
 
@@ -68,6 +71,9 @@
 
 {% block choice_widget_collapsed %}
     {% set attr = attr|merge({class: (attr.class|default('') ~ ' form-control')|trim}) %}
+    {% if form.vars.errors|length > 0 and attr.class is defined %}
+        {% set attr = attr|merge({class: (attr.class|default('')) ~ ' border-red-500 ring-2 ring-red-200'}) %}
+    {% endif %}
     <select {{ block('widget_attributes') }}{% if multiple %} multiple="multiple"{% endif %}>
         {% if placeholder is not none %}
             <option value=""{% if required and value is empty %} selected="selected"{% endif %}>{{ placeholder|trans({}, translation_domain) }}</option>

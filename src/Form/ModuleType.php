@@ -10,13 +10,14 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\Url;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 final class ModuleType extends AbstractType
 {
@@ -70,14 +71,26 @@ final class ModuleType extends AbstractType
                 'constraints' => [new NotBlank(message: 'La catégorie est obligatoire.')],
                 'attr' => $attr,
             ])
-            ->add('image', TextType::class, [
-                'label' => 'URL de l\'image',
+            ->add('image', FileType::class, [
+                'label' => 'Image du module',
                 'required' => false,
-                'empty_data' => '',
+                'mapped' => false,
                 'constraints' => [
-                    new Url(message: 'Veuillez entrer une URL valide.')
+                    new File([
+                        'maxSize' => '5M',
+                        'mimeTypes' => [
+                            'image/jpeg',
+                            'image/jpg',
+                            'image/png',
+                            'image/gif',
+                            'image/webp',
+                        ],
+                        'mimeTypesMessage' => 'Veuillez uploader une image valide (JPEG, PNG, GIF ou WebP).',
+                        'maxSizeMessage' => 'L\'image ne doit pas dépasser 5MB.',
+                        'uploadErrorMessage' => 'Une erreur est survenue lors de l\'upload de l\'image.',
+                    ]),
                 ],
-                'attr' => $attr + ['placeholder' => 'https://…'],
+                'attr' => $attr + ['accept' => 'image/*'],
             ])
             ->add('isPublished', CheckboxType::class, [
                 'label' => 'Publié',

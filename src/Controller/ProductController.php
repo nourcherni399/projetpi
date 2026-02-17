@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/products')]
+#[Route('/produits')]
 final class ProductController extends AbstractController
 {
     public function __construct(
@@ -49,28 +49,31 @@ final class ProductController extends AbstractController
         }
         
         $produits = $this->produitRepository->findBy($criteria, $orderBy);
-        
-        // Filter by price range and search term in PHP
-        if ($minPrice !== null || $maxPrice !== null || $search !== null) {
-            $minPrice = $minPrice !== null ? (int)$minPrice : 0;
-            $maxPrice = $maxPrice !== null ? (int)$maxPrice : PHP_INT_MAX;
-            $searchTerm = $search !== null ? strtolower(trim($search)) : '';
-            
-            $produits = array_filter($produits, function($produit) use ($minPrice, $maxPrice, $searchTerm) {
-                $priceMatch = $produit->getPrix() >= $minPrice && $produit->getPrix() <= $maxPrice;
-                
+
+        $minPriceVal = $minPrice !== null && $minPrice !== '' ? (int) $minPrice : null;
+        $maxPriceVal = $maxPrice !== null && $maxPrice !== '' ? (int) $maxPrice : null;
+        $searchTerm = $search !== null && $search !== '' ? strtolower(trim((string) $search)) : '';
+
+        if ($minPriceVal !== null || $maxPriceVal !== null || $searchTerm !== '') {
+            $minFilter = $minPriceVal ?? 0;
+            $maxFilter = $maxPriceVal ?? PHP_INT_MAX;
+
+            $produits = array_filter($produits, function ($produit) use ($minFilter, $maxFilter, $searchTerm) {
+                $priceMatch = $produit->getPrix() !== null && (float) $produit->getPrix() >= $minFilter && (float) $produit->getPrix() <= $maxFilter;
+
                 if ($searchTerm === '') {
                     return $priceMatch;
                 }
-                
-                $nomMatch = strpos(strtolower($produit->getNom()), $searchTerm) !== false;
-                $descriptionMatch = $produit->getDescription() && strpos(strtolower($produit->getDescription()), $searchTerm) !== false;
-                $categorieMatch = $produit->getCategorie() && strpos(strtolower($produit->getCategorie()->label()), $searchTerm) !== false;
-                
+
+                $nom = $produit->getNom() ?? '';
+                $nomMatch = strpos(strtolower($nom), $searchTerm) !== false;
+                $descriptionMatch = $produit->getDescription() !== null && strpos(strtolower($produit->getDescription()), $searchTerm) !== false;
+                $categorieMatch = $produit->getCategorie() !== null && strpos(strtolower($produit->getCategorie()->label()), $searchTerm) !== false;
+
                 return $priceMatch && ($nomMatch || $descriptionMatch || $categorieMatch);
             });
         }
-        
+
         return $this->render('front/products/index.html.twig', [
             'produits' => $produits,
             'categories' => Categorie::cases(),
@@ -80,6 +83,7 @@ final class ProductController extends AbstractController
             'search' => $search,
             'sortBy' => $sortBy,
             'sortOrder' => $sortOrder,
+            'cart_add' => true,
         ]);
     }
 }

@@ -8,32 +8,71 @@ use App\Entity\Module;
 use App\Form\ModuleType;
 use App\Repository\ModuleRepository;
 use App\Repository\ActionHistoryRepository;
+use App\Repository\RessourceRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/admin/modules')]
 final class ModuleController extends AbstractController
 {
     public function __construct(
         private readonly ModuleRepository $moduleRepository,
+        private readonly RessourceRepository $ressourceRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly ActionHistoryRepository $actionHistoryRepository,
+        private readonly SluggerInterface $slugger,
     ) {
     }
 
     #[Route('', name: 'admin_dashboard', methods: ['GET'])]
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $modules = $this->moduleRepository->findBy([], ['dateCreation' => 'DESC']);
         $actionHistory = $this->actionHistoryRepository->findLatestActions(5);
-        
+        $resourceModuleId = $request->query->getInt('resourceModule', 0);
+        $selectedResourceModule = $resourceModuleId > 0 ? $this->moduleRepository->find($resourceModuleId) : null;
+        $ressources = $selectedResourceModule instanceof Module
+            ? $this->ressourceRepository->findByModuleOrdered($selectedResourceModule)
+            : $this->ressourceRepository->findAllOrdered();
+
+        $statsByType = [
+            'recommandation' => 0,
+            'plainte' => 0,
+            'question' => 0,
+            'experience' => 0,
+        ];
+        $statsByModule = [];
+
+        foreach ($modules as $module) {
+            $articlesCount = 0;
+            $commentairesCount = 0;
+            foreach ($module->getBlogs() as $blog) {
+                $articlesCount++;
+                $type = $blog->getType();
+                if (isset($statsByType[$type])) {
+                    $statsByType[$type]++;
+                }
+                $commentairesCount += $blog->getCommentaires()->count();
+            }
+            $statsByModule[] = [
+                'module' => $module,
+                'articles' => $articlesCount,
+                'commentaires' => $commentairesCount,
+            ];
+        }
+
         return $this->render('admin/module/index.html.twig', [
             'modules' => $modules,
-            'actionHistory' => $actionHistory
+            'ressources' => $ressources,
+            'selectedResourceModule' => $selectedResourceModule,
+            'actionHistory' => $actionHistory,
+            'statsByType' => $statsByType,
+            'statsByModule' => $statsByModule,
         ]);
     }
 
@@ -45,6 +84,16 @@ final class ModuleController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $imageFile = $form->get('image')->getData();
+            if ($imageFile) {
+                $saved = $this->handleImageUpload($imageFile, $module);
+                if (!$saved) {
+                    return $this->render('admin/module/new.html.twig', [
+                        'module' => $module,
+                        'form' => $form,
+                    ]);
+                }
+            }
             $now = new \DateTime();
             $module->setDateCreation($now);
             $module->setDateModif($now);
@@ -80,6 +129,16 @@ final class ModuleController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $imageFile = $form->get('image')->getData();
+            if ($imageFile) {
+                $saved = $this->handleImageUpload($imageFile, $module);
+                if (!$saved) {
+                    return $this->render('admin/module/edit.html.twig', [
+                        'module' => $module,
+                        'form' => $form,
+                    ]);
+                }
+            }
             $module->setDateModif(new \DateTime());
             if ($module->getImage() === null) {
                 $module->setImage('');
@@ -150,5 +209,25 @@ final class ModuleController extends AbstractController
         );
 
         return $this->json(['success' => true]);
+    }
+
+    private function handleImageUpload(\Symfony\Component\HttpFoundation\File\UploadedFile $imageFile, Module $module): bool
+    {
+        $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+        $safeFilename = $this->slugger->slug($originalFilename);
+        $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
+
+        try {
+            $dir = $this->getParameter('uploads_modules_directory');
+            if (!is_dir($dir)) {
+                mkdir($dir, 0755, true);
+            }
+            $imageFile->move($dir, $newFilename);
+            $module->setImage('uploads/modules/' . $newFilename);
+            return true;
+        } catch (\Throwable $e) {
+            $this->addFlash('error', 'Erreur lors de l\'upload de l\'image.');
+            return false;
+        }
     }
 }

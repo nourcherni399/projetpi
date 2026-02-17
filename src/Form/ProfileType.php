@@ -11,8 +11,9 @@ use App\Entity\User;
 use App\Enum\Sexe;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\EnumType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -20,6 +21,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Email;
+use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\LessThanOrEqual;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -68,6 +70,21 @@ final class ProfileType extends AbstractType
                     new Range(['min' => 10000000, 'max' => 999999999999, 'notInRangeMessage' => 'Le téléphone doit contenir entre 8 et 12 chiffres.']),
                 ],
                 'attr' => self::ATTR + ['placeholder' => '612345678'],
+            ])
+            ->add('image', FileType::class, [
+                'label' => 'Photo de profil',
+                'required' => false,
+                'mapped' => false,
+                'constraints' => [
+                    new File([
+                        'maxSize' => '5M',
+                        'mimeTypes' => ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'],
+                        'mimeTypesMessage' => 'Veuillez uploader une image valide (JPEG, PNG, GIF ou WebP).',
+                        'maxSizeMessage' => 'L\'image ne doit pas dépasser 5 Mo.',
+                        'uploadErrorMessage' => 'Une erreur est survenue lors de l\'upload.',
+                    ]),
+                ],
+                'attr' => self::ATTR + ['accept' => 'image/*'],
             ]);
 
         if ($user instanceof Patient) {
@@ -141,7 +158,7 @@ final class ProfileType extends AbstractType
         $builder->add('submit', SubmitType::class, [
             'label' => 'Enregistrer les modifications',
             'attr' => [
-                'class' => 'w-full py-3.5 rounded-xl bg-[#A7C7E7] text-white font-semibold hover:bg-[#96B8DC] focus:outline focus:ring-2 focus:ring-[#A7C7E7] focus:ring-offset-2 transition-colors cursor-pointer',
+                'class' => 'inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-[#A7C7E7] text-white font-semibold shadow-lg shadow-[#A7C7E7]/30 hover:bg-[#8BB8E0] hover:shadow-xl hover:shadow-[#A7C7E7]/25 focus:outline focus:ring-2 focus:ring-[#A7C7E7] focus:ring-offset-2 transition-all duration-200 cursor-pointer',
             ],
         ]);
     }

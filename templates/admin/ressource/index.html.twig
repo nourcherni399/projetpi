@@ -1,0 +1,112 @@
+{% extends 'layouts/admin.html.twig' %}
+
+{% block title %}Ressources - AutiCare Admin{% endblock %}
+
+{% block admin_content %}
+<h1 class="text-2xl font-semibold text-[#4B5563] mb-6">Gestion des ressources</h1>
+
+{% for message in app.flashes('success') %}
+    <div class="mb-4 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">{{ message }}</div>
+{% endfor %}
+{% for message in app.flashes('error') %}
+    <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-800">{{ message }}</div>
+{% endfor %}
+
+<div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
+    <div class="p-4 border-b border-[#E5E0D8] flex flex-wrap gap-3 items-end justify-between">
+        <form method="get" action="{{ path('admin_ressource_index') }}" class="flex flex-wrap gap-3 items-end">
+            <div>
+                <label for="moduleFilter" class="block text-sm text-[#4B5563] mb-1">Filtrer par module</label>
+                <select id="moduleFilter" name="module" class="rounded-lg border border-[#E5E0D8] px-3 py-2 text-[#4B5563]">
+                    <option value="">Tous les modules</option>
+                    {% for module in modules %}
+                        <option value="{{ module.id }}" {% if selectedModule and selectedModule.id == module.id %}selected{% endif %}>
+                            {{ module.titre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="px-4 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED]">
+                Filtrer
+            </button>
+        </form>
+
+        <a href="{{ path('admin_ressource_new', selectedModule ? {'module': selectedModule.id} : {}) }}"
+           class="px-4 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED]">
+            Nouvelle ressource
+        </a>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead class="bg-[#F5F1EB] border-b border-[#E5E0D8]">
+                <tr>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Titre</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Type</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Contenu</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Module</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Ordre</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Actif</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-[#E5E0D8]">
+                {% for ressource in ressources %}
+                    <tr class="hover:bg-[#F5F1EB]/50">
+                        <td class="px-6 py-4 text-[#4B5563] font-medium">{{ ressource.titre }}</td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
+                                {% if ressource.typeRessource == 'url' %}bg-blue-100 text-blue-800
+                                {% elseif ressource.typeRessource == 'video' %}bg-purple-100 text-purple-800
+                                {% else %}bg-green-100 text-green-800{% endif %}">
+                                {{ ressource.typeRessource|upper }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-[#6B7280] max-w-xs truncate">
+                            {{ ressource.contenu }}
+                        </td>
+                        <td class="px-6 py-4 text-[#6B7280]">
+                            {{ ressource.module ? ressource.module.titre : '-' }}
+                        </td>
+                        <td class="px-6 py-4 text-[#6B7280]">{{ ressource.ordre is not null ? ressource.ordre : '-' }}</td>
+                        <td class="px-6 py-4">
+                            {% if ressource.isActive %}
+                                <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Oui</span>
+                            {% else %}
+                                <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">Non</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex gap-2">
+                                <a href="{{ path('admin_ressource_edit', {'id': ressource.id}) }}"
+                                   class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100"
+                                   title="Modifier">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </a>
+                                <form method="post"
+                                      action="{{ path('admin_ressource_delete', {'id': ressource.id}) }}"
+                                      onsubmit="return confirm('Supprimer cette ressource ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_ressource' ~ ressource.id) }}">
+                                    <button type="submit"
+                                            class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-red-50 text-red-600 hover:bg-red-100"
+                                            title="Supprimer">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-8 text-center text-[#6B7280]">Aucune ressource.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

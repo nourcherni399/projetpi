@@ -1,0 +1,21 @@
+{% extends 'layouts/admin.html.twig' %}
+
+{% block title %}Modifier ressource - AutiCare Admin{% endblock %}
+
+{% block admin_content %}
+<div class="max-w-2xl">
+    <div class="mb-6 flex items-center gap-4">
+        <a href="{{ path('admin_ressource_index', ressource.module ? {'module': ressource.module.id} : {}) }}" class="inline-flex items-center gap-2 text-[#6B7280] hover:text-[#A7C7E7] rounded-lg">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Retour aux ressources
+        </a>
+    </div>
+    <h1 class="text-2xl font-semibold text-[#4B5563] mb-6">Modifier la ressource</h1>
+
+    <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8">
+        {{ include('admin/ressource/_form.html.twig', { form: form, button_label: 'Enregistrer les modifications' }) }}
+    </div>
+</div>
+{% endblock %}

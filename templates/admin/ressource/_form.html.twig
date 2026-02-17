@@ -1,0 +1,29 @@
+{{ form_start(form, {
+    attr: { class: 'space-y-6', novalidate: 'novalidate' },
+    label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }
+}) }}
+{{ form_errors(form) }}
+
+<div class="grid grid-cols-1 gap-6">
+    {{ form_row(form.titre) }}
+    {{ form_row(form.typeRessource) }}
+    {{ form_row(form.contenu) }}
+    {{ form_row(form.mediaFile) }}
+    {{ form_row(form.module) }}
+    {{ form_row(form.ordre) }}
+    <div class="flex items-center gap-2">
+        {{ form_widget(form.isActive) }}
+        {{ form_label(form.isActive) }}
+        {{ form_errors(form.isActive) }}
+    </div>
+</div>
+
+<div class="flex flex-wrap gap-3 pt-4">
+    <button type="submit" class="px-5 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED]">
+        {{ button_label|default('Enregistrer') }}
+    </button>
+    <a href="{{ path('admin_ressource_index') }}" class="px-5 py-2.5 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB]">
+        Annuler
+    </a>
+</div>
+{{ form_end(form) }}

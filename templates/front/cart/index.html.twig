@@ -4,6 +4,12 @@
 
 {% block user_content %}
 <span class="cart-items-count hidden">{{ cart.totalItems }}</span>
+{% for message in app.flashes('error') %}
+    <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-800">{{ message }}</div>
+{% endfor %}
+{% for message in app.flashes('success') %}
+    <div class="mb-4 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">{{ message }}</div>
+{% endfor %}
 <section class="text-center mb-10">
     <h1 class="text-3xl font-bold text-[#4B5563] mb-3">Mon Panier</h1>
 </section>
@@ -42,8 +48,8 @@
                         </td>
                         <td class="px-6 py-4 text-center text-[#4B5563] font-semibold">{{ item.prix|number_format(2, ',', ' ') }} د.ت</td>
                         <td class="px-6 py-4 text-center">
-                            <form method="POST" action="{{ path('cart_update', {id: item.produit.id}) }}" class="flex justify-center gap-2">
-                                <input type="number" name="quantite" value="{{ item.quantite }}" min="1" class="w-16 px-2 py-1 border border-[#E5E0D8] rounded-lg text-center">
+                            <form method="POST" action="{{ path('cart_update', {id: item.produit.id}) }}" class="flex justify-center gap-2" novalidate>
+                                <input type="number" name="quantite" value="{{ item.quantite }}" class="w-16 px-2 py-1 border border-[#E5E0D8] rounded-lg text-center" aria-label="Quantité">
                                 <button type="submit" class="px-3 py-1 bg-[#A7C7E7] text-white rounded-lg text-sm hover:bg-[#B8D4ED]">OK</button>
                             </form>
                         </td>
@@ -82,7 +88,7 @@
 
             <div class="space-y-3">
                 <a href="{{ path('order_checkout') }}" class="block w-full px-4 py-3 bg-[#A7C7E7] text-white rounded-lg font-semibold text-center hover:bg-[#B8D4ED] transition">
-                    Procéder au paiement
+                    Passer la commande
                 </a>
                 <a href="{{ path('user_products_index') }}" class="block w-full px-4 py-3 border border-[#A7C7E7] text-[#A7C7E7] rounded-lg font-semibold text-center hover:bg-[#F5F1EB] transition">
                     Continuer les achats

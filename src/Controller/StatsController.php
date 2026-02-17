@@ -9,6 +9,7 @@ use App\Repository\CartRepository;
 use App\Repository\CartItemRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -21,6 +22,16 @@ final class StatsController extends AbstractController
         private readonly CartItemRepository $cartItemRepository,
         private readonly EntityManagerInterface $entityManager,
     ) {
+    }
+
+    /**
+     * Ancienne URL des stats thématiques/événements : redirection vers Thématiques
+     * (les stats sont maintenant intégrées dans les pages Événements et Thématiques).
+     */
+    #[Route('/thematiques-evenements', name: 'thematiques_evenements_redirect', methods: ['GET'])]
+    public function thematiquesEvenementsRedirect(): RedirectResponse
+    {
+        return $this->redirectToRoute('admin_thematique_index');
     }
 
     #[Route('', name: 'index', methods: ['GET'])]

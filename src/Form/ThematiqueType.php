@@ -15,12 +15,9 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-<<<<<<< HEAD
-=======
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Range;
->>>>>>> origin/integreModule
 
 final class ThematiqueType extends AbstractType
 {
@@ -33,62 +30,36 @@ final class ThematiqueType extends AbstractType
         $builder
             ->add('nomThematique', TextType::class, [
                 'label' => 'Nom de la thématique',
-<<<<<<< HEAD
-                'required' => true,
-=======
                 'constraints' => [
                     new NotBlank(message: 'Le nom est obligatoire.'),
                     new Length(['min' => 1, 'max' => 255, 'maxMessage' => 'Le nom ne peut pas dépasser {{ limit }} caractères.']),
                 ],
->>>>>>> origin/integreModule
                 'attr' => $attr + ['placeholder' => 'Ex. Sensoriel'],
             ])
             ->add('codeThematique', TextType::class, [
                 'label' => 'Code thématique',
-<<<<<<< HEAD
-                'required' => true,
-=======
                 'constraints' => [
                     new NotBlank(message: 'Le code est obligatoire.'),
                     new Length(['min' => 1, 'max' => 50, 'maxMessage' => 'Le code ne peut pas dépasser {{ limit }} caractères.']),
                 ],
->>>>>>> origin/integreModule
                 'attr' => $attr + ['placeholder' => 'Ex. SENS'],
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Description',
-<<<<<<< HEAD
-                'required' => true,
-=======
                 'required' => false,
                 'constraints' => [new Length(['max' => 65535, 'maxMessage' => 'La description ne peut pas dépasser {{ limit }} caractères.'])],
->>>>>>> origin/integreModule
                 'attr' => $attr + ['rows' => 3, 'placeholder' => 'Description…'],
             ])
             ->add('couleur', TextType::class, [
                 'label' => 'Couleur',
-<<<<<<< HEAD
-                'required' => true,
+                'required' => false,
+                'constraints' => [new Length(['max' => 20, 'maxMessage' => 'La couleur ne peut pas dépasser {{ limit }} caractères.'])],
                 'attr' => $attr + ['placeholder' => 'Ex. #A7C7E7'],
             ])
             ->add('image', TextType::class, [
                 'label' => 'Image (URL ou chemin)',
-                'required' => true,
-                'attr' => $attr + ['placeholder' => 'Ex. /images/thematiques/sensoriel.jpg ou https://…'],
-            ])
-            ->add('sousTitre', TextType::class, [
-                'label' => 'Sous-titre',
-                'required' => true,
-                'attr' => $attr + ['placeholder' => 'Ex. Sous-titre'],
-            ])
-            ->add('ordre', IntegerType::class, [
-                'label' => 'Ordre d\'affichage',
-                'required' => true,
-                'attr' => $attr + ['min' => 0, 'max' => 32767, 'placeholder' => '0'],
-=======
                 'required' => false,
-                'constraints' => [new Length(['max' => 20, 'maxMessage' => 'La couleur ne peut pas dépasser {{ limit }} caractères.'])],
-                'attr' => $attr + ['placeholder' => 'Ex. #A7C7E7'],
+                'attr' => $attr + ['placeholder' => 'Ex. /images/thematiques/sensoriel.jpg ou https://…'],
             ])
             ->add('sousTitre', TextType::class, [
                 'label' => 'Sous-titre',
@@ -101,7 +72,6 @@ final class ThematiqueType extends AbstractType
                 'required' => false,
                 'constraints' => [new Range(['min' => 0, 'max' => 32767, 'notInRangeMessage' => 'L\'ordre doit être entre {{ min }} et {{ max }}.'])],
                 'attr' => $attr + ['min' => 0, 'placeholder' => '0'],
->>>>>>> origin/integreModule
             ])
             ->add('actif', CheckboxType::class, [
                 'label' => 'Visible sur le site',

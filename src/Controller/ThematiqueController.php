@@ -24,21 +24,35 @@ final class ThematiqueController extends AbstractController
     }
 
     #[Route('', name: 'admin_thematique_index', methods: ['GET'])]
-<<<<<<< HEAD
     public function index(Request $request): Response
     {
         $q = $request->query->get('q');
         $thematiques = $this->thematiqueRepository->search($q);
+        $totalThematiques = $this->thematiqueRepository->countAll();
+        $thematiquesWithCount = $this->thematiqueRepository->getThematiquesWithEventCount();
+        $totalEvenements = array_sum(array_map(fn ($r) => $r['event_count'], $thematiquesWithCount));
+        $thematiquesAvecEvenements = count(array_filter($thematiquesWithCount, fn ($r) => $r['event_count'] > 0));
+        $thematiquesSansEvenement = $totalThematiques - $thematiquesAvecEvenements;
+        $maxEventsByThematique = $thematiquesWithCount !== [] ? max(array_map(fn ($r) => $r['event_count'], $thematiquesWithCount)) : 0;
+        $chartData = [
+            'repartition' => [
+                'Avec événements' => $thematiquesAvecEvenements,
+                'Sans événement' => $thematiquesSansEvenement,
+            ],
+            'eventLabels' => array_map(fn ($r) => $r['thematique']->getNomThematique(), $thematiquesWithCount),
+            'eventValues' => array_map(fn ($r) => $r['event_count'], $thematiquesWithCount),
+        ];
         return $this->render('admin/thematique/index.html.twig', [
             'thematiques' => $thematiques,
             'q' => $q,
+            'totalThematiques' => $totalThematiques,
+            'thematiquesWithCount' => $thematiquesWithCount,
+            'totalEvenements' => $totalEvenements,
+            'thematiquesAvecEvenements' => $thematiquesAvecEvenements,
+            'thematiquesSansEvenement' => $thematiquesSansEvenement,
+            'maxEventsByThematique' => $maxEventsByThematique,
+            'chartData' => $chartData,
         ]);
-=======
-    public function index(): Response
-    {
-        $thematiques = $this->thematiqueRepository->findBy([], ['ordre' => 'ASC', 'nomThematique' => 'ASC']);
-        return $this->render('admin/thematique/index.html.twig', ['thematiques' => $thematiques]);
->>>>>>> origin/integreModule
     }
 
     #[Route('/new', name: 'admin_thematique_new', methods: ['GET', 'POST'])]
@@ -93,7 +107,6 @@ final class ThematiqueController extends AbstractController
             'form' => $form,
         ]);
     }
-<<<<<<< HEAD
 
     #[Route('/{id}/delete', name: 'admin_thematique_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function delete(Request $request, int $id): Response
@@ -112,6 +125,4 @@ final class ThematiqueController extends AbstractController
         $this->addFlash('success', 'La thématique a été supprimée.');
         return $this->redirectToRoute('admin_thematique_index');
     }
-=======
->>>>>>> origin/integreModule
 }

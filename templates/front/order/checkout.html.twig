@@ -1,143 +1,72 @@
 {% extends 'layouts/user.html.twig' %}
 
-{% block title %}Commande - AutiCare{% endblock %}
+{% block title %}Finaliser la commande - AutiCare{% endblock %}
 
 {% block user_content %}
 <section class="text-center mb-10">
-    <h1 class="text-3xl font-bold text-[#4B5563] mb-3">Finaliser votre Commande</h1>
+    <h1 class="text-3xl font-bold text-[#4B5563] mb-3">Finaliser votre commande</h1>
+    <p class="text-[#6B7280]">Vos informations liées au compte sont pré-remplies. Complétez l'adresse et le mode de paiement.</p>
 </section>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    <!-- Formulaire de commande -->
     <div class="lg:col-span-2">
-        <form method="POST" class="space-y-6">
-            <!-- Section Informations Personnelles -->
+        {{ form_start(form, { attr: { class: 'space-y-6', novalidate: 'novalidate' } }) }}
             <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
-                <h2 class="text-xl font-semibold text-[#4B5563] mb-4">Informations Personnelles</h2>
-                
+                <h2 class="text-xl font-semibold text-[#4B5563] mb-4">Informations personnelles</h2>
+                <p class="text-sm text-[#6B7280] mb-4">Ces champs sont renseignés depuis votre compte et ne peuvent pas être modifiés ici.</p>
                 <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-[#4B5563] mb-2">Nom Complet *</label>
-                        <input type="text" name="nom" required class="w-full px-4 py-2 border border-[#E5E0D8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A7C7E7]">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-semibold text-[#4B5563] mb-2">Email *</label>
-                        <input type="email" name="email" required class="w-full px-4 py-2 border border-[#E5E0D8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A7C7E7]">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-semibold text-[#4B5563] mb-2">Téléphone *</label>
-                        <input type="tel" name="telephone" required class="w-full px-4 py-2 border border-[#E5E0D8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A7C7E7]">
-                    </div>
+                    {{ form_row(form.nom) }}
+                    {{ form_row(form.email) }}
+                    {{ form_row(form.telephone) }}
                 </div>
             </div>
 
-            <!-- Section Adresse -->
             <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
-                <h2 class="text-xl font-semibold text-[#4B5563] mb-4">Adresse de Livraison</h2>
-                
+                <h2 class="text-xl font-semibold text-[#4B5563] mb-4">Adresse de livraison</h2>
                 <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-[#4B5563] mb-2">Adresse *</label>
-                        <input type="text" name="adresse" required class="w-full px-4 py-2 border border-[#E5E0D8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A7C7E7]">
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-semibold text-[#4B5563] mb-2">Ville *</label>
-                            <input type="text" name="ville" required class="w-full px-4 py-2 border border-[#E5E0D8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A7C7E7]">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-[#4B5563] mb-2">Code Postal</label>
-                            <input type="text" name="code_postal" class="w-full px-4 py-2 border border-[#E5E0D8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A7C7E7]">
-                        </div>
+                    {{ form_row(form.adresse) }}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {{ form_row(form.codePostal) }}
+                        {{ form_row(form.ville) }}
                     </div>
                 </div>
             </div>
 
-            <!-- Section Paiement -->
             <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
-                <h2 class="text-xl font-semibold text-[#4B5563] mb-4">Mode de Paiement *</h2>
-                
-                <div class="space-y-3" id="paiementMethods">
-                    <!-- Paiement à la livraison -->
-                    <label class="flex items-center p-4 border border-[#E5E0D8] rounded-lg cursor-pointer hover:bg-[#F5F1EB] transition">
-                        <input type="radio" name="paiement" value="delivery" checked class="w-4 h-4">
-                        <span class="ml-3">
-                            <span class="block font-semibold text-[#4B5563]">Paiement à la livraison</span>
-                            <span class="text-sm text-[#6B7280]">Payez à la réception de votre commande</span>
-                        </span>
-                    </label>
-
-                    <!-- Carte Bancaire -->
-                    <label class="flex items-center p-4 border border-[#E5E0D8] rounded-lg cursor-pointer hover:bg-[#F5F1EB] transition">
-                        <input type="radio" name="paiement" value="card" class="w-4 h-4" id="cardOption">
-                        <span class="ml-3">
-                            <span class="block font-semibold text-[#4B5563]">Carte Bancaire</span>
-                            <span class="text-sm text-[#6B7280]">Visa, Mastercard, American Express</span>
-                        </span>
-                    </label>
-                </div>
-
-                <!-- Détails de la carte (masqué au départ) -->
-                <div id="cardDetails" class="hidden mt-4 space-y-4 pt-4 border-t border-[#E5E0D8]">
-                    <div>
-                        <label class="block text-sm font-semibold text-[#4B5563] mb-2">Numéro de Carte (16 chiffres) *</label>
-                        <input type="text" name="card_number" placeholder="0000 0000 0000 0000" maxlength="19" class="w-full px-4 py-2 border border-[#E5E0D8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A7C7E7]">
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-semibold text-[#4B5563] mb-2">Date d'Expiration (MM/YY) *</label>
-                            <input type="text" name="card_expiry" placeholder="MM/YY" maxlength="5" class="w-full px-4 py-2 border border-[#E5E0D8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A7C7E7]">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-[#4B5563] mb-2">CVV (3-4 chiffres) *</label>
-                            <input type="text" name="card_cvv" placeholder="***" maxlength="4" class="w-full px-4 py-2 border border-[#E5E0D8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A7C7E7]">
-                        </div>
-                    </div>
-                </div>
+                <h2 class="text-xl font-semibold text-[#4B5563] mb-4">Mode de paiement</h2>
+                {{ form_row(form.modePayment) }}
             </div>
 
-            <!-- Bouton Soumettre -->
-            <div class="flex gap-4">
-                <button type="submit" class="flex-1 px-6 py-3 bg-[#A7C7E7] text-white rounded-lg font-semibold hover:bg-[#B8D4ED] transition">
-                    Confirmer la Commande
+            <div class="flex flex-wrap gap-4">
+                <button type="submit" class="px-6 py-3 bg-[#A7C7E7] text-white rounded-lg font-semibold hover:bg-[#B8D4ED] transition">
+                    Passer la commande
                 </button>
-                <a href="{{ path('cart_index') }}" class="flex-1 px-6 py-3 border border-[#A7C7E7] text-[#A7C7E7] rounded-lg font-semibold hover:bg-[#F5F1EB] transition text-center">
-                    Retour au Panier
+                <a href="{{ path('cart_index') }}" class="px-6 py-3 border border-[#A7C7E7] text-[#A7C7E7] rounded-lg font-semibold hover:bg-[#F5F1EB] transition inline-block">
+                    Retour au panier
                 </a>
             </div>
-        </form>
+        {{ form_end(form) }}
     </div>
 
-    <!-- Résumé de la Commande -->
     <div>
         <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6 sticky top-20">
-            <h3 class="text-lg font-semibold text-[#4B5563] mb-4">Résumé de la Commande</h3>
-            
+            <h3 class="text-lg font-semibold text-[#4B5563] mb-4">Résumé de la commande</h3>
             <div class="space-y-3 mb-6 pb-6 border-b border-[#E5E0D8]">
-                {% set count = 0 %}
-                {% for item in cart %}
-                    <div class="flex justify-between text-sm text-[#6B7280]">
-                        <span>{{ item.nom }} x {{ item.quantity }}</span>
-                        <span>{{ (item.prix * item.quantity)|number_format(2, ',', ' ') }} د.ت</span>
-                    </div>
-                    {% set count = count + 1 %}
+                {% for item in cart.items %}
+                <div class="flex justify-between text-sm text-[#6B7280]">
+                    <span>{{ item.produit.nom }} x {{ item.quantite }}</span>
+                    <span>{{ item.totalPrice|number_format(2, ',', ' ') }} د.ت</span>
+                </div>
                 {% endfor %}
-                
                 <div class="flex justify-between text-[#6B7280] text-sm pt-2">
-                    <span>Nombre d'articles:</span>
-                    <span>{{ count }}</span>
+                    <span>Nombre d'articles :</span>
+                    <span>{{ totalItems }}</span>
                 </div>
             </div>
-
             <div class="flex justify-between text-lg font-bold text-[#4B5563] mb-6">
-                <span>Total:</span>
+                <span>Total :</span>
                 <span class="text-[#A7C7E7]">{{ totalPrice|number_format(2, ',', ' ') }} د.ت</span>
             </div>
-
             <div class="bg-[#F5F1EB] rounded-lg p-4 text-sm text-[#6B7280]">
                 <p><strong>Livraison gratuite</strong> partout en Tunisie.</p>
                 <p class="mt-2">Votre commande sera livrée dans 2-3 jours ouvrables.</p>
@@ -145,42 +74,4 @@
         </div>
     </div>
 </div>
-
-<script>
-    // Afficher/Masquer les détails de la carte
-    const cardOption = document.getElementById('cardOption');
-    const cardDetails = document.getElementById('cardDetails');
-    const paiementRadios = document.querySelectorAll('input[name="paiement"]');
-
-    paiementRadios.forEach(radio => {
-        radio.addEventListener('change', function() {
-            if (this.value === 'card') {
-                cardDetails.classList.remove('hidden');
-            } else {
-                cardDetails.classList.add('hidden');
-            }
-        });
-    });
-
-    // Format de la carte
-    document.querySelector('input[name="card_number"]').addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
-        let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
-        e.target.value = formattedValue;
-    });
-
-    // Format de la date d'expiration
-    document.querySelector('input[name="card_expiry"]').addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, '');
-        if (value.length >= 2) {
-            value = value.slice(0, 2) + '/' + value.slice(2, 4);
-        }
-        e.target.value = value;
-    });
-
-    // Format du CVV (chiffres seulement)
-    document.querySelector('input[name="card_cvv"]').addEventListener('input', function(e) {
-        e.target.value = e.target.value.replace(/\D/g, '');
-    });
-</script>
 {% endblock %}

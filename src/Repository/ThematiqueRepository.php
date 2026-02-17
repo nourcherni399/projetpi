@@ -17,7 +17,6 @@ class ThematiqueRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Thematique::class);
     }
-<<<<<<< HEAD
 
     /**
      * @return Thematique[]
@@ -34,6 +33,31 @@ class ThematiqueRepository extends ServiceEntityRepository
             ->addOrderBy('t.nomThematique', 'ASC');
         return $qb->getQuery()->getResult();
     }
-=======
->>>>>>> origin/integreModule
+
+    public function countAll(): int
+    {
+        return (int) $this->createQueryBuilder('t')
+            ->select('COUNT(t.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Returns list of thematiques with their event count, ordered by event count desc.
+     *
+     * @return array<array{thematique: Thematique, event_count: int}>
+     */
+    public function getThematiquesWithEventCount(): array
+    {
+        $thematiques = $this->findBy([], ['ordre' => 'ASC', 'nomThematique' => 'ASC']);
+        $result = [];
+        foreach ($thematiques as $t) {
+            $result[] = [
+                'thematique' => $t,
+                'event_count' => $t->getEvenements()->count(),
+            ];
+        }
+        usort($result, static fn ($a, $b) => $b['event_count'] <=> $a['event_count']);
+        return $result;
+    }
 }

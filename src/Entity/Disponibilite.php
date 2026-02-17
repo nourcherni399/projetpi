@@ -10,8 +10,11 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity(repositoryClass: DisponibiliteRepository::class)]
+#[Assert\Callback(callback: 'validateHeureFinApresDebut')]
 class Disponibilite
 {
     #[ORM\Id]
@@ -20,17 +23,22 @@ class Disponibilite
     private ?int $id = null;
 
     #[ORM\Column(type: Types::TIME_MUTABLE)]
+    #[Assert\NotBlank(message: "L'heure de début est obligatoire.")]
     private ?\DateTimeInterface $heureDebut = null;
 
     #[ORM\Column(type: Types::TIME_MUTABLE)]
+    #[Assert\NotBlank(message: "L'heure de fin est obligatoire.")]
     private ?\DateTimeInterface $heureFin = null;
 
     #[ORM\Column(type: 'string', enumType: Jour::class, columnDefinition: "ENUM('lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche')")]
+    #[Assert\NotNull(message: 'Le jour est obligatoire.')]
     private ?Jour $jour = null;
 
     /** Durée en minutes. */
     #[ORM\Column(type: 'integer', options: ['default' => 0])]
-    private int $duree = 0;
+    #[Assert\NotNull(message: 'La durée est obligatoire.')]
+    #[Assert\PositiveOrZero(message: 'La durée doit être positive ou nulle.')]
+    private ?int $duree = 0;
 
     #[ORM\Column(type: 'boolean', options: ['default' => true])]
     private bool $estDispo = true;
@@ -58,7 +66,7 @@ class Disponibilite
         return $this->heureDebut;
     }
 
-    public function setHeureDebut(\DateTimeInterface $heureDebut): static
+    public function setHeureDebut(?\DateTimeInterface $heureDebut): static
     {
         $this->heureDebut = $heureDebut;
         return $this;
@@ -69,7 +77,7 @@ class Disponibilite
         return $this->heureFin;
     }
 
-    public function setHeureFin(\DateTimeInterface $heureFin): static
+    public function setHeureFin(?\DateTimeInterface $heureFin): static
     {
         $this->heureFin = $heureFin;
         return $this;
@@ -86,12 +94,12 @@ class Disponibilite
         return $this;
     }
 
-    public function getDuree(): int
+    public function getDuree(): ?int
     {
         return $this->duree;
     }
 
-    public function setDuree(int $duree): static
+    public function setDuree(?int $duree): static
     {
         $this->duree = $duree;
         return $this;
@@ -142,5 +150,16 @@ class Disponibilite
             }
         }
         return $this;
+    }
+
+    public function validateHeureFinApresDebut(ExecutionContextInterface $context, mixed $payload = null): void
+    {
+        $debut = $this->heureDebut;
+        $fin = $this->heureFin;
+        if ($debut !== null && $fin !== null && $fin <= $debut) {
+            $context->buildViolation('L\'heure de fin doit être postérieure à l\'heure de début.')
+                ->atPath('heureFin')
+                ->addViolation();
+        }
     }
 }

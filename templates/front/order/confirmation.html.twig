@@ -29,8 +29,10 @@
                     <p class="text-lg font-semibold text-[#4B5563]">{{ commande.dateCreation|date('d/m/Y') }}</p>
                 </div>
                 <div>
-                    <p class="text-sm text-[#6B7280] mb-1">Status</p>
-                    <p class="text-lg font-semibold text-green-600">{% if commande.statut == 'en_attente' %}En Attente{% else %}{{ commande.statut }}{% endif %}</p>
+                    <p class="text-sm text-[#6B7280] mb-1">Statut</p>
+                    <p class="text-lg font-semibold {% if commande.statut == 'en_attente' %}text-amber-600{% elseif commande.statut == 'recu' %}text-emerald-600{% else %}text-[#4B5563]{% endif %}">
+                        {% if commande.statut == 'en_attente' %}En attente (validation admin){% elseif commande.statut == 'recu' %}Reçu{% elseif commande.statut == 'payée' %}Payée{% elseif commande.statut == 'livrée' %}Livrée{% elseif commande.statut == 'annulée' %}Annulée{% else %}{{ commande.statut }}{% endif %}
+                    </p>
                 </div>
                 <div>
                     <p class="text-sm text-[#6B7280] mb-1">Mode de Paiement</p>
@@ -72,25 +74,26 @@
         </div>
     </div>
 
-    <!-- Prochaines étapes -->
+    <!-- Prochaines étapes (étape 1 = en_attente, étape 2 = recu) -->
     <div>
         <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6 sticky top-20">
-            <h3 class="text-lg font-semibold text-[#4B5563] mb-4">Prochaines Étapes</h3>
-            
+            <h3 class="text-lg font-semibold text-[#4B5563] mb-4">Suivi de la commande</h3>
+            {% set etape1_ok = true %}
+            {% set etape2_ok = commande.statut == 'recu' or commande.statut == 'payée' or commande.statut == 'livrée' %}
             <div class="space-y-3">
                 <div class="flex gap-3">
                     <div class="w-8 h-8 rounded-full bg-[#A7C7E7] text-white flex items-center justify-center flex-shrink-0 font-semibold">✓</div>
                     <div>
-                        <p class="font-semibold text-[#4B5563]">Commande Reçue</p>
-                        <p class="text-sm text-[#6B7280]">Votre commande a été validée</p>
+                        <p class="font-semibold text-[#4B5563]">Étape 1 – Commande enregistrée</p>
+                        <p class="text-sm text-[#6B7280]">Votre commande a bien été reçue</p>
                     </div>
                 </div>
 
                 <div class="flex gap-3">
-                    <div class="w-8 h-8 rounded-full bg-[#E5E0D8] text-[#6B7280] flex items-center justify-center flex-shrink-0 font-semibold">2</div>
+                    <div class="w-8 h-8 rounded-full {{ etape2_ok ? 'bg-[#A7C7E7] text-white' : 'bg-[#E5E0D8] text-[#6B7280]' }} flex items-center justify-center flex-shrink-0 font-semibold">{{ etape2_ok ? '✓' : '2' }}</div>
                     <div>
-                        <p class="font-semibold text-[#4B5563]">Préparation</p>
-                        <p class="text-sm text-[#6B7280]">Nous préparons votre commande</p>
+                        <p class="font-semibold text-[#4B5563]">Étape 2 – Payé</p>
+                        <p class="text-sm text-[#6B7280]">{% if etape2_ok %}Paiement effectué{% else %}Paiement en attente{% endif %}</p>
                     </div>
                 </div>
 
@@ -105,8 +108,8 @@
                 <div class="flex gap-3">
                     <div class="w-8 h-8 rounded-full bg-[#E5E0D8] text-[#6B7280] flex items-center justify-center flex-shrink-0 font-semibold">4</div>
                     <div>
-                        <p class="font-semibold text-[#4B5563]">Reçu</p>
-                        <p class="text-sm text-[#6B7280]">Votre commande livrée</p>
+                        <p class="font-semibold text-[#4B5563]">Livré</p>
+                        <p class="text-sm text-[#6B7280]">Commande livrée</p>
                     </div>
                 </div>
             </div>
@@ -121,7 +124,7 @@
             </div>
 
             <div class="mt-6 space-y-3">
-                <a href="{{ path('user_products') }}" class="block w-full px-4 py-3 bg-[#A7C7E7] text-white rounded-lg font-semibold text-center hover:bg-[#B8D4ED] transition">
+                <a href="{{ path('user_products_index') }}" class="block w-full px-4 py-3 bg-[#A7C7E7] text-white rounded-lg font-semibold text-center hover:bg-[#B8D4ED] transition">
                     Continuer les achats
                 </a>
                 <a href="{{ path('home') }}" class="block w-full px-4 py-3 border border-[#A7C7E7] text-[#A7C7E7] rounded-lg font-semibold text-center hover:bg-[#F5F1EB] transition">

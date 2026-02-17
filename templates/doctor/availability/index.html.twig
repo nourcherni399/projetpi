@@ -3,102 +3,6 @@
 {% block title %}Disponibilités - AutiCare Médecin{% endblock %}
 
 {% block doctor_content %}
-<<<<<<< HEAD
-<h1 class="text-2xl font-semibold text-[#4B5563] mb-6">Gestion des disponibilités</h1>
-{% for message in app.flashes('success') %}
-    <div class="mb-4 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">{{ message }}</div>
-{% endfor %}
-{% for message in app.flashes('error') %}
-    <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-800">{{ message }}</div>
-{% endfor %}
-
-<div id="form-nouvelle-dispo" class="mb-6 bg-white rounded-xl border border-[#E5E0D8] overflow-hidden {% if not form.vars.submitted or form.vars.valid %}hidden{% endif %}" aria-hidden="{{ (form.vars.submitted and not form.vars.valid) ? 'false' : 'true' }}">
-    <div class="p-4 border-b border-[#E5E0D8]">
-        <h2 class="text-lg font-medium text-[#4B5563]">Nouvelle disponibilité</h2>
-        <p class="text-sm text-[#6B7280] mt-1">Champs correspondant à l'entité Disponibilité : jour, heure de début, heure de fin, durée (minutes), disponible.</p>
-    </div>
-    <div class="p-6">
-        {{ form_start(form, { attr: { class: 'space-y-4' }, label_attr: { class: 'block text-[#4B5563] font-medium mb-1' } }) }}
-        {{ form_errors(form) }}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                {{ form_label(form.jour) }}
-                {{ form_widget(form.jour) }}
-                {{ form_errors(form.jour) }}
-            </div>
-            <div>
-                {{ form_label(form.heureDebut) }}
-                {{ form_widget(form.heureDebut) }}
-                {{ form_errors(form.heureDebut) }}
-            </div>
-            <div>
-                {{ form_label(form.heureFin) }}
-                {{ form_widget(form.heureFin) }}
-                {{ form_errors(form.heureFin) }}
-            </div>
-            <div>
-                {{ form_label(form.duree) }}
-                {{ form_widget(form.duree) }}
-                {{ form_errors(form.duree) }}
-            </div>
-            <div class="flex items-center gap-2 md:col-span-2">
-                {{ form_widget(form.estDispo) }}
-                {{ form_label(form.estDispo) }}
-                {{ form_errors(form.estDispo) }}
-            </div>
-        </div>
-        <div class="mt-4 flex gap-3">
-            <button type="submit" class="px-4 py-2 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Enregistrer la disponibilité</button>
-        </div>
-        {{ form_end(form) }}
-    </div>
-</div>
-
-<div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
-    <form method="get" action="{{ path('doctor_availability') }}" class="p-4 border-b border-[#E5E0D8] flex flex-wrap gap-4 justify-between items-center">
-        <input type="search" name="q" value="{{ search|default('') }}" placeholder="Rechercher par jour, heure ou durée…" class="px-4 py-2 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#4B5563] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7] max-w-xs">
-        <button type="button" id="btn-nouvelle-dispo" class="px-4 py-2 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Nouvelle disponibilité</button>
-    </form>
-    <div class="overflow-x-auto">
-        <table class="w-full text-left">
-            <thead class="bg-[#F5F1EB] border-b border-[#E5E0D8]">
-                <tr>
-                    <th class="px-6 py-4 font-medium text-[#4B5563]">Jour</th>
-                    <th class="px-6 py-4 font-medium text-[#4B5563]">Heure début</th>
-                    <th class="px-6 py-4 font-medium text-[#4B5563]">Heure fin</th>
-                    <th class="px-6 py-4 font-medium text-[#4B5563]">Durée</th>
-                    <th class="px-6 py-4 font-medium text-[#4B5563]">Disponible</th>
-                    <th class="px-6 py-4 font-medium text-[#4B5563]">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-[#E5E0D8]">
-                {% for dispo in disponibilites %}
-                <tr class="hover:bg-[#F5F1EB]/50">
-                    <td class="px-6 py-4 text-[#4B5563]">{{ dispo.jour ? dispo.jour.value|capitalize : '—' }}</td>
-                    <td class="px-6 py-4 text-[#6B7280]">{{ dispo.heureDebut ? dispo.heureDebut|date('H:i') : '—' }}</td>
-                    <td class="px-6 py-4 text-[#6B7280]">{{ dispo.heureFin ? dispo.heureFin|date('H:i') : '—' }}</td>
-                    <td class="px-6 py-4 text-[#6B7280]">{{ dispo.duree }} min</td>
-                    <td class="px-6 py-4 text-[#6B7280]">{{ dispo.estDispo ? 'Oui' : 'Non' }}</td>
-                    <td class="px-6 py-4">
-                        <div class="flex flex-wrap items-center gap-2">
-                            <a href="{{ path('doctor_availability_edit', { id: dispo.id }) }}" class="px-3 py-1.5 text-sm rounded-lg bg-[#A7C7E7] text-white hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
-                                Modifier
-                            </a>
-                            <form action="{{ path('doctor_availability_delete', { id: dispo.id }) }}" method="post" class="inline" onsubmit="return confirm('Supprimer ce créneau ?');">
-                                <input type="hidden" name="_token" value="{{ csrf_token('doctor_availability_delete_' ~ dispo.id) }}">
-                                <button type="submit" class="px-3 py-1.5 text-sm rounded-lg border border-[#E5E0D8] text-[#6B7280] hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
-                                    Supprimer
-                                </button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                {% else %}
-                <tr><td colspan="6" class="px-6 py-8 text-center text-[#6B7280]">Aucune disponibilité.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
-=======
 <div class="space-y-6">
     <!-- En-tête moderne -->
     <div class="bg-gradient-to-r from-[#A7C7E7] to-[#B8D4ED] rounded-2xl p-8 text-white shadow-xl">
@@ -135,23 +39,36 @@
     <!-- Section recherche et ajout -->
     <div class="bg-white rounded-2xl border border-[#E5E0D8] shadow-lg overflow-hidden">
         <div class="p-6 border-b border-[#E5E0D8] bg-gray-50">
-            <div class="flex flex-col sm:flex-row gap-4 items-center justify-between">
-                <div class="relative flex-1 max-w-md">
+            <form id="availability-filter-form" method="get" action="{{ path('doctor_availability') }}" class="flex flex-col sm:flex-row gap-4 items-center justify-between">
+                <div class="relative flex-1 max-w-md w-full">
                     <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
-                    <input type="search" name="q" value="{{ search|default('') }}" 
-                           placeholder="Rechercher un créneau..." 
+                    <input id="availability-search" type="search" name="q" value="{{ search|default('') }}"
+                           placeholder="Rechercher un créneau..."
                            class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:border-[#A7C7E7] focus:ring-2 focus:ring-[#A7C7E7]/20 transition-all">
                 </div>
-                <button type="button" id="btn-nouvelle-dispo" 
-                        class="px-6 py-3 bg-gradient-to-r from-[#A7C7E7] to-[#B8D4ED] text-white rounded-xl hover:shadow-lg transition-all transform hover:scale-105 flex items-center gap-2 font-medium">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Ajouter un créneau
-                </button>
-            </div>
+                <div class="flex items-center gap-3">
+                    {% set currentOrder = order|default('asc') %}
+                    <a href="{{ path('doctor_availability', { q: search|default(''), order: currentOrder == 'asc' ? 'desc' : 'asc' }) }}"
+                       class="inline-flex items-center gap-2 px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-700 text-sm font-medium hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#A7C7E7]">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8m-6 5h6m-4 5h4" />
+                        </svg>
+                        Trier par jour
+                        <span class="text-xs text-gray-500">
+                            {{ currentOrder == 'asc' ? '(A → Z)' : '(Z → A)' }}
+                        </span>
+                    </a>
+                    <button type="button" id="btn-nouvelle-dispo"
+                            class="px-6 py-3 bg-gradient-to-r from-[#A7C7E7] to-[#B8D4ED] text-white rounded-xl hover:shadow-lg transition-all transform hover:scale-105 flex items-center gap-2 font-medium shrink-0">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Ajouter un créneau
+                    </button>
+                </div>
+            </form>
         </div>
 
         <!-- Formulaire d'ajout -->
@@ -163,7 +80,7 @@
                     </svg>
                     Nouvelle disponibilité
                 </h3>
-                {{ form_start(form, { attr: { class: 'space-y-4' } }) }}
+                {{ form_start(form, { attr: { class: 'space-y-4', 'data-turbo': 'false', novalidate: 'novalidate' } }) }}
                 {{ form_errors(form) }}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="space-y-2">
@@ -268,21 +185,22 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-2">
-                                    <a href="{{ path('doctor_availability_edit', { id: dispo.id }) }}" 
-                                       class="inline-flex items-center gap-1 px-3 py-2 text-sm rounded-lg bg-[#A7C7E7] text-white hover:bg-[#B8D4ED] transition-all">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    <a href="{{ path('doctor_availability_edit', { id: dispo.id }) }}"
+                                       class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                                       title="Modifier">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
                                         </svg>
-                                        Modifier
                                     </a>
-                                    <form action="{{ path('doctor_availability_delete', { id: dispo.id }) }}" method="post" class="inline" 
+                                    <form action="{{ path('doctor_availability_delete', { id: dispo.id }) }}" method="post" class="inline"
                                           onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce créneau horaire ?');">
                                         <input type="hidden" name="_token" value="{{ csrf_token('doctor_availability_delete_' ~ dispo.id) }}">
-                                        <button type="submit" class="inline-flex items-center gap-1 px-3 py-2 text-sm rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-all">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        <button type="submit"
+                                                class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-red-600 bg-red-50 hover:bg-red-100 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
+                                                title="Supprimer">
+                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                                             </svg>
-                                            Supprimer
                                         </button>
                                     </form>
                                 </div>
@@ -298,32 +216,22 @@
                     </svg>
                     <h3 class="text-lg font-medium text-gray-900 mb-2">Aucune disponibilité configurée</h3>
                     <p class="text-gray-500 mb-6">Commencez par ajouter vos premiers créneaux horaires</p>
-                    <button type="button" onclick="document.getElementById('btn-nouvelle-dispo').click()" 
+                    <button type="button" onclick="document.getElementById('btn-nouvelle-dispo').click()"
                             class="px-6 py-3 bg-gradient-to-r from-[#A7C7E7] to-[#B8D4ED] text-white rounded-xl hover:shadow-lg transition-all transform hover:scale-105">
                         Ajouter votre premier créneau
                     </button>
                 </div>
             {% endif %}
         </div>
->>>>>>> origin/integreModule
     </div>
 </div>
 
 <script>
-<<<<<<< HEAD
-document.getElementById('btn-nouvelle-dispo').addEventListener('click', function() {
-    var formEl = document.getElementById('form-nouvelle-dispo');
-    formEl.classList.toggle('hidden');
-    formEl.setAttribute('aria-hidden', formEl.classList.contains('hidden'));
-});
-</script>
-{% endblock %}
-=======
 document.addEventListener('DOMContentLoaded', function() {
     const btnNouvelleDispo = document.getElementById('btn-nouvelle-dispo');
     const btnCancelDispo = document.getElementById('btn-cancel-dispo');
     const formNouvelleDispo = document.getElementById('form-nouvelle-dispo');
-    
+
     if (btnNouvelleDispo && formNouvelleDispo) {
         btnNouvelleDispo.addEventListener('click', function() {
             formNouvelleDispo.classList.remove('hidden');
@@ -331,14 +239,28 @@ document.addEventListener('DOMContentLoaded', function() {
             formNouvelleDispo.scrollIntoView({ behavior: 'smooth', block: 'center' });
         });
     }
-    
+
     if (btnCancelDispo && formNouvelleDispo) {
         btnCancelDispo.addEventListener('click', function() {
             formNouvelleDispo.classList.add('hidden');
             formNouvelleDispo.setAttribute('aria-hidden', 'true');
         });
     }
+
+    // Recherche automatique des créneaux sans appuyer sur Entrée
+    const searchInput = document.getElementById('availability-search');
+    const filterForm = document.getElementById('availability-filter-form');
+    if (searchInput && filterForm) {
+        let debounceTimer = null;
+        searchInput.addEventListener('input', function () {
+            if (debounceTimer !== null) {
+                clearTimeout(debounceTimer);
+            }
+            debounceTimer = setTimeout(function () {
+                filterForm.submit();
+            }, 400);
+        });
+    }
 });
 </script>
 {% endblock %}
->>>>>>> origin/integreModule

@@ -41,7 +41,7 @@
                             </div>
                             
                             <!-- Actions du commentaire -->
-                            {% if app.user and (commentaire.user == app.user or is_granted('ROLE_ADMIN')) %}
+                            {% if app.user and (commentaire.user and commentaire.user.id == app.user.id or is_granted('ROLE_ADMIN')) %}
                                 <div class="flex items-center gap-2">
                                     <form method="post" action="{{ path('commentaire_supprimer', {'id': commentaire.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?');" class="inline">
                                         <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ commentaire.id) }}">

@@ -8,6 +8,15 @@
     <div class="mb-4 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">{{ message }}</div>
 {% endfor %}
 <div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
+    <div class="p-6 border-b border-[#E5E0D8]">
+        <h3 class="text-lg font-semibold text-[#4B5563] mb-2 flex items-center gap-2">
+            <svg class="w-5 h-5 text-[#A7C7E7]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5h18M3 12h18M3 16.5h18" />
+            </svg>
+            Liste des modules
+        </h3>
+        <p class="text-sm text-[#6B7280]">Recherche, tri et actions de gestion des modules</p>
+    </div>
     <div class="p-4 border-b border-[#E5E0D8] flex flex-wrap gap-4 justify-between">
         <div class="flex-1 max-w-xs">
             <div class="relative">
@@ -53,6 +62,7 @@
                     <th class="px-6 py-4 font-medium text-[#4B5563]">Catégorie</th>
                     <th class="px-6 py-4 font-medium text-[#4B5563]">Publié</th>
                     <th class="px-6 py-4 font-medium text-[#4B5563]">Articles</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Ressources</th>
                     <th class="px-6 py-4 font-medium text-[#4B5563]">Actions</th>
                 </tr>
             </thead>
@@ -102,16 +112,21 @@
                         </span>
                     </td>
                     <td class="px-6 py-4">
+                        <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-indigo-100 text-indigo-800">
+                            {{ module.ressources|length }} ressource{{ module.ressources|length > 1 ? 's' : '' }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
                         <div class="flex gap-2">
-                            <a href="{{ path('admin_module_edit', {'id': module.id}) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 focus:outline focus:ring-2 focus:ring-blue-500" title="Modifier">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <a href="{{ path('admin_module_edit', {'id': module.id}) }}" class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 focus:outline focus:ring-2 focus:ring-blue-500" title="Modifier">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                 </svg>
                             </a>
                             <form method="post" action="{{ path('admin_module_delete', {'id': module.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce module ?');" class="inline">
                                 <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ module.id) }}">
-                                <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 focus:outline focus:ring-2 focus:ring-red-500" title="Supprimer">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <button type="submit" class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 focus:outline focus:ring-2 focus:ring-red-500" title="Supprimer">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
                                 </button>
@@ -120,10 +135,187 @@
                     </td>
                 </tr>
                 {% else %}
-                <tr><td colspan="8" class="px-6 py-8 text-center text-[#6B7280]">Aucun module.</td></tr>
+                <tr><td colspan="9" class="px-6 py-8 text-center text-[#6B7280]">Aucun module.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
+    </div>
+</div>
+
+<!-- Gestion des ressources (intégrée dans la page modules) -->
+<div class="mt-8 bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
+    <div class="p-6 border-b border-[#E5E0D8]">
+        <h3 class="text-lg font-semibold text-[#4B5563] mb-2 flex items-center gap-2">
+            <svg class="w-5 h-5 text-[#A7C7E7]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5h18M3 12h18M3 16.5h18" />
+            </svg>
+            Gestion des ressources
+        </h3>
+        <p class="text-sm text-[#6B7280]">Ressources associees aux modules (URL, video, audio)</p>
+    </div>
+    <div class="p-4 border-b border-[#E5E0D8] flex flex-wrap gap-3 items-end justify-between">
+        <form id="resourceFilterForm" method="get" action="{{ path('admin_dashboard') }}" class="flex flex-wrap gap-3 items-end">
+            <div>
+                <label for="resourceModuleFilter" class="block text-sm text-[#4B5563] mb-1">Filtrer les ressources par module</label>
+                <select id="resourceModuleFilter" name="resourceModule" class="rounded-lg border border-[#E5E0D8] px-3 py-2 text-[#4B5563]">
+                    <option value="">Tous les modules</option>
+                    {% for module in modules %}
+                        <option value="{{ module.id }}" {% if selectedResourceModule and selectedResourceModule.id == module.id %}selected{% endif %}>
+                            {{ module.titre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+
+        <a href="{{ path('admin_ressource_new', selectedResourceModule ? {'module': selectedResourceModule.id} : {}) }}"
+           class="px-4 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED]">
+            Nouvelle ressource
+        </a>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead class="bg-[#F5F1EB] border-b border-[#E5E0D8]">
+                <tr>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Titre</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Type</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Contenu</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Module</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Ordre</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Actif</th>
+                    <th class="px-6 py-4 font-medium text-[#4B5563]">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-[#E5E0D8]">
+                {% for ressource in ressources %}
+                    <tr class="hover:bg-[#F5F1EB]/50">
+                        <td class="px-6 py-4 text-[#4B5563] font-medium">{{ ressource.titre }}</td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
+                                {% if ressource.typeRessource == 'url' %}bg-blue-100 text-blue-800
+                                {% elseif ressource.typeRessource == 'video' %}bg-purple-100 text-purple-800
+                                {% else %}bg-green-100 text-green-800{% endif %}">
+                                {{ ressource.typeRessource|upper }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-[#6B7280] max-w-xs truncate">{{ ressource.contenu }}</td>
+                        <td class="px-6 py-4 text-[#6B7280]">{{ ressource.module ? ressource.module.titre : '-' }}</td>
+                        <td class="px-6 py-4 text-[#6B7280]">{{ ressource.ordre is not null ? ressource.ordre : '-' }}</td>
+                        <td class="px-6 py-4">
+                            {% if ressource.isActive %}
+                                <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Oui</span>
+                            {% else %}
+                                <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">Non</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex gap-2">
+                                <a href="{{ path('admin_ressource_edit', {'id': ressource.id}) }}"
+                                   class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100"
+                                   title="Modifier">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </a>
+                                <form method="post"
+                                      action="{{ path('admin_ressource_delete', {'id': ressource.id}) }}"
+                                      onsubmit="return confirm('Supprimer cette ressource ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_ressource' ~ ressource.id) }}">
+                                    <button type="submit"
+                                            class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-red-50 text-red-600 hover:bg-red-100"
+                                            title="Supprimer">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="7" class="px-6 py-8 text-center text-[#6B7280]">Aucune ressource.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const resourceSelect = document.getElementById('resourceModuleFilter');
+    const resourceForm = document.getElementById('resourceFilterForm');
+    if (resourceSelect && resourceForm) {
+        resourceSelect.addEventListener('change', function() {
+            resourceForm.submit();
+        });
+    }
+});
+</script>
+
+<!-- Statistiques des articles par type et commentaires par module -->
+<div class="mt-8 bg-white rounded-xl shadow-sm border border-[#E5E0D8] overflow-hidden">
+    <div class="p-6 border-b border-[#E5E0D8]">
+        <h3 class="text-lg font-semibold text-[#4B5563] mb-2 flex items-center gap-2">
+            <svg class="w-5 h-5 text-[#A7C7E7]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+            </svg>
+            Statistiques des articles et commentaires
+        </h3>
+        <p class="text-sm text-[#6B7280]">Articles par type et commentaires par module</p>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-[#F5F1EB] border-b border-[#E5E0D8]">
+                <tr>
+                    <th class="px-6 py-4 text-left font-medium text-[#4B5563]">Module</th>
+                    <th class="px-6 py-4 text-left font-medium text-[#4B5563]">Articles</th>
+                    <th class="px-6 py-4 text-left font-medium text-[#4B5563]">Recommandations</th>
+                    <th class="px-6 py-4 text-left font-medium text-[#4B5563]">Plaintes</th>
+                    <th class="px-6 py-4 text-left font-medium text-[#4B5563]">Questions</th>
+                    <th class="px-6 py-4 text-left font-medium text-[#4B5563]">Expériences</th>
+                    <th class="px-6 py-4 text-left font-medium text-[#4B5563]">Commentaires</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-[#E5E0D8]">
+                {% for stat in statsByModule %}
+                <tr class="hover:bg-[#F5F1EB]/50">
+                    <td class="px-6 py-4 text-[#4B5563] font-medium">{{ stat.module.titre }}</td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">{{ stat.articles }}</span>
+                    </td>
+                    <td class="px-6 py-4 text-[#6B7280]">{{ stat.module.blogs|filter(b => b.type == 'recommandation')|length }}</td>
+                    <td class="px-6 py-4 text-[#6B7280]">{{ stat.module.blogs|filter(b => b.type == 'plainte')|length }}</td>
+                    <td class="px-6 py-4 text-[#6B7280]">{{ stat.module.blogs|filter(b => b.type == 'question')|length }}</td>
+                    <td class="px-6 py-4 text-[#6B7280]">{{ stat.module.blogs|filter(b => b.type == 'experience')|length }}</td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">{{ stat.commentaires }}</span>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="px-6 py-8 text-center text-[#6B7280]">Aucun module.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="p-6 border-t border-[#E5E0D8] bg-[#F5F1EB]">
+        <h4 class="text-sm font-medium text-[#4B5563] mb-3">Total des articles par type</h4>
+        <div class="flex flex-wrap gap-4">
+            <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-100 text-green-800 text-sm font-medium">
+                Recommandations : {{ statsByType.recommandation|default(0) }}
+            </span>
+            <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-100 text-red-800 text-sm font-medium">
+                Plaintes : {{ statsByType.plainte|default(0) }}
+            </span>
+            <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-amber-100 text-amber-800 text-sm font-medium">
+                Questions : {{ statsByType.question|default(0) }}
+            </span>
+            <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-100 text-blue-800 text-sm font-medium">
+                Expériences : {{ statsByType.experience|default(0) }}
+            </span>
+        </div>
     </div>
 </div>
 

@@ -19,9 +19,12 @@ class CommandeType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $lockUserFields = $options['lock_user_fields'] ?? false;
+
         $builder
             ->add('nom', TextType::class, [
                 'label' => 'Nom complet',
+                'disabled' => $lockUserFields,
                 'constraints' => [
                     new NotBlank(['message' => 'Le nom est obligatoire']),
                 ],
@@ -29,6 +32,7 @@ class CommandeType extends AbstractType
             ])
             ->add('email', EmailType::class, [
                 'label' => 'Adresse email',
+                'disabled' => $lockUserFields,
                 'constraints' => [
                     new NotBlank(['message' => 'L\'email est obligatoire']),
                     new Email(['message' => 'Veuillez entrer une adresse email valide']),
@@ -37,6 +41,7 @@ class CommandeType extends AbstractType
             ])
             ->add('telephone', TelType::class, [
                 'label' => 'Numéro de téléphone',
+                'disabled' => $lockUserFields,
                 'constraints' => [
                     new NotBlank(['message' => 'Le téléphone est obligatoire']),
                     new Regex([
@@ -89,7 +94,9 @@ class CommandeType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => null,
+            'data_class' => \App\Entity\Commande::class,
+            'lock_user_fields' => false,
         ]);
+        $resolver->setAllowedTypes('lock_user_fields', 'bool');
     }
 }

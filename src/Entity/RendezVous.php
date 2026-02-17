@@ -9,6 +9,7 @@ use App\Enum\StatusRendezVous;
 use App\Repository\RendezVousRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: RendezVousRepository::class)]
 #[ORM\Table(name: 'rendez_vous')]
@@ -21,6 +22,7 @@ class RendezVous
 
     #[ORM\ManyToOne(inversedBy: 'rendezVous')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    #[Assert\NotNull(message: 'Le médecin est obligatoire.')]
     private ?Medcin $medecin = null;
 
     #[ORM\ManyToOne(inversedBy: 'rendezVous')]
@@ -28,43 +30,46 @@ class RendezVous
     private ?Disponibilite $disponibilite = null;
 
     /** Date choisie pour le rendez-vous (ex. lundi 17 fév.). */
-    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-<<<<<<< HEAD
+    #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
     private ?\DateTimeInterface $dateRdv = null;
-=======
-    private ?\DateTime $dateRdv = null;
->>>>>>> origin/integreModule
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?Patient $patient = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Le nom est obligatoire.')]
+    #[Assert\Length(min: 2, max: 255, minMessage: 'Le nom doit contenir au moins {{ limit }} caractères.', maxMessage: 'Le nom ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Le prénom est obligatoire.')]
+    #[Assert\Length(min: 2, max: 255, minMessage: 'Le prénom doit contenir au moins {{ limit }} caractères.', maxMessage: 'Le prénom ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $prenom = null;
 
     #[ORM\Column(length: 500, nullable: true)]
+    #[Assert\Length(max: 500, maxMessage: 'L\'adresse ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $adresse = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-<<<<<<< HEAD
+    #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
+    #[Assert\LessThanOrEqual('today', message: 'La date de naissance ne peut pas être dans le futur.')]
     private ?\DateTimeInterface $dateNaissance = null;
-=======
-    private ?\DateTime $dateNaissance = null;
->>>>>>> origin/integreModule
 
     #[ORM\Column(length: 30, nullable: true)]
+    #[Assert\Length(max: 30, maxMessage: 'Le téléphone ne peut pas dépasser {{ limit }} caractères.')]
+    #[Assert\Regex(pattern: '/^[\d\s\-\+\.\(\)]{0,30}$/', message: 'Le téléphone contient des caractères non autorisés.')]
     private ?string $telephone = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true, options: ['default' => 'vide'])]
+    #[Assert\Length(max: 5000, maxMessage: 'La note ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $notePatient = 'vide';
 
     #[ORM\Column(type: 'string', enumType: StatusRendezVous::class, columnDefinition: "ENUM('en_attente', 'confirmer', 'annuler')")]
+    #[Assert\NotNull(message: 'Le statut est obligatoire.')]
     private ?StatusRendezVous $status = null;
 
     #[ORM\Column(type: 'string', enumType: Motif::class, columnDefinition: "ENUM('urgence', 'suivie', 'normal')")]
+    #[Assert\NotNull(message: 'Le motif est obligatoire.')]
     private ?Motif $motif = null;
 
     public function getId(): ?int
@@ -94,20 +99,12 @@ class RendezVous
         return $this;
     }
 
-<<<<<<< HEAD
     public function getDateRdv(): ?\DateTimeInterface
-=======
-    public function getDateRdv(): ?\DateTime
->>>>>>> origin/integreModule
     {
         return $this->dateRdv;
     }
 
-<<<<<<< HEAD
     public function setDateRdv(?\DateTimeInterface $dateRdv): static
-=======
-    public function setDateRdv(?\DateTime $dateRdv): static
->>>>>>> origin/integreModule
     {
         $this->dateRdv = $dateRdv;
         return $this;
@@ -157,20 +154,12 @@ class RendezVous
         return $this;
     }
 
-<<<<<<< HEAD
     public function getDateNaissance(): ?\DateTimeInterface
-=======
-    public function getDateNaissance(): ?\DateTime
->>>>>>> origin/integreModule
     {
         return $this->dateNaissance;
     }
 
-<<<<<<< HEAD
     public function setDateNaissance(?\DateTimeInterface $dateNaissance): static
-=======
-    public function setDateNaissance(?\DateTime $dateNaissance): static
->>>>>>> origin/integreModule
     {
         $this->dateNaissance = $dateNaissance;
         return $this;

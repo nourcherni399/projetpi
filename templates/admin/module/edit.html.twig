@@ -26,6 +26,12 @@
                 {{ form_row(form.categorie) }}
             </div>
             {{ form_row(form.image) }}
+            {% if module.image %}
+            <div class="space-y-2">
+                <label class="block text-[#4B5563] font-medium mb-2">Image actuelle</label>
+                <img src="{{ asset(module.image) }}" alt="{{ module.titre }}" class="w-32 h-32 object-cover rounded-lg">
+            </div>
+            {% endif %}
             <div class="flex items-center gap-2">
                 {{ form_widget(form.isPublished) }}
                 {{ form_label(form.isPublished) }}

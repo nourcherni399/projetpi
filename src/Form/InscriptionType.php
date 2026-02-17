@@ -98,10 +98,9 @@ final class InscriptionType extends AbstractType
                 'choice_label' => fn (UserRole $r) => match ($r) {
                     UserRole::PARENT => 'Parent / Proche',
                     UserRole::PATIENT => 'Personne concernée (patient)',
-                    UserRole::USER => 'Utilisateur',
                     default => $r->value,
                 },
-                'choices' => [UserRole::PATIENT, UserRole::PARENT, UserRole::USER],
+                'choices' => [UserRole::PATIENT, UserRole::PARENT],
                 'placeholder' => 'Sélectionnez votre profil',
                 'constraints' => [new NotBlank(message: 'Veuillez sélectionner un profil.')],
                 'attr' => $attr + ['data-role-select' => '1'],

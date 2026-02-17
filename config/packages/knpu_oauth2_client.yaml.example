@@ -1,0 +1,13 @@
+# Copier ce fichier en knpu_oauth2_client.yaml après avoir exécuté :
+#   composer require knpuniversity/oauth2-client-bundle league/oauth2-google
+# Puis ajouter le bundle dans config/bundles.php si Flex ne l'a pas fait :
+#   KnpU\OAuth2ClientBundle\KnpUOAuth2ClientBundle::class => ['all' => true],
+#
+knpu_oauth2_client:
+    clients:
+        google:
+            type: google
+            client_id: '%env(OAUTH_GOOGLE_CLIENT_ID)%'
+            client_secret: '%env(OAUTH_GOOGLE_CLIENT_SECRET)%'
+            redirect_route: app_connect_google_check
+            redirect_params: {}

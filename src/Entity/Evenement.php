@@ -9,10 +9,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-<<<<<<< HEAD
 use Symfony\Component\Validator\Constraints as Assert;
-=======
->>>>>>> origin/integreModule
 
 #[ORM\Entity(repositoryClass: EvenementRepository::class)]
 class Evenement
@@ -23,7 +20,6 @@ class Evenement
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-<<<<<<< HEAD
     #[Assert\NotBlank(message: 'Le titre de l\'événement est obligatoire.')]
     #[Assert\Length(max: 255, maxMessage: 'Le titre ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $title = null;
@@ -45,7 +41,6 @@ class Evenement
     private ?\DateTimeInterface $heureFin = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Assert\NotBlank(message: 'Ce champ est obligatoire.')]
     #[Assert\Length(max: 255)]
     private ?string $lieu = null;
 
@@ -57,29 +52,6 @@ class Evenement
     /** Agrégation : un événement appartient à une thématique (sans cascade delete). */
     #[ORM\ManyToOne(inversedBy: 'evenements')]
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
-    #[Assert\NotNull(message: 'Ce champ est obligatoire.')]
-=======
-    private ?string $title = null;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $description = null;
-
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTimeInterface $dateEvent = null;
-
-    #[ORM\Column(type: Types::TIME_MUTABLE)]
-    private ?\DateTimeInterface $heureDebut = null;
-
-    #[ORM\Column(type: Types::TIME_MUTABLE)]
-    private ?\DateTimeInterface $heureFin = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $lieu = null;
-
-    /** Agrégation : un événement appartient à une thématique (sans cascade delete). */
-    #[ORM\ManyToOne(inversedBy: 'evenements')]
-    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
->>>>>>> origin/integreModule
     private ?Thematique $thematique = null;
 
     /** @var Collection<int, InscritEvents> */
@@ -101,11 +73,7 @@ class Evenement
         return $this->title;
     }
 
-<<<<<<< HEAD
     public function setTitle(?string $title): static
-=======
-    public function setTitle(string $title): static
->>>>>>> origin/integreModule
     {
         $this->title = $title;
         return $this;
@@ -127,11 +95,7 @@ class Evenement
         return $this->dateEvent;
     }
 
-<<<<<<< HEAD
     public function setDateEvent(?\DateTimeInterface $dateEvent): static
-=======
-    public function setDateEvent(\DateTimeInterface $dateEvent): static
->>>>>>> origin/integreModule
     {
         $this->dateEvent = $dateEvent;
         return $this;
@@ -142,11 +106,7 @@ class Evenement
         return $this->heureDebut;
     }
 
-<<<<<<< HEAD
     public function setHeureDebut(?\DateTimeInterface $heureDebut): static
-=======
-    public function setHeureDebut(\DateTimeInterface $heureDebut): static
->>>>>>> origin/integreModule
     {
         $this->heureDebut = $heureDebut;
         return $this;
@@ -157,11 +117,7 @@ class Evenement
         return $this->heureFin;
     }
 
-<<<<<<< HEAD
     public function setHeureFin(?\DateTimeInterface $heureFin): static
-=======
-    public function setHeureFin(\DateTimeInterface $heureFin): static
->>>>>>> origin/integreModule
     {
         $this->heureFin = $heureFin;
         return $this;
@@ -172,17 +128,12 @@ class Evenement
         return $this->lieu;
     }
 
-<<<<<<< HEAD
     public function setLieu(?string $lieu): static
-=======
-    public function setLieu(string $lieu): static
->>>>>>> origin/integreModule
     {
         $this->lieu = $lieu;
         return $this;
     }
 
-<<<<<<< HEAD
     public function getLocationUrl(): ?string
     {
         return $this->locationUrl;
@@ -242,8 +193,6 @@ class Evenement
         return null;
     }
 
-=======
->>>>>>> origin/integreModule
     public function getThematique(): ?Thematique
     {
         return $this->thematique;

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Liste des participants — {{ evenement.title }}</title>
+    <style>
+        body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #333; margin: 20px; }
+        h1 { font-size: 16px; color: #4B5563; border-bottom: 2px solid #A7C7E7; padding-bottom: 8px; }
+        .meta { color: #6B7280; font-size: 10px; margin-bottom: 16px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th, td { border: 1px solid #E5E0D8; padding: 6px 10px; text-align: left; }
+        th { background: #F5F1EB; font-weight: 600; color: #4B5563; }
+        tr:nth-child(even) { background: #FAFAF9; }
+        .statut-accepte { color: #047857; }
+        .statut-refuse { color: #b91c1c; }
+        .statut-attente { color: #b45309; }
+        .statut-desinscrit { color: #6B7280; }
+        .footer { margin-top: 20px; font-size: 9px; color: #9CA3AF; }
+    </style>
+</head>
+<body>
+    <h1>{{ evenement.title }}</h1>
+    <p class="meta">
+        Liste des participants — {{ evenement.dateEvent ? evenement.dateEvent|date('d/m/Y') : '—' }}
+        {{ evenement.lieu ? ' · ' ~ evenement.lieu : '' }}
+        — Exporté le {{ "now"|date("d/m/Y à H:i") }} — {{ participants|length }} participant(s)
+    </p>
+    <table>
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Email</th>
+                <th>Date demande</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in participants %}
+            <tr>
+                <td>{{ p.user.prenom }} {{ p.user.nom }}</td>
+                <td>{{ p.user.email }}</td>
+                <td>{{ p.dateInscrit ? p.dateInscrit|date('d/m/Y H:i') : '—' }}</td>
+                <td>
+                    {% if p.statut == 'accepte' %}Accepté
+                    {% elseif p.statut == 'refuse' %}Refusé
+                    {% elseif p.statut == 'desinscrit' %}Désinscrit
+                    {% else %}En attente
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4">Aucun participant.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p class="footer">AutiCare Admin — Liste des participants</p>
+</body>
+</html>

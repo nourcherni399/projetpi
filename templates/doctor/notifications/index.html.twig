@@ -62,8 +62,8 @@
                         Date demandée : {{ rv.date is defined ? rv.date|date('d/m/Y') : (rv.dateRdv is defined ? rv.dateRdv|date('d/m/Y') : '—') }}
                         {% if rv.heure is defined %} {{ rv.heure|date('H:i') }}{% endif %}
                     </p>
-                    {% if rv.motif is defined %}
-                    <p class="text-[#6B7280] text-sm">Motif : {{ rv.motif is iterable and rv.motif.value is defined ? rv.motif.value|capitalize : (rv.motif|default('—')) }}</p>
+                    {% if rv.motif is defined and rv.motif is not null %}
+                    <p class="text-[#6B7280] text-sm">Motif : {{ rv.motif.value|capitalize }}</p>
                     {% endif %}
                     {% if rv.telephone is defined and rv.telephone %}<p class="text-[#6B7280] text-sm">Tél. : {{ rv.telephone }}</p>{% endif %}
                 </div>

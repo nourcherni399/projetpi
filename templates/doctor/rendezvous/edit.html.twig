@@ -1,0 +1,59 @@
+{% extends 'layouts/doctor.html.twig' %}
+
+{% block title %}Modifier le rendez-vous - AutiCare Médecin{% endblock %}
+
+{% block doctor_content %}
+<div class="space-y-6 max-w-2xl">
+    <div class="flex items-center gap-4">
+        <a href="{{ path('doctor_rendezvous') }}" class="inline-flex items-center gap-2 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded-lg">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            Retour aux rendez-vous
+        </a>
+    </div>
+
+    <h1 class="text-2xl font-semibold text-[#4B5563]">Modifier le rendez-vous</h1>
+
+    <div class="bg-white rounded-xl border border-[#E5E0D8] p-6">
+        <h2 class="text-lg font-medium text-[#4B5563] mb-4">Données du patient</h2>
+        <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 pb-6 border-b border-[#E5E0D8]">
+            <div>
+                <dt class="text-sm text-[#6B7280]">Patient</dt>
+                <dd class="font-medium text-[#4B5563]">{{ rdv.patient ? (rdv.patient.prenom ~ ' ' ~ rdv.patient.nom) : (rdv.prenom ~ ' ' ~ rdv.nom) }}</dd>
+            </div>
+            <div>
+                <dt class="text-sm text-[#6B7280]">Date du rendez-vous</dt>
+                <dd class="font-medium text-[#4B5563]">{{ rdv.dateRdv ? rdv.dateRdv|date('d/m/Y') : '—' }}</dd>
+            </div>
+            <div>
+                <dt class="text-sm text-[#6B7280]">Téléphone</dt>
+                <dd class="font-medium text-[#4B5563]">{{ rdv.telephone ?? (rdv.patient and rdv.patient.telephone ? rdv.patient.telephone : '—') }}</dd>
+            </div>
+            <div>
+                <dt class="text-sm text-[#6B7280]">Adresse</dt>
+                <dd class="font-medium text-[#4B5563]">{{ rdv.adresse ?? '—' }}</dd>
+            </div>
+            {% if rdv.notePatient and rdv.notePatient != 'vide' %}
+            <div class="sm:col-span-2">
+                <dt class="text-sm text-[#6B7280]">Note du patient</dt>
+                <dd class="font-medium text-[#4B5563] mt-1 p-3 bg-purple-50 rounded-lg text-sm whitespace-pre-wrap">{{ rdv.notePatient }}</dd>
+            </div>
+            {% endif %}
+        </dl>
+
+        {{ form_start(form, {
+            attr: { class: 'space-y-4' },
+            label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }
+        }) }}
+        {{ form_row(form.status) }}
+        <div class="flex gap-3 pt-2">
+            <button type="submit" class="px-5 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                Enregistrer
+            </button>
+            <a href="{{ path('doctor_rendezvous') }}" class="px-5 py-2.5 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                Annuler
+            </a>
+        </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

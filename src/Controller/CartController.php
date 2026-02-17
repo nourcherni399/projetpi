@@ -58,15 +58,19 @@ final class CartController extends AbstractController
             return $this->redirectToRoute('login');
         }
 
+        $stockDispo = $this->getStockQuantity($produit);
+        if ($stockDispo <= 0) {
+            $this->addFlash('error', 'Le produit n\'est pas en stock.');
+            return $this->redirectToProductOrCart($request, $produit->getId());
+        }
+
         $cart = $this->cartRepository->findOneBy(['user' => $user]);
-        
         if (!$cart) {
             $cart = new Cart();
             $cart->setUser($user);
             $this->entityManager->persist($cart);
         }
 
-        // Vérifier si le produit est déjà dans le panier
         $existingItem = null;
         foreach ($cart->getItems() as $item) {
             if ($item->getProduit()->getId() === $produit->getId()) {
@@ -75,11 +79,15 @@ final class CartController extends AbstractController
             }
         }
 
+        $nouvelleQuantite = $existingItem ? $existingItem->getQuantite() + 1 : 1;
+        if ($nouvelleQuantite > $stockDispo) {
+            $this->addFlash('error', 'Le produit n\'est pas en stock.');
+            return $this->redirectToProductOrCart($request, $produit->getId());
+        }
+
         if ($existingItem) {
-            // Augmenter la quantité
-            $existingItem->setQuantite($existingItem->getQuantite() + 1);
+            $existingItem->setQuantite($nouvelleQuantite);
         } else {
-            // Ajouter un nouvel item
             $cartItem = new CartItem();
             $cartItem->setProduit($produit);
             $cartItem->setQuantite(1);
@@ -89,8 +97,23 @@ final class CartController extends AbstractController
 
         $cart->setUpdatedAt(new \DateTimeImmutable());
         $this->entityManager->flush();
-        
+
         $this->addFlash('success', 'Produit ajouté au panier!');
+        return $this->redirectToRoute('cart_index');
+    }
+
+    private function getStockQuantity(Produit $produit): int
+    {
+        $stock = $produit->getStock();
+        return $stock !== null ? $stock->getQuantite() : 0;
+    }
+
+    private function redirectToProductOrCart(Request $request, int $produitId): RedirectResponse
+    {
+        $referer = $request->headers->get('Referer', '');
+        if (str_contains($referer, '/produits/')) {
+            return $this->redirectToRoute('user_product_show', ['id' => $produitId]);
+        }
         return $this->redirectToRoute('cart_index');
     }
 
@@ -136,14 +159,24 @@ final class CartController extends AbstractController
             return $this->redirectToRoute('cart_index');
         }
 
-        $quantity = (int)$request->request->get('quantite', 1);
+        $quantity = (int) $request->request->get('quantite', 1);
         if ($quantity < 1) {
-            $quantity = 1;
+            $this->addFlash('error', 'La quantité doit être au moins 1.');
+            return $this->redirectToRoute('cart_index');
         }
-        
-        // Trouver l'item à mettre à jour
+
         foreach ($cart->getItems() as $item) {
             if ($item->getProduit()->getId() === $id) {
+                $produit = $item->getProduit();
+                $stockDispo = $this->getStockQuantity($produit);
+                if ($stockDispo <= 0) {
+                    $this->addFlash('error', 'Le produit n\'est pas en stock.');
+                    return $this->redirectToRoute('cart_index');
+                }
+                if ($quantity > $stockDispo) {
+                    $this->addFlash('error', 'Le produit n\'est pas en stock.');
+                    return $this->redirectToRoute('cart_index');
+                }
                 $item->setQuantite($quantity);
                 break;
             }
@@ -151,7 +184,7 @@ final class CartController extends AbstractController
 
         $cart->setUpdatedAt(new \DateTimeImmutable());
         $this->entityManager->flush();
-        
+
         return $this->redirectToRoute('cart_index');
     }
 
