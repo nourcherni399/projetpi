@@ -30,4 +30,5 @@ RUN php bin/console importmap:install --no-interaction 2>/dev/null || true
 
 EXPOSE 8000
 ENV PORT=8000
-CMD ["sh", "-c", "php bin/console doctrine:migrations:migrate --no-interaction 2>/dev/null || true && php bin/console cache:clear --env=prod 2>/dev/null || true && exec php -d variables_order=EGPCS -S 0.0.0.0:${PORT:-8000} -t public"]
+# Migrations + cache run in subshell so PHP fatals don't kill container; server always starts
+CMD ["sh", "-c", "(php bin/console doctrine:migrations:migrate --no-interaction 2>/dev/null) || true; (php bin/console cache:clear --env=prod 2>/dev/null) || true; exec php -d variables_order=EGPCS -S 0.0.0.0:${PORT:-8000} -t public"]
