@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\Enum\Jour;
 use App\Repository\DisponibiliteRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -30,9 +29,10 @@ class Disponibilite
     #[Assert\NotBlank(message: "L'heure de fin est obligatoire.")]
     private ?\DateTimeInterface $heureFin = null;
 
-    #[ORM\Column(type: 'string', enumType: Jour::class, columnDefinition: "ENUM('lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche')")]
-    #[Assert\NotNull(message: 'Le jour est obligatoire.')]
-    private ?Jour $jour = null;
+    /** Date du créneau (jour calendaire). */
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Assert\NotNull(message: 'La date est obligatoire.')]
+    private ?\DateTimeInterface $date = null;
 
     /** Durée en minutes. */
     #[ORM\Column(type: 'integer', options: ['default' => 0])]
@@ -83,14 +83,14 @@ class Disponibilite
         return $this;
     }
 
-    public function getJour(): ?Jour
+    public function getDate(): ?\DateTimeInterface
     {
-        return $this->jour;
+        return $this->date;
     }
 
-    public function setJour(?Jour $jour): static
+    public function setDate(?\DateTimeInterface $date): static
     {
-        $this->jour = $jour;
+        $this->date = $date;
         return $this;
     }
 

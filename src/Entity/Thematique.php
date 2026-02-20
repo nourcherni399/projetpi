@@ -41,9 +41,8 @@ class Thematique
     #[Assert\Length(max: 20)]
     private ?string $couleur = null;
 
-    /** URL ou chemin de l'image représentant la thématique */
+    /** Chemin de l'image représentant la thématique (upload) */
     #[ORM\Column(length: 500, nullable: true)]
-    #[Assert\NotBlank(message: 'Ce champ est obligatoire.')]
     #[Assert\Length(max: 500)]
     private ?string $image = null;
 

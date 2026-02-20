@@ -166,7 +166,7 @@ final class UserEditType extends AbstractType
                 'attr' => $attr + ['data-role-fields' => 'ROLE_MEDECIN'],
             ])
             ->add('tarifConsultation', NumberType::class, [
-                'label' => 'Tarif consultation (€)',
+                'label' => 'Tarif consultation (DT)',
                 'required' => false,
                 'mapped' => false,
                 'constraints' => [new Range(['min' => 0, 'max' => 99999.99, 'notInRangeMessage' => 'Le tarif doit être entre {{ min }} et {{ max }}.'])],

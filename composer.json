@@ -78,6 +78,7 @@
         "symfony/polyfill-php81": "*"
     },
     "scripts": {
+        "serve": "php -S 127.0.0.1:8000 -t public",
         "auto-scripts": {
             "cache:clear": "symfony-cmd",
             "assets:install %PUBLIC_DIR%": "symfony-cmd",

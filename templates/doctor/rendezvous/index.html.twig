@@ -134,9 +134,12 @@
                             </td>
                             <td class="px-6 py-4 text-gray-700">
                                 {% if rv.dateRdv is defined and rv.dateRdv %}
-                                    {{ rv.dateRdv|date('d/m/Y') }} {{ rv.dateRdv|date('H:i') }}
-                                {% elseif rv.date is defined and rv.date %}
-                                    {{ rv.date|date('d/m/Y') }} {{ rv.heure is defined ? rv.heure|date('H:i') : '—' }}
+                                    {{ rv.dateRdv|date('d/m/Y') }}
+                                    {% if rv.disponibilite and rv.disponibilite.heureDebut and rv.disponibilite.heureFin %}
+                                        {{ rv.disponibilite.heureDebut|date('H:i') }} - {{ rv.disponibilite.heureFin|date('H:i') }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
                                 {% else %}
                                     —
                                 {% endif %}

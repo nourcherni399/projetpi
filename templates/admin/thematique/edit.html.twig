@@ -30,7 +30,14 @@
                 {{ form_row(form.couleur) }}
                 {{ form_row(form.sousTitre) }}
             </div>
-            {{ form_row(form.image) }}
+            {% if thematique.image %}
+            <div class="rounded-lg border border-[#E5E0D8] p-4 bg-[#F9FAFB]">
+                <p class="text-sm font-medium text-[#4B5563] mb-2">Image actuelle</p>
+                {% set imgSrc = thematique.image starts with 'http' ? thematique.image : asset(thematique.image) %}
+                <img src="{{ imgSrc }}" alt="{{ thematique.nomThematique }}" class="max-h-40 rounded-lg object-cover">
+            </div>
+            {% endif %}
+            {{ form_row(form.image, { label: 'Nouvelle image (laisser vide pour conserver l’actuelle)' }) }}
             {{ form_row(form.ordre) }}
             <div class="flex items-center gap-2">
                 {{ form_widget(form.actif) }}

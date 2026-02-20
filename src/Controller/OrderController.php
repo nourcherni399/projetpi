@@ -10,6 +10,7 @@ use App\Entity\LigneCommande;
 use App\Entity\Produit;
 use App\Form\CommandeType;
 use App\Repository\CartRepository;
+use App\Repository\CommandeRepository;
 use App\Repository\ProduitRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -24,6 +25,7 @@ final class OrderController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly ProduitRepository $produitRepository,
         private readonly CartRepository $cartRepository,
+        private readonly CommandeRepository $commandeRepository,
     ) {
     }
 
@@ -256,13 +258,34 @@ final class OrderController extends AbstractController
         return $this->redirectToRoute('order_confirmation', ['id' => $commande->getId()]);
     }
 
-    #[Route('/confirmation/{id}', name: 'confirmation', methods: ['GET'])]
+    #[Route('/mes-commandes', name: 'my_orders', methods: ['GET'])]
+    public function myOrders(): Response
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            $this->addFlash('error', 'Vous devez être connecté pour voir vos commandes.');
+            return $this->redirectToRoute('app_login');
+        }
+
+        $commandes = $this->commandeRepository->findByUserOrderedByDate($user);
+
+        return $this->render('front/order/list.html.twig', [
+            'commandes' => $commandes,
+        ]);
+    }
+
+    #[Route('/confirmation/{id}', name: 'confirmation', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function confirmation(int $id): Response
     {
-        $commande = $this->entityManager->getRepository(Commande::class)->find($id);
-        
+        $commande = $this->commandeRepository->find($id);
         if (!$commande) {
             throw $this->createNotFoundException('Commande introuvable');
+        }
+
+        $user = $this->getUser();
+        $isOwner = $user && $commande->getUser() && $commande->getUser()->getId() === $user->getId();
+        if (!$isOwner && !$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException('Vous ne pouvez pas consulter cette commande.');
         }
 
         return $this->render('front/order/confirmation.html.twig', [

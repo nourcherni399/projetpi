@@ -12,6 +12,13 @@
         <a href="{{ path('admin_evenement_edit', { id: evenement.id }) }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
             Modifier
         </a>
+        <form method="post" action="{{ path('admin_evenement_send_reminders', { id: evenement.id }) }}" class="inline">
+            <input type="hidden" name="_token" value="{{ csrf_token('send_reminders_' ~ evenement.id) }}">
+            <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 focus:outline focus:ring-2 focus:ring-emerald-500" title="Envoyer un rappel par e-mail à tous les participants (acceptés ou en attente).">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                Envoyer les rappels par e-mail
+            </button>
+        </form>
     </div>
 
     <div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
@@ -33,6 +40,53 @@
         </div>
         {% endif %}
     </div>
+
+    {% if false %}
+    <div class="mt-6 bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
+        <div class="p-4 border-b border-[#E5E0D8]">
+            <h2 class="text-lg font-semibold text-[#4B5563] mb-2">Image / Affiche (IA)</h2>
+            <div class="mb-4 rounded-lg border-2 px-4 py-3 text-sm {% if huggingface_configured|default(false) %}border-emerald-200 bg-emerald-50 text-emerald-800{% else %}border-amber-200 bg-amber-50 text-amber-800{% endif %}">
+                <strong>Statut API :</strong>
+                {% if huggingface_configured|default(false) %}
+                    Clé Hugging Face détectée.
+                    <a href="{{ path('admin_api_ai_verify_image_key') }}" target="_blank" rel="noopener" class="font-medium underline ml-1">Tester la clé</a>
+                {% else %}
+                    Clé non configurée. Ajoutez <code class="bg-white/80 px-1 rounded">HUGGINGFACE_API_KEY</code> dans <code class="bg-white/80 px-1 rounded">.env</code>, puis exécutez <code class="bg-white/80 px-1 rounded">php bin/console cache:clear</code>.
+                {% endif %}
+            </div>
+            <form method="post" action="{{ path('admin_evenement_generate_image', { id: evenement.id }) }}" class="js-generate-image-form space-y-3" data-turbo="false">
+                <input type="hidden" name="_token" value="{{ csrf_token('admin_evenement_generate_image_' ~ evenement.id) }}">
+                <div>
+                    <label for="image-prompt" class="block text-sm font-medium text-[#4B5563] mb-1">Votre prompt (décrivez l’affiche souhaitée)</label>
+                    <textarea name="prompt" id="image-prompt" class="js-generate-image-prompt w-full rounded-lg border border-[#E5E0D8] bg-white px-4 py-2.5 text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]" rows="3" placeholder="Ex. Affiche pour un atelier sensoriel familles, couleurs douces, style illustration bienveillant"></textarea>
+                    <p class="text-xs text-[#6B7280] mt-1">Laissez vide pour générer automatiquement à partir du titre et de la description de l’événement.</p>
+                </div>
+                <button type="button" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-violet-600 text-white text-sm font-medium hover:bg-violet-700 focus:outline focus:ring-2 focus:ring-violet-500 js-generate-image-btn">
+                    <span class="js-generate-image-label">Générer une image (IA)</span>
+                    <span class="js-generate-image-loading hidden">Génération…</span>
+                </button>
+            </form>
+        </div>
+        <div class="p-4 space-y-3">
+            <div class="js-generate-image-loading-banner hidden rounded-xl border-2 border-violet-200 bg-violet-50 p-4 text-center">
+                <p class="text-violet-800 font-medium">Génération en cours…</p>
+                <p class="text-violet-600 text-sm mt-1">Cela peut prendre 30 à 60 secondes. Ne quittez pas la page.</p>
+            </div>
+            <div class="js-generate-image-error hidden rounded-lg border-2 border-red-300 bg-red-50 text-red-800 px-4 py-3 text-sm font-medium" role="alert"></div>
+            <div class="js-generate-image-result hidden rounded-lg border border-[#E5E0D8] overflow-hidden bg-[#F5F1EB]/50 p-3"></div>
+            <p class="js-generate-image-loading-msg hidden text-sm text-[#6B7280]">Génération en cours (cela peut prendre 30 à 60 secondes)…</p>
+            {% if evenement.image and image_file_exists|default(false) and image_url|default('') %}
+            <div class="js-event-image mt-2 js-event-image-placeholder" data-image-url="{{ image_url|e('html_attr') }}">
+                <p class="js-event-image-loading text-[#6B7280] text-sm">Chargement de l'affiche…</p>
+                <p class="js-event-image-fallback hidden text-[#6B7280] text-sm mt-2">Aucune affiche pour le moment. Décrivez votre affiche ci-dessus (n’importe quel sujet), puis cliquez sur « Générer une image (IA) ».</p>
+            </div>
+            {% else %}
+            <p class="text-[#6B7280] text-sm js-no-image mt-2">Comme avec un générateur d’images IA (ex. Gemini) : décrivez l’affiche ci-dessus (n’importe quel sujet) ou laissez vide, puis cliquez sur « Générer une image (IA) ». {% if huggingface_configured|default(false) %}<span class="text-emerald-600 font-medium">Clé Hugging Face détectée.</span> Si la génération échoue encore, videz le cache (<code class="text-xs bg-[#E5E0D8]/60 px-1 rounded">php bin/console cache:clear</code>) ou ajoutez <strong>POLLINATIONS_API_KEY</strong> dans .env (enter.pollinations.ai) en secours.{% else %}Pour activer la génération : dans <code class="text-xs bg-[#E5E0D8]/60 px-1 rounded">.env</code> décommentez et remplissez <strong>HUGGINGFACE_API_KEY=</strong> votre_token (huggingface.co/settings/tokens), puis exécutez <code class="text-xs bg-[#E5E0D8]/60 px-1 rounded">php bin/console cache:clear</code>.{% endif %}</p>
+            <div class="js-event-image mt-2 hidden"></div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
 
     <div class="mt-6 bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
         <div class="p-4 border-b border-[#E5E0D8] flex flex-wrap items-center justify-between gap-3">
@@ -94,5 +148,353 @@
         <p class="p-6 text-[#6B7280] text-sm">Aucun participant pour le moment.</p>
         {% endif %}
     </div>
+
+    <div class="mt-6 bg-white rounded-xl border border-[#E5E0D8] overflow-hidden shadow-sm">
+        <div class="p-4 border-b border-[#E5E0D8] flex flex-wrap items-center gap-3">
+            <span class="flex items-center justify-center w-10 h-10 rounded-xl bg-sky-100 text-sky-600 shrink-0">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 003.83-.498c1.085-.163 2.037-.369 2.707-.622a3.578 3.578 0 001.67-1.618 3.575 3.575 0 00.281-1.236V6.26c0-1.6-1.123-2.994-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg>
+            </span>
+            <div class="min-w-0">
+                <h2 class="text-lg font-semibold text-[#4B5563]">Discussions avec les participants</h2>
+                <p class="text-[#6B7280] text-sm mt-0.5">Répondez aux messages des utilisateurs.</p>
+            </div>
+            {% if unreadMessagesCount|default(0) > 0 %}
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">
+                <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                {{ unreadMessagesCount }} message(s) non lu(s)
+            </span>
+            {% endif %}
+        </div>
+        <div class="p-4 flex flex-col md:flex-row gap-4">
+            {% if conversations|default([])|length > 0 %}
+            <div class="md:w-72 shrink-0">
+                <p class="text-xs font-medium text-[#6B7280] mb-2 uppercase tracking-wide">Conversations</p>
+                <div class="space-y-2 max-h-80 md:max-h-none overflow-y-auto">
+                    {% for conv in conversations %}
+                    <a href="{{ path('admin_evenement_show', { id: evenement.id, user: conv.user.id }) }}" class="flex items-center gap-3 p-3 rounded-xl border transition-colors {{ conversationUser and conversationUser.id == conv.user.id ? 'border-[#A7C7E7] bg-[#A7C7E7]/10 ring-1 ring-[#A7C7E7]/30' : 'border-[#E5E0D8] hover:bg-[#F5F1EB] hover:border-[#E5E0D8]' }}">
+                        <span class="flex items-center justify-center w-10 h-10 rounded-full bg-[#E5E0D8] text-[#4B5563] text-sm font-semibold shrink-0">{{ (conv.user.prenom|slice(0,1) ~ conv.user.nom|slice(0,1))|upper }}</span>
+                        <div class="min-w-0 flex-1">
+                            <span class="font-medium text-[#4B5563] block truncate">{{ conv.user.prenom }} {{ conv.user.nom }}</span>
+                            <span class="text-xs text-[#9CA3AF]">Dernier msg. {{ conv.last_at|date('d/m H:i') }}</span>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="flex-1 min-w-0 rounded-xl border border-[#E5E0D8] bg-[#FAFAFA]/50 overflow-hidden">
+                {% if conversationUser and replyForm %}
+                <div class="p-3 border-b border-[#E5E0D8] bg-white flex items-center gap-3">
+                    <span class="flex items-center justify-center w-9 h-9 rounded-full bg-[#A7C7E7]/20 text-[#4B5563] text-sm font-semibold">{{ (conversationUser.prenom|slice(0,1) ~ conversationUser.nom|slice(0,1))|upper }}</span>
+                    <div>
+                        <p class="font-medium text-[#4B5563]">Conversation avec {{ conversationUser.prenom }} {{ conversationUser.nom }}</p>
+                        <p class="text-xs text-[#6B7280]">{{ conversationUser.email }}</p>
+                    </div>
+                </div>
+                <div class="p-4 space-y-4 max-h-72 overflow-y-auto">
+                    {% for msg in conversationMessages %}
+                    <div class="flex {{ msg.envoyePar == 'admin' ? 'justify-end' : 'justify-start' }} gap-2">
+                        {% if msg.envoyePar != 'admin' %}
+                        <span class="flex items-center justify-center w-8 h-8 rounded-full bg-[#E5E0D8] text-[#6B7280] text-xs font-medium shrink-0 self-end">{{ (conversationUser.prenom|slice(0,1) ~ conversationUser.nom|slice(0,1))|upper }}</span>
+                        {% endif %}
+                        <div class="max-w-[82%] rounded-2xl px-4 py-3 shadow-sm {{ msg.envoyePar == 'admin' ? 'rounded-br-md bg-[#A7C7E7] text-white' : 'rounded-bl-md bg-white border border-[#E5E0D8] text-[#4B5563]' }}">
+                            <p class="text-sm whitespace-pre-wrap leading-relaxed">{{ msg.contenu }}</p>
+                            <p class="text-xs mt-2 {{ msg.envoyePar == 'admin' ? 'text-white/90' : 'text-[#9CA3AF]' }}">{{ msg.dateEnvoi|date('d/m/Y H:i') }}{{ msg.envoyePar == 'admin' ? ' · Vous' : ' · Participant' }}</p>
+                            {% if msg.envoyePar != 'admin' %}
+                            <div class="mt-2 space-y-2">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <button type="button" class="text-xs px-2 py-1 rounded border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 js-complete-btn" data-contenu="{{ msg.contenu|e('html_attr') }}">Analyse complète (IA)</button>
+                                    <button type="button" class="text-xs px-2 py-1 rounded border border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100 js-suggest-reply-btn" data-contenu="{{ msg.contenu|e('html_attr') }}">Suggérer une réponse (IA)</button>
+                                    <button type="button" class="hidden" data-contenu="{{ msg.contenu|e('html_attr') }}" title="Indices pour adapter l’accueil">Besoins d’adaptation (IA)</button>
+                                    <button type="button" class="text-xs px-2 py-1 rounded border border-[#E5E0D8] bg-white/80 text-[#6B7280] hover:bg-[#F5F1EB] js-sentiment-btn" data-contenu="{{ msg.contenu|e('html_attr') }}">Sentiment</button>
+                                    <span class="js-sentiment-result text-xs font-medium"></span>
+                                    <button type="button" class="text-xs px-2 py-1 rounded border border-violet-200 bg-violet-50 text-violet-700 hover:bg-violet-100 js-category-btn" data-contenu="{{ msg.contenu|e('html_attr') }}">Type</button>
+                                    <span class="js-category-result text-xs font-medium"></span>
+                                </div>
+                                <div class="js-complete-result hidden text-xs rounded-lg p-3 bg-[#F0F4F8] border border-[#E5E0D8]"></div>
+                                <div class="js-adaptation-needs-result hidden text-xs rounded-lg p-3 mt-2 bg-amber-50/80 border border-amber-200"></div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% if msg.envoyePar == 'admin' %}
+                        <span class="flex items-center justify-center w-8 h-8 rounded-full bg-[#A7C7E7]/30 text-[#4B5563] text-xs font-medium shrink-0 self-end" title="Admin">A</span>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="p-4 border-t border-[#E5E0D8] bg-white">
+                    {{ form_start(replyForm, { action: path('admin_evenement_message_reply', { id: evenement.id }), method: 'POST', attr: { class: 'space-y-4' } }) }}
+                    <input type="hidden" name="user_id" value="{{ conversationUser.id }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('admin_event_reply_' ~ evenement.id ~ '_' ~ conversationUser.id) }}">
+                    {{ form_row(replyForm.contenu, { label: 'Votre réponse', attr: { class: 'rounded-xl border-[#E5E0D8] focus:ring-2 focus:ring-[#A7C7E7] js-reply-contenu', rows: 3 } }) }}
+                    <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7] focus:ring-offset-2 transition-colors">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg>
+                        Envoyer la réponse
+                    </button>
+                    {{ form_end(replyForm) }}
+                </div>
+                {% else %}
+                <div class="p-8 text-center">
+                    <svg class="w-12 h-12 mx-auto text-[#E5E0D8] mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 003.83-.498c1.085-.163 2.037-.369 2.707-.622a3.578 3.578 0 001.67-1.618 3.575 3.575 0 00.281-1.236V6.26c0-1.6-1.123-2.994-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg>
+                    <p class="text-[#6B7280] text-sm">Sélectionnez une conversation dans la liste.</p>
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="p-8 text-center">
+                <svg class="w-12 h-12 mx-auto text-[#E5E0D8] mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 003.83-.498c1.085-.163 2.037-.369 2.707-.622a3.578 3.578 0 001.67-1.618 3.575 3.575 0 00.281-1.236V6.26c0-1.6-1.123-2.994-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg>
+                <p class="text-[#6B7280] text-sm">Aucune discussion pour le moment.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+(function() {
+    var apiUrl = '{{ path('admin_api_ai_sentiment')|e('js') }}';
+    var suggestReplyUrl = '{{ path('admin_api_ai_suggest_reply')|e('js') }}';
+    var analyzeCompleteUrl = '{{ path('admin_api_ai_analyze_complete')|e('js') }}';
+    var opts = { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' };
+
+    function callApi(contenu, mode, resultEl, btn, prefix) {
+        if (!contenu.trim()) { if (resultEl) resultEl.textContent = 'Texte vide'; return; }
+        btn.disabled = true;
+        if (resultEl) resultEl.textContent = '…';
+        var body = JSON.stringify({ text: contenu, mode: mode || 'sentiment' });
+        fetch(apiUrl, { ...opts, body: body })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (resultEl) resultEl.textContent = d.label_fr ? (prefix + d.label_fr + (d.score != null ? ' (' + Math.round(d.score * 100) + ' %)' : '')) : (d.error || 'Indisponible');
+            })
+            .catch(function() { if (resultEl) resultEl.textContent = 'Erreur'; })
+            .finally(function() { btn.disabled = false; });
+    }
+
+    function bindButtons() {
+        document.querySelectorAll('.js-sentiment-btn').forEach(function(btn) {
+            if (btn.dataset.sentimentBound) return;
+            btn.dataset.sentimentBound = '1';
+            btn.addEventListener('click', function() {
+                var contenu = this.getAttribute('data-contenu') || '';
+                var resultEl = this.closest('div').querySelector('.js-sentiment-result');
+                callApi(contenu, 'sentiment', resultEl, this, 'Sentiment : ');
+            });
+        });
+        document.querySelectorAll('.js-category-btn').forEach(function(btn) {
+            if (btn.dataset.categoryBound) return;
+            btn.dataset.categoryBound = '1';
+            btn.addEventListener('click', function() {
+                var contenu = this.getAttribute('data-contenu') || '';
+                var resultEl = this.closest('div').querySelector('.js-category-result');
+                callApi(contenu, 'category', resultEl, this, 'Type : ');
+            });
+        });
+
+        document.querySelectorAll('.js-complete-btn').forEach(function(btn) {
+            if (btn.dataset.completeBound) return;
+            btn.dataset.completeBound = '1';
+            btn.addEventListener('click', function() {
+                var contenu = this.getAttribute('data-contenu') || '';
+                var container = this.closest('.mt-2').querySelector('.js-complete-result');
+                if (!contenu.trim()) { if (container) { container.classList.remove('hidden'); container.innerHTML = 'Texte vide'; } return; }
+                btn.disabled = true;
+                if (container) { container.classList.remove('hidden'); container.innerHTML = 'Analyse en cours…'; }
+                fetch(analyzeCompleteUrl, { ...opts, body: JSON.stringify({ text: contenu }) })
+                    .then(function(r) { return r.json(); })
+                    .then(function(d) {
+                        if (!container) return;
+                        if (d.error) { container.innerHTML = '<span class="text-red-600">' + d.error + '</span>'; return; }
+                        var html = '<strong>Sentiment :</strong> ' + (d.sentiment_fr || '—') + ' &nbsp;|&nbsp; <strong>Type :</strong> ' + (d.category_fr || '—');
+                        if (d.recommandation) html += '<br><strong>Recommandation :</strong> ' + d.recommandation;
+                        container.innerHTML = html;
+                    })
+                    .catch(function() { if (container) container.innerHTML = 'Erreur'; })
+                    .finally(function() { btn.disabled = false; });
+            });
+        });
+
+        document.querySelectorAll('.js-suggest-reply-btn').forEach(function(btn) {
+            if (btn.dataset.suggestReplyBound) return;
+            btn.dataset.suggestReplyBound = '1';
+            btn.addEventListener('click', function() {
+                var contenu = this.getAttribute('data-contenu') || '';
+                if (!contenu.trim()) return;
+                btn.disabled = true;
+                fetch(suggestReplyUrl, { ...opts, body: JSON.stringify({ message: contenu }) })
+                    .then(function(r) { return r.json(); })
+                    .then(function(d) {
+                        var textarea = document.querySelector('textarea.js-reply-contenu');
+                        if (textarea && d.suggestion) textarea.value = d.suggestion;
+                        else if (d.error) alert(d.error);
+                    })
+                    .catch(function() { alert('Erreur'); })
+                    .finally(function() { btn.disabled = false; });
+            });
+        });
+
+        document.querySelectorAll('.js-adaptation-needs-btn').forEach(function(btn) {
+            if (btn.dataset.adaptationBound) return;
+            btn.dataset.adaptationBound = '1';
+            btn.addEventListener('click', function() {
+                var contenu = this.getAttribute('data-contenu') || '';
+                var container = this.closest('.mt-2').querySelector('.js-adaptation-needs-result');
+                if (!contenu.trim()) { if (container) { container.classList.remove('hidden'); container.innerHTML = 'Texte vide'; } return; }
+                btn.disabled = true;
+                if (container) { container.classList.remove('hidden'); container.innerHTML = 'Analyse en cours…'; }
+                fetch('', { ...opts, body: JSON.stringify({ text: contenu }) })
+                    .then(function(r) { return r.json(); })
+                    .then(function(d) {
+                        if (!container) return;
+                        if (d.error) { container.innerHTML = '<span class="text-red-600">' + d.error + '</span>'; return; }
+                        var html = '';
+                        if (d.labels_fr && d.labels_fr.length) {
+                            html += '<p class="font-medium text-amber-800 mb-1">Indices repérés :</p><div class="flex flex-wrap gap-1 mb-2">';
+                            d.labels_fr.forEach(function(l) { html += '<span class="inline-block px-2 py-0.5 rounded bg-amber-100 text-amber-800 text-xs">' + l + '</span>'; });
+                            html += '</div>';
+                        } else {
+                            html += '<p class="text-amber-700">Aucun indice particulier repéré.</p>';
+                        }
+                        if (d.hint) html += '<p class="text-[#6B7280]"><strong>Piste pour l’équipe :</strong> ' + d.hint + '</p>';
+                        container.innerHTML = html;
+                    })
+                    .catch(function() { if (container) container.innerHTML = 'Erreur'; })
+                    .finally(function() { btn.disabled = false; });
+            });
+        });
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bindButtons);
+    } else {
+        bindButtons();
+    }
+    document.addEventListener('turbo:load', bindButtons);
+
+    function bindGenerateImageForm() {
+        var genForm = document.querySelector('.js-generate-image-form');
+        var btn = genForm ? genForm.querySelector('.js-generate-image-btn') : null;
+        if (!genForm || !btn || btn.dataset.generateImageBound === '1') return;
+        btn.dataset.generateImageBound = '1';
+        btn.addEventListener('click', function() {
+            var label = genForm.querySelector('.js-generate-image-label');
+            var loading = genForm.querySelector('.js-generate-image-loading');
+            var loadingMsg = document.querySelector('.js-generate-image-loading-msg');
+            var loadingBanner = document.querySelector('.js-generate-image-loading-banner');
+            var resultDiv = document.querySelector('.js-generate-image-result');
+            var errorDiv = document.querySelector('.js-generate-image-error');
+            var noImageP = document.querySelector('.js-no-image');
+            var eventImageWrap = document.querySelector('.js-event-image');
+            if (btn) btn.disabled = true;
+            if (label) label.classList.add('hidden');
+            if (loading) loading.classList.remove('hidden');
+            if (loadingMsg) loadingMsg.classList.remove('hidden');
+            if (loadingBanner) loadingBanner.classList.remove('hidden');
+            if (errorDiv) { errorDiv.classList.add('hidden'); errorDiv.textContent = ''; }
+            if (resultDiv) { resultDiv.classList.add('hidden'); resultDiv.innerHTML = ''; }
+            var fd = new FormData(genForm);
+            var controller = new AbortController();
+            var timeoutId = setTimeout(function() { controller.abort(); }, 120000);
+            fetch(genForm.action, { method: 'POST', body: fd, credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' }, signal: controller.signal })
+                .then(function(r) {
+                    clearTimeout(timeoutId);
+                    return r.json().catch(function() { return { error: r.ok ? 'Réponse invalide.' : 'Erreur serveur (' + r.status + ').' }; }).then(function(d) {
+                        if (!r.ok && !d.error) d.error = 'Erreur ' + r.status;
+                        return d;
+                    });
+                })
+                .then(function(d) {
+                    if (d.error) {
+                        if (errorDiv) { errorDiv.textContent = d.error; errorDiv.classList.remove('hidden'); errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+                        if (!errorDiv && resultDiv) { var ep = document.createElement('p'); ep.className = 'text-red-600 font-medium'; ep.textContent = d.error || 'Erreur'; resultDiv.innerHTML = ''; resultDiv.appendChild(ep); resultDiv.classList.remove('hidden'); }
+                    } else if (d.image_url || d.image_data_url) {
+                        if (noImageP) noImageP.classList.add('hidden');
+                        var imgSrc = d.image_data_url || d.image_url;
+                        if (resultDiv) {
+                            var p = document.createElement('p');
+                            p.className = 'text-sm text-[#6B7280] mb-2';
+                            p.textContent = 'Affiche générée :';
+                            var img = document.createElement('img');
+                            img.alt = 'Affiche de l\'événement';
+                            img.className = 'max-w-md rounded-lg shadow-md border border-[#E5E0D8]';
+                            img.src = imgSrc;
+                            var fallbackP = document.createElement('p');
+                            fallbackP.className = 'text-amber-600 text-sm mt-2 hidden js-result-image-fallback';
+                            fallbackP.textContent = 'L\'image ne s\'affiche pas. Rechargez la page (F5) pour la voir.';
+                            img.onerror = function() {
+                                if (d.image_url && imgSrc.indexOf('data:') !== 0) {
+                                    fetch(d.image_url, { credentials: 'same-origin' }).then(function(r) { return r.ok ? r.blob() : Promise.reject(); }).then(function(blob) {
+                                        img.src = URL.createObjectURL(blob);
+                                        fallbackP.classList.add('hidden');
+                                    }).catch(function() { fallbackP.classList.remove('hidden'); });
+                                } else {
+                                    fallbackP.classList.remove('hidden');
+                                }
+                            };
+                            resultDiv.innerHTML = '';
+                            resultDiv.appendChild(p);
+                            resultDiv.appendChild(img);
+                            resultDiv.appendChild(fallbackP);
+                            resultDiv.classList.remove('hidden');
+                            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                        if (eventImageWrap) {
+                            eventImageWrap.classList.remove('hidden');
+                            eventImageWrap.classList.add('js-event-image-placeholder');
+                            eventImageWrap.setAttribute('data-image-url', imgSrc || d.image_url || '');
+                            eventImageWrap.innerHTML = '<p class="js-event-image-loading text-[#6B7280] text-sm">Chargement de l\'affiche…</p><p class="js-event-image-fallback hidden text-[#6B7280] text-sm mt-2">Aucune affiche pour le moment. Décrivez votre affiche ci-dessus (n\'importe quel sujet), puis cliquez sur « Générer une image (IA) ».</p>';
+                            eventImageWrap.removeAttribute('data-load-started');
+                            loadEventPosterImage();
+                        }
+                    } else if (resultDiv || errorDiv) {
+                        var msg = 'Réponse inattendue du serveur. Réessayez.';
+                        if (errorDiv) { errorDiv.textContent = msg; errorDiv.classList.remove('hidden'); errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+                        else if (resultDiv) { var mp = document.createElement('p'); mp.className = 'text-red-600 font-medium'; mp.textContent = msg; resultDiv.innerHTML = ''; resultDiv.appendChild(mp); resultDiv.classList.remove('hidden'); }
+                    }
+                })
+                .catch(function(err) {
+                    clearTimeout(timeoutId);
+                    var errMsg = err && err.name === 'AbortError' ? 'La génération prend trop de temps. Réessayez.' : 'La génération n\'a pas abouti. Réessayez dans un instant.';
+                    if (errorDiv) { errorDiv.textContent = errMsg; errorDiv.classList.remove('hidden'); errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+                    else if (resultDiv) { var cp = document.createElement('p'); cp.className = 'text-red-600 font-medium'; cp.textContent = errMsg; resultDiv.innerHTML = ''; resultDiv.appendChild(cp); resultDiv.classList.remove('hidden'); }
+                })
+                .finally(function() {
+                    clearTimeout(timeoutId);
+                    if (btn) btn.disabled = false;
+                    if (label) label.classList.remove('hidden');
+                    if (loading) loading.classList.add('hidden');
+                    if (loadingMsg) loadingMsg.classList.add('hidden');
+                    if (loadingBanner) loadingBanner.classList.add('hidden');
+                });
+        });
+    }
+    function loadEventPosterImage() {
+        document.querySelectorAll('.js-event-image-placeholder').forEach(function(wrap) {
+            if (wrap.dataset.loadStarted === '1') return;
+            var url = wrap.getAttribute('data-image-url');
+            if (!url) return;
+            wrap.dataset.loadStarted = '1';
+            var loadingEl = wrap.querySelector('.js-event-image-loading');
+            var fallbackEl = wrap.querySelector('.js-event-image-fallback');
+            var img = new Image();
+            img.alt = 'Affiche de l\'événement';
+            img.className = 'max-w-md rounded-lg shadow-md border border-[#E5E0D8]';
+            img.onload = function() {
+                if (loadingEl) loadingEl.classList.add('hidden');
+                if (fallbackEl) fallbackEl.classList.add('hidden');
+                wrap.insertBefore(img, wrap.firstChild);
+            };
+            img.onerror = function() {
+                if (loadingEl) loadingEl.classList.add('hidden');
+                if (fallbackEl) fallbackEl.classList.remove('hidden');
+            };
+            img.src = url;
+        });
+    }
+    bindGenerateImageForm();
+    loadEventPosterImage();
+    document.addEventListener('turbo:load', function() { bindGenerateImageForm(); loadEventPosterImage(); });
+})();
+</script>
 {% endblock %}

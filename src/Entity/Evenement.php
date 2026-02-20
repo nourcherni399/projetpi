@@ -49,6 +49,29 @@ class Evenement
     #[Assert\Length(max: 500)]
     private ?string $locationUrl = null;
 
+    /** Latitude pour affichage sur carte (Google Maps). */
+    #[ORM\Column(type: Types::FLOAT, nullable: true)]
+    private ?float $latitude = null;
+
+    /** Longitude pour affichage sur carte (Google Maps). */
+    #[ORM\Column(type: Types::FLOAT, nullable: true)]
+    private ?float $longitude = null;
+
+    /** Mode de l'événement : presentiel | en_ligne | hybride */
+    #[ORM\Column(length: 20, nullable: false, options: ['default' => 'presentiel'])]
+    #[Assert\Choice(choices: ['presentiel', 'en_ligne', 'hybride'], message: 'Le mode doit être présentiel, en ligne ou hybride.')]
+    private string $mode = 'presentiel';
+
+    /** Lien de la réunion Zoom (généré via API ou saisi à la main). */
+    #[ORM\Column(length: 500, nullable: true)]
+    #[Assert\Length(max: 500)]
+    private ?string $meetingUrl = null;
+
+    /** Image générée (affiche) : chemin relatif ex. uploads/evenements/xxx.png. */
+    #[ORM\Column(length: 500, nullable: true)]
+    #[Assert\Length(max: 500)]
+    private ?string $image = null;
+
     /** Agrégation : un événement appartient à une thématique (sans cascade delete). */
     #[ORM\ManyToOne(inversedBy: 'evenements')]
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
@@ -145,11 +168,93 @@ class Evenement
         return $this;
     }
 
+    public function getLatitude(): ?float
+    {
+        return $this->latitude;
+    }
+
+    public function setLatitude(?float $latitude): static
+    {
+        $this->latitude = $latitude;
+        return $this;
+    }
+
+    public function getLongitude(): ?float
+    {
+        return $this->longitude;
+    }
+
+    public function setLongitude(?float $longitude): static
+    {
+        $this->longitude = $longitude;
+        return $this;
+    }
+
+    public function getMode(): string
+    {
+        return $this->mode;
+    }
+
+    public function setMode(string $mode): static
+    {
+        $this->mode = $mode;
+        return $this;
+    }
+
+    public function getMeetingUrl(): ?string
+    {
+        return $this->meetingUrl;
+    }
+
+    public function setMeetingUrl(?string $meetingUrl): static
+    {
+        $this->meetingUrl = $meetingUrl;
+        return $this;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): static
+    {
+        $this->image = $image;
+        return $this;
+    }
+
+    /** True si l'événement a une partie en ligne (mode en_ligne ou hybride). */
+    public function isOnlineOrHybrid(): bool
+    {
+        return $this->mode === 'en_ligne' || $this->mode === 'hybride';
+    }
+
+    /**
+     * Retourne [latitude, longitude] si disponibles (champs ou parsing de locationUrl).
+     *
+     * @return array{0: float, 1: float}|null
+     */
+    public function getCoordinates(): ?array
+    {
+        if ($this->latitude !== null && $this->longitude !== null) {
+            return [(float) $this->latitude, (float) $this->longitude];
+        }
+        $url = $this->locationUrl;
+        if ($url !== null && preg_match('/@(-?\d+\.?\d*),(-?\d+\.?\d*)/', $url, $m)) {
+            return [(float) $m[1], (float) $m[2]];
+        }
+        return null;
+    }
+
     /**
      * URL d'intégration iframe pour la carte (Google Maps).
+     * Priorité : latitude/longitude (exact) > locationUrl > lieu.
      */
     public function getMapEmbedUrl(): ?string
     {
+        if ($this->latitude !== null && $this->longitude !== null) {
+            return 'https://www.google.com/maps?q=' . $this->latitude . ',' . $this->longitude . '&output=embed';
+        }
         $url = $this->locationUrl;
         if ($url !== null && $url !== '') {
             $urlLower = strtolower($url);
@@ -171,9 +276,13 @@ class Evenement
 
     /**
      * URL pour ouvrir la localisation dans Google Maps (page complète).
+     * Priorité : latitude/longitude (exact) > locationUrl > lieu.
      */
     public function getMapsPageUrl(): ?string
     {
+        if ($this->latitude !== null && $this->longitude !== null) {
+            return 'https://www.google.com/maps?q=' . $this->latitude . ',' . $this->longitude;
+        }
         $url = $this->locationUrl;
         if ($url !== null && $url !== '') {
             $urlLower = strtolower($url);

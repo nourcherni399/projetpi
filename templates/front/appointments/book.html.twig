@@ -35,7 +35,7 @@
             <div class="flex gap-2 mb-4">
                 {% if doctor.has_cabinet %}<span class="px-3 py-1.5 rounded-lg border border-[#E5E0D8] text-[#6B7280] text-sm">Cabinet</span>{% endif %}
             </div>
-            <p class="font-semibold text-[#4B5563]">{{ doctor.price }}€ <span class="text-sm font-normal text-[#6B7280]">Tarif de la consultation</span></p>
+            <p class="font-semibold text-[#4B5563]">{{ doctor.price }} DT <span class="text-sm font-normal text-[#6B7280]">Tarif de la consultation</span></p>
         </div>
     </aside>
 
@@ -52,6 +52,31 @@
             <span>{{ message }}</span>
         </div>
         {% endfor %}
+
+        {% if require_login|default(false) %}
+        <div class="mb-6 p-6 md:p-8 rounded-2xl bg-[#E8F4FC] border-2 border-[#A7C7E7] text-[#4B5563]">
+            <div class="flex items-start gap-4">
+                <span class="shrink-0 flex items-center justify-center w-14 h-14 rounded-full bg-[#A7C7E7] text-white">
+                    <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                </span>
+                <div class="min-w-0 flex-1">
+                    <h2 class="text-xl font-bold text-[#4B5563] mb-2">Vous devez vous connecter</h2>
+                    <p class="text-[#6B7280] mb-6">Pour prendre rendez-vous avec {{ doctor.name }}, connectez-vous à votre compte ou créez-en un.</p>
+                    <div class="flex flex-wrap gap-3">
+                        {% set _login_params = return_uri|default('') != '' ? { _target_path: return_uri } : {} %}
+                        <a href="{{ path('app_login', _login_params) }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                            Se connecter
+                        </a>
+                        <a href="{{ path('register', _login_params) }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border-2 border-[#A7C7E7] text-[#4B5563] font-medium hover:bg-[#A7C7E7]/10 focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                            Créer un compte
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if not require_login|default(false) %}
         <div id="rdv-step-alert" class="hidden mb-4 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm flex items-center gap-2" role="alert">
             <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
             <span>Veuillez d'abord compléter l'étape 1 (choisir un créneau) avant de passer à cette étape.</span>
@@ -80,21 +105,48 @@
 
         <div class="bg-white rounded-2xl shadow-sm border border-[#E5E0D8] p-6 md:p-8">
             {% if step == 1 %}
-            <h2 class="text-xl font-bold text-[#4B5563] mb-6">Choisissez un créneau disponible</h2>
-            <p class="text-[#6B7280] mb-4">Les créneaux déjà réservés ne sont pas affichés.</p>
+            {% set filter_days = filter_days|default([]) %}
+            <h2 class="text-xl font-bold text-[#4B5563] mb-2">Choisissez votre créneau</h2>
+            <p class="text-[#6B7280] mb-6">Sélectionnez le jour et l'heure qui vous conviennent le mieux.</p>
             {% if slots is defined and slots|length > 0 %}
             <form method="get" action="{{ path('user_appointment_book', { id: doctor.id }) }}" id="rdv-form-step1">
                 <input type="hidden" name="etape" value="2">
                 <input type="hidden" name="disponibilite_id" id="rdv-dispo" value="{{ choices.disponibilite_id|default('') }}">
                 <input type="hidden" name="date_rdv" id="rdv-date" value="{{ choices.date_rdv|default('') }}">
                 <input type="hidden" name="date_label" id="rdv-label" value="{{ choices.date_label|default('') }}">
-                <div class="flex flex-wrap gap-2 mb-8">
-                    {% for slot in slots %}
-                    <button type="button" class="rdv-slot px-4 py-3 rounded-lg border-2 border-[#E5E0D8] text-[#6B7280] hover:border-[#A7C7E7] font-medium transition-colors text-left {% if choices.disponibilite_id == slot.disponibilite_id and choices.date_rdv == slot.date_rdv %}rdv-selected{% endif %}" data-dispo="{{ slot.disponibilite_id }}" data-date="{{ slot.date_rdv }}" data-label="{{ slot.label }}">{{ slot.label }}</button>
+                <div class="flex flex-wrap gap-2 mb-6" role="tablist" aria-label="Filtrer par jour">
+                    <button type="button" class="rdv-filter-day px-4 py-2 rounded-lg border-2 font-medium text-sm transition-colors bg-[#A7C7E7] border-[#A7C7E7] text-white" data-day="">Tous</button>
+                    {% for day in filter_days %}
+                    <button type="button" class="rdv-filter-day px-4 py-2 rounded-lg border-2 border-[#E5E0D8] bg-white text-[#4B5563] font-medium text-sm hover:border-[#A7C7E7] hover:bg-[#A7C7E7]/5 transition-colors" data-day="{{ day|e('html_attr') }}">{{ day }}</button>
                     {% endfor %}
                 </div>
-                <div class="flex justify-end">
-                    <button type="submit" id="rdv-btn-continuer-step1" class="inline-flex items-center gap-1 px-6 py-3 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] disabled:opacity-50 disabled:cursor-not-allowed" {% if not choices.disponibilite_id or not choices.date_rdv %}disabled{% endif %} title="Choisissez un créneau ci-dessus pour continuer">Continuer <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg></button>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 rdv-slots-container">
+                    {% for slot in slots %}
+                    {% if slot.available is defined and slot.available == true %}
+                    <button type="button" class="rdv-slot rdv-slot-available rdv-slot-card text-left px-5 py-4 rounded-xl border-2 border-[#E5E0D8] bg-white text-[#4B5563] hover:border-[#A7C7E7] hover:bg-[#A7C7E7]/5 font-medium transition-colors {% if choices.disponibilite_id == slot.disponibilite_id and choices.date_rdv == slot.date_rdv %}rdv-selected{% endif %}" data-dispo="{{ slot.disponibilite_id }}" data-date="{{ slot.date_rdv }}" data-label="{{ slot.label }}" data-day="{{ slot.day_name|default('')|e('html_attr') }}">
+                        <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 mb-2">{{ slot.day_name|default('') }}</span>
+                        <span class="block font-bold text-[#4B5563] text-lg">{{ slot.time_range|default(slot.label) }}</span>
+                        <span class="block text-[#6B7280] text-sm font-normal mt-1">{{ slot.label }}</span>
+                    </button>
+                    {% else %}
+                    <div class="rdv-slot-blocked rdv-slot-card px-5 py-4 rounded-xl border-2 border-red-500 bg-red-50 text-left relative cursor-not-allowed select-none pointer-events-none" tabindex="-1" role="status" aria-label="Créneau indisponible" data-day="{{ slot.day_name|default('')|e('html_attr') }}" data-blocked="true">
+                        <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-200 text-red-800 mb-2">{{ slot.day_name|default('') }}</span>
+                        <span class="absolute top-3 right-3 flex items-center justify-center w-8 h-8 rounded-full bg-red-400 text-red-700 border-2 border-red-500" aria-hidden="true">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
+                        </span>
+                        <span class="block font-bold text-red-900 text-lg pr-10">{{ slot.time_range|default(slot.label) }}</span>
+                        <span class="block text-red-800 text-sm font-normal mt-1">{{ slot.label }}</span>
+                        <span class="inline-block mt-2 text-sm font-semibold text-red-700">Créneau indisponible</span>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                    <p class="text-sm text-[#6B7280] flex items-center gap-2">
+                        <span class="flex items-center justify-center w-5 h-5 rounded-full bg-[#A7C7E7]/20 text-[#A7C7E7] font-bold text-xs" aria-hidden="true">i</span>
+                        Les créneaux rouges sont déjà réservés.
+                    </p>
+                    <button type="submit" id="rdv-btn-continuer-step1" class="inline-flex items-center gap-1 px-6 py-3 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] disabled:opacity-50 disabled:cursor-not-allowed" {% if not choices.disponibilite_id or not choices.date_rdv or not (selected_slot_available|default(true)) %}disabled{% endif %} title="Choisissez un créneau disponible (blanc) pour continuer">Continuer <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg></button>
                 </div>
             </form>
             <script>
@@ -103,14 +155,37 @@
                 var date = document.getElementById('rdv-date');
                 var label = document.getElementById('rdv-label');
                 var btnContinuer = document.getElementById('rdv-btn-continuer-step1');
-                var btns = document.querySelectorAll('.rdv-slot');
+                var slotsContainer = document.querySelector('.rdv-slots-container');
+                var filterBtns = document.querySelectorAll('.rdv-filter-day');
+                var slotCards = document.querySelectorAll('.rdv-slot-card');
+                var availableBtns = document.querySelectorAll('.rdv-slot-available');
+                function filterByDay(day) {
+                    slotCards.forEach(function(card) {
+                        var cardDay = card.getAttribute('data-day') || '';
+                        card.style.display = (day === '' || cardDay === day) ? '' : 'none';
+                    });
+                    filterBtns.forEach(function(btn) {
+                        var isActive = (btn.getAttribute('data-day') || '') === day;
+                        btn.classList.toggle('bg-[#A7C7E7]', isActive);
+                        btn.classList.toggle('border-[#A7C7E7]', isActive);
+                        btn.classList.toggle('text-white', isActive);
+                        btn.classList.toggle('bg-white', !isActive);
+                        btn.classList.toggle('border-[#E5E0D8]', !isActive);
+                        btn.classList.toggle('text-[#4B5563]', !isActive);
+                    });
+                }
+                filterBtns.forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        filterByDay(this.getAttribute('data-day') || '');
+                    });
+                });
                 function updateContinuerState() {
                     var hasSlot = dispo && date && dispo.value && date.value;
                     if (btnContinuer) btnContinuer.disabled = !hasSlot;
                 }
-                btns.forEach(function(btn) {
+                availableBtns.forEach(function(btn) {
                     btn.addEventListener('click', function() {
-                        btns.forEach(function(b) { b.classList.remove('rdv-selected'); });
+                        availableBtns.forEach(function(b) { b.classList.remove('rdv-selected'); });
                         this.classList.add('rdv-selected');
                         if (dispo) dispo.value = this.getAttribute('data-dispo');
                         if (date) date.value = this.getAttribute('data-date');
@@ -122,7 +197,7 @@
             })();
             </script>
             {% else %}
-            <p class="text-[#6B7280] mb-6">Aucun créneau disponible pour les 4 prochaines semaines. Revenez plus tard ou choisissez un autre médecin.</p>
+            <p class="text-[#6B7280] mb-6">Aucun créneau pour les 4 prochaines semaines. Revenez plus tard ou choisissez un autre médecin.</p>
             <a href="{{ path('user_appointments') }}" class="inline-flex px-6 py-3 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED]">Voir les autres médecins</a>
             {% endif %}
             <script>
@@ -250,7 +325,7 @@
                         <li>Type: {{ choices.type_label }}</li>
                         <li>Mode: {{ choices.mode_label }}</li>
                         {% if choices.motif %}<li>Motif: {{ choices.motif }}</li>{% endif %}
-                        <li class="font-semibold text-[#4B5563] pt-2">Tarif: {{ doctor.price }}€</li>
+                        <li class="font-semibold text-[#4B5563] pt-2">Tarif: {{ doctor.price }} DT</li>
                     </ul>
                 </div>
                 <div class="flex justify-between">
@@ -284,6 +359,7 @@
             </div>
             {% endif %}
         </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

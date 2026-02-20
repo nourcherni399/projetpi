@@ -7,10 +7,12 @@ namespace App\Form;
 use App\Entity\Evenement;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
+use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Length;
@@ -42,8 +44,10 @@ final class EvenementType extends AbstractType
             ->add('dateEvent', DateType::class, [
                 'label' => 'Date',
                 'widget' => 'single_text',
+                'format' => 'dd/MM/yyyy',
+                'html5' => false,
                 'constraints' => [new NotBlank(message: 'La date est obligatoire.')],
-                'attr' => $attr,
+                'attr' => $attr + ['placeholder' => 'JJ/MM/AAAA', 'autocomplete' => 'off'],
             ])
             ->add('heureDebut', TimeType::class, [
                 'label' => 'Heure de début',
@@ -55,6 +59,15 @@ final class EvenementType extends AbstractType
                 'label' => 'Heure de fin',
                 'widget' => 'single_text',
                 'constraints' => [new NotBlank(message: 'L\'heure de fin est obligatoire.')],
+                'attr' => $attr,
+            ])
+            ->add('mode', ChoiceType::class, [
+                'label' => 'Mode de l\'événement',
+                'choices' => [
+                    'Présentiel' => 'presentiel',
+                    'En ligne' => 'en_ligne',
+                    'Hybride' => 'hybride',
+                ],
                 'attr' => $attr,
             ])
             ->add('lieu', TextType::class, [
@@ -71,6 +84,21 @@ final class EvenementType extends AbstractType
                 'required' => false,
                 'attr' => $attr + ['placeholder' => 'Collez le lien de partage Google Maps'],
             ])
+            ->add('meetingUrl', TextType::class, [
+                'label' => 'Lien réunion Zoom / visio',
+                'required' => false,
+                'attr' => $attr + ['placeholder' => 'Généré automatiquement ou collez un lien'],
+            ])
+            ->add('latitude', TextType::class, [
+                'label' => 'Latitude (carte)',
+                'required' => false,
+                'attr' => $attr + ['placeholder' => 'Ex. 36.8065', 'inputmode' => 'decimal'],
+            ])
+            ->add('longitude', TextType::class, [
+                'label' => 'Longitude (carte)',
+                'required' => false,
+                'attr' => $attr + ['placeholder' => 'Ex. 10.1815', 'inputmode' => 'decimal'],
+            ])
             ->add('thematique', EntityType::class, [
                 'label' => 'Thématique',
                 'class' => \App\Entity\Thematique::class,
@@ -79,6 +107,13 @@ final class EvenementType extends AbstractType
                 'required' => true,
                 'attr' => $attr,
             ]);
+
+        $floatToString = new CallbackTransformer(
+            fn (?float $v) => $v !== null ? (string) $v : '',
+            fn (string $v) => trim($v) === '' ? null : (float) str_replace(',', '.', $v)
+        );
+        $builder->get('latitude')->addModelTransformer($floatToString);
+        $builder->get('longitude')->addModelTransformer($floatToString);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

@@ -69,6 +69,55 @@ final class DoctorController extends AbstractController
         ]));
     }
 
+    #[Route('/medecin/recherche', name: 'doctor_search', methods: ['GET'])]
+    public function search(Request $request): Response
+    {
+        $medecin = $this->getMedecin();
+        if ($medecin === null) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        $q = trim((string) $request->query->get('q', ''));
+        if ($q !== '') {
+            $qLower = mb_strtolower($q);
+            $len = mb_strlen($qLower);
+            // Mots complets ou partiels (au moins 2 caractères) pour ouvrir directement l'interface
+            $isDashboard = $len >= 1 && (
+                str_starts_with('tableau', $qLower) || str_starts_with('bord', $qLower)
+                || str_starts_with('dashboard', $qLower) || str_starts_with('accueil', $qLower)
+                || $qLower === 'tab' || $qLower === 'b'
+            );
+            $isDispo = $len >= 2 && (
+                str_starts_with('dispo', $qLower) || str_starts_with('disponibilité', $qLower)
+                || str_starts_with('disponibilite', $qLower) || str_starts_with('disponibilités', $qLower)
+            );
+            $isNotes = $len >= 2 && (str_starts_with('note', $qLower) || str_starts_with('notes', $qLower));
+            $isRdv = $len >= 2 && (
+                str_starts_with('rendez', $qLower) || str_starts_with('rendez-vous', $qLower)
+                || str_starts_with('rendezvous', $qLower)
+                || $qLower === 'rdv' || str_starts_with('rdv', $qLower)
+            );
+
+            if ($isDashboard) {
+                return $this->redirectToRoute('doctor_dashboard');
+            }
+            if ($isDispo) {
+                return $this->redirectToRoute('doctor_availability');
+            }
+            if ($isNotes) {
+                return $this->redirectToRoute('doctor_notes');
+            }
+            if ($isRdv) {
+                return $this->redirectToRoute('doctor_rendezvous');
+            }
+            // Aucune section correspondante : retour au tableau de bord
+            return $this->redirectToRoute('doctor_dashboard');
+        }
+
+        // q vide (barre supprimée) : retour au tableau de bord, pas d'affichage des instructions
+        return $this->redirectToRoute('doctor_dashboard');
+    }
+
     #[Route('/medecin/mon-profil', name: 'doctor_profile', methods: ['GET', 'POST'])]
     public function profile(Request $request): Response
     {
@@ -95,42 +144,56 @@ final class DoctorController extends AbstractController
     public function availability(Request $request): Response
     {
         $medecin = $this->getMedecin();
-        $search = (string) $request->query->get('q', '');
-        $search = \trim($search);
-        $order = (string) $request->query->get('order', 'asc');
-        $order = \in_array(strtolower($order), ['asc', 'desc'], true) ? strtolower($order) : 'asc';
+        $month = (int) $request->query->get('month', (int) date('n'));
+        $year = (int) $request->query->get('year', (int) date('Y'));
+        if ($month < 1) {
+            $month = 12;
+            --$year;
+        }
+        if ($month > 12) {
+            $month = 1;
+            ++$year;
+        }
 
         $disponibilites = $this->disponibiliteRepository->findForListing($medecin);
-        if ($search !== '') {
-            $lower = mb_strtolower($search);
-            $disponibilites = \array_values(\array_filter($disponibilites, static function (Disponibilite $d) use ($lower): bool {
-                $jour = $d->getJour()?->value ?? '';
-                $heureDebut = $d->getHeureDebut()?->format('H:i') ?? '';
-                $heureFin = $d->getHeureFin()?->format('H:i') ?? '';
-                $duree = (string) $d->getDuree();
+        \usort($disponibilites, static function (Disponibilite $a, Disponibilite $b): int {
+            $dateA = $a->getDate()?->format('Y-m-d') ?? '';
+            $dateB = $b->getDate()?->format('Y-m-d') ?? '';
+            if ($dateA !== $dateB) {
+                return \strcmp($dateA, $dateB);
+            }
+            $timeA = $a->getHeureDebut()?->format('H:i') ?? '';
+            $timeB = $b->getHeureDebut()?->format('H:i') ?? '';
+            return \strcmp($timeA, $timeB);
+        });
 
-                return \str_contains(mb_strtolower($jour), $lower)
-                    || \str_contains(mb_strtolower($heureDebut), $lower)
-                    || \str_contains(mb_strtolower($heureFin), $lower)
-                    || \str_contains(mb_strtolower($duree), $lower);
-            }));
+        $disposByDate = [];
+        foreach ($disponibilites as $d) {
+            $date = $d->getDate();
+            if ($date === null) {
+                continue;
+            }
+            $key = $date->format('Y-m-d');
+            if (!isset($disposByDate[$key])) {
+                $disposByDate[$key] = [];
+            }
+            $disposByDate[$key][] = $d;
         }
 
-        if ($disponibilites !== []) {
-            \usort($disponibilites, static function (Disponibilite $a, Disponibilite $b) use ($order): int {
-                $jourA = $a->getJour()?->value ?? '';
-                $jourB = $b->getJour()?->value ?? '';
-                if ($jourA === $jourB) {
-                    $timeA = $a->getHeureDebut()?->format('H:i') ?? '';
-                    $timeB = $b->getHeureDebut()?->format('H:i') ?? '';
-                    $cmp = \strcmp($timeA, $timeB);
-                } else {
-                    $cmp = \strcmp($jourA, $jourB);
-                }
-
-                return $order === 'asc' ? $cmp : -$cmp;
-            });
+        $first = new \DateTimeImmutable(sprintf('%d-%02d-01', $year, $month));
+        $last = $first->modify('last day of this month');
+        $start = $first->modify('-' . ((int) $first->format('N') - 1) . ' days');
+        $endWeek = $last->modify('+' . (7 - (int) $last->format('N')) . ' days');
+        $days = [];
+        $current = $start;
+        while ($current <= $endWeek) {
+            $days[] = $current;
+            $current = $current->modify('+1 day');
         }
+        $calendarWeeks = array_chunk($days, 7);
+
+        $prev = $first->modify('-1 month');
+        $next = $first->modify('+1 month');
 
         $disponibilite = new Disponibilite();
         $disponibilite->setMedecin($medecin);
@@ -142,15 +205,19 @@ final class DoctorController extends AbstractController
             $this->entityManager->persist($disponibilite);
             $this->entityManager->flush();
             $this->addFlash('success', 'Disponibilité enregistrée.');
-            return $this->redirectToRoute('doctor_availability', ['q' => $search, 'order' => $order], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('doctor_availability', ['month' => $month, 'year' => $year], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('doctor/availability/index.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
             'disponibilites' => $disponibilites,
             'medecin' => $medecin,
             'form' => $form,
-            'search' => $search,
-            'order' => $order,
+            'calendar_weeks' => $calendarWeeks,
+            'dispos_by_date' => $disposByDate,
+            'calendar_month' => $month,
+            'calendar_year' => $year,
+            'prev_month' => ['month' => (int) $prev->format('n'), 'year' => (int) $prev->format('Y')],
+            'next_month' => ['month' => (int) $next->format('n'), 'year' => (int) $next->format('Y')],
         ]));
     }
 
@@ -169,12 +236,12 @@ final class DoctorController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $jour = $disponibilite->getJour();
+            $date = $disponibilite->getDate();
             $heureDebut = $disponibilite->getHeureDebut();
             $heureFin = $disponibilite->getHeureFin();
 
-            if ($jour === null) {
-                $this->addFlash('error', 'Le jour est obligatoire.');
+            if ($date === null) {
+                $this->addFlash('error', 'La date est obligatoire.');
                 return $this->render('doctor/availability/new.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
                     'form' => $form,
                 ]));
@@ -202,12 +269,15 @@ final class DoctorController extends AbstractController
                 ]));
             }
 
-            $existingDispos = $this->disponibiliteRepository->findByMedecinAndJour($medecin, $jour);
+            $existingDispos = $this->disponibiliteRepository->findByMedecinAndDate($medecin, $date);
             foreach ($existingDispos as $existing) {
-                if (($heureDebut >= $existing->getHeureDebut() && $heureDebut < $existing->getHeureFin())
-                    || ($heureFin > $existing->getHeureDebut() && $heureFin <= $existing->getHeureFin())
-                    || ($heureDebut <= $existing->getHeureDebut() && $heureFin >= $existing->getHeureFin())) {
-                    $this->addFlash('error', 'Cette disponibilité chevauche une disponibilité existante.');
+                $exDebut = $existing->getHeureDebut();
+                $exFin = $existing->getHeureFin();
+                if ($exDebut !== null && $exFin !== null
+                    && (($heureDebut >= $exDebut && $heureDebut < $exFin)
+                        || ($heureFin > $exDebut && $heureFin <= $exFin)
+                        || ($heureDebut <= $exDebut && $heureFin >= $exFin))) {
+                    $this->addFlash('error', 'Un créneau existe déjà à cette date et chevauche ces horaires.');
                     return $this->render('doctor/availability/new.html.twig', array_merge($this->getDoctorTemplateVars($medecin), [
                         'form' => $form,
                     ]));
@@ -322,7 +392,8 @@ final class DoctorController extends AbstractController
         }
 
         $patients = $this->rendezVousRepository->findDistinctPatientsByMedecin($medecin);
-        $notes = $this->noteRepository->findByMedecinOrderByDate($medecin);
+        $searchQ = trim((string) $request->query->get('q', ''));
+        $notes = $searchQ !== '' ? $this->noteRepository->searchByMedecin($medecin, $searchQ, 100) : $this->noteRepository->findByMedecinOrderByDate($medecin);
         $stats = $this->calculateNotesStats($notes, $medecin);
 
         $note = new Note();
@@ -341,6 +412,7 @@ final class DoctorController extends AbstractController
                     'form' => $form,
                     'patients' => $patients,
                     'stats' => $stats,
+                    'search_q' => $searchQ,
                 ]));
             }
 
@@ -351,6 +423,7 @@ final class DoctorController extends AbstractController
                     'form' => $form,
                     'patients' => $patients,
                     'stats' => $stats,
+                    'search_q' => $searchQ,
                 ]));
             }
 
@@ -362,6 +435,7 @@ final class DoctorController extends AbstractController
                     'form' => $form,
                     'patients' => $patients,
                     'stats' => $stats,
+                    'search_q' => $searchQ,
                 ]));
             }
 
@@ -372,6 +446,7 @@ final class DoctorController extends AbstractController
                     'form' => $form,
                     'patients' => $patients,
                     'stats' => $stats,
+                    'search_q' => $searchQ,
                 ]));
             }
 
@@ -383,6 +458,7 @@ final class DoctorController extends AbstractController
                     'form' => $form,
                     'patients' => $patients,
                     'stats' => $stats,
+                    'search_q' => $searchQ,
                 ]));
             }
 
@@ -395,6 +471,7 @@ final class DoctorController extends AbstractController
                         'form' => $form,
                         'patients' => $patients,
                         'stats' => $stats,
+                        'search_q' => $searchQ,
                     ]));
                 }
             }
@@ -413,6 +490,7 @@ final class DoctorController extends AbstractController
                     'form' => $form,
                     'patients' => $patients,
                     'stats' => $stats,
+                    'search_q' => $searchQ,
                 ]));
             }
         }
@@ -422,6 +500,7 @@ final class DoctorController extends AbstractController
             'form' => $form,
             'patients' => $patients,
             'stats' => $stats,
+            'search_q' => $searchQ,
         ]));
     }
 
@@ -577,7 +656,14 @@ final class DoctorController extends AbstractController
         ]);
     }
 
-    #[Route('/medecin/rendez-vous', name: 'doctor_rendezvous', methods: ['GET'])]
+    /** Ancien chemin (avec trait d'union) : redirection vers le bon chemin. */
+    #[Route('/medecin/rendez-vous', name: 'doctor_rendezvous_legacy', methods: ['GET'])]
+    public function rendezvousLegacyRedirect(Request $request): Response
+    {
+        return $this->redirectToRoute('doctor_rendezvous', $request->query->all(), Response::HTTP_301_MOVED_PERMANENTLY);
+    }
+
+    #[Route('/medecin/rendezvous', name: 'doctor_rendezvous', methods: ['GET'])]
     public function rendezvous(Request $request): Response
     {
         $medecin = $this->getMedecin();
@@ -588,8 +674,8 @@ final class DoctorController extends AbstractController
 
         $order = (string) $request->query->get('order', 'asc');
         $order = \in_array(strtolower($order), ['asc', 'desc'], true) ? strtolower($order) : 'asc';
-
-        $rendezVous = $this->rendezVousRepository->findByMedecinOrderByDate($medecin, $order);
+        $searchQ = trim((string) $request->query->get('q', ''));
+        $rendezVous = $searchQ !== '' ? $this->rendezVousRepository->searchByMedecin($medecin, $searchQ, 100) : $this->rendezVousRepository->findByMedecinOrderByDate($medecin, $order);
         $stats = $this->calculateRendezVousStats($rendezVous, $medecin);
 
         $upcomingRdv = array_filter($rendezVous, function ($rdv) {
@@ -606,10 +692,11 @@ final class DoctorController extends AbstractController
             'today_count' => count($todayRdv),
             'recent_rdv' => array_slice($rendezVous, 0, 5),
             'order' => $order,
+            'search_q' => $searchQ,
         ]));
     }
 
-    #[Route('/medecin/rendez-vous/{id}/modifier', name: 'doctor_rendezvous_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
+    #[Route('/medecin/rendezvous/{id}/modifier', name: 'doctor_rendezvous_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
     public function rendezvousEdit(Request $request, int $id): Response
     {
         $medecin = $this->getMedecin();
@@ -644,7 +731,7 @@ final class DoctorController extends AbstractController
         ]));
     }
 
-    #[Route('/medecin/rendez-vous/{id}/supprimer', name: 'doctor_rendezvous_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
+    #[Route('/medecin/rendezvous/{id}/supprimer', name: 'doctor_rendezvous_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function rendezvousDelete(Request $request, int $id): Response
     {
         $medecin = $this->getMedecin();
@@ -677,7 +764,7 @@ final class DoctorController extends AbstractController
         return $this->redirectToRoute('doctor_rendezvous');
     }
 
-    #[Route('/medecin/rendez-vous/{id}/accepter', name: 'doctor_rendezvous_accept', requirements: ['id' => '\d+'], methods: ['POST'])]
+    #[Route('/medecin/rendezvous/{id}/accepter', name: 'doctor_rendezvous_accept', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function rendezvousAccept(Request $request, int $id): Response
     {
         $medecin = $this->getMedecin();
@@ -760,7 +847,7 @@ final class DoctorController extends AbstractController
         ]));
     }
 
-    #[Route('/medecin/rendez-vous/{id}/refuser', name: 'doctor_rendezvous_refuse', requirements: ['id' => '\d+'], methods: ['POST'])]
+    #[Route('/medecin/rendezvous/{id}/refuser', name: 'doctor_rendezvous_refuse', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function rendezvousRefuse(Request $request, int $id): Response
     {
         $medecin = $this->getMedecin();

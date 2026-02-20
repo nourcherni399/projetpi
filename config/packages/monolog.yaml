@@ -5,9 +5,10 @@ monolog:
 when@dev:
     monolog:
         handlers:
+            # En dev : écriture vers stderr pour éviter "Resource temporarily unavailable" sur Windows (fichier var/log verrouillé)
             main:
                 type: stream
-                path: "%kernel.logs_dir%/%kernel.environment%.log"
+                path: "php://stderr"
                 level: debug
                 channels: ["!event"]
             console:

@@ -28,12 +28,13 @@ final class AuthController extends AbstractController
             return $this->redirectToRoute('home');
         }
 
+        $session = $request->getSession();
         $targetPath = $request->query->get('_target_path') ?? $request->request->get('_target_path');
-        if ($targetPath !== null && $targetPath !== '') {
-            $request->getSession()->set('_security.main.target_path', $targetPath);
+        // N'accepter qu'un chemin relatif (ex. /rendez-vous/prendre/5?etape=2) pour éviter les redirections ouvertes
+        if (\is_string($targetPath) && $targetPath !== '' && str_starts_with($targetPath, '/') && !str_starts_with($targetPath, '//')) {
+            $session->set('_security.main.target_path', $targetPath);
         }
 
-        $session = $request->getSession();
         $validationErrors = $session->remove(LoginValidationSubscriber::SESSION_VALIDATION_ERRORS);
         $lastUsernameFromValidation = $session->remove(LoginValidationSubscriber::SESSION_LAST_USERNAME);
 

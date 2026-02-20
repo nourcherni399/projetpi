@@ -127,17 +127,29 @@ class RendezVousRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    /** Créneau (disponibilite + date) déjà pris (en_attente ou confirmer). */
-    public function isSlotTaken(Disponibilite $disponibilite, \DateTimeInterface $date): bool
+    /** Créneau bloqué uniquement quand le médecin a accepté la demande (confirmer). Les demandes en attente ne bloquent pas le créneau. Les créneaux passés sont considérés comme libres. */
+    public function isSlotTaken(Disponibilite $disponibilite): bool
     {
+        $date = $disponibilite->getDate();
+        $heureFin = $disponibilite->getHeureFin();
+        if ($date !== null && $heureFin !== null) {
+            $day = $date instanceof \DateTimeImmutable ? $date : \DateTimeImmutable::createFromInterface($date);
+            $endAt = $day->setTime(
+                (int) $heureFin->format('H'),
+                (int) $heureFin->format('i'),
+                (int) $heureFin->format('s')
+            );
+            if ($endAt < new \DateTimeImmutable('now')) {
+                return false;
+            }
+        }
+
         $count = (int) $this->createQueryBuilder('r')
             ->select('COUNT(r.id)')
             ->andWhere('r.disponibilite = :dispo')
-            ->andWhere('r.dateRdv = :date')
-            ->andWhere('r.status IN (:statuses)')
+            ->andWhere('r.status = :status')
             ->setParameter('dispo', $disponibilite)
-            ->setParameter('date', $date->format('Y-m-d'))
-            ->setParameter('statuses', [StatusRendezVous::EN_ATTENTE, StatusRendezVous::CONFIRMER])
+            ->setParameter('status', StatusRendezVous::CONFIRMER->value)
             ->getQuery()
             ->getSingleScalarResult();
         return $count > 0;
@@ -174,6 +186,38 @@ class RendezVousRepository extends ServiceEntityRepository
             ->setParameter('medecin', $medecin)
             ->getQuery()
             ->getSingleScalarResult();
+    }
+
+    /**
+     * Recherche dans les rendez-vous (nom, prénom patient, date) pour un médecin.
+     *
+     * @return list<RendezVous>
+     */
+    public function searchByMedecin(Medcin $medecin, string $query, int $limit = 20): array
+    {
+        $term = '%' . addcslashes(trim($query), '%_') . '%';
+        if ($term === '%%') {
+            return [];
+        }
+        $qb = $this->createQueryBuilder('r')
+            ->andWhere('r.medecin = :medecin')
+            ->setParameter('medecin', $medecin)
+            ->orderBy('r.dateRdv', 'DESC')
+            ->addOrderBy('r.id', 'DESC')
+            ->setMaxResults($limit);
+
+        $dateStr = null;
+        if (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', trim($query), $m)) {
+            $dateStr = trim($query);
+        } elseif (preg_match('/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/', trim($query), $m)) {
+            $dateStr = sprintf('%04d-%02d-%02d', (int) $m[3], (int) $m[2], (int) $m[1]);
+        }
+        if ($dateStr !== null) {
+            $qb->andWhere('r.dateRdv = :date')->setParameter('date', $dateStr);
+        } else {
+            $qb->andWhere('r.nom LIKE :term OR r.prenom LIKE :term')->setParameter('term', $term);
+        }
+        return $qb->getQuery()->getResult();
     }
 
     /**

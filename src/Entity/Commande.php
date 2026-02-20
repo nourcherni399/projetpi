@@ -53,7 +53,7 @@ class Commande
     private ?float $total = null;
 
     #[ORM\Column(length: 50)]
-    private ?string $statut = 'en_attente'; // en_attente, payée, livrée, annulée
+    private ?string $statut = 'en_attente'; // en_attente → confirmer (admin) → livraison → recu ; annulée
 
     #[ORM\Column(length: 50)]
     #[Assert\NotBlank]

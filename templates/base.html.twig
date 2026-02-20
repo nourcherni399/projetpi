@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% block head_meta %}{% endblock %}
     <title>{% block title %}AutiCare{% endblock %}</title>
     <link rel="icon" href="{{ asset('images/logo.png') }}">
     {% block stylesheets %}

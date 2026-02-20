@@ -15,6 +15,9 @@ class Notification
     public const TYPE_DEMANDE_RDV = 'demande_rdv';
     public const TYPE_RDV_ACCEPTE = 'rdv_accepte';
     public const TYPE_RDV_REFUSE = 'rdv_refuse';
+    public const TYPE_COMMANDE_CONFIRMEE = 'commande_confirmée';
+    public const TYPE_COMMANDE_LIVRAISON = 'commande_livraison';
+    public const TYPE_COMMANDE_RECU = 'commande_recu';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -32,6 +35,10 @@ class Notification
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: true, onDelete: 'CASCADE')]
     private ?RendezVous $rendezVous = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'CASCADE')]
+    private ?Commande $commande = null;
 
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
     private bool $lu = false;
@@ -79,6 +86,17 @@ class Notification
     public function setRendezVous(?RendezVous $rendezVous): static
     {
         $this->rendezVous = $rendezVous;
+        return $this;
+    }
+
+    public function getCommande(): ?Commande
+    {
+        return $this->commande;
+    }
+
+    public function setCommande(?Commande $commande): static
+    {
+        $this->commande = $commande;
         return $this;
     }
 

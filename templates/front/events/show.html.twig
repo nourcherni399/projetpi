@@ -18,6 +18,28 @@
     <div class="mb-4 p-3 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 text-sm">{{ message }}</div>
 {% endfor %}
 
+{% if welcome_message is defined and welcome_message %}
+<div class="mb-6 flex justify-center">
+    <div class="w-full max-w-lg overflow-hidden rounded-xl border-l-4 border-[#e1bee7] bg-[#f5e5fc] shadow-sm">
+        <div class="flex items-center gap-3 p-4">
+            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#e1bee7] text-white" aria-hidden="true">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>
+            </span>
+            <div class="min-w-0 flex-1 text-center">
+                <p class="font-bold text-[#2D3748] text-base md:text-lg">{{ welcome_message }}</p>
+                <p class="mt-0.5 flex items-center justify-center gap-1.5 text-sm text-[#7b1fa2]">
+                    <svg class="h-4 w-4 text-[#e1bee7]" fill="currentColor" viewBox="0 0 24 24"><path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" /></svg>
+                    <span>Ravis de vous accompagner</span>
+                </p>
+            </div>
+            <span class="hidden shrink-0 text-[#e1bee7] sm:block" aria-hidden="true">
+                <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" /></svg>
+            </span>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 {% set mapEmbedUrl = evenement.mapEmbedUrl %}
 {% set mapsPageUrl = evenement.mapsPageUrl %}
 
@@ -37,6 +59,27 @@
 </div>
 {% endif %}
 
+{% if evenement.meetingUrl and (evenement.mode == 'en_ligne' or evenement.mode == 'hybride') %}
+    {% if app.user and userInscrit|default(false) %}
+    <div class="mb-8">
+        <a href="{{ evenement.meetingUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#2D8CFF] text-white font-medium hover:bg-[#1a7ae6] focus:outline focus:ring-2 focus:ring-[#2D8CFF] focus:ring-offset-2 shadow-sm">
+            <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+            Rejoindre la réunion en ligne
+        </a>
+    </div>
+    {% elseif app.user and inscription|default(null) and inscription.statut == 'en_attente' %}
+    <div class="mb-8 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm">
+        <p class="font-medium">Réunion en ligne disponible après acceptation</p>
+        <p>Votre demande d'inscription est en attente. Le lien pour rejoindre la réunion apparaîtra une fois que l'administrateur aura accepté votre inscription.</p>
+    </div>
+    {% elseif app.user %}
+    <div class="mb-8 p-4 rounded-xl bg-[#F0F4F8] border border-[#E5E0D8] text-[#6B7280] text-sm">
+        <p class="font-medium">Réunion en ligne réservée aux participants acceptés</p>
+        <p>Inscrivez-vous à l'événement ci-dessous. Une fois votre demande acceptée par l'administrateur, le bouton « Rejoindre la réunion en ligne » sera affiché.</p>
+    </div>
+    {% endif %}
+{% endif %}
+
 <div class="flex flex-col lg:flex-row gap-8 mb-12">
     <div class="flex-1 min-w-0">
         {% if evenement.thematique %}
@@ -48,6 +91,110 @@
             <span class="flex items-center gap-1"><svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> {{ evenement.heureDebut ? evenement.heureDebut|date('H:i') : '' }} – {{ evenement.heureFin ? evenement.heureFin|date('H:i') : '' }}</span>
             <span class="flex items-center gap-1"><svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg> {{ evenement.lieu|default('—') }}</span>
         </div>
+
+        {% if meteo is defined and meteo %}
+        {% set code = meteo.weathercode %}
+        {% set icon_cloud = '<svg class="w-8 h-8 text-white/95" fill="currentColor" viewBox="0 0 24 24"><path d="M4.5 13.5a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM15.75 9.75a.75.75 0 00-.75.75 6 6 0 01-12 0 .75.75 0 00-.75-.75H3a.75.75 0 00-.75.75 7.5 7.5 0 007.5 7.5h9a7.5 7.5 0 007.5-7.5 .75.75 0 00-.75-.75h-2.25z"/></svg>' %}
+        {% set icon_rain = '<svg class="w-8 h-8 text-white/95" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M4.5 13.5a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM15.75 9.75a.75.75 0 00-.75.75 6 6 0 01-12 0 .75.75 0 00-.75-.75H3a.75.75 0 00-.75.75 7.5 7.5 0 007.5 7.5h9a7.5 7.5 0 007.5-7.5 .75.75 0 00-.75-.75h-2.25z" clip-rule="evenodd"/><path d="M8.25 17.25a.75.75 0 01.75-.75h.75v-1.5h-.75a.75.75 0 01-.75-.75v.75h-.75a.75.75 0 010-1.5h.75v-1.5h-.75a.75.75 0 010-1.5h1.5a.75.75 0 01.75.75v3h.75a.75.75 0 010 1.5h-.75v.75a.75.75 0 01-.75.75h-1.5a.75.75 0 01-.75-.75zm4.5-3a.75.75 0 01.75-.75h.75v-1.5h-.75a.75.75 0 01-.75-.75v.75h-.75a.75.75 0 010-1.5h.75v-1.5h-.75a.75.75 0 010-1.5h1.5a.75.75 0 01.75.75v3h.75a.75.75 0 010 1.5h-.75v.75a.75.75 0 01-.75.75h-1.5a.75.75 0 01-.75-.75zm4.5-3a.75.75 0 01.75-.75h.75v-1.5h-.75a.75.75 0 01-.75-.75v.75h-.75a.75.75 0 010-1.5h.75v-1.5h-.75a.75.75 0 010-1.5h1.5a.75.75 0 01.75.75v3h.75a.75.75 0 010 1.5h-.75v.75a.75.75 0 01-.75.75h-1.5a.75.75 0 01-.75-.75z"/></svg>' %}
+        {% set icon_fog = '<svg class="w-8 h-8 text-white/95" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M3.75 13.5a.75.75 0 01.75-.75h15a.75.75 0 010 1.5h-15a.75.75 0 01-.75-.75zM3.75 9.75a.75.75 0 01.75-.75h15a.75.75 0 010 1.5h-15a.75.75 0 01-.75-.75zM3.75 17.25a.75.75 0 01.75-.75h15a.75.75 0 010 1.5h-15a.75.75 0 01-.75-.75z" clip-rule="evenodd"/></svg>' %}
+        {% set icon_storm = '<svg class="w-8 h-8 text-amber-200" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M14.615 1.595a.75.75 0 01.359.852L12.982 9.75h7.268a.75.75 0 01.548 1.262l-10.5 11.25a.75.75 0 01-1.272-.71l1.992-7.302H3.75a.75.75 0 01-.548-1.262l10.5-11.25a.75.75 0 011.273.71z" clip-rule="evenodd"/></svg>' %}
+        {% set icon_snow = '<svg class="w-8 h-8 text-white/95" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.25a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM12 18a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0112 18zM6.75 9.75a.75.75 0 00-1.5 0v4.5a.75.75 0 001.5 0v-4.5zM18 9.75a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5a.75.75 0 01.75-.75zM4.5 14.25a.75.75 0 00-1.06-1.06l-1.06 1.06a.75.75 0 001.06 1.06l1.06-1.06zM19.06 14.25a.75.75 0 01 1.06-1.06l1.06 1.06a.75.75 0 01-1.06 1.06l-1.06-1.06zM6.94 8.31a.75.75 0 00-1.06-1.06l-1.06 1.06a.75.75 0 001.06 1.06l1.06-1.06zM19.06 8.31a.75.75 0 01 1.06-1.06l1.06 1.06a.75.75 0 01-1.06 1.06l-1.06-1.06z" /></svg>' %}
+        {% set icon_sm = '<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M4.5 13.5a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM15.75 9.75a.75.75 0 00-.75.75 6 6 0 01-12 0 .75.75 0 00-.75-.75H3a.75.75 0 00-.75.75 7.5 7.5 0 007.5 7.5h9a7.5 7.5 0 007.5-7.5 .75.75 0 00-.75-.75h-2.25z"/></svg>' %}
+        {% set icon_sm_rain = '<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M4.5 13.5a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM15.75 9.75a.75.75 0 00-.75.75 6 6 0 01-12 0 .75.75 0 00-.75-.75H3a.75.75 0 00-.75.75 7.5 7.5 0 007.5 7.5h9a7.5 7.5 0 007.5-7.5 .75.75 0 00-.75-.75h-2.25z" clip-rule="evenodd"/><path d="M8.25 17.25a.75.75 0 01.75-.75h.75v-1.5h-.75a.75.75 0 01-.75-.75v.75h-.75a.75.75 0 010-1.5h.75v-1.5h-.75a.75.75 0 010-1.5h1.5a.75.75 0 01.75.75v3h.75a.75.75 0 010 1.5h-.75v.75a.75.75 0 01-.75.75h-1.5a.75.75 0 01-.75-.75zm4.5-3a.75.75 0 01.75-.75h.75v-1.5h-.75a.75.75 0 01-.75-.75v.75h-.75a.75.75 0 010-1.5h.75v-1.5h-.75a.75.75 0 010-1.5h1.5a.75.75 0 01.75.75v3h.75a.75.75 0 010 1.5h-.75v.75a.75.75 0 01-.75.75h-1.5a.75.75 0 01-.75-.75zm4.5-3a.75.75 0 01.75-.75h.75v-1.5h-.75a.75.75 0 01-.75-.75v.75h-.75a.75.75 0 010-1.5h.75v-1.5h-.75a.75.75 0 010-1.5h1.5a.75.75 0 01.75.75v3h.75a.75.75 0 010 1.5h-.75v.75a.75.75 0 01-.75.75h-1.5a.75.75 0 01-.75-.75z"/></svg>' %}
+        {% set icon_sm_fog = '<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M3.75 13.5a.75.75 0 01.75-.75h15a.75.75 0 010 1.5h-15a.75.75 0 01-.75-.75zM3.75 9.75a.75.75 0 01.75-.75h15a.75.75 0 010 1.5h-15a.75.75 0 01-.75-.75zM3.75 17.25a.75.75 0 01.75-.75h15a.75.75 0 010 1.5h-15a.75.75 0 01-.75-.75z" clip-rule="evenodd"/></svg>' %}
+        {% set icon_sm_storm = '<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M14.615 1.595a.75.75 0 01.359.852L12.982 9.75h7.268a.75.75 0 01.548 1.262l-10.5 11.25a.75.75 0 01-1.272-.71l1.992-7.302H3.75a.75.75 0 01-.548-1.262l10.5-11.25a.75.75 0 011.273.71z" clip-rule="evenodd"/></svg>' %}
+        {% set icon_sm_snow = '<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.25a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM12 18a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0112 18zM6.75 9.75a.75.75 0 00-1.5 0v4.5a.75.75 0 001.5 0v-4.5zM18 9.75a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5a.75.75 0 01.75-.75zM4.5 14.25a.75.75 0 00-1.06-1.06l-1.06 1.06a.75.75 0 001.06 1.06l1.06-1.06zM19.06 14.25a.75.75 0 01 1.06-1.06l1.06 1.06a.75.75 0 01-1.06 1.06l-1.06-1.06zM6.94 8.31a.75.75 0 00-1.06-1.06l-1.06 1.06a.75.75 0 001.06 1.06l1.06-1.06zM19.06 8.31a.75.75 0 01 1.06-1.06l1.06 1.06a.75.75 0 01-1.06 1.06l-1.06-1.06z" /></svg>' %}
+        {% set t_min = meteo.temp_min|round(0) %}
+        {% set t_max = meteo.temp_max|round(0) %}
+        <div class="mb-8 rounded-[1.75rem] overflow-hidden shadow-xl bg-[#f5f0eb]" style="font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;">
+            <section class="relative px-6 pt-6 pb-8 overflow-hidden" aria-labelledby="meteo-title" style="background: linear-gradient(180deg, #90e0ef 0%, #48cae4 40%, #00b4d8 75%, #0096c7 100%);">
+                <div class="absolute inset-0" style="background: radial-gradient(ellipse 120% 100% at 50% -30%, rgba(255,255,255,0.95) 0%, rgba(254,240,138,0.35) 15%, rgba(253,230,138,0.12) 30%, transparent 50%);"></div>
+                <div class="absolute inset-0 opacity-60" style="background: radial-gradient(ellipse 80% 60% at 50% -15%, rgba(255,255,255,0.5) 0%, transparent 45%);"></div>
+                <svg class="absolute top-0 left-1/2 -translate-x-1/2 w-[200%] max-w-none h-[90%] pointer-events-none opacity-70" viewBox="0 0 200 100" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
+                    <defs>
+                        <linearGradient id="meteo-ray-grad" x1="50%" y1="0%" x2="50%" y2="100%">
+                            <stop offset="0%" stop-color="rgba(255,255,255,0.55)"/>
+                            <stop offset="50%" stop-color="rgba(255,255,255,0.2)"/>
+                            <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+                        </linearGradient>
+                    </defs>
+                    {% for i in 0..23 %}
+                    <path fill="url(#meteo-ray-grad)" d="M 100,0 L 102,0 L 100.5,100 L 99.5,100 Z" transform="rotate({{ i * 15 }}, 100, 0)"/>
+                    {% endfor %}
+                </svg>
+                <div class="relative flex items-start justify-between gap-4">
+                    <div>
+                        <p id="meteo-title" class="text-white/95 text-sm font-medium mb-1">{{ evenement.dateEvent ? evenement.dateEvent|date('d/m/Y') : '—' }}</p>
+                        <p class="text-5xl font-bold text-white tracking-tight">{{ t_max }}°</p>
+                    </div>
+                    <div class="flex flex-col items-end pt-1">
+                        <p class="text-white text-sm font-medium">{{ meteo.description_fr }}</p>
+                        <span class="text-white/95 mt-1">{% if code >= 95 %}{{ icon_storm|raw }}{% elseif code >= 71 %}{{ icon_snow|raw }}{% elseif code >= 51 or code == 80 or code == 81 or code == 82 %}{{ icon_rain|raw }}{% elseif code >= 45 %}{{ icon_fog|raw }}{% else %}{{ icon_cloud|raw }}{% endif %}</span>
+                    </div>
+                </div>
+                {% if meteo.hourly is defined and meteo.hourly|length > 0 %}
+                <div class="mt-6">
+                    <p class="text-white/90 text-xs font-medium mb-2">Prévision horaire</p>
+                    <div class="relative flex items-center gap-1">
+                        <button type="button" class="meteo-hour-prev z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20 text-white hover:bg-white/30 focus:outline focus:ring-2 focus:ring-white/50" aria-label="Heures précédentes">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                        </button>
+                        <div class="meteo-hour-scroll flex flex-1 gap-2 overflow-x-auto scroll-smooth py-2 px-1 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                            {% for h in meteo.hourly %}
+                            {% set wc = h.weathercode %}
+                            <div class="meteo-hour-item flex shrink-0 snap-start flex-col items-center rounded-xl bg-white/15 px-3 py-2 min-w-[4rem] border border-white/20">
+                                <span class="text-white/95 text-sm font-medium">{{ h.label }}</span>
+                                <span class="text-white/90 mt-1 flex h-6 w-6 items-center justify-center [&>svg]:h-5 [&>svg]:w-5">{% if wc >= 95 %}{{ icon_sm_storm|raw }}{% elseif wc >= 71 %}{{ icon_sm_snow|raw }}{% elseif wc >= 51 or wc == 80 or wc == 81 or wc == 82 %}{{ icon_sm_rain|raw }}{% elseif wc >= 45 %}{{ icon_sm_fog|raw }}{% else %}{{ icon_sm|raw }}{% endif %}</span>
+                                <span class="text-white font-semibold text-sm mt-0.5">{{ h.temp ?? '—' }}°</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <button type="button" class="meteo-hour-next z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20 text-white hover:bg-white/30 focus:outline focus:ring-2 focus:ring-white/50" aria-label="Heures suivantes">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
+            </section>
+            <div class="bg-[#fafaf9] border-t border-slate-200/80">
+                <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200/60">
+                    <div>
+                        <p class="text-slate-400 text-sm">{{ evenement.dateEvent ? evenement.dateEvent|date('d/m/Y') : '—' }}</p>
+                        <p class="text-slate-800 font-semibold text-sm mt-0.5">Jour de l'événement</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-sky-500">{% if code >= 95 %}{{ icon_sm_storm|raw }}{% elseif code >= 71 %}{{ icon_sm_snow|raw }}{% elseif code >= 51 or code == 80 or code == 81 or code == 82 %}{{ icon_sm_rain|raw }}{% elseif code >= 45 %}{{ icon_sm_fog|raw }}{% else %}{{ icon_sm|raw }}{% endif %}</span>
+                        <span class="text-slate-800 font-semibold text-sm">{{ t_max }}°</span>
+                        <span class="text-slate-400 text-sm">{{ t_min }}°</span>
+                    </div>
+                </div>
+                <details class="group">
+                    <summary class="flex cursor-pointer list-none items-center justify-center gap-2 py-3 text-sm font-medium text-slate-600 hover:bg-slate-100/80 [&::-webkit-details-marker]:hidden">
+                        <span>Plus d'infos</span>
+                        <svg class="h-4 w-4 text-slate-400 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                    </summary>
+                    <div class="px-5 pb-4">
+                        <div class="flex items-center gap-4 rounded-xl bg-white px-4 py-3 border border-slate-200/80 shadow-sm">
+                            <div class="flex flex-1 items-center gap-2 min-w-0">
+                                <span class="text-slate-600 text-sm shrink-0 w-8">Min</span>
+                                <div class="flex-1 h-2 rounded-full bg-gradient-to-r from-sky-300 via-sky-200 to-amber-200 overflow-hidden min-w-[60px]"></div>
+                                <span class="text-slate-700 text-sm font-medium shrink-0">{{ t_min }}°</span>
+                            </div>
+                            <div class="flex flex-1 items-center gap-2 min-w-0">
+                                <span class="text-slate-600 text-sm shrink-0 w-8">Max</span>
+                                <div class="flex-1 h-2 rounded-full bg-gradient-to-r from-sky-300 via-sky-200 to-amber-200 overflow-hidden min-w-[60px]"></div>
+                                <span class="text-slate-700 text-sm font-medium shrink-0">{{ t_max }}°</span>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+            </div>
+        </div>
+        {% else %}
+        <div class="mb-8 rounded-xl border border-[#E5E0D8] bg-[#F5F1EB]/50 px-5 py-4">
+            <p class="text-[#6B7280] text-sm"><strong>Météo</strong> : affichée uniquement pour les événements <strong>présentiel</strong> ou <strong>hybride</strong> dont le lieu a été géolocalisé (latitude/longitude). En admin, modifiez l’événement et enregistrez le lieu pour déclencher la géolocalisation.</p>
+        </div>
+        {% endif %}
 
         {% if evenement.description %}
         <section class="mb-8">
@@ -131,4 +278,67 @@
         </div>
     </aside>
 </div>
+
+{% if app.user and messageForm is defined and messageForm %}
+<section class="mt-12 pt-8 border-t border-[#E5E0D8]" id="discussion">
+    <div class="flex items-start gap-4 mb-6">
+        <span class="flex items-center justify-center w-12 h-12 rounded-xl bg-[#A7C7E7]/20 text-[#A7C7E7] shrink-0">
+            <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 003.83-.498c1.085-.163 2.037-.369 2.707-.622a3.578 3.578 0 001.67-1.618 3.575 3.575 0 00.281-1.236V6.26c0-1.6-1.123-2.994-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg>
+        </span>
+        <div>
+            <h2 class="text-xl font-bold text-[#4B5563]">Contacter l'organisateur</h2>
+            <p class="text-[#6B7280] text-sm mt-1">Posez une question ou envoyez un message. L'équipe vous répondra ici.</p>
+        </div>
+    </div>
+
+    {% if messages is defined and messages|length > 0 %}
+    <div class="mb-6 rounded-2xl border border-[#E5E0D8] bg-gradient-to-b from-[#F9FAFB] to-[#F5F1EB]/30 shadow-sm overflow-hidden">
+        <div class="p-3 border-b border-[#E5E0D8] bg-white/80">
+            <span class="text-xs font-medium text-[#6B7280]">Fil de la conversation</span>
+        </div>
+        <div class="space-y-4 p-4 max-h-80 overflow-y-auto">
+            {% for msg in messages %}
+            <div class="flex {{ msg.envoyePar == 'user' ? 'justify-end' : 'justify-start' }} gap-2">
+                {% if msg.envoyePar != 'user' %}
+                <span class="flex items-center justify-center w-8 h-8 rounded-full bg-[#E5E0D8] text-[#6B7280] text-xs font-medium shrink-0 self-end" title="Organisateur">A</span>
+                {% endif %}
+                <div class="max-w-[82%] rounded-2xl px-4 py-3 shadow-sm {{ msg.envoyePar == 'user' ? 'rounded-br-md bg-[#A7C7E7] text-white' : 'rounded-bl-md bg-white border border-[#E5E0D8] text-[#4B5563]' }}">
+                    <p class="text-sm whitespace-pre-wrap leading-relaxed">{{ msg.contenu }}</p>
+                    <p class="text-xs mt-2 {{ msg.envoyePar == 'user' ? 'text-white/90' : 'text-[#9CA3AF]' }}">{{ msg.dateEnvoi|date('d/m/Y H:i') }}{{ msg.envoyePar == 'user' ? ' · Vous' : ' · Organisateur' }}</p>
+                </div>
+                {% if msg.envoyePar == 'user' %}
+                <span class="flex items-center justify-center w-8 h-8 rounded-full bg-[#A7C7E7]/30 text-[#4B5563] text-xs font-medium shrink-0 self-end" title="Vous">{{ (app.user.prenom|slice(0,1) ~ app.user.nom|slice(0,1))|upper }}</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="rounded-2xl border border-[#E5E0D8] bg-white p-4 shadow-sm">
+        {{ form_start(messageForm, { action: path('user_event_message', { id: evenement.id }), method: 'POST', attr: { class: 'space-y-4' } }) }}
+        <input type="hidden" name="_token" value="{{ csrf_token('event_message_' ~ evenement.id) }}">
+        {{ form_row(messageForm.contenu, { label: 'Votre message', attr: { class: 'rounded-xl border-[#E5E0D8] focus:ring-2 focus:ring-[#A7C7E7] focus:border-[#A7C7E7]', rows: 3 } }) }}
+        <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7] focus:ring-offset-2 transition-colors">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg>
+            Envoyer le message
+        </button>
+        {{ form_end(messageForm) }}
+    </div>
+</section>
+{% endif %}
+
+{% if meteo is defined and meteo.hourly is defined and meteo.hourly|length > 0 %}
+<script>
+(function() {
+    var scrollEl = document.querySelector('.meteo-hour-scroll');
+    var prevBtn = document.querySelector('.meteo-hour-prev');
+    var nextBtn = document.querySelector('.meteo-hour-next');
+    if (!scrollEl || !prevBtn || !nextBtn) return;
+    var step = 120;
+    prevBtn.addEventListener('click', function() { scrollEl.scrollBy({ left: -step, behavior: 'smooth' }); });
+    nextBtn.addEventListener('click', function() { scrollEl.scrollBy({ left: step, behavior: 'smooth' }); });
+})();
+</script>
+{% endif %}
 {% endblock %}

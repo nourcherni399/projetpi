@@ -31,9 +31,7 @@
             <div>
                 <dt class="text-sm font-medium text-[#4B5563]">Mode de paiement</dt>
                 <dd>
-                    {% if orderData.modePayment == 'carte_visa' %}Visa
-                    {% elseif orderData.modePayment == 'carte_mastercard' %}MasterCard
-                    {% elseif orderData.modePayment == 'carte_amex' %}American Express
+                    {% if orderData.modePayment == 'carte_bancaire' or orderData.modePayment starts with 'carte_' %}Carte Bancaire
                     {% else %}À la livraison (paiement à réception)
                     {% endif %}
                 </dd>

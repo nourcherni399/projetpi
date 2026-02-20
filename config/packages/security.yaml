@@ -41,6 +41,8 @@ security:
     access_control:
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/medecin, roles: ROLE_MEDECIN }
+        # Liste des médecins/rendez-vous : accessible à tous ; soumission du RDV : réservée aux connectés
+        - { path: ^/rendez-vous/prendre/[^/]+/confirmer, roles: IS_AUTHENTICATED_FULLY }
         # - { path: ^/profile, roles: ROLE_USER }
 
 when@test:

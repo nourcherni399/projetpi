@@ -4,10 +4,18 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    # Secret pour l'API de rappels d'événements (cron). Définir REMINDER_SECRET en .env pour sécuriser.
+    reminder_secret: '%env(default:kernel.secret:REMINDER_SECRET)%'
+    # Gateways Email-to-SMS par code pays (JSON). Ex. {"33":"orange.fr","216":"tunisietelecom.tn"}. REMINDER_SMS_GATEWAYS
+    reminder_sms_gateways: '%env(default::REMINDER_SMS_GATEWAYS)%'
+    reminder_from_email: 'amarahedil8@gmail.com'
+    reminder_from_name: 'AutiCare'
     uploads_directory: '%kernel.project_dir%/public/uploads/produits'
     uploads_modules_directory: '%kernel.project_dir%/public/uploads/modules'
     uploads_blogs_directory: '%kernel.project_dir%/public/uploads/blog'
     uploads_users_directory: '%kernel.project_dir%/public/uploads/users'
+    uploads_thematiques_directory: '%kernel.project_dir%/public/uploads/thematiques'
+    uploads_evenements_directory: '%kernel.project_dir%/public/uploads/evenements'
     app_url_default: ''
 
 services:
@@ -34,6 +42,28 @@ services:
     App\EventSubscriber\OAuthRedirectUriContextSubscriber:
         arguments:
             $appUrl: '%env(default:app_url_default:APP_URL)%'
+
+    App\Service\ZoomApiService:
+        arguments:
+            $accountId: '%env(default::ZOOM_ACCOUNT_ID)%'
+            $clientId: '%env(default::ZOOM_CLIENT_ID)%'
+            $clientSecret: '%env(default::ZOOM_CLIENT_SECRET)%'
+
+    App\Service\ReminderSmsSender:
+        arguments:
+            $gatewaysJson: '%reminder_sms_gateways%'
+            $fromEmail: '%reminder_from_email%'
+            $fromName: '%reminder_from_name%'
+
+    App\Service\HuggingFaceService:
+        arguments:
+            $apiKey: '%env(default::HUGGINGFACE_API_KEY)%'
+            $projectDir: '%kernel.project_dir%'
+
+    App\Service\GoogleCustomSearchService:
+        arguments:
+            $apiKey: '%env(default::GOOGLE_CSE_API_KEY)%'
+            $searchEngineId: '%env(default::GOOGLE_CSE_CX)%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

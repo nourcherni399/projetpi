@@ -77,6 +77,23 @@ class InscritEventsRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * Inscrits à qui envoyer un rappel (acceptés ou en attente, toujours inscrits).
+     *
+     * @return InscritEvents[]
+     */
+    public function findInscritsToRemindForEvent(Evenement $evenement): array
+    {
+        $list = $this->findByEvenementOrderByDate($evenement);
+        return array_values(array_filter($list, static function (InscritEvents $i): bool {
+            return $i->isEstInscrit()
+                && \in_array($i->getStatut(), ['accepte', 'en_attente'], true)
+                && $i->getUser() !== null
+                && $i->getUser()->getEmail() !== null
+                && trim($i->getUser()->getEmail()) !== '';
+        }));
+    }
+
     public function countByStatut(string $statut): int
     {
         return (int) $this->createQueryBuilder('i')
@@ -94,4 +111,5 @@ class InscritEventsRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult();
     }
+
 }
