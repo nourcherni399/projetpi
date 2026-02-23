@@ -3,13 +3,13 @@
 {% block body %}
 <div class="min-h-screen flex flex-col">
     <header class="bg-white shadow-sm shrink-0">
-        <div class="max-w-6xl mx-auto pl-2 pr-4 py-4 flex flex-nowrap items-center gap-6">
-            <a href="{{ path('home') }}" class="flex items-center gap-3 text-[#4B5563] font-semibold text-lg shrink-0 mr-8" title="AutiCare - Accueil">
-                <img src="{{ asset('images/logo.png') }}" alt="AutiCare" class="h-16 w-auto object-contain" />
+        <div class="w-full px-4 py-4 flex flex-nowrap items-center gap-3">
+            <a href="{{ path('home') }}" class="flex items-center gap-3 text-[#4B5563] font-semibold text-lg shrink-0 order-first" title="AutiCare - Accueil">
+                <img src="{{ asset('images/logo.png') }}" alt="AutiCare" class="h-16 w-auto object-contain shrink-0" />
                 <span class="hidden md:inline whitespace-nowrap text-[#4B5563]">AutiCare</span>
             </a>
-            <div class="flex flex-nowrap items-center gap-4 md:gap-5 flex-1 min-w-0 justify-end">
-            <nav class="flex flex-nowrap items-center gap-2 md:gap-4 shrink-0 pl-4 border-l border-[#E5E0D8]" aria-label="Navigation principale">
+            <div class="flex flex-nowrap items-center gap-2 md:gap-3 flex-1 min-w-0 justify-end">
+            <nav class="flex flex-nowrap items-center gap-2 md:gap-3 shrink-0 pl-2 pr-2" aria-label="Navigation principale">
                 <a href="{{ path('home') }}" class="flex items-center gap-1.5 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded px-2 py-1 whitespace-nowrap">
                     <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>
                     <span class="hidden sm:inline">Accueil</span>
@@ -31,7 +31,7 @@
                     <span class="hidden sm:inline">Blog</span>
                 </a>
             </nav>
-            <div class="flex flex-nowrap items-center gap-2 md:gap-3 shrink-0 pl-4 border-l border-[#E5E0D8]">
+            <div class="flex flex-nowrap items-center gap-2 md:gap-3 shrink-0 pl-2">
                 {% if app.user %}
                     {% set _notif_count = (user_inscription_notifications|default([])|length) + (user_rdv_notifications|default([])|length) %}
                     {% set _event_notifs_header = user_inscription_notifications|default([]) %}
@@ -122,6 +122,39 @@
                             <a href="{{ path('app_logout') }}" class="text-[#9CA3AF] hover:text-[#6B7280] text-sm focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded whitespace-nowrap mt-0.5" title="Se déconnecter">Se déconnecter</a>
                         </div>
                     </div>
+                    {% set _blog_locale = app.session.get('blog_locale', 'fr') %}
+                    <div class="relative shrink-0 ml-auto" id="lang-selector-wrap">
+                        <button type="button" id="lang-selector-btn" class="flex items-center gap-1.5 px-2 py-1 rounded-lg text-[#6B7280] hover:bg-[#F5F1EB] hover:text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]" title="Choisir la langue du blog" aria-haspopup="true" aria-expanded="false">
+                            <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 01-3.827-5.802" /></svg>
+                            <span class="text-sm font-medium">{{ _blog_locale|upper }}</span>
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                        </button>
+                        <div id="lang-dropdown" class="hidden absolute right-0 top-full mt-1 w-44 bg-white rounded-xl shadow-lg border border-[#E5E0D8] py-1 z-50 max-h-64 overflow-y-auto">
+                            <a href="{{ path('blog_set_locale', {locale: 'fr'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale == 'fr' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">Français</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'en'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale == 'en' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">English</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'es'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale == 'es' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">Español</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'ar'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale == 'ar' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">العربية</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'de'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale == 'de' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">Deutsch</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'it'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale == 'it' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">Italiano</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'pt'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale == 'pt' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">Português</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'ru'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale == 'ru' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">Русский</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'zh'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale == 'zh' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">中文</a>
+                        </div>
+                    </div>
+                    <script>
+                    (function() {
+                        var wrap = document.getElementById('lang-selector-wrap');
+                        var btn = document.getElementById('lang-selector-btn');
+                        var panel = document.getElementById('lang-dropdown');
+                        if (!wrap || !btn || !panel) return;
+                        function open() { panel.classList.remove('hidden'); btn.setAttribute('aria-expanded', 'true'); }
+                        function close() { panel.classList.add('hidden'); btn.setAttribute('aria-expanded', 'false'); }
+                        function toggle() { panel.classList.contains('hidden') ? open() : close(); }
+                        btn.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); toggle(); });
+                        document.addEventListener('click', function(e) { if (wrap.contains(e.target)) return; close(); });
+                        panel.querySelectorAll('a').forEach(function(el) { el.addEventListener('click', close); });
+                    })();
+                    </script>
                 {% else %}
                     <a href="{{ path('app_login') }}" class="text-[#4B5563] hover:text-[#A7C7E7] font-medium focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded whitespace-nowrap">Connexion</a>
                     <a href="{{ path('register') }}" class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7] whitespace-nowrap">
@@ -130,6 +163,39 @@
                         </svg>
                         S'inscrire
                     </a>
+                    {% set _blog_locale_guest = app.session.get('blog_locale', 'fr') %}
+                    <div class="relative shrink-0 ml-auto" id="lang-selector-wrap-guest">
+                        <button type="button" id="lang-selector-btn-guest" class="flex items-center gap-1.5 px-2 py-1 rounded-lg text-[#6B7280] hover:bg-[#F5F1EB] hover:text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]" title="Choisir la langue du blog" aria-haspopup="true" aria-expanded="false">
+                            <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 01-3.827-5.802" /></svg>
+                            <span class="text-sm font-medium">{{ _blog_locale_guest|upper }}</span>
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                        </button>
+                        <div id="lang-dropdown-guest" class="hidden absolute right-0 top-full mt-1 w-44 bg-white rounded-xl shadow-lg border border-[#E5E0D8] py-1 z-50 max-h-64 overflow-y-auto">
+                            <a href="{{ path('blog_set_locale', {locale: 'fr'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale_guest == 'fr' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">Français</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'en'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale_guest == 'en' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">English</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'es'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale_guest == 'es' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">Español</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'ar'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale_guest == 'ar' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">العربية</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'de'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale_guest == 'de' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">Deutsch</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'it'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale_guest == 'it' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">Italiano</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'pt'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale_guest == 'pt' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">Português</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'ru'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale_guest == 'ru' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">Русский</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'zh'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale_guest == 'zh' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">中文</a>
+                        </div>
+                    </div>
+                    <script>
+                    (function() {
+                        var wrap = document.getElementById('lang-selector-wrap-guest');
+                        var btn = document.getElementById('lang-selector-btn-guest');
+                        var panel = document.getElementById('lang-dropdown-guest');
+                        if (!wrap || !btn || !panel) return;
+                        function open() { panel.classList.remove('hidden'); btn.setAttribute('aria-expanded', 'true'); }
+                        function close() { panel.classList.add('hidden'); btn.setAttribute('aria-expanded', 'false'); }
+                        function toggle() { panel.classList.contains('hidden') ? open() : close(); }
+                        btn.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); toggle(); });
+                        document.addEventListener('click', function(e) { if (wrap.contains(e.target)) return; close(); });
+                        panel.querySelectorAll('a').forEach(function(el) { el.addEventListener('click', close); });
+                    })();
+                    </script>
                 {% endif %}
             </div>
             </div>
@@ -185,4 +251,8 @@
     </footer>
     {% endblock %}
 </div>
+{% endblock %}
+{% block javascripts %}
+{{ parent() }}
+{{ include('front/blog/_dictionary_script.html.twig') }}
 {% endblock %}

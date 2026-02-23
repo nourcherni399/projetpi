@@ -17,6 +17,9 @@ class Commentaire
     #[ORM\Column(type: Types::TEXT)]
     private ?string $contenu = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $media = null;
+
     #[ORM\Column]
     private ?bool $isPublished = null;
 
@@ -34,6 +37,18 @@ class Commentaire
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Blog $blog = null;
 
+    /** @var \Doctrine\Common\Collections\Collection<int, CommentaireReaction> */
+    #[ORM\OneToMany(targetEntity: CommentaireReaction::class, mappedBy: 'commentaire', cascade: ['persist', 'remove'])]
+    private \Doctrine\Common\Collections\Collection $reactions;
+
+    public function __construct()
+    {
+        $now = new \DateTime();
+        $this->dateCreation = $now;
+        $this->dateModif = $now;
+        $this->reactions = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -47,6 +62,18 @@ class Commentaire
     public function setContenu(?string $contenu): static
     {
         $this->contenu = $contenu ?? '';
+
+        return $this;
+    }
+
+    public function getMedia(): ?string
+    {
+        return $this->media;
+    }
+
+    public function setMedia(?string $media): static
+    {
+        $this->media = $media;
 
         return $this;
     }
@@ -111,10 +138,9 @@ class Commentaire
         return $this;
     }
 
-    public function __construct()
+    /** @return \Doctrine\Common\Collections\Collection<int, CommentaireReaction> */
+    public function getReactions(): \Doctrine\Common\Collections\Collection
     {
-        $now = new \DateTime();
-        $this->dateCreation = $now;
-        $this->dateModif = $now;
+        return $this->reactions;
     }
 }

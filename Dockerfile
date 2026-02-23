@@ -1,4 +1,4 @@
-# Force PHP 8.4 for Railway (Railpack uses 8.5 by default, incompatible with dompdf deps)
+# PHP 8.4 for Symfony (compatible with dompdf deps)
 FROM php:8.4-cli-bookworm
 
 RUN apt-get update && apt-get install -y \
@@ -30,5 +30,5 @@ RUN php bin/console importmap:install --no-interaction 2>/dev/null || true
 
 EXPOSE 8000
 ENV PORT=8000
-# Migrations + cache run in subshell so PHP fatals don't kill container; server always starts
+# Run migrations and cache before starting server
 CMD ["sh", "-c", "(php bin/console doctrine:migrations:migrate --no-interaction 2>/dev/null) || true; (php bin/console cache:clear --env=prod 2>/dev/null) || true; exec php -d variables_order=EGPCS -S 0.0.0.0:${PORT:-8000} -t public"]

@@ -18,14 +18,79 @@
             label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }
         }) }}
         <div class="grid grid-cols-1 gap-6">
-            {{ form_row(form.titre) }}
-            {{ form_row(form.description) }}
-            {{ form_row(form.contenu) }}
+            <div>
+                <div class="flex items-center justify-between gap-2 mb-1">
+                    {{ form_label(form.titre) }}
+                    <button type="button" class="spell-check-btn text-sm text-violet-600 hover:text-violet-700 font-medium"
+                            data-target="module_titre" title="Vérifier l'orthographe">
+                        Vérifier l'orthographe
+                    </button>
+                </div>
+                {{ form_widget(form.titre) }}
+                <div class="spell-check-result mt-2 hidden" data-for="module_titre"></div>
+                {{ form_errors(form.titre) }}
+            </div>
+            <div>
+                <div class="flex items-center justify-between gap-2 mb-1">
+                    {{ form_label(form.description) }}
+                    <button type="button" class="spell-check-btn text-sm text-violet-600 hover:text-violet-700 font-medium"
+                            data-target="module_description" title="Vérifier l'orthographe">
+                        Vérifier l'orthographe
+                    </button>
+                </div>
+                {{ form_widget(form.description) }}
+                <div class="spell-check-result mt-2 hidden" data-for="module_description"></div>
+                {{ form_errors(form.description) }}
+            </div>
+            <div>
+                <div class="flex items-center justify-between gap-2 mb-1">
+                    {{ form_label(form.contenu) }}
+                    <button type="button" class="spell-check-btn text-sm text-violet-600 hover:text-violet-700 font-medium"
+                            data-target="module_contenu" title="Vérifier l'orthographe">
+                        Vérifier l'orthographe
+                    </button>
+                </div>
+                {{ form_widget(form.contenu) }}
+                <div class="spell-check-result mt-2 hidden" data-for="module_contenu"></div>
+                {{ form_errors(form.contenu) }}
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {{ form_row(form.niveau) }}
                 {{ form_row(form.categorie) }}
             </div>
-            {{ form_row(form.image) }}
+            <div class="space-y-4" data-image-source>
+                <label class="block text-[#4B5563] font-medium mb-2">Image du module</label>
+                <div class="flex gap-4 mb-3">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="image_source" value="upload" checked
+                               class="rounded border-[#E5E0D8] text-[#A7C7E7] focus:ring-[#A7C7E7]">
+                        <span class="text-[#4B5563]">Uploader un fichier</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="image_source" value="pexels"
+                               class="rounded border-[#E5E0D8] text-[#A7C7E7] focus:ring-[#A7C7E7]">
+                        <span class="text-[#4B5563]">Rechercher sur Pexels</span>
+                    </label>
+                </div>
+                <div id="image-upload-zone" class="p-4 rounded-lg border border-[#E5E0D8] bg-white">
+                    {{ form_widget(form.image) }}
+                    {{ form_errors(form.image) }}
+                </div>
+                <div id="pexels-zone" class="hidden space-y-4 p-4 rounded-lg border border-[#E5E0D8] bg-[#FAFAF9]">
+                    <div class="flex gap-2">
+                        <input type="text" id="pexels-query" placeholder="Ex. autisme, éducation, famille..."
+                               class="flex-1 rounded-lg border border-[#E5E0D8] px-4 py-2.5 text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                        <button type="button" id="pexels-search-btn"
+                                class="px-4 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED]">
+                            Rechercher
+                        </button>
+                    </div>
+                    <div id="pexels-results" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    </div>
+                    <p id="pexels-selected-msg" class="text-sm text-emerald-600 hidden"></p>
+                </div>
+                {{ form_widget(form.pexels_image_url) }}
+            </div>
             {% if module.image %}
             <div class="space-y-2">
                 <label class="block text-[#4B5563] font-medium mb-2">Image actuelle</label>
@@ -49,4 +114,123 @@
         {{ form_end(form) }}
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadRadio = document.querySelector('input[name="image_source"][value="upload"]');
+    const pexelsRadio = document.querySelector('input[name="image_source"][value="pexels"]');
+    const uploadZone = document.getElementById('image-upload-zone');
+    const pexelsZone = document.getElementById('pexels-zone');
+    const imageInput = document.querySelector('#image-upload-zone input[type="file"]');
+    const pexelsUrlInput = document.querySelector('input[name*="[pexels_image_url]"]');
+    const pexelsQuery = document.getElementById('pexels-query');
+    const pexelsSearchBtn = document.getElementById('pexels-search-btn');
+    const pexelsResults = document.getElementById('pexels-results');
+    const pexelsSelectedMsg = document.getElementById('pexels-selected-msg');
+    const pexelsSearchUrl = '{{ path("pexels_search") }}';
+
+    function switchSource() {
+        if (uploadRadio.checked) {
+            uploadZone.classList.remove('hidden');
+            pexelsZone.classList.add('hidden');
+            if (pexelsUrlInput) pexelsUrlInput.value = '';
+            if (pexelsSelectedMsg) pexelsSelectedMsg.classList.add('hidden');
+        } else {
+            uploadZone.classList.add('hidden');
+            pexelsZone.classList.remove('hidden');
+            if (imageInput) imageInput.value = '';
+        }
+    }
+
+    uploadRadio.addEventListener('change', switchSource);
+    pexelsRadio.addEventListener('change', switchSource);
+
+    pexelsSearchBtn.addEventListener('click', function() {
+        const query = (pexelsQuery.value || '').trim();
+        if (query.length < 2) {
+            pexelsResults.innerHTML = '<p class="text-red-600 col-span-full">Champs obligatoire</p>';
+            return;
+        }
+        pexelsSearchBtn.disabled = true;
+        pexelsResults.innerHTML = '<p class="text-[#6B7280] col-span-full">Recherche en cours...</p>';
+        fetch(pexelsSearchUrl + '?q=' + encodeURIComponent(query))
+            .then(r => r.json())
+            .then(data => {
+                pexelsSearchBtn.disabled = false;
+                if (data.error) {
+                    pexelsResults.innerHTML = '<p class="text-red-600 col-span-full">Erreur : ' + (data.error || 'Inconnue') + '</p>';
+                    return;
+                }
+                if (!data.photos || data.photos.length === 0) {
+                    pexelsResults.innerHTML = '<p class="text-[#6B7280] col-span-full">Aucune image trouvée.</p>';
+                    return;
+                }
+                pexelsResults.innerHTML = data.photos.map(function(p) {
+                    return '<div class="aspect-square rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-[#A7C7E7] pexels-photo" data-src="' + (p.src_large || p.src_medium || '').replace(/"/g, '&quot;') + '" data-photographer="' + (p.photographer || '').replace(/"/g, '&quot;') + '"><img src="' + (p.src_medium || '').replace(/"/g, '&quot;') + '" alt="" class="w-full h-full object-cover"></div>';
+                }).join('');
+                pexelsResults.querySelectorAll('.pexels-photo').forEach(function(el) {
+                    el.addEventListener('click', function() {
+                        pexelsResults.querySelectorAll('.pexels-photo').forEach(e => e.classList.remove('border-[#A7C7E7]'));
+                        this.classList.add('border-[#A7C7E7]');
+                        if (pexelsUrlInput) pexelsUrlInput.value = this.getAttribute('data-src') || '';
+                        if (pexelsSelectedMsg) {
+                            pexelsSelectedMsg.textContent = 'Image sélectionnée : Photo by ' + (this.getAttribute('data-photographer') || '');
+                            pexelsSelectedMsg.classList.remove('hidden');
+                        }
+                    });
+                });
+            })
+            .catch(function() {
+                pexelsSearchBtn.disabled = false;
+                pexelsResults.innerHTML = '<p class="text-red-600 col-span-full">Erreur réseau.</p>';
+            });
+    });
+
+    var spellCheckUrl = '{{ path("user_blog_spell_check") }}';
+    document.querySelectorAll('.spell-check-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var targetId = this.getAttribute('data-target');
+            var field = document.getElementById(targetId);
+            var resultEl = document.querySelector('.spell-check-result[data-for="' + targetId + '"]');
+            if (!field || !resultEl) return;
+            var text = field.value.trim();
+            if (!text) {
+                resultEl.innerHTML = '<p class="text-amber-600 text-sm">Veuillez saisir du texte.</p>';
+                resultEl.classList.remove('hidden');
+                return;
+            }
+            btn.disabled = true;
+            resultEl.innerHTML = '<p class="text-[#6B7280] text-sm">Vérification en cours...</p>';
+            resultEl.classList.remove('hidden');
+            var formData = new FormData();
+            formData.append('text', text);
+            fetch(spellCheckUrl, { method: 'POST', body: formData, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btn.disabled = false;
+                if (data.error) {
+                    resultEl.innerHTML = '<p class="text-red-600 text-sm">' + data.error + '</p>';
+                } else if (data.corrections && data.corrections.length > 0) {
+                    var correctedText = data.corrected_text || '';
+                    var html = '<div class="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm"><p class="font-medium text-amber-800 mb-2">Corrections proposées :</p><ul class="space-y-1 mb-3">';
+                    data.corrections.forEach(function(c) {
+                        html += '<li><span class="text-red-600">' + (c.original || '').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span> → <span class="text-emerald-600">' + (c.suggestion || '').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span></li>';
+                    });
+                    html += '</ul><button type="button" class="apply-spell-check px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700">Appliquer les corrections</button></div>';
+                    resultEl.innerHTML = html;
+                    resultEl.querySelector('.apply-spell-check')?.addEventListener('click', function() {
+                        var f = document.getElementById(targetId);
+                        if (f && correctedText) { f.value = correctedText; resultEl.classList.add('hidden'); }
+                    });
+                } else {
+                    resultEl.innerHTML = '<p class="text-emerald-600 text-sm">Aucune faute détectée.</p>';
+                }
+            })
+            .catch(function() {
+                btn.disabled = false;
+                resultEl.innerHTML = '<p class="text-red-600 text-sm">Erreur lors de la vérification.</p>';
+            });
+        });
+    });
+});
+</script>
 {% endblock %}

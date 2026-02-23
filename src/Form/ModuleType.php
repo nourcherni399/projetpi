@@ -11,12 +11,12 @@ use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\File;
-use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
 final class ModuleType extends AbstractType
@@ -31,26 +31,17 @@ final class ModuleType extends AbstractType
         $builder
             ->add('titre', TextType::class, [
                 'label' => 'Titre',
-                'constraints' => [
-                    new NotBlank(message: 'Le titre est obligatoire.'),
-                    new Length(['min' => 3, 'max' => 255, 'minMessage' => 'Le titre doit contenir au moins {{ limit }} caractères.', 'maxMessage' => 'Le titre ne peut pas dépasser {{ limit }} caractères.'])
-                ],
+                'constraints' => [new NotBlank(message: 'Le titre est obligatoire.')],
                 'attr' => $attr + ['placeholder' => 'Ex. Introduction au TSA'],
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Description',
-                'constraints' => [
-                    new NotBlank(message: 'La description est obligatoire.'),
-                    new Length(['min' => 10, 'max' => 255, 'minMessage' => 'La description doit contenir au moins {{ limit }} caractères.', 'maxMessage' => 'La description ne peut pas dépasser {{ limit }} caractères.'])
-                ],
+                'constraints' => [new NotBlank(message: 'La description est obligatoire.')],
                 'attr' => $attr + ['rows' => 3, 'placeholder' => 'Courte description du module…'],
             ])
             ->add('contenu', TextareaType::class, [
                 'label' => 'Contenu',
-                'constraints' => [
-                    new NotBlank(message: 'Le contenu est obligatoire.'),
-                    new Length(['min' => 20, 'minMessage' => 'Le contenu doit contenir au moins {{ limit }} caractères.'])
-                ],
+                'constraints' => [new NotBlank(message: 'Le contenu est obligatoire.')],
                 'attr' => $attr + ['rows' => 5, 'placeholder' => 'Contenu détaillé du module…'],
             ])
             ->add('niveau', ChoiceType::class, [
@@ -91,6 +82,10 @@ final class ModuleType extends AbstractType
                     ]),
                 ],
                 'attr' => $attr + ['accept' => 'image/*'],
+            ])
+            ->add('pexels_image_url', HiddenType::class, [
+                'required' => false,
+                'mapped' => false,
             ])
             ->add('isPublished', CheckboxType::class, [
                 'label' => 'Publié',

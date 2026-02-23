@@ -9,7 +9,10 @@ parameters:
     uploads_blogs_directory: '%kernel.project_dir%/public/uploads/blog'
     uploads_ressources_directory: '%kernel.project_dir%/public/uploads/ressources'
     uploads_users_directory: '%kernel.project_dir%/public/uploads/users'
+    uploads_commentaires_directory: '%kernel.project_dir%/public/uploads/commentaires'
     app_url_default: ''
+    libretranslate_api_key_default: ''
+    groq_api_key_default: ''
 
 services:
     # default configuration for services in *this* file
@@ -35,6 +38,33 @@ services:
     App\EventSubscriber\OAuthRedirectUriContextSubscriber:
         arguments:
             $appUrl: '%env(default:app_url_default:APP_URL)%'
+
+    App\Service\LibreTranslateService:
+        arguments:
+            $cache: '@cache.app'
+            $apiUrl: '%env(LIBRETRANSLATE_URL)%'
+            $cacheTtl: '%env(int:LIBRETRANSLATE_CACHE_TTL)%'
+            $apiKey: '%env(default:libretranslate_api_key_default:LIBRETRANSLATE_API_KEY)%'
+
+    App\Service\PexelsService:
+        arguments:
+            $pexelsApiKey: '%env(PEXELS_API_KEY)%'
+
+    App\Service\GroqSummaryService:
+        arguments:
+            $apiKey: '%env(default:groq_api_key_default:GROQ_API_KEY)%'
+
+    App\Service\GroqModuleGeneratorService:
+        arguments:
+            $apiKey: '%env(default:groq_api_key_default:GROQ_API_KEY)%'
+
+    App\Service\GroqBlogGeneratorService:
+        arguments:
+            $apiKey: '%env(default:groq_api_key_default:GROQ_API_KEY)%'
+
+    App\Service\GroqSpellCheckService:
+        arguments:
+            $apiKey: '%env(default:groq_api_key_default:GROQ_API_KEY)%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

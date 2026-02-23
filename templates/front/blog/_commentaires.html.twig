@@ -1,14 +1,23 @@
 {# templates/front/blog/_commentaires.html.twig #}
 
-<div class="space-y-6">
+<div class="space-y-2">
     {% if commentaires|length > 0 %}
         <h3 class="text-xl font-semibold text-[#4B5563] mb-6">
             Commentaires ({{ commentaires|length }})
         </h3>
+
+        {% set reactionEmojis = {like: '⭐', love: '❤️', haha: '😂', wow: '😮', sad: '😢', angry: '😡'} %}
+        {% set reactionLabels = {like: "J'aime", love: "J'adore", haha: 'Haha', wow: 'Wow', sad: 'Quoi ?', angry: 'Solidaire'} %}
+        {% set reactionColors = {like: '#1877F2', love: '#F33E58', haha: '#F7B928', wow: '#F7B928', sad: '#F7B928', angry: '#E9710F'} %}
+        {% set starIconPath = asset('images/icons/star.png') %}
+        {% set heartIconPath = asset('images/icons/heart.png') %}
+        {% set hahaIconPath = asset('images/icons/haha.png') %}
+        {% set wowIconPath = asset('images/icons/wow.png') %}
+        {% set sadIconPath = asset('images/icons/sad.png') %}
+        {% set angryIconPath = asset('images/icons/angry.png') %}
         
         {% for commentaire in commentaires|sort((a, b) => b.dateCreation <=> a.dateCreation) %}
-            <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 hover:shadow-md transition-shadow">
-                <div class="flex items-start gap-4">
+            <div class="flex items-start gap-4 py-2">
                     <!-- Avatar utilisateur -->
                     <div class="flex-shrink-0">
                         {% if commentaire.user %}
@@ -27,7 +36,7 @@
                     <!-- Contenu du commentaire -->
                     <div class="flex-1">
                         <div class="flex items-center justify-between mb-2">
-                            <div>
+                            <div class="flex items-center gap-2 flex-wrap">
                                 <h4 class="font-semibold text-[#4B5563]">
                                     {% if commentaire.user %}
                                         {{ commentaire.user.nom }} {{ commentaire.user.prenom }}
@@ -55,10 +64,115 @@
                             {% endif %}
                         </div>
                         
-                        <div class="prose prose-sm max-w-none">
-                            <p class="text-[#4B5563] whitespace-pre-wrap">{{ commentaire.contenu }}</p>
+                        <div class="prose prose-[#4B5563] max-w-none">
+                            {% if commentaire.contenu %}<div class="text-[#4B5563] whitespace-pre-wrap break-words">{{ commentaire.contenu }}</div>{% endif %}
+                            {% if commentaire.media %}
+                                {% set ext = commentaire.media|split('.')|last|lower %}
+                                {% if ext in ['jpg','jpeg','png','gif','webp'] %}
+                                    <img src="{{ asset(commentaire.media) }}" alt="Pièce jointe" class="mt-2 max-w-xs rounded-lg border border-[#E5E0D8] object-cover max-h-64">
+                                {% elseif ext in ['mp4','webm','mov'] %}
+                                    <video src="{{ asset(commentaire.media) }}" controls class="mt-2 max-w-md rounded-lg border border-[#E5E0D8]">
+                                        Votre navigateur ne supporte pas la vidéo.
+                                    </video>
+                                {% endif %}
+                            {% endif %}
                         </div>
-                    </div>
+
+                        {# ── Réactions Facebook-style ── #}
+                        {% if app.user %}
+                        {% set userReactionType = (reactedCommentTypes|default({}))[commentaire.id]|default(null) %}
+                        <div class="reaction-wrapper mt-1 relative inline-flex items-center gap-2" data-comment-id="{{ commentaire.id }}" data-star-icon="{{ starIconPath }}" data-heart-icon="{{ heartIconPath }}" data-haha-icon="{{ hahaIconPath }}" data-wow-icon="{{ wowIconPath }}" data-sad-icon="{{ sadIconPath }}" data-angry-icon="{{ angryIconPath }}">
+                            {# Bouton principal #}
+                            <button type="button"
+                                    class="reaction-main-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 border
+                                           {{ userReactionType ? 'border-transparent' : 'border-[#E5E0D8] text-[#6B7280] hover:border-[#A7C7E7] hover:text-[#1D4ED8] hover:bg-[#EFF6FF]' }}"
+                                    style="{{ userReactionType ? 'background:' ~ reactionColors[userReactionType] ~ '15; border-color:' ~ reactionColors[userReactionType] ~ '; color:' ~ reactionColors[userReactionType] : '' }}"
+                                    data-toggle-url="{{ path('commentaire_reaction_toggle', {'id': commentaire.id}) }}"
+                                    data-csrf="{{ csrf_token('commentaire_reaction_' ~ commentaire.id) }}"
+                                    data-current-reaction="{{ userReactionType|default('') }}"
+                                    title="{{ userReactionType ? reactionLabels[userReactionType]|default("J'aime") : "J'aime" }}">
+                                <span class="reaction-main-emoji text-base inline-flex items-center">
+                                    {% set dispType = userReactionType|default('like') %}
+                                    {% if dispType == 'like' %}
+                                        <img src="{{ starIconPath }}" alt="J'aime" class="w-7 h-7">
+                                    {% elseif dispType == 'love' %}
+                                        <img src="{{ heartIconPath }}" alt="J'adore" class="w-7 h-7">
+                                    {% elseif dispType == 'haha' %}
+                                        <img src="{{ hahaIconPath }}" alt="Haha" class="w-7 h-7">
+                                    {% elseif dispType == 'wow' %}
+                                        <img src="{{ wowIconPath }}" alt="Wow" class="w-7 h-7">
+                                    {% elseif dispType == 'sad' %}
+                                        <img src="{{ sadIconPath }}" alt="Quoi ?" class="w-7 h-7">
+                                    {% elseif dispType == 'angry' %}
+                                        <img src="{{ angryIconPath }}" alt="Solidaire" class="w-7 h-7">
+                                    {% else %}
+                                        {{ reactionEmojis[dispType]|default('⭐') }}
+                                    {% endif %}
+                                </span>
+                                <span class="reaction-main-label">{{ userReactionType ? reactionLabels[userReactionType]|default("J'aime") : "J'aime" }}</span>
+                            </button>
+
+                            {# Popup des réactions #}
+                            <div class="reaction-popup absolute bottom-full left-0 mb-2 bg-white rounded-full shadow-xl border border-gray-100 px-2 py-1.5 flex gap-1 z-50 opacity-0 pointer-events-none transition-all duration-200 scale-75 origin-bottom-left"
+                                 style="white-space:nowrap;">
+                                {% for type, emoji in reactionEmojis %}
+                                <button type="button"
+                                        class="reaction-option-btn w-9 h-9 flex items-center justify-center text-xl rounded-full hover:scale-125 transition-transform duration-150 hover:bg-gray-50"
+                                        data-type="{{ type }}"
+                                        title="{{ reactionLabels[type] }}">
+                                    {% if type == 'like' %}
+                                        <img src="{{ starIconPath }}" alt="J'aime" class="w-7 h-7">
+                                    {% elseif type == 'love' %}
+                                        <img src="{{ heartIconPath }}" alt="J'adore" class="w-7 h-7">
+                                    {% elseif type == 'haha' %}
+                                        <img src="{{ hahaIconPath }}" alt="Haha" class="w-7 h-7">
+                                    {% elseif type == 'wow' %}
+                                        <img src="{{ wowIconPath }}" alt="Wow" class="w-7 h-7">
+                                    {% elseif type == 'sad' %}
+                                        <img src="{{ sadIconPath }}" alt="Quoi ?" class="w-7 h-7">
+                                    {% elseif type == 'angry' %}
+                                        <img src="{{ angryIconPath }}" alt="Solidaire" class="w-7 h-7">
+                                    {% else %}
+                                        {{ emoji }}
+                                    {% endif %}
+                                </button>
+                                {% endfor %}
+                            </div>
+
+                            {# Compteurs de réactions #}
+                            {% set totalReactions = commentaire.reactions|length %}
+                            {% if totalReactions > 0 %}
+                            <span class="reaction-counts text-sm text-[#6B7280] inline-flex items-center">
+                                {%- set shown = [] -%}
+                                {%- for r in commentaire.reactions -%}
+                                    {%- if r.type not in shown -%}
+                                        {%- if r.type == 'like' -%}<img src="{{ starIconPath }}" alt="J'aime" class="w-6 h-6 inline-block align-middle">{%- elseif r.type == 'love' -%}<img src="{{ heartIconPath }}" alt="J'adore" class="w-6 h-6 inline-block align-middle">{%- elseif r.type == 'haha' -%}<img src="{{ hahaIconPath }}" alt="Haha" class="w-6 h-6 inline-block align-middle">{%- elseif r.type == 'wow' -%}<img src="{{ wowIconPath }}" alt="Wow" class="w-6 h-6 inline-block align-middle">{%- elseif r.type == 'sad' -%}<img src="{{ sadIconPath }}" alt="Quoi ?" class="w-6 h-6 inline-block align-middle">{%- elseif r.type == 'angry' -%}<img src="{{ angryIconPath }}" alt="Solidaire" class="w-6 h-6 inline-block align-middle">{%- else -%}{{ reactionEmojis[r.type]|default('⭐') }}{%- endif -%}
+                                        {%- set shown = shown|merge([r.type]) -%}
+                                    {%- endif -%}
+                                {%- endfor -%}
+                                <span class="reaction-total-count ml-0.5">{{ totalReactions }}</span>
+                            </span>
+                            {% else %}
+                            <span class="reaction-counts text-sm text-[#9CA3AF] reaction-total-count inline-flex items-center" style="display:none">0</span>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        {# Affichage lecture seule pour non-connectés #}
+                        {% set totalReactions = commentaire.reactions|length %}
+                        {% if totalReactions > 0 %}
+                        <div class="mt-1 text-sm text-[#6B7280]">
+                            {%- set shown = [] -%}
+                            {%- for r in commentaire.reactions -%}
+                                {%- if r.type not in shown -%}
+                                    {%- if r.type == 'like' -%}<img src="{{ starIconPath }}" alt="J'aime" class="w-6 h-6 inline-block align-middle">{%- elseif r.type == 'love' -%}<img src="{{ heartIconPath }}" alt="J'adore" class="w-6 h-6 inline-block align-middle">{%- elseif r.type == 'haha' -%}<img src="{{ hahaIconPath }}" alt="Haha" class="w-6 h-6 inline-block align-middle">{%- elseif r.type == 'wow' -%}<img src="{{ wowIconPath }}" alt="Wow" class="w-6 h-6 inline-block align-middle">{%- elseif r.type == 'sad' -%}<img src="{{ sadIconPath }}" alt="Quoi ?" class="w-6 h-6 inline-block align-middle">{%- elseif r.type == 'angry' -%}<img src="{{ angryIconPath }}" alt="Solidaire" class="w-6 h-6 inline-block align-middle">{%- else -%}{{ reactionEmojis[r.type]|default('⭐') }}{%- endif -%}
+                                    {%- set shown = shown|merge([r.type]) -%}
+                                {%- endif -%}
+                            {%- endfor -%}
+                            {{ totalReactions }}
+                        </div>
+                        {% endif %}
+                        {% endif %}
+                        {# ── Fin réactions ── #}
                 </div>
             </div>
         {% endfor %}

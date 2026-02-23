@@ -5,92 +5,119 @@
 {% block user_content %}
 <article class="max-w-7xl mx-auto">
     <div class="mb-6">
-        <a href="{{ path('user_blog') }}" class="inline-flex items-center gap-2 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded-lg text-sm font-medium">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-            Retour au blog
+        <a href="{{ path('user_blog') }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#E8DED5] text-[#4B5563] font-medium hover:bg-[#F5F1EB] transition-colors w-fit">
+            <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            {{ 'Retour au blog'|blog_translate }}
         </a>
     </div>
 
     {% for message in app.flashes('success') %}
-        <div class="mb-6 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">{{ message }}</div>
+        <div class="mb-6 px-4 py-3 rounded-lg bg-[#D4E5D0] border border-[#A8BBA3] text-[#4B5563]">{{ message }}</div>
     {% endfor %}
     {% for message in app.flashes('error') %}
-        <div class="mb-6 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-800">{{ message }}</div>
+        <div class="mb-6 px-4 py-3 rounded-lg bg-[#FAEDE8] border border-[#E8DED5] text-[#4B5563]">{{ message }}</div>
     {% endfor %}
 
     <div class="flex flex-col lg:flex-row gap-8 items-start">
     <!-- Colonne gauche : Contenu du module -->
     <div class="w-full lg:w-2/5 lg:min-w-0 lg:sticky lg:top-8 flex-shrink-0">
-    <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8">
+    <div class="bg-[#FDF8F5] rounded-xl border border-[#E8DED5] p-6 md:p-8 shadow-sm">
         <header class="mb-8">
             <div class="flex items-start justify-between gap-4 mb-3">
                 <h1 class="text-3xl font-bold text-[#4B5563]">
-                    {{ module.titre }}
+                    {{ module.titre|blog_translate }}
                 </h1>
                 <span class="inline-block px-3 py-1 rounded-lg bg-[#A7C7E7]/30 text-[#4B5563] text-sm font-medium shrink-0">{{ module.niveau|capitalize }}</span>
             </div>
             {% if module.dateCreation %}
             <div class="inline-flex items-center gap-2">
-                <p class="text-[#6B7280] text-sm">Publié le {{ module.dateCreation|date('d/m/Y') }}</p>
+                <p class="text-[#687280] text-sm">{{ 'Publié le'|blog_translate }} {{ module.dateCreation|date('d/m/Y') }}</p>
+                {% if module.titre or module.description or module.contenu %}
+                <button type="button"
+                        class="module-tts-btn inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#D4E5D0] text-[#A8BBA3] hover:bg-[#C4DFBF] focus:outline focus:ring-2 focus:ring-[#A8BBA3] shrink-0"
+                        data-tts-text="{{ [(module.titre ?? ''), (module.description ?? ''), (module.contenu ?? '')]|join(' ')|trim|striptags|e('html_attr') }}"
+                        data-tts-lang="{{ app.session.get('blog_locale', 'fr') }}"
+                        title="{{ 'Écouter le module'|blog_translate }}"
+                        aria-label="Écouter le contenu du module">
+                    <svg class="module-tts-icon-play w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    <svg class="module-tts-icon-pause w-4 h-4" fill="currentColor" viewBox="0 0 24 24" style="display:none">
+                        <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
+                    </svg>
+                </button>
+                {% endif %}
                 <a href="{{ path('user_blog_module_download', { id: module.id }) }}"
-                   class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 focus:outline focus:ring-2 focus:ring-blue-500 shrink-0"
-                   title="Télécharger le module">
+                   class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#E8F4FC] text-[#1e3a5f] hover:bg-[#D4E8F8] focus:outline focus:ring-2 focus:ring-[#A7C7E7] shrink-0"
+                    title="{{ 'Télécharger le module'|blog_translate }}">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M8 12l4 4m0 0l4-4m-4 4V4" />
                     </svg>
                 </a>
+                {% if module.titre or module.description or module.contenu %}
+                <button type="button"
+                        id="module-summary-btn"
+                        class="module-summary-btn inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#E8DCF0] text-[#4B3D6B] hover:bg-[#DDD0E8] focus:outline focus:ring-2 focus:ring-[#CDB4DB] shrink-0"
+                        data-module-id="{{ module.id }}"
+                        data-summary-url="{{ path('module_summary', { id: module.id }) }}"
+                        title="{{ 'Résumer avec l\'IA'|blog_translate }}"
+                        aria-label="{{ 'Résumer ce module avec l\'IA'|blog_translate }}">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 4.5l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423-1.423z" />
+                    </svg>
+                </button>
+                {% endif %}
             </div>
             {% endif %}
         </header>
 
         {% if module.description %}
-        <p class="text-lg text-[#6B7280] mb-6 whitespace-normal break-words">{{ module.description }}</p>
+        <p class="text-lg text-[#687280] mb-6 whitespace-normal break-words">{{ module.description|blog_translate }}</p>
         {% endif %}
 
         {% if module.image %}
         <div class="mb-8">
             <img src="{{ asset(module.image) }}"
-                 alt="{{ module.titre }}"
+                 alt="{{ module.titre|blog_translate }}"
                  class="w-full max-w-[620px] aspect-[16/10] object-cover rounded-lg">
         </div>
         {% endif %}
 
         <div class="prose prose-[#4B5563] max-w-none mb-10 break-words">
             {% if module.contenu %}
-            <div class="text-[#4B5563] whitespace-pre-wrap break-words">{{ module.contenu }}</div>
+            <div class="dict-content text-[#4B5563] whitespace-pre-wrap break-words" data-dict-lang="{{ app.session.get('blog_locale', 'fr') }}">{{ module.contenu|blog_translate|raw }}</div>
             {% else %}
-            <p class="text-[#6B7280]">Aucun contenu disponible.</p>
+            <p class="text-[#687280]">{{ 'Aucun contenu disponible.'|blog_translate }}</p>
             {% endif %}
         </div>
 
         {% set activeRessources = module.ressources|filter(ressource => ressource.isActive) %}
         {% set ressources = activeRessources|sort((a, b) => (a.ordre ?? 999999) <=> (b.ordre ?? 999999)) %}
         <div class="mb-8">
-            <h2 class="text-xl font-semibold text-[#4B5563] mb-4">Ressources du module</h2>
+            <h2 class="text-xl font-semibold text-[#4B5563] mb-4">{{ 'Ressources du module'|blog_translate }}</h2>
             {% if ressources|length > 0 %}
                 <div class="space-y-4">
                     {% for ressource in ressources %}
                         {% set contenuUrl = (ressource.contenu starts with 'http://') or (ressource.contenu starts with 'https://') ? ressource.contenu : asset(ressource.contenu) %}
                         {% set isRemoteResource = (ressource.contenu starts with 'http://') or (ressource.contenu starts with 'https://') %}
-                        <div class="rounded-lg border border-[#E5E0D8] p-4 bg-[#F9FAFB]">
+                        <div class="rounded-lg border border-[#E8DED5] p-4 bg-[#FAEDE8]">
                             <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                                 <div class="flex items-center gap-2 min-w-0">
-                                    <h3 class="font-medium text-[#4B5563] truncate">{{ ressource.titre }}</h3>
-                                    <a href="{{ contenuUrl }}"
-                                       {% if isRemoteResource %}target="_blank" rel="noopener noreferrer"{% endif %}
-                                       {% if not isRemoteResource %}download{% endif %}
-                                       class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#E7EDF8] text-[#2563EB] hover:bg-[#DCE7FA] transition-colors shrink-0"
-                                       title="Télécharger cette ressource"
-                                       aria-label="Télécharger {{ ressource.titre }}">
+                                    <h3 class="font-medium text-[#4B5563] truncate">{{ ressource.titre|blog_translate }}</h3>
+                                    <a href="{{ path('ressource_download', { id: ressource.id }) }}"
+                                       {% if ressource.typeRessource == 'url' %}target="_blank" rel="noopener noreferrer"{% else %}download{% endif %}
+                                       class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#E8F4FC] text-[#1e3a5f] hover:bg-[#D4E8F8] transition-colors shrink-0"
+                                       title="{{ 'Télécharger cette ressource'|blog_translate }}"
+                                       aria-label="{{ 'Télécharger'|blog_translate }} {{ ressource.titre|blog_translate }}">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0l4-4m-4 4l-4-4m-5 8h18" />
                                         </svg>
                                     </a>
                                 </div>
                                 <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
-                                    {% if ressource.typeRessource == 'url' %}bg-blue-100 text-blue-800
-                                    {% elseif ressource.typeRessource == 'video' %}bg-purple-100 text-purple-800
-                                    {% else %}bg-green-100 text-green-800{% endif %}">
+                                    {% if ressource.typeRessource == 'url' %}bg-[#E8F4FC] text-[#1e3a5f]
+                                    {% elseif ressource.typeRessource == 'video' %}bg-[#E8DCF0] text-[#4B3D6B]
+                                    {% else %}bg-[#D4E5D0] text-[#4B5563]{% endif %}">
                                     {{ ressource.typeRessource|upper }}
                                 </span>
                             </div>
@@ -98,13 +125,13 @@
                             {% if ressource.typeRessource == 'url' %}
                                 <a href="{{ contenuUrl }}" target="_blank" rel="noopener noreferrer"
                                    class="inline-flex items-center gap-2 text-[#A7C7E7] hover:text-[#B8D4ED] font-medium text-sm">
-                                    Ouvrir la ressource
+                                    {{ 'Ouvrir la ressource'|blog_translate }}
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H18m0 0v4.5M18 6l-7.5 7.5M6 10.5V18h7.5" />
                                     </svg>
                                 </a>
                             {% elseif ressource.typeRessource == 'video' %}
-                                <video controls preload="metadata" class="w-full rounded-lg border border-[#E5E0D8] bg-black/5">
+                                <video controls preload="metadata" class="w-full rounded-lg border border-[#E8DED5] bg-black/5">
                                     <source src="{{ contenuUrl }}">
                                     Votre navigateur ne supporte pas la lecture vidéo.
                                 </video>
@@ -114,60 +141,22 @@
                                     Votre navigateur ne supporte pas la lecture audio.
                                 </audio>
                             {% else %}
-                                <p class="text-sm text-[#6B7280]">Type de ressource non supporte.</p>
+                                <p class="text-sm text-[#687280]">{{ 'Type de ressource non supporté.'|blog_translate }}</p>
                             {% endif %}
                         </div>
                     {% endfor %}
                 </div>
             {% else %}
-                <p class="text-[#6B7280]">Aucune ressource active pour ce module.</p>
+                <p class="text-[#687280]">{{ 'Aucune ressource active pour ce module.'|blog_translate }}</p>
             {% endif %}
         </div>
 
-        {# Toast notification #}
-        <div id="toast-notification" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden">
-            <div class="px-4 py-2.5 rounded-lg bg-[#1F2937] text-white text-sm font-medium shadow-lg">
-                <span id="toast-message"></span>
-            </div>
-        </div>
-
-        <div id="module-share-modal" class="fixed inset-0 z-[60] hidden">
-            <div id="module-share-backdrop" class="absolute inset-0 bg-black/45"></div>
-            <div class="relative z-10 h-full w-full flex items-center justify-center p-4">
-                <div class="w-full max-w-md rounded-2xl bg-white border border-[#E5E0D8] shadow-xl overflow-hidden">
-                    <div class="flex items-center justify-between px-4 py-3 border-b border-[#E5E0D8]">
-                        <h3 class="text-lg font-semibold text-[#4B5563]">Partager le module</h3>
-                        <button type="button" id="close-module-share" class="px-2 py-1 rounded-lg text-[#6B7280] hover:bg-[#F3F4F6]">Fermer</button>
-                    </div>
-
-                    <div class="p-4 space-y-4">
-                        <div class="rounded-xl border border-[#E5E0D8] bg-[#F9FAFB] p-3">
-                            {% if module.image %}
-                                <img src="{{ asset(module.image) }}" alt="{{ module.titre }}" class="w-full h-44 object-cover rounded-lg mb-3">
-                            {% endif %}
-                            <p class="font-semibold text-[#4B5563] line-clamp-2">{{ module.titre }}</p>
-                            <p class="text-sm text-[#6B7280] line-clamp-2 mt-1">{{ module.description ?: 'Découvrez ce module sur AutiCare.' }}</p>
-                        </div>
-
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                            <button type="button" id="share-copy-link" class="px-3 py-2.5 rounded-xl bg-[#E0F2FE] text-[#0369A1] text-sm font-medium hover:bg-[#BAE6FD]">Copier lien</button>
-                            <button type="button" id="share-native" class="px-3 py-2.5 rounded-xl bg-[#DCFCE7] text-[#15803D] text-sm font-medium hover:bg-[#BBF7D0]">Partager</button>
-                            <button type="button" id="share-facebook" class="px-3 py-2.5 rounded-xl bg-[#DBEAFE] text-[#1D4ED8] text-sm font-medium hover:bg-[#BFDBFE]">Facebook</button>
-                            <button type="button" id="share-messenger" class="px-3 py-2.5 rounded-xl bg-[#F3E8FF] text-[#7E22CE] text-sm font-medium hover:bg-[#E9D5FF]">Messenger</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="pt-3 border-t border-[#E5E0D8]">
-            {% if app.user %}
+        {# Barre d'icônes (favoris, ajouter, repost, partager) - au-dessus du lien En savoir plus #}
+        {% if app.user %}
                 {% set hasFormErrors = articleForm is defined and articleForm and not articleForm.vars.valid and articleForm.vars.submitted %}
                 {% set showArticleForm = articleForm is defined and articleForm and (articleForm.vars.submitted or hasFormErrors) %}
-
-                <div class="py-0.5">
-                    <div class="flex items-center justify-between w-full max-w-[300px] mx-auto -translate-x-1">
-                        {# Coeur = enregistrer/retirer le module des favoris #}
+                <div class="flex justify-center my-6">
+                    <div class="module-actions-float inline-flex items-center gap-1 bg-[#FDF8F5] rounded-full shadow-xl border border-[#E8DED5] px-3 py-2.5">
                         <button type="button"
                                 id="module-heart-btn"
                                 class="inline-flex items-center justify-center w-10 h-10 rounded-full transition-colors {{ isModuleSaved is defined and isModuleSaved ? 'bg-[#BE185D] text-white' : 'bg-[#FCE7F3] text-[#BE185D]' }} hover:bg-[#FBCFE8]"
@@ -176,100 +165,96 @@
                                 data-saved="{{ isModuleSaved is defined and isModuleSaved ? '1' : '0' }}"
                                 data-toggle-url="{{ path('favoris_module_toggle', {id: module.id}) }}"
                                 data-csrf="{{ csrf_token('toggle_module_favori_' ~ module.id) }}">
-                            <svg class="w-5 h-5" fill="{{ isModuleSaved is defined and isModuleSaved ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <svg class="w-7 h-7" fill="{{ isModuleSaved is defined and isModuleSaved ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                             </svg>
                         </button>
-
                         <button type="button"
                                 id="toggle-article-form"
-                                class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#DBEAFE] text-[#1D4ED8] hover:bg-[#BFDBFE] transition-colors"
+                                class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#E8F4FC] text-[#1e3a5f] hover:bg-[#D4E8F8] transition-colors"
                                 aria-expanded="{{ showArticleForm ? 'true' : 'false' }}"
                                 aria-controls="article-form-panel"
                                 title="Ajouter un article">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m-7-7h14" />
                             </svg>
                         </button>
-
-                        <button type="button" id="repost-module" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#E0F2FE] text-[#0369A1] hover:bg-[#BAE6FD] transition-colors" title="Copier le lien">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <button type="button" id="repost-module" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#E8F4FC] text-[#1e3a5f] hover:bg-[#D4E8F8] transition-colors" title="Copier le lien public" data-public-url="{{ url('module_public', { id: module.id }) }}">
+                            <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M17 1l4 4-4 4M3 11V9a4 4 0 014-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 01-4 4H3" />
                             </svg>
                         </button>
-
                         <button type="button"
                                 id="share-module"
-                                class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#DCFCE7] text-[#15803D] hover:bg-[#BBF7D0] transition-colors"
+                                class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#D4E5D0] text-[#4B5563] hover:bg-[#C4DFBF] transition-colors"
                                 title="Partager"
-                                data-share-url="{{ url('user_blog_module', { id: module.id }) }}"
-                                data-share-title="{{ module.titre }}"
-                                data-share-text="Je vous partage ce module sur AutiCare.">
+                                data-share-url="{{ url('module_public', { id: module.id }) }}"
+                                data-share-title="{{ module.titre|blog_translate }}"
+                                data-share-text="{{ 'Je vous partage ce module sur AutiCare.'|blog_translate }}">
                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.1">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 8.25L19.5 12m0 0L15 15.75M19.5 12H9.75c-2.9 0-5.25 2.35-5.25 5.25" />
                             </svg>
                         </button>
                     </div>
                 </div>
+        {% endif %}
 
-                <div id="article-form-panel" class="mt-4 {{ showArticleForm ? '' : 'hidden' }}">
-                    <div class="rounded-xl border border-[#E5E0D8] bg-[#F9FAFB] p-4 md:p-5">
-                        <h3 class="text-lg font-semibold text-[#4B5563] mb-4">Nouvel article</h3>
-                        {% if articleForm is defined and articleForm %}
-                        {% form_theme articleForm 'form/form_div_layout.html.twig' %}
-                            {{ form_start(articleForm, {'attr': {'class': 'space-y-4', 'novalidate': 'novalidate', 'id': 'article-form'}, 'label_attr': {'class': 'block text-[#4B5563] font-medium mb-1'}}) }}
-                                {{ form_errors(articleForm) }}
-                                <div>
-                                    {{ form_label(articleForm.titre) }}
-                                    {{ form_widget(articleForm.titre) }}
-                                    {% if articleForm.titre.vars.errors|length > 0 %}
-                                        <div class="mt-1 text-sm font-medium text-red-600" role="alert">{{ articleForm.titre.vars.errors|first.message }}</div>
-                                    {% endif %}
-                                </div>
-                                <div>
-                                    {{ form_label(articleForm.type) }}
-                                    {{ form_widget(articleForm.type) }}
-                                    {% if articleForm.type.vars.errors|length > 0 %}
-                                        <div class="mt-1 text-sm font-medium text-red-600" role="alert">{{ articleForm.type.vars.errors|first.message }}</div>
-                                    {% endif %}
-                                </div>
-                                <div>
-                                    {{ form_label(articleForm.contenu) }}
-                                    {{ form_widget(articleForm.contenu) }}
-                                    {% if articleForm.contenu.vars.errors|length > 0 %}
-                                        <div class="mt-1 text-sm font-medium text-red-600" role="alert">{{ articleForm.contenu.vars.errors|first.message }}</div>
-                                    {% endif %}
-                                </div>
-                                <div>
-                                    {{ form_label(articleForm.image) }}
-                                    {{ form_widget(articleForm.image) }}
-                                    {% if articleForm.image.vars.errors|length > 0 %}
-                                        <div class="mt-1 text-sm font-medium text-red-600" role="alert">{{ articleForm.image.vars.errors|first.message }}</div>
-                                    {% endif %}
-                                </div>
-                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                    <div class="flex items-center gap-2">{{ form_widget(articleForm.isPublished) }}{{ form_label(articleForm.isPublished) }}</div>
-                                    <div class="flex items-center gap-2">{{ form_widget(articleForm.isUrgent) }}{{ form_label(articleForm.isUrgent) }}</div>
-                                    <div class="flex items-center gap-2">{{ form_widget(articleForm.isVisible) }}{{ form_label(articleForm.isVisible) }}</div>
-                                </div>
-                                <div class="flex items-center gap-2 pt-2">
-                                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED]">
-                                        Publier
-                                    </button>
-                                    <button type="button" id="cancel-article-form" class="px-4 py-2 rounded-lg border border-[#E5E0D8] text-[#6B7280] hover:bg-white">
-                                        Annuler
-                                    </button>
-                                </div>
-                            {{ form_end(articleForm) }}
-                        {% endif %}
+        {# Lien Wikipedia - En savoir plus sur le module #}
+        <div class="mt-4">
+            <a href="{{ wikiUrl|default('https://fr.wikipedia.org/wiki/Autisme') }}"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="inline-flex items-center gap-2 text-[#1e3a5f] hover:text-[#0369A1] hover:underline font-medium text-sm transition-colors">
+                {{ 'En savoir plus sur ce module'|blog_translate }}
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H18m0 0v4.5M18 6l-7.5 7.5M6 10.5V18h7.5" />
+                </svg>
+            </a>
+        </div>
+
+        {# Toast notification #}
+        <div id="toast-notification" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden">
+            <div class="px-4 py-2.5 rounded-lg bg-[#4B5563] text-white text-sm font-medium shadow-lg">
+                <span id="toast-message"></span>
+            </div>
+        </div>
+
+        <div id="module-share-modal" class="fixed inset-0 z-[60] hidden">
+            <div id="module-share-backdrop" class="absolute inset-0 bg-black/45"></div>
+            <div class="relative z-10 h-full w-full flex items-center justify-center p-4">
+                <div class="w-full max-w-md rounded-2xl bg-[#FDF8F5] border border-[#E8DED5] shadow-xl overflow-hidden">
+                    <div class="flex items-center justify-between px-4 py-3 border-b border-[#E8DED5]">
+                        <h3 class="text-lg font-semibold text-[#4B5563]">{{ 'Partager le module'|blog_translate }}</h3>
+                        <button type="button" id="close-module-share" class="px-2 py-1 rounded-lg text-[#687280] hover:bg-[#F5F1EB]">{{ 'Fermer'|blog_translate }}</button>
+                    </div>
+
+                    <div class="p-4 space-y-4">
+                        <div class="rounded-xl border border-[#E8DED5] bg-[#FAEDE8] p-3">
+                            {% if module.image %}
+                                <img src="{{ asset(module.image) }}" alt="{{ module.titre|blog_translate }}" class="w-full h-44 object-cover rounded-lg mb-3">
+                            {% endif %}
+                            <p class="font-semibold text-[#4B5563] line-clamp-2">{{ module.titre|blog_translate }}</p>
+                            <p class="text-sm text-[#687280] line-clamp-2 mt-1">{{ (module.description ?: 'Découvrez ce module sur AutiCare.')|blog_translate }}</p>
+                        </div>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            <button type="button" id="share-copy-link" class="px-3 py-2.5 rounded-xl bg-[#E8F4FC] text-[#1e3a5f] text-sm font-medium hover:bg-[#D4E8F8]">{{ 'Copier lien'|blog_translate }}</button>
+                            <button type="button" id="share-native" class="px-3 py-2.5 rounded-xl bg-[#D4E5D0] text-[#4B5563] text-sm font-medium hover:bg-[#C4DFBF]">{{ 'Partager'|blog_translate }}</button>
+                            <button type="button" id="share-facebook" class="px-3 py-2.5 rounded-xl bg-[#E8F4FC] text-[#1e3a5f] text-sm font-medium hover:bg-[#D4E8F8]">Facebook</button>
+                            <button type="button" id="share-messenger" class="px-3 py-2.5 rounded-xl bg-[#E8DCF0] text-[#4B3D6B] text-sm font-medium hover:bg-[#DDD0E8]">Messenger</button>
+                        </div>
                     </div>
                 </div>
-            {% else %}
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <p class="text-blue-700 mb-2">Pour écrire un article, veuillez vous <a href="{{ path('app_login') }}" class="text-blue-600 hover:text-blue-800 underline">connecter</a>.</p>
-                </div>
-            {% endif %}
+            </div>
         </div>
+
+        {% if not app.user %}
+        <div class="pt-3 border-t border-[#E8DED5]">
+            <div class="bg-[#E8F4FC] border border-[#E8DED5] rounded-lg p-4">
+                <p class="text-[#4B5563] mb-2">{{ 'Pour écrire un article, veuillez vous'|blog_translate }} <a href="{{ path('app_login') }}" class="text-[#A7C7E7] hover:text-[#95b8dc] underline">{{ 'connecter'|blog_translate }}</a>.</p>
+            </div>
+        </div>
+        {% endif %}
     </div>
     </div>
 
@@ -298,19 +283,19 @@
     {% if hasResults %}
         <div>
             <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-4">
-                <h2 class="text-xl font-semibold text-[#4B5563]">Articles publiés pour ce module</h2>
+                <h2 class="text-xl font-semibold text-[#4B5563]">{{ 'Articles publiés pour ce module'|blog_translate }}</h2>
                 <form method="get" action="{{ path('user_blog_module', { id: module.id }) }}" class="w-full md:w-80">
-                    <label for="search-article" class="block text-sm font-medium text-[#6B7280] mb-1"></label>
+                    <label for="search-article" class="block text-sm font-medium text-[#687280] mb-1"></label>
                     <div class="relative">
                         <input
                             type="text"
                             id="search-article"
                             name="q"
                             value="{{ searchTerm ?? '' }}"
-                            placeholder="Tapez un titre d'article..."
-                            class="w-full rounded-lg border border-[#E5E0D8] px-3 py-2 pl-9 text-sm text-[#111827] placeholder-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#A7C7E7]"
+                            placeholder="{{ 'Tapez un titre d\'article...'|blog_translate }}"
+                            class="w-full rounded-lg border border-[#E8DED5] px-3 py-2 pl-9 text-sm text-[#4B5563] placeholder-[#687280] focus:outline-none focus:ring-2 focus:ring-[#A7C7E7] bg-[#FDF8F5]"
                         >
-                        <span class="absolute inset-y-0 left-2 flex items-center pointer-events-none text-[#9CA3AF]">
+                        <span class="absolute inset-y-0 left-2 flex items-center pointer-events-none text-[#687280]">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M11 18a7 7 0 100-14 7 7 0 000 14z" />
                             </svg>
@@ -323,26 +308,37 @@
             {% if articles|length > 0 %}
             <div class="space-y-4">
                 {% for article in articles|sort((a, b) => b.dateCreation <=> a.dateCreation) %}
-                    <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 hover:shadow-md transition-shadow relative">
+                    <div class="bg-[#FAE8E3] rounded-xl border border-[#E8DED5] p-6 hover:shadow-md transition-shadow relative">
                         <!-- Icônes d'action fixes dans le coin supérieur droit -->
                         <div class="absolute top-4 right-4 flex gap-2">
                             <a href="{{ path('user_blog_article_download', {'id': article.id}) }}"
-                               class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#DCFCE7] text-[#15803D] hover:bg-[#BBF7D0] transition-colors focus:outline focus:ring-2 focus:ring-[#86EFAC]"
-                               title="Télécharger l'article">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                               class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#D4E5D0] text-[#4B5563] hover:bg-[#C4DFBF] transition-colors focus:outline focus:ring-2 focus:ring-[#A8BBA3]"
+                               title="{{ 'Télécharger l\'article'|blog_translate }}">
+                                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M8 12l4 4m0 0l4-4m-4 4V4" />
                                 </svg>
                             </a>
                             {% if app.user and (article.user and article.user.id == app.user.id or is_granted('ROLE_ADMIN')) %}
-                                <a href="{{ path('user_blog_edit_article', {'id': article.id, 'moduleId': module.id}) }}" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#DBEAFE] text-[#1D4ED8] hover:bg-[#BFDBFE] transition-colors focus:outline focus:ring-2 focus:ring-[#93C5FD]" title="Modifier l'article">
-                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <button type="button"
+                                        class="article-spell-check-btn inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#D4E5D0] text-[#4B5563] hover:bg-[#C4DFBF] transition-colors focus:outline focus:ring-2 focus:ring-[#A8BBA3]"
+                                        title="{{ 'Vérifier l\'orthographe'|blog_translate }}"
+                                        data-article-id="{{ article.id }}"
+                                        data-article-csrf="{{ csrf_token('apply_spell_check_' ~ article.id) }}"
+                                        data-article-titre="{{ article.titre|e('html_attr') }}"
+                                        data-article-contenu="{{ article.contenu|e('html_attr') }}">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </button>
+                                <a href="{{ path('user_blog_edit_article', {'id': article.id, 'moduleId': module.id}) }}" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#E8F4FC] text-[#1e3a5f] hover:bg-[#D4E8F8] transition-colors focus:outline focus:ring-2 focus:ring-[#93C5FD]" title="{{ 'Modifier l\'article'|blog_translate }}">
+                                    <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                     </svg>
                                 </a>
                                 <form method="post" action="{{ path('user_blog_delete_article', {'id': article.id, 'moduleId': module.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet article ?');" class="inline">
                                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ article.id) }}">
-                                    <button type="submit" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#FEE2E2] text-[#DC2626] hover:bg-[#FECACA] transition-colors focus:outline focus:ring-2 focus:ring-[#FCA5A5]" title="Supprimer l'article">
-                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                    <button type="submit" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#FEE2E2] text-[#DC2626] hover:bg-[#FECACA] transition-colors focus:outline focus:ring-2 focus:ring-[#FCA5A5]" title="{{ 'Supprimer l\'article'|blog_translate }}">
+                                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                         </svg>
                                     </button>
@@ -355,42 +351,34 @@
                                 <!-- Image de l'article en petit -->
                                 {% if article.image %}
                                     <div class="flex-shrink-0">
-                                        <img src="{{ asset(article.image) }}" alt="{{ article.titre }}" class="w-12 h-12 object-cover rounded-lg">
+                                        <img src="{{ asset(article.image) }}" alt="{{ article.titre|blog_translate }}" class="w-12 h-12 object-cover rounded-lg">
                                     </div>
                                 {% endif %}
                                 <div class="flex-1">
-                                    <h3 class="text-lg font-semibold text-[#4B5563] mb-2">{{ article.titre }}</h3>
-                                    <div class="flex items-center gap-4 text-sm text-[#6B7280] mb-3">
+                                    <h3 class="text-lg font-semibold text-[#4B5563] mb-2">{{ article.titre|blog_translate }}</h3>
+                                    <div class="flex items-center gap-4 text-sm text-[#687280] mb-3">
                                         <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
-                                            {% if article.type == 'recommandation' %}bg-blue-100 text-blue-800
-                                            {% elseif article.type == 'plainte' %}bg-red-100 text-red-800
-                                            {% elseif article.type == 'question' %}bg-yellow-100 text-yellow-800
-                                            {% else %}bg-gray-100 text-gray-800{% endif %}">
-                                            {{ article.type|capitalize }}
+                                            {% if article.type == 'recommandation' %}bg-[#E8F4FC] text-[#1e3a5f]
+                                            {% elseif article.type == 'plainte' %}bg-[#FAEDE8] text-[#4B5563]
+                                            {% elseif article.type == 'question' %}bg-[#D4E5D0] text-[#4B5563]
+                                            {% else %}bg-[#F5F1EB] text-[#4B5563]{% endif %}">
+                                            {{ article.type|blog_translate_type }}
                                         </span>
                                         {% if article.isUrgent %}
-                                            <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">Urgent</span>
+                                            <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-[#FAEDE8] text-[#4B5563]">{{ 'Urgent'|blog_translate }}</span>
                                         {% endif %}
-                                        <span>Par {{ article.user ? article.user.email : 'Anonyme' }}</span>
-                                        <span>Le {{ article.dateCreation|date('d/m/Y à H:i') }}</span>
+                                        <span>{{ 'Par'|blog_translate }} {{ article.user ? article.user.email : ('Anonyme'|blog_translate) }}</span>
+                                        <span>{{ 'Le'|blog_translate }} {{ article.dateCreation|date('d/m/Y à H:i') }}</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="prose prose-[#4B5563] max-w-none">
-                            <p class="text-[#4B5563] break-words whitespace-normal">{{ article.contenu|length > 200 ? (article.contenu|slice(0, 200) ~ '...') : article.contenu }}</p>
-                            <div class="mt-3 flex justify-end">
-                                <a href="{{ path('user_blog_show_article', {'id': article.id}) }}" class="inline-flex items-center gap-2 text-[#A7C7E7] hover:text-[#B8D4ED] font-medium text-sm focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded-lg">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                    </svg>
-                                    Lire la suite
-                                </a>
-                            </div>
+                            <div class="dict-content text-[#4B5563] break-words whitespace-pre-wrap" data-dict-lang="{{ app.session.get('blog_locale', 'fr') }}">{{ article.contenu|blog_translate|raw }}</div>
                         </div>
 
                         {# --- Barre d'interaction de l'article --- #}
-                        <div class="mt-4 pt-3 border-t border-[#F3F0EB] flex items-center gap-4 text-sm text-[#6B7280]">
+                        <div class="mt-4 pt-3 border-t border-[#E8DED5] flex items-center gap-4 text-sm text-[#687280]">
                             {% set isOwnArticle = app.user and article.user and article.user.id == app.user.id %}
                             {% set isArticleSaved = article.id in (savedArticleIds|default([])) %}
 
@@ -403,35 +391,46 @@
                                         data-toggle-url="{{ path('favoris_article_toggle', {id: article.id}) }}"
                                         data-csrf="{{ csrf_token('toggle_article_favori_' ~ article.id) }}"
                                         data-login-url="{{ path('app_login') }}">
-                                    <svg class="w-5 h-5" fill="{{ isArticleSaved ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                    <svg class="w-7 h-7" fill="{{ isArticleSaved ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                                     </svg>
                                 </button>
                             {% endif %}
 
-                            {# Commentaire - lien vers la page article #}
-                            <a href="{{ path('user_blog_show_article', {id: article.id}) }}#commentaires" class="inline-flex items-center gap-2 text-[#0369A1]">
-                                <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#DBEAFE] text-[#1D4ED8] hover:bg-[#BFDBFE] transition-colors">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM21 12c0 4.97-4.03 9-9 9a9.863 9.863 0 01-4.255-.949L3 21l1.395-3.72A8.971 8.971 0 013 12c0-4.97 4.03-9 9-9s9 4.03 9 9z" />
-                                </svg>
+                            {# Commentaire - afficher inline au clic #}
+                            <button type="button"
+                                    class="comment-toggle-btn inline-flex items-center gap-2 text-[#0369A1] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded-full"
+                                    data-article-id="{{ article.id }}"
+                                    title="Voir les commentaires">
+                                <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#E8F4FC] text-[#1e3a5f] hover:bg-[#D4E8F8] transition-colors">
+                                    <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM21 12c0 4.97-4.03 9-9 9a9.863 9.863 0 01-4.255-.949L3 21l1.395-3.72A8.971 8.971 0 013 12c0-4.97 4.03-9 9-9s9 4.03 9 9z" />
+                                    </svg>
                                 </span>
-                                <span class="min-w-[1.25rem] text-sm font-medium text-[#6B7280]">{{ article.commentaires|length }}</span>
-                            </a>
+                            </button>
 
                             {# Repost article #}
                             <button type="button" class="article-repost-btn inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#E0F2FE] text-[#0369A1] hover:bg-[#BAE6FD] transition-colors" data-url="{{ url('user_blog_show_article', {id: article.id}) }}">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M17 1l4 4-4 4M3 11V9a4 4 0 014-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 01-4 4H3" />
                                 </svg>
                             </button>
 
                             {# Partage article #}
-                            <button type="button" class="article-share-btn inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#DCFCE7] text-[#15803D] hover:bg-[#BBF7D0] transition-colors" data-url="{{ url('user_blog_show_article', {id: article.id}) }}" data-title="{{ article.titre }}">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <button type="button" class="article-share-btn inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#DCFCE7] text-[#15803D] hover:bg-[#BBF7D0] transition-colors" data-url="{{ url('user_blog_show_article', {id: article.id}) }}" data-title="{{ article.titre|blog_translate }}">
+                                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 8.25L19.5 12m0 0L15 15.75M19.5 12H9.75c-2.9 0-5.25 2.35-5.25 5.25" />
                                 </svg>
                             </button>
+                        </div>
+
+                        {# Panneau commentaires inline (style Substack) - affiché au clic sur l'icône #}
+                        <div id="comments-panel-{{ article.id }}" class="comment-panel hidden" data-article-id="{{ article.id }}">
+                            {{ include('front/blog/_commentaire_inline.html.twig', {
+                                article: article,
+                                commentaireForm: commentaireForms[article.id]|default(null),
+                                redirectUrl: url('user_blog_module', {id: module.id}) ~ '?showComments=' ~ article.id
+                            }) }}
                         </div>
                     </div>
                 {% endfor %}
@@ -440,24 +439,24 @@
 
             {# Section des brouillons de l'utilisateur connecté #}
             {% if app.user and drafts|length > 0 %}
-                <div class="mt-8 pt-6 border-t border-[#E5E0D8]">
-                    <h3 class="text-lg font-semibold text-[#4B5563] mb-4">Vos brouillons</h3>
+                <div class="mt-8 pt-6 border-t border-[#E8DED5]">
+                    <h3 class="text-lg font-semibold text-[#4B5563] mb-4">{{ 'Vos brouillons'|blog_translate }}</h3>
                     <div class="space-y-4">
                         {% for article in drafts|sort((a, b) => b.dateCreation <=> a.dateCreation) %}
-                            <div class="bg-white rounded-xl border border-dashed border-[#E5E0D8] p-6 hover:shadow-sm transition-shadow relative">
+                            <div class="bg-[#FAE8E3] rounded-xl border border-dashed border-[#E8DED5] p-6 hover:shadow-sm transition-shadow relative">
                                 <div class="absolute top-4 right-4 flex gap-2">
                                     <span class="inline-flex items-center justify-center px-2 py-1 rounded-full bg-yellow-50 text-yellow-700 text-xs font-medium">
-                                        Brouillon
+                                        {{ 'Brouillon'|blog_translate }}
                                     </span>
-                                    <a href="{{ path('user_blog_edit_article', {'id': article.id, 'moduleId': module.id}) }}" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#DBEAFE] text-[#1D4ED8] hover:bg-[#BFDBFE] transition-colors focus:outline focus:ring-2 focus:ring-[#93C5FD]" title="Modifier le brouillon">
-                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                    <a href="{{ path('user_blog_edit_article', {'id': article.id, 'moduleId': module.id}) }}" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#E8F4FC] text-[#1e3a5f] hover:bg-[#D4E8F8] transition-colors focus:outline focus:ring-2 focus:ring-[#93C5FD]" title="{{ 'Modifier le brouillon'|blog_translate }}">
+                                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                         </svg>
                                     </a>
                                     <form method="post" action="{{ path('user_blog_delete_article', {'id': article.id, 'moduleId': module.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce brouillon ?');" class="inline">
                                         <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ article.id) }}">
-                                        <button type="submit" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#FEE2E2] text-[#DC2626] hover:bg-[#FECACA] transition-colors focus:outline focus:ring-2 focus:ring-[#FCA5A5]" title="Supprimer le brouillon">
-                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                        <button type="submit" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#FEE2E2] text-[#DC2626] hover:bg-[#FECACA] transition-colors focus:outline focus:ring-2 focus:ring-[#FCA5A5]" title="{{ 'Supprimer le brouillon'|blog_translate }}">
+                                            <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                             </svg>
                                         </button>
@@ -468,19 +467,17 @@
                                     <div class="flex items-start gap-3 mb-3">
                                         {% if article.image %}
                                             <div class="flex-shrink-0">
-                                                <img src="{{ asset(article.image) }}" alt="{{ article.titre }}" class="w-12 h-12 object-cover rounded-lg">
+                                                <img src="{{ asset(article.image) }}" alt="{{ article.titre|blog_translate }}" class="w-12 h-12 object-cover rounded-lg">
                                             </div>
                                         {% endif %}
                                         <div class="flex-1">
-                                            <h4 class="text-lg font-semibold text-[#4B5563] mb-1">{{ article.titre }}</h4>
-                                            <p class="text-sm text-[#6B7280] mb-2">Créé le {{ article.dateCreation|date('d/m/Y à H:i') }}</p>
+                                            <h4 class="text-lg font-semibold text-[#4B5563] mb-1">{{ article.titre|blog_translate }}</h4>
+                                            <p class="text-sm text-[#687280] mb-2">{{ 'Créé le'|blog_translate }} {{ article.dateCreation|date('d/m/Y à H:i') }}</p>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="prose prose-[#4B5563] max-w-none">
-                                    <p class="text-[#4B5563] break-words whitespace-normal">
-                                        {{ article.contenu|length > 200 ? (article.contenu|slice(0, 200) ~ '...') : article.contenu }}
-                                    </p>
+                                    <div class="dict-content text-[#4B5563] break-words whitespace-pre-wrap" data-dict-lang="{{ app.session.get('blog_locale', 'fr') }}">{{ article.contenu|blog_translate|raw }}</div>
                                 </div>
                             </div>
                         {% endfor %}
@@ -489,23 +486,267 @@
             {% endif %}
         </div>
     {% else %}
-        <div class="bg-white rounded-xl border border-[#E5E0D8] p-8 text-center">
+        <div class="bg-white rounded-xl border border-[#E8DED5] p-8 text-center">
             {% if searchTerm is defined and searchTerm is not empty %}
-                <p class="text-[#6B7280] mb-2">Aucun article (publié ou brouillon) ne correspond au titre « {{ searchTerm }} ».</p>
+                <p class="text-[#687280] mb-2">{{ 'Aucun article (publié ou brouillon) ne correspond au titre'|blog_translate }} « {{ searchTerm }} ».</p>
                 <a href="{{ path('user_blog_module', { id: module.id }) }}" class="inline-flex items-center gap-2 text-sm text-[#A7C7E7] hover:text-[#B8D4ED] font-medium">
-                    Réinitialiser la recherche
+                    {{ 'Réinitialiser la recherche'|blog_translate }}
                 </a>
             {% else %}
-                <p class="text-[#6B7280] mb-4">Aucun article publié pour ce module.</p>
-                <p class="text-sm text-[#9CA3AF]">Soyez le premier à écrire un article !</p>
+                <p class="text-[#687280] mb-4">{{ 'Aucun article publié pour ce module.'|blog_translate }}</p>
+                <p class="text-sm text-[#687280]">{{ 'Soyez le premier à écrire un article !'|blog_translate }}</p>
             {% endif %}
         </div>
     {% endif %}
+
+    {% if app.user %}
+    {# Formulaire nouvel article - affiché à droite sous les articles au clic sur l'icône + #}
+    <div id="article-form-panel" class="mt-6 {{ showArticleForm is defined and showArticleForm ? '' : 'hidden' }}">
+        <div class="rounded-xl border border-[#E8DED5] bg-[#FAEDE8] p-4 md:p-5">
+            <h3 class="text-lg font-semibold text-[#4B5563] mb-4">{{ 'Nouvel article'|blog_translate }}</h3>
+            {% if articleForm is defined and articleForm %}
+            {% form_theme articleForm 'form/form_div_layout.html.twig' %}
+                {{ form_start(articleForm, {'attr': {'class': 'space-y-4', 'novalidate': 'novalidate', 'id': 'article-form'}, 'label_attr': {'class': 'block text-[#4B5563] font-medium mb-1'}}) }}
+                    {{ form_errors(articleForm) }}
+                    <div class="p-4 rounded-xl border border-[#CDB4DB] bg-[#E8DCF0]/50 space-y-4">
+                        <h4 class="text-base font-semibold text-[#4B3D6B]">{{ 'Générer avec l\'IA'|blog_translate }}</h4>
+                        <p class="text-sm text-[#687280]">{{ 'Saisissez un prompt et sélectionnez un type pour que l\'IA génère le titre et le contenu.'|blog_translate }}</p>
+                        <div>
+                            <label for="article-ai-prompt" class="block text-[#4B5563] font-medium mb-1 text-sm">{{ 'Prompt / Sujet'|blog_translate }}</label>
+                            <div class="relative mt-1">
+                                <textarea id="article-ai-prompt" rows="2" placeholder="{{ 'Ex. Témoignage sur les progrès avec les pictogrammes...'|blog_translate }}"
+                                          class="block w-full rounded-lg border border-[#E8DED5] bg-[#FDF8F5] px-3 py-2 pr-12 text-sm text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#CDB4DB]"></textarea>
+                                <button type="button"
+                                        class="dictation-btn absolute right-3 top-3 w-10 h-10 flex items-center justify-center rounded-lg
+                                               bg-[#F5F1EB] text-[#687280] hover:bg-[#E8DED5] focus:outline focus:ring-2 focus:ring-[#CDB4DB]
+                                               transition-colors"
+                                        data-target="article-ai-prompt"
+                                        title="{{ 'Dictée vocale'|blog_translate }}"
+                                        aria-label="{{ 'Dictée vocale pour le prompt'|blog_translate }}">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <p class="dictation-status mt-1 text-sm text-[#687280] hidden" data-for="article-ai-prompt"></p>
+                        </div>
+                        <div>
+                            <label for="article-ai-type" class="block text-[#4B5563] font-medium mb-1 text-sm">{{ 'Type d\'article'|blog_translate }}</label>
+                            <select id="article-ai-type" class="mt-1 block w-full rounded-lg border border-[#E8DED5] bg-[#FDF8F5] px-3 py-2 text-sm text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#CDB4DB]">
+                                <option value="">-- {{ 'Choisir'|blog_translate }} --</option>
+                                <option value="recommandation">Recommandation</option>
+                                <option value="plainte">Plainte</option>
+                                <option value="question">Question</option>
+                                <option value="experience">Expérience</option>
+                            </select>
+                        </div>
+                        <button type="button" id="article-ai-generate-btn"
+                                class="px-3 py-2 rounded-lg bg-[#CDB4DB] text-white text-sm font-medium hover:bg-[#C4A8D5] focus:outline focus:ring-2 focus:ring-[#CDB4DB]">
+                            {{ 'Générer titre et contenu'|blog_translate }}
+                        </button>
+                        <p id="article-ai-error-msg" class="text-sm text-red-600 hidden"></p>
+                    </div>
+                    <div>
+                        {{ form_label(articleForm.titre) }}
+                        <div class="relative mt-1">
+                            {{ form_widget(articleForm.titre) }}
+                            <button type="button"
+                                    class="spell-check-btn absolute right-14 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-lg
+                                           bg-[#D4E5D0] text-[#4B5563] hover:bg-[#C4DFBF] focus:outline focus:ring-2 focus:ring-[#A8BBA3]
+                                           transition-colors"
+                                    data-target="blog_titre"
+                                    title="{{ 'Vérifier l\'orthographe'|blog_translate }}"
+                                    aria-label="{{ 'Vérifier l\'orthographe pour le titre'|blog_translate }}">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </button>
+                            <button type="button"
+                                    class="dictation-btn absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-lg
+                                           bg-[#F5F1EB] text-[#687280] hover:bg-[#E8DED5] focus:outline focus:ring-2 focus:ring-[#A7C7E7]
+                                           transition-colors"
+                                    data-target="blog_titre"
+                                    title="Dictée vocale"
+                                    aria-label="Dictée vocale pour le titre">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="spell-check-result mt-1 hidden" data-for="blog_titre"></div>
+                        <p class="dictation-status mt-1 text-sm text-[#687280] hidden" data-for="blog_titre"></p>
+                        {% if articleForm.titre.vars.errors|length > 0 %}
+                            <div class="mt-1 text-sm font-medium text-red-600" role="alert">{{ articleForm.titre.vars.errors|first.message }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        {{ form_label(articleForm.type) }}
+                        {{ form_widget(articleForm.type) }}
+                        {% if articleForm.type.vars.errors|length > 0 %}
+                            <div class="mt-1 text-sm font-medium text-red-600" role="alert">{{ articleForm.type.vars.errors|first.message }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        {{ form_label(articleForm.contenu) }}
+                        <div class="relative mt-1">
+                            {{ form_widget(articleForm.contenu) }}
+                            <button type="button"
+                                    class="spell-check-btn absolute right-14 top-3 w-10 h-10 flex items-center justify-center rounded-lg
+                                           bg-[#D4E5D0] text-[#4B5563] hover:bg-[#C4DFBF] focus:outline focus:ring-2 focus:ring-[#A8BBA3]
+                                           transition-colors"
+                                    data-target="blog_contenu"
+                                    title="{{ 'Vérifier l\'orthographe'|blog_translate }}"
+                                    aria-label="{{ 'Vérifier l\'orthographe pour le contenu'|blog_translate }}">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </button>
+                            <button type="button"
+                                    class="dictation-btn absolute right-3 top-3 w-10 h-10 flex items-center justify-center rounded-lg
+                                           bg-[#F5F1EB] text-[#687280] hover:bg-[#E8DED5] focus:outline focus:ring-2 focus:ring-[#A7C7E7]
+                                           transition-colors"
+                                    data-target="blog_contenu"
+                                    title="Dictée vocale"
+                                    aria-label="Dictée vocale pour le contenu">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="spell-check-result mt-1 hidden" data-for="blog_contenu"></div>
+                        <p class="dictation-status mt-1 text-sm text-[#687280] hidden" data-for="blog_contenu"></p>
+                        {% if articleForm.contenu.vars.errors|length > 0 %}
+                            <div class="mt-1 text-sm font-medium text-red-600" role="alert">{{ articleForm.contenu.vars.errors|first.message }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="space-y-4">
+                        <label class="block text-[#4B5563] font-medium mb-2">{{ 'Image de l\'article'|blog_translate }}</label>
+                        <div class="flex gap-4 mb-2">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="article_image_source" value="upload" checked
+                                       class="rounded border-[#E8DED5] text-[#A7C7E7] focus:ring-[#A7C7E7]">
+                                <span class="text-[#4B5563]">{{ 'Uploader un fichier'|blog_translate }}</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="article_image_source" value="pexels"
+                                       class="rounded border-[#E8DED5] text-[#A7C7E7] focus:ring-[#A7C7E7]">
+                                <span class="text-[#4B5563]">{{ 'Rechercher sur Pexels'|blog_translate }}</span>
+                            </label>
+                        </div>
+                        <div id="article-image-upload-zone" class="p-3 rounded-lg border border-[#E8DED5] bg-[#FDF8F5]">
+                            {{ form_widget(articleForm.image) }}
+                            {% if articleForm.image.vars.errors|length > 0 %}
+                                <div class="mt-1 text-sm font-medium text-red-600" role="alert">{{ articleForm.image.vars.errors|first.message }}</div>
+                            {% endif %}
+                        </div>
+                        <div id="article-pexels-zone" class="hidden space-y-3 p-3 rounded-lg border border-[#E8DED5] bg-[#FAEDE8]">
+                            <div class="flex gap-2">
+                                <input type="text" id="article-pexels-query" placeholder="{{ 'Ex. autisme, famille...'|blog_translate }}"
+                                       class="flex-1 rounded-lg border border-[#E8DED5] px-3 py-2 text-sm text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                                <button type="button" id="article-pexels-search-btn"
+                                        class="px-3 py-2 rounded-lg bg-[#A7C7E7] text-white text-sm font-medium hover:bg-[#B8D4ED]">
+                                    {{ 'Rechercher'|blog_translate }}
+                                </button>
+                            </div>
+                            <div id="article-pexels-results" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+                            <p id="article-pexels-selected-msg" class="text-sm text-[#A8BBA3] hidden"></p>
+                        </div>
+                        {{ form_widget(articleForm.pexels_image_url) }}
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="flex items-center gap-2">{{ form_widget(articleForm.isPublished) }}{{ form_label(articleForm.isPublished) }}</div>
+                        <div class="flex items-center gap-2">{{ form_widget(articleForm.isUrgent) }}{{ form_label(articleForm.isUrgent) }}</div>
+                        <div class="flex items-center gap-2">{{ form_widget(articleForm.isVisible) }}{{ form_label(articleForm.isVisible) }}</div>
+                    </div>
+                    <div class="flex items-center gap-2 pt-2">
+                        <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED]">
+                            {{ 'Publier'|blog_translate }}
+                        </button>
+                        <button type="button" id="cancel-article-form" class="px-4 py-2 rounded-lg border border-[#E8DED5] text-[#687280] hover:bg-[#F5F1EB]">
+                            {{ 'Annuler'|blog_translate }}
+                        </button>
+                    </div>
+                {{ form_end(articleForm) }}
+            {% endif %}
+        </div>
     </div>
+    {% endif %}
+    </div>
+    </div>
+
+    {# Modal Vérification orthographique (articles publiés) #}
+    <div id="article-spell-check-modal" class="fixed inset-0 z-[9999] hidden">
+        <div id="article-spell-check-backdrop" class="absolute inset-0 bg-black/45"></div>
+        <div class="relative z-10 h-full w-full flex items-center justify-center p-4">
+            <div class="w-full max-w-lg rounded-2xl bg-white border border-[#E8DED5] shadow-xl overflow-hidden">
+                <div class="flex items-center justify-between px-4 py-3 border-b border-[#E8DED5]">
+                    <h3 class="text-lg font-semibold text-amber-800">{{ 'Vérification orthographique'|blog_translate }}</h3>
+                    <button type="button" id="close-article-spell-check" class="px-2 py-1 rounded-lg text-[#687280] hover:bg-[#F3F4F6]">{{ 'Fermer'|blog_translate }}</button>
+                </div>
+                <div class="p-4">
+                    <div id="article-spell-check-loading" class="hidden flex items-center justify-center gap-2 py-8 text-amber-600">
+                        <svg class="animate-spin w-6 h-6" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>{{ 'Vérification en cours...'|blog_translate }}</span>
+                    </div>
+                    <div id="article-spell-check-result" class="hidden"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Modal Résumé IA - style harmonisé avec le reste de la page #}
+    <div id="module-summary-modal" class="fixed inset-0 z-[9999] hidden">
+        <div id="module-summary-backdrop" class="absolute inset-0 bg-black/45"></div>
+        <div class="relative z-10 h-full w-full flex items-center justify-center p-4">
+            <div class="w-full max-w-xl rounded-2xl bg-[#FDF8F5] border border-[#E8DED5] shadow-xl overflow-hidden">
+                <div class="flex items-center justify-between px-4 py-3 border-b border-[#E8DED5] bg-[#E8DCF0]/50">
+                    <h3 class="text-lg font-semibold text-[#4B3D6B]">{{ 'Résumé IA'|blog_translate }}</h3>
+                    <button type="button" id="close-module-summary" class="px-3 py-1.5 rounded-lg text-[#4B3D6B] font-medium hover:bg-[#DDD0E8] focus:outline focus:ring-2 focus:ring-[#CDB4DB]">{{ 'Fermer'|blog_translate }}</button>
+                </div>
+
+                <div class="p-4 min-w-0">
+                    <div id="module-summary-loading" class="hidden flex items-center justify-center gap-2 py-8 text-[#4B3D6B]">
+                        <svg class="animate-spin w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>{{ 'Génération du résumé...'|blog_translate }}</span>
+                    </div>
+                    <div id="module-summary-content" class="hidden">
+                        <div class="flex items-center gap-2 mb-3">
+                            <button type="button" id="module-summary-tts-btn"
+                                class="summary-tts-btn inline-flex items-center justify-center w-9 h-9 rounded-lg bg-[#E8DCF0] text-[#4B3D6B] hover:bg-[#DDD0E8] focus:outline focus:ring-2 focus:ring-[#CDB4DB] shrink-0"
+                                title="{{ 'Écouter le résumé'|blog_translate }}"
+                                aria-label="{{ 'Écouter le résumé'|blog_translate }}">
+                                <svg class="summary-tts-icon-play w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                                <svg class="summary-tts-icon-pause w-5 h-5" fill="currentColor" viewBox="0 0 24 24" style="display:none">
+                                    <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
+                                </svg>
+                            </button>
+                            <span class="text-sm text-[#687280]">{{ 'Écouter le résumé'|blog_translate }}</span>
+                        </div>
+                        <p id="module-summary-text" class="text-[#4B5563] text-sm leading-relaxed break-words min-w-0"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </article>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+
+    /* ====== Ouvrir le panneau commentaires si on revient après ajout ====== */
+    var urlParams = new URLSearchParams(window.location.search);
+    var showComments = urlParams.get('showComments');
+    if (showComments) {
+        var panel = document.getElementById('comments-panel-' + showComments);
+        if (panel) panel.classList.remove('hidden');
+    }
 
     /* ====== Toast helper ====== */
     function showToast(message, duration) {
@@ -531,6 +772,9 @@ document.addEventListener('DOMContentLoaded', function () {
             var isHidden = panel.classList.contains('hidden');
             panel.classList.toggle('hidden');
             toggleBtn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+            if (isHidden) {
+                panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         });
         if (cancelBtn) {
             cancelBtn.addEventListener('click', function () {
@@ -547,6 +791,136 @@ document.addEventListener('DOMContentLoaded', function () {
         if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'true');
         articleFormEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+
+    /* ====== Article form : Upload / Pexels image ====== */
+    (function() {
+        var uploadRadio = document.querySelector('input[name="article_image_source"][value="upload"]');
+        var pexelsRadio = document.querySelector('input[name="article_image_source"][value="pexels"]');
+        var uploadZone = document.getElementById('article-image-upload-zone');
+        var pexelsZone = document.getElementById('article-pexels-zone');
+        var imageInput = document.querySelector('#article-image-upload-zone input[type="file"]');
+        var pexelsUrlInput = document.querySelector('#article-form input[name*="pexels_image_url"]');
+        var pexelsQuery = document.getElementById('article-pexels-query');
+        var pexelsSearchBtn = document.getElementById('article-pexels-search-btn');
+        var pexelsResults = document.getElementById('article-pexels-results');
+        var pexelsSelectedMsg = document.getElementById('article-pexels-selected-msg');
+        var pexelsSearchUrl = '{{ path("pexels_search") }}';
+
+        var articleAiPrompt = document.getElementById('article-ai-prompt');
+        var articleAiType = document.getElementById('article-ai-type');
+        var articleAiGenerateBtn = document.getElementById('article-ai-generate-btn');
+        var articleAiErrorMsg = document.getElementById('article-ai-error-msg');
+        var articleTitreInput = document.querySelector('#article-form input[name*="[titre]"]');
+        var articleTypeSelect = document.querySelector('#article-form select[name*="[type]"]');
+        var articleContenuInput = document.querySelector('#article-form textarea[name*="[contenu]"]');
+        var articleGenerateUrl = '{{ path("user_blog_generate") }}';
+
+        if (articleAiGenerateBtn && articleTitreInput && articleContenuInput) {
+            articleAiGenerateBtn.addEventListener('click', function() {
+                var prompt = articleAiPrompt ? articleAiPrompt.value.trim() : '';
+                var type = articleAiType ? articleAiType.value : '';
+                if (!prompt) {
+                    if (articleAiErrorMsg) {
+                        articleAiErrorMsg.textContent = 'Veuillez saisir un prompt.';
+                        articleAiErrorMsg.classList.remove('hidden');
+                    }
+                    return;
+                }
+                if (articleAiErrorMsg) articleAiErrorMsg.classList.add('hidden');
+                articleAiGenerateBtn.disabled = true;
+                articleAiGenerateBtn.textContent = 'Génération...';
+                var formData = new FormData();
+                formData.append('prompt', prompt);
+                formData.append('type', type || '');
+                fetch(articleGenerateUrl, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.error) {
+                        if (articleAiErrorMsg) {
+                            articleAiErrorMsg.textContent = data.error;
+                            articleAiErrorMsg.classList.remove('hidden');
+                        }
+                    } else {
+                        if (data.titre) articleTitreInput.value = data.titre;
+                        if (data.contenu) articleContenuInput.value = data.contenu;
+                        if (type && articleTypeSelect) articleTypeSelect.value = type;
+                    }
+                })
+                .catch(function() {
+                    if (articleAiErrorMsg) {
+                        articleAiErrorMsg.textContent = 'Erreur lors de la génération.';
+                        articleAiErrorMsg.classList.remove('hidden');
+                    }
+                })
+                .finally(function() {
+                    articleAiGenerateBtn.disabled = false;
+                    articleAiGenerateBtn.textContent = '{{ "Générer titre et contenu"|blog_translate|e("js") }}';
+                });
+            });
+        }
+
+        if (!uploadRadio || !pexelsZone) return;
+        function switchSource() {
+            if (uploadRadio.checked) {
+                uploadZone.classList.remove('hidden');
+                pexelsZone.classList.add('hidden');
+                if (pexelsUrlInput) pexelsUrlInput.value = '';
+                if (pexelsSelectedMsg) pexelsSelectedMsg.classList.add('hidden');
+            } else {
+                uploadZone.classList.add('hidden');
+                pexelsZone.classList.remove('hidden');
+                if (imageInput) imageInput.value = '';
+            }
+        }
+        uploadRadio.addEventListener('change', switchSource);
+        pexelsRadio.addEventListener('change', switchSource);
+        if (pexelsSearchBtn) pexelsSearchBtn.addEventListener('click', function() {
+            var query = (pexelsQuery ? pexelsQuery.value : '').trim();
+            if (query.length < 2) {
+                pexelsResults.innerHTML = '<p class="text-red-600 col-span-full">Champs obligatoire</p>';
+                return;
+            }
+            pexelsSearchBtn.disabled = true;
+            pexelsResults.innerHTML = '<p class="text-[#687280] col-span-full">Recherche en cours...</p>';
+            fetch(pexelsSearchUrl + '?q=' + encodeURIComponent(query))
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    pexelsSearchBtn.disabled = false;
+                    if (data.error) {
+                        pexelsResults.innerHTML = '<p class="text-red-600 col-span-full">Erreur : ' + (data.error || 'Inconnue') + '</p>';
+                        return;
+                    }
+                    if (!data.photos || data.photos.length === 0) {
+                        pexelsResults.innerHTML = '<p class="text-[#687280] col-span-full">Aucune image trouvée.</p>';
+                        return;
+                    }
+                    pexelsResults.innerHTML = data.photos.map(function(p) {
+                        var src = (p.src_large || p.src_medium || '').replace(/"/g, '&quot;');
+                        var photographer = (p.photographer || '').replace(/"/g, '&quot;');
+                        return '<div class="aspect-square rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-[#A7C7E7] article-pexels-photo" data-src="' + src + '" data-photographer="' + photographer + '"><img src="' + (p.src_medium || '').replace(/"/g, '&quot;') + '" alt="" class="w-full h-full object-cover"></div>';
+                    }).join('');
+                    pexelsResults.querySelectorAll('.article-pexels-photo').forEach(function(el) {
+                        el.addEventListener('click', function() {
+                            pexelsResults.querySelectorAll('.article-pexels-photo').forEach(function(e) { e.classList.remove('border-[#A7C7E7]'); });
+                            this.classList.add('border-[#A7C7E7]');
+                            if (pexelsUrlInput) pexelsUrlInput.value = this.getAttribute('data-src') || '';
+                            if (pexelsSelectedMsg) {
+                                pexelsSelectedMsg.textContent = 'Image sélectionnée : Photo by ' + (this.getAttribute('data-photographer') || '');
+                                pexelsSelectedMsg.classList.remove('hidden');
+                            }
+                        });
+                    });
+                })
+                .catch(function() {
+                    pexelsSearchBtn.disabled = false;
+                    pexelsResults.innerHTML = '<p class="text-red-600 col-span-full">Erreur réseau.</p>';
+                });
+        });
+    })();
 
     /* ====== Module Heart = toggle favori ====== */
     var heartBtn = document.getElementById('module-heart-btn');
@@ -740,13 +1114,107 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    /* ====== Module Summary (IA) ====== */
+    var summaryBtn = document.getElementById('module-summary-btn');
+    var summaryModal = document.getElementById('module-summary-modal');
+    var summaryBackdrop = document.getElementById('module-summary-backdrop');
+    var closeSummaryBtn = document.getElementById('close-module-summary');
+    var summaryTextEl = document.getElementById('module-summary-text');
+    var summaryContentEl = document.getElementById('module-summary-content');
+    var summaryLoadingEl = document.getElementById('module-summary-loading');
+    var summaryTtsBtn = document.getElementById('module-summary-tts-btn');
+    var summaryTtsLang = '{{ app.session.get("blog_locale", "fr") }}';
+
+    function closeSummaryModal() {
+        if (!summaryModal) return;
+        if (window.speechSynthesis && window.speechSynthesis.speaking) {
+            window.speechSynthesis.cancel();
+            if (summaryTtsBtn) summaryTtsBtn.classList.remove('summary-tts-active');
+        }
+        summaryModal.classList.add('hidden');
+    }
+
+    function openSummaryModal() {
+        if (!summaryModal) return;
+        summaryModal.classList.remove('hidden');
+    }
+
+    function initSummaryTTS() {
+        if (!summaryTtsBtn || !summaryTextEl) return;
+        if (summaryTtsBtn._summaryTtsInit) return;
+        summaryTtsBtn._summaryTtsInit = true;
+        var langMap = { fr: 'fr-FR', en: 'en-US', es: 'es-ES', ar: 'ar-SA', de: 'de-DE', it: 'it-IT', pt: 'pt-PT', ru: 'ru-RU', zh: 'zh-CN', nl: 'nl-NL', ja: 'ja-JP', ko: 'ko-KR', tr: 'tr-TR', pl: 'pl-PL', sv: 'sv-SE', vi: 'vi-VN', id: 'id-ID', th: 'th-TH', uk: 'uk-UA' };
+        summaryTtsBtn.addEventListener('click', function () {
+            var text = (summaryTextEl && summaryTextEl.textContent) ? summaryTextEl.textContent.trim() : '';
+            if (!text || text.indexOf('Erreur') === 0) return;
+            if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+                window.speechSynthesis.cancel();
+                this.classList.remove('summary-tts-active');
+                return;
+            }
+            if (window.speechSynthesis.paused) {
+                window.speechSynthesis.resume();
+                this.classList.add('summary-tts-active');
+                return;
+            }
+            var utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = langMap[summaryTtsLang] || (summaryTtsLang + '-' + summaryTtsLang.toUpperCase()) || 'fr-FR';
+            utterance.rate = 0.95;
+            utterance.onstart = function () { summaryTtsBtn.classList.add('summary-tts-active'); };
+            utterance.onend = function () { summaryTtsBtn.classList.remove('summary-tts-active'); };
+            utterance.onerror = function () { summaryTtsBtn.classList.remove('summary-tts-active'); };
+            window.speechSynthesis.speak(utterance);
+        });
+    }
+    initSummaryTTS();
+
+    if (summaryBtn) {
+        summaryBtn.addEventListener('click', async function () {
+            var url = summaryBtn.getAttribute('data-summary-url');
+            if (!url) return;
+
+            summaryBtn.disabled = true;
+            summaryBtn.classList.add('opacity-50', 'cursor-wait');
+            openSummaryModal();
+            if (summaryContentEl) summaryContentEl.classList.add('hidden');
+            if (summaryTextEl) summaryTextEl.textContent = '';
+            if (summaryLoadingEl) summaryLoadingEl.classList.remove('hidden');
+
+            try {
+                var resp = await fetch(url);
+                var data = await resp.json();
+                if (summaryTextEl) {
+                    summaryTextEl.textContent = data.summary || 'Erreur lors de la génération.';
+                }
+                if (summaryContentEl) summaryContentEl.classList.remove('hidden');
+            } catch (e) {
+                if (summaryTextEl) summaryTextEl.textContent = 'Erreur de connexion. Réessayez.';
+                if (summaryContentEl) summaryContentEl.classList.remove('hidden');
+            } finally {
+                if (summaryLoadingEl) summaryLoadingEl.classList.add('hidden');
+                summaryBtn.disabled = false;
+                summaryBtn.classList.remove('opacity-50', 'cursor-wait');
+            }
+        });
+    }
+
+    if (closeSummaryBtn) closeSummaryBtn.addEventListener('click', closeSummaryModal);
+    if (summaryBackdrop) summaryBackdrop.addEventListener('click', closeSummaryModal);
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && summaryModal && !summaryModal.classList.contains('hidden')) {
+            closeSummaryModal();
+        }
+    });
+
     /* ====== Module Repost ====== */
     var repostBtn = document.getElementById('repost-module');
     if (repostBtn) {
         repostBtn.addEventListener('click', async function () {
+            var urlToCopy = repostBtn.getAttribute('data-public-url') || window.location.href;
             try {
                 if (navigator.clipboard && window.isSecureContext) {
-                    await navigator.clipboard.writeText(window.location.href);
+                    await navigator.clipboard.writeText(urlToCopy);
                     showToast('Lien copié dans le presse-papier !');
                 } else {
                     showToast('Copie non disponible');
@@ -789,6 +1257,447 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+
+    /* ====== Comment panel toggle (inline, style Substack) ====== */
+    document.querySelectorAll('.comment-toggle-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var articleId = btn.getAttribute('data-article-id');
+            var panel = document.getElementById('comments-panel-' + articleId);
+            if (!panel) return;
+
+            var wasHidden = panel.classList.contains('hidden');
+            document.querySelectorAll('.comment-panel').forEach(function (p) {
+                p.classList.add('hidden');
+            });
+            if (wasHidden) {
+                panel.classList.remove('hidden');
+            }
+        });
+    });
+
+    /* ====== Envoyer le commentaire avec Entrée (sans bouton) ====== */
+    document.querySelectorAll('.comment-form-inline textarea').forEach(function (ta) {
+        ta.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                var form = ta.closest('form');
+                if (form && ta.value.trim()) form.submit();
+            }
+        });
+    });
+
+    /* ====== Facebook-style Reactions ====== */
+    var REACTION_EMOJIS = {like:'⭐', love:'❤️', haha:'😂', wow:'😮', sad:'😢', angry:'😡'};
+    var REACTION_LABELS = {like:"J'aime", love:"J'adore", haha:'Haha', wow:'Wow', sad:'Quoi ?', angry:'Solidaire'};
+    var REACTION_COLORS = {like:'#1877F2', love:'#F33E58', haha:'#F7B928', wow:'#F7B928', sad:'#F7B928', angry:'#E9710F'};
+
+    function initReactionWrappers() {
+        document.querySelectorAll('.reaction-wrapper').forEach(function (wrapper) {
+            if (wrapper._reactionInit) return;
+            wrapper._reactionInit = true;
+
+            var mainBtn = wrapper.querySelector('.reaction-main-btn');
+            var popup = wrapper.querySelector('.reaction-popup');
+            var optionBtns = wrapper.querySelectorAll('.reaction-option-btn');
+            var countsEl = wrapper.querySelector('.reaction-counts');
+            var totalCountEl = wrapper.querySelector('.reaction-total-count');
+            var hoverTimer, leaveTimer;
+
+            function showPopup() {
+                clearTimeout(leaveTimer);
+                popup.classList.remove('opacity-0', 'pointer-events-none', 'scale-75');
+                popup.classList.add('opacity-100', 'scale-100');
+            }
+            function hidePopup() {
+                clearTimeout(hoverTimer);
+                popup.classList.add('opacity-0', 'pointer-events-none', 'scale-75');
+                popup.classList.remove('opacity-100', 'scale-100');
+            }
+
+            mainBtn.addEventListener('mouseenter', function () {
+                hoverTimer = setTimeout(showPopup, 400);
+            });
+            mainBtn.addEventListener('mouseleave', function () {
+                clearTimeout(hoverTimer);
+                leaveTimer = setTimeout(hidePopup, 300);
+            });
+            popup.addEventListener('mouseenter', function () { clearTimeout(leaveTimer); });
+            popup.addEventListener('mouseleave', function () { leaveTimer = setTimeout(hidePopup, 200); });
+
+            function sendReaction(type) {
+                hidePopup();
+                var url = mainBtn.getAttribute('data-toggle-url');
+                var csrf = mainBtn.getAttribute('data-csrf');
+                var formData = new FormData();
+                formData.append('_token', csrf);
+                formData.append('type', type);
+
+                fetch(url, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    var userReaction = data.userReaction || null;
+                    var total = data.total || 0;
+
+                    mainBtn.setAttribute('data-current-reaction', userReaction || '');
+
+                    var starIconUrl = wrapper.getAttribute('data-star-icon') || '';
+                    var heartIconUrl = wrapper.getAttribute('data-heart-icon') || '';
+                    var hahaIconUrl = wrapper.getAttribute('data-haha-icon') || '';
+                    var wowIconUrl = wrapper.getAttribute('data-wow-icon') || '';
+                    var sadIconUrl = wrapper.getAttribute('data-sad-icon') || '';
+                    var angryIconUrl = wrapper.getAttribute('data-angry-icon') || '';
+                    var emojiEl = mainBtn.querySelector('.reaction-main-emoji');
+                    var displayType = userReaction || 'like';
+
+                    if (userReaction) {
+                        var color = REACTION_COLORS[userReaction] || '#1877F2';
+                        mainBtn.style.background = color + '15';
+                        mainBtn.style.borderColor = color;
+                        mainBtn.style.color = color;
+                        if (displayType === 'like' && starIconUrl) {
+                            emojiEl.innerHTML = '<img src="' + starIconUrl + '" alt="J\'aime" class="w-7 h-7">';
+                        } else if (displayType === 'love' && heartIconUrl) {
+                            emojiEl.innerHTML = '<img src="' + heartIconUrl + '" alt="J\'adore" class="w-7 h-7">';
+                        } else if (displayType === 'haha' && hahaIconUrl) {
+                            emojiEl.innerHTML = '<img src="' + hahaIconUrl + '" alt="Haha" class="w-7 h-7">';
+                        } else if (displayType === 'wow' && wowIconUrl) {
+                            emojiEl.innerHTML = '<img src="' + wowIconUrl + '" alt="Wow" class="w-7 h-7">';
+                        } else if (displayType === 'sad' && sadIconUrl) {
+                            emojiEl.innerHTML = '<img src="' + sadIconUrl + '" alt="Quoi ?" class="w-7 h-7">';
+                        } else if (displayType === 'angry' && angryIconUrl) {
+                            emojiEl.innerHTML = '<img src="' + angryIconUrl + '" alt="Solidaire" class="w-7 h-7">';
+                        } else {
+                            emojiEl.textContent = REACTION_EMOJIS[userReaction] || '⭐';
+                        }
+                        mainBtn.querySelector('.reaction-main-label').textContent = REACTION_LABELS[userReaction] || "J'aime";
+                    } else {
+                        mainBtn.style.background = '';
+                        mainBtn.style.borderColor = '';
+                        mainBtn.style.color = '';
+                        if (starIconUrl) {
+                            emojiEl.innerHTML = '<img src="' + starIconUrl + '" alt="J\'aime" class="w-7 h-7">';
+                        } else {
+                            emojiEl.textContent = '⭐';
+                        }
+                        mainBtn.querySelector('.reaction-main-label').textContent = "J'aime";
+                    }
+
+                    if (totalCountEl) {
+                        totalCountEl.textContent = total;
+                        if (countsEl) countsEl.style.display = total > 0 ? '' : 'none';
+                    }
+                })
+                .catch(function () {
+                    showToast('Erreur, veuillez réessayer');
+                });
+            }
+
+            mainBtn.addEventListener('click', function () {
+                var current = mainBtn.getAttribute('data-current-reaction') || '';
+                sendReaction(current || 'like');
+            });
+
+            optionBtns.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    sendReaction(btn.getAttribute('data-type'));
+                });
+            });
+        });
+    }
+
+    initReactionWrappers();
+
+    // Re-init after comment panels open
+    document.querySelectorAll('.comment-toggle-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            setTimeout(initReactionWrappers, 100);
+            setTimeout(initModuleTTS, 100);
+        });
+    });
+
+    /* ====== Text-to-Speech (Web Speech API) ====== */
+    function initModuleTTS() {
+        document.querySelectorAll('.module-tts-btn').forEach(function (btn) {
+            if (btn._ttsInit) return;
+            btn._ttsInit = true;
+            btn.addEventListener('click', function () {
+                var text = this.getAttribute('data-tts-text');
+                if (!text || !text.trim()) return;
+                if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+                    window.speechSynthesis.cancel();
+                    this.classList.remove('module-tts-active');
+                    return;
+                }
+                if (window.speechSynthesis.paused) {
+                    window.speechSynthesis.resume();
+                    this.classList.add('module-tts-active');
+                    return;
+                }
+                var utterance = new SpeechSynthesisUtterance(text);
+                var locale = this.getAttribute('data-tts-lang') || 'fr';
+                var langMap = { fr: 'fr-FR', en: 'en-US', es: 'es-ES', ar: 'ar-SA', de: 'de-DE', it: 'it-IT', pt: 'pt-PT', ru: 'ru-RU', zh: 'zh-CN', nl: 'nl-NL', ja: 'ja-JP', ko: 'ko-KR', tr: 'tr-TR', pl: 'pl-PL', sv: 'sv-SE', vi: 'vi-VN', id: 'id-ID', th: 'th-TH', uk: 'uk-UA' };
+                utterance.lang = langMap[locale] || (locale + '-' + locale.toUpperCase()) || 'fr-FR';
+                utterance.rate = 1;
+                utterance.pitch = 1;
+                utterance.volume = 1;
+                utterance.onstart = function () { btn.classList.add('module-tts-active'); };
+                utterance.onend = function () { btn.classList.remove('module-tts-active'); };
+                utterance.onerror = function () { btn.classList.remove('module-tts-active'); };
+                window.speechSynthesis.speak(utterance);
+            });
+        });
+    }
+    initModuleTTS();
+
+    /* ====== Speech-to-Text (Dictée vocale) ====== */
+    function initDictation() {
+        var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            document.querySelectorAll('.dictation-btn').forEach(function (btn) {
+                btn.disabled = true;
+                btn.title = 'Dictée non supportée (Chrome, Edge, Safari)';
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+            });
+            return;
+        }
+        var recognition = new SpeechRecognition();
+        recognition.lang = 'fr-FR';
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        var activeBtn = null;
+        var activeTarget = null;
+        var dictationStart = 0;
+        var dictationLength = 0;
+        recognition.onresult = function (event) {
+            if (!activeTarget) return;
+            var transcript = '';
+            for (var i = event.resultIndex; i < event.results.length; i++) {
+                if (event.results[i].isFinal) {
+                    transcript = event.results[i][0].transcript;
+                }
+            }
+            if (!transcript) return;
+            var field = document.getElementById(activeTarget);
+            if (!field) return;
+            var before = field.value.substring(0, dictationStart);
+            var after = field.value.substring(dictationStart + dictationLength);
+            field.value = before + transcript + after;
+            dictationLength = transcript.length;
+            field.selectionStart = field.selectionEnd = dictationStart + dictationLength;
+        };
+        recognition.onerror = function (event) {
+            if (event.error !== 'aborted') {
+                var msg = event.error === 'not-allowed' ? 'Micro non autorisé' : event.error;
+                var status = document.querySelector('.dictation-status[data-for="' + activeTarget + '"]');
+                if (status) { status.textContent = 'Erreur : ' + msg; status.classList.remove('hidden'); }
+            }
+            stopDictation();
+        };
+        recognition.onend = function () {
+            if (activeBtn) {
+                try { recognition.start(); } catch (e) {}
+            } else {
+                document.querySelectorAll('.dictation-status').forEach(function (s) {
+                    s.classList.add('hidden');
+                });
+            }
+        };
+        function stopDictation() {
+            recognition.stop();
+            activeBtn = null;
+            activeTarget = null;
+            dictationStart = 0;
+            dictationLength = 0;
+            document.querySelectorAll('.dictation-btn').forEach(function (b) {
+                b.classList.remove('bg-red-100', 'text-red-600');
+                b.classList.add('bg-[#F3F4F6]', 'text-[#687280]');
+            });
+            document.querySelectorAll('.dictation-status').forEach(function (s) {
+                s.classList.add('hidden');
+            });
+        }
+        document.querySelectorAll('.dictation-btn').forEach(function (btn) {
+            if (btn._dictationInit) return;
+            btn._dictationInit = true;
+            btn.addEventListener('click', function () {
+                var targetId = this.getAttribute('data-target');
+                var statusEl = document.querySelector('.dictation-status[data-for="' + targetId + '"]');
+                if (activeBtn === this) {
+                    stopDictation();
+                    this.title = 'Dictée vocale';
+                    return;
+                }
+                if (activeBtn) stopDictation();
+                try {
+                    activeBtn = this;
+                    activeTarget = targetId;
+                    var field = document.getElementById(targetId);
+                    dictationStart = field ? (field.selectionStart || field.value.length) : 0;
+                    dictationLength = 0;
+                    recognition.start();
+                    this.classList.remove('bg-[#F3F4F6]', 'text-[#687280]');
+                    this.classList.add('bg-red-100', 'text-red-600');
+                    this.title = 'Arrêter la dictée';
+                    if (statusEl) {
+                        statusEl.textContent = 'Écoute en cours... Parlez.';
+                        statusEl.classList.remove('hidden');
+                    }
+                } catch (e) {
+                    if (statusEl) {
+                        statusEl.textContent = 'Impossible de démarrer.';
+                        statusEl.classList.remove('hidden');
+                    }
+                }
+            });
+        });
+    }
+    initDictation();
+
+    /* ====== Vérification orthographique (Groq) - formulaire nouvel article ====== */
+    var spellCheckUrl = '{{ path("user_blog_spell_check") }}';
+    document.querySelectorAll('.spell-check-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var targetId = this.getAttribute('data-target');
+            var field = document.getElementById(targetId);
+            var resultEl = document.querySelector('.spell-check-result[data-for="' + targetId + '"]');
+            if (!field || !resultEl) return;
+            var text = field.value.trim();
+            if (!text) {
+                resultEl.innerHTML = '<p class="text-amber-600 text-sm">Veuillez saisir du texte.</p>';
+                resultEl.classList.remove('hidden');
+                return;
+            }
+            btn.disabled = true;
+            resultEl.innerHTML = '<p class="text-[#687280] text-sm">Vérification en cours...</p>';
+            resultEl.classList.remove('hidden');
+            var formData = new FormData();
+            formData.append('text', text);
+            fetch(spellCheckUrl, { method: 'POST', body: formData, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btn.disabled = false;
+                if (data.error) {
+                    resultEl.innerHTML = '<p class="text-red-600 text-sm">' + data.error + '</p>';
+                } else if (data.corrections && data.corrections.length > 0) {
+                    var html = '<div class="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm"><p class="font-medium text-amber-800 mb-2">Corrections proposées :</p><ul class="space-y-1 mb-3">';
+                    data.corrections.forEach(function(c) {
+                        html += '<li><span class="text-red-600">' + (c.original || '').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span> → <span class="text-emerald-600">' + (c.suggestion || '').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span></li>';
+                    });
+                    html += '</ul><button type="button" class="apply-spell-check px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700">Appliquer les corrections</button></div>';
+                    resultEl.innerHTML = html;
+                    var correctedText = data.corrected_text || '';
+                    resultEl.querySelector('.apply-spell-check')?.addEventListener('click', function() {
+                        var f = document.getElementById(targetId);
+                        if (f && correctedText) { f.value = correctedText; resultEl.classList.add('hidden'); }
+                    });
+                } else {
+                    resultEl.innerHTML = '<p class="text-emerald-600 text-sm">Aucune faute détectée.</p>';
+                }
+            })
+            .catch(function() {
+                btn.disabled = false;
+                resultEl.innerHTML = '<p class="text-red-600 text-sm">Erreur lors de la vérification.</p>';
+            });
+        });
+    });
+
+    /* ====== Vérification orthographique - articles publiés (auteur) ====== */
+    var articleSpellCheckModal = document.getElementById('article-spell-check-modal');
+    var articleSpellCheckBackdrop = document.getElementById('article-spell-check-backdrop');
+    var closeArticleSpellCheckBtn = document.getElementById('close-article-spell-check');
+    var articleSpellCheckLoading = document.getElementById('article-spell-check-loading');
+    var articleSpellCheckResult = document.getElementById('article-spell-check-result');
+    var applySpellCheckUrl = '{{ path("user_blog_apply_spell_check") }}';
+    var moduleId = {{ module.id|default(0) }};
+
+    function closeArticleSpellCheckModal() {
+        if (articleSpellCheckModal) articleSpellCheckModal.classList.add('hidden');
+    }
+    function openArticleSpellCheckModal() {
+        if (articleSpellCheckModal) articleSpellCheckModal.classList.remove('hidden');
+    }
+
+    if (closeArticleSpellCheckBtn) closeArticleSpellCheckBtn.addEventListener('click', closeArticleSpellCheckModal);
+    if (articleSpellCheckBackdrop) articleSpellCheckBackdrop.addEventListener('click', closeArticleSpellCheckModal);
+
+    document.querySelectorAll('.article-spell-check-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var articleId = this.getAttribute('data-article-id');
+            var titre = this.getAttribute('data-article-titre') || '';
+            var contenu = this.getAttribute('data-article-contenu') || '';
+            if (!articleId) return;
+            var btn = this;
+
+            openArticleSpellCheckModal();
+            articleSpellCheckResult.classList.add('hidden');
+            articleSpellCheckResult.innerHTML = '';
+            articleSpellCheckLoading.classList.remove('hidden');
+
+            function doSpellCheck(text) {
+                if (!text || !text.trim()) return Promise.resolve({ corrections: [], corrected_text: text });
+                var fd = new FormData();
+                fd.append('text', text);
+                return fetch(spellCheckUrl, { method: 'POST', body: fd, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(function(r) { return r.json(); });
+            }
+
+            Promise.all([doSpellCheck(titre), doSpellCheck(contenu)]).then(function(results) {
+                articleSpellCheckLoading.classList.add('hidden');
+                var resTitre = results[0] || {};
+                var resContenu = results[1] || {};
+                var correctedTitre = resTitre.corrected_text !== undefined ? resTitre.corrected_text : titre;
+                var correctedContenu = resContenu.corrected_text !== undefined ? resContenu.corrected_text : contenu;
+                var hasCorrections = (resTitre.corrections && resTitre.corrections.length > 0) || (resContenu.corrections && resContenu.corrections.length > 0);
+
+                if (resTitre.error || resContenu.error) {
+                    articleSpellCheckResult.innerHTML = '<p class="text-red-600">' + (resTitre.error || resContenu.error || 'Erreur') + '</p>';
+                } else if (hasCorrections) {
+                    var html = '<div class="space-y-3"><p class="font-medium text-amber-800">Corrections proposées :</p><ul class="space-y-1 text-sm">';
+                    (resTitre.corrections || []).forEach(function(c) {
+                        html += '<li><span class="text-red-600">' + (c.original || '').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span> → <span class="text-emerald-600">' + (c.suggestion || '').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span></li>';
+                    });
+                    (resContenu.corrections || []).forEach(function(c) {
+                        html += '<li><span class="text-red-600">' + (c.original || '').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span> → <span class="text-emerald-600">' + (c.suggestion || '').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span></li>';
+                    });
+                    var csrf = btn.getAttribute('data-article-csrf') || '';
+                    html += '</ul><form method="post" action="' + applySpellCheckUrl + '" class="mt-4">';
+                    var csrfEscaped = (csrf || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    html += '<input type="hidden" name="_token" value="' + csrfEscaped + '">';
+                    html += '<input type="hidden" name="article_id" value="' + articleId + '">';
+                    html += '<input type="hidden" name="corrected_titre" value="">';
+                    html += '<input type="hidden" name="corrected_contenu" value="">';
+                    html += '<button type="submit" class="px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700">Appliquer et modifier l\'article</button></form></div>';
+                    articleSpellCheckResult.innerHTML = html;
+                    var form = articleSpellCheckResult.querySelector('form');
+                    if (form) {
+                        form.querySelector('input[name="corrected_titre"]').value = correctedTitre;
+                        form.querySelector('input[name="corrected_contenu"]').value = correctedContenu;
+                    }
+                } else {
+                    articleSpellCheckResult.innerHTML = '<p class="text-emerald-600">Aucune faute détectée.</p>';
+                }
+                articleSpellCheckResult.classList.remove('hidden');
+            }).catch(function() {
+                articleSpellCheckLoading.classList.add('hidden');
+                articleSpellCheckResult.innerHTML = '<p class="text-red-600">Erreur lors de la vérification.</p>';
+                articleSpellCheckResult.classList.remove('hidden');
+            });
+        });
+    });
 });
 </script>
+<style>
+.module-tts-active { background-color: rgb(220 252 231) !important; color: rgb(22 163 74) !important; }
+.module-tts-active .module-tts-icon-play { display: none !important; }
+.module-tts-active .module-tts-icon-pause { display: block !important; }
+.summary-tts-active { background-color: #CDB4DB !important; color: #4B3D6B !important; }
+.summary-tts-active .summary-tts-icon-play { display: none !important; }
+.summary-tts-active .summary-tts-icon-pause { display: block !important; }
+</style>
 {% endblock %}
+

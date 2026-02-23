@@ -9,6 +9,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -40,7 +41,7 @@ final class BlogType extends AbstractType
                     ]),
                 ],
                 'empty_data' => '',
-                'attr' => $attr + ['placeholder' => 'Titre de l\'article'],
+                'attr' => $attr + ['placeholder' => 'Titre de l\'article', 'id' => 'blog_titre'],
             ])
             ->add('type', ChoiceType::class, [
                 'label' => 'Type',
@@ -66,7 +67,7 @@ final class BlogType extends AbstractType
                     ]),
                 ],
                 'empty_data' => '',
-                'attr' => $attr + ['rows' => 8, 'placeholder' => 'Contenu de l\'article...'],
+                'attr' => $attr + ['rows' => 8, 'placeholder' => 'Contenu de l\'article...', 'id' => 'blog_contenu'],
             ])
             ->add('image', FileType::class, [
                 'label' => 'Image de l\'article',
@@ -88,6 +89,10 @@ final class BlogType extends AbstractType
                     ]),
                 ],
                 'attr' => $attr + ['accept' => 'image/*'],
+            ])
+            ->add('pexels_image_url', HiddenType::class, [
+                'required' => false,
+                'mapped' => false,
             ])
             ->add('isPublished', CheckboxType::class, [
                 'label' => 'Publier l\'article',

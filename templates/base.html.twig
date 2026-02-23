@@ -9,16 +9,43 @@
         <style>
             :root {
                 --auticare-bg: #F5F1EB;
-                --auticare-text: #6B7280;
-                --auticare-text-strong: #4B5563;
+                --auticare-text: #687280;
+                --auticare-text-strong: #485563;
                 --auticare-border: #E5E0D8;
+                --auticare-border-pastel: #E8DED5;
                 --auticare-accent: #A7C7E7;
+                --auticare-accent-hover: #95b8dc;
                 --auticare-accent-soft: #B8D4ED;
                 --auticare-card: #FFFFFF;
+                --auticare-title-light: #1e3a5f;
+                --auticare-title-dark: #93C5FD;
+                --auticare-lavender: #E8DCF0;
+                --auticare-violet-sidebar: #4B3D6B;
+                --auticare-violet-accent: #CDB4DB;
+                --auticare-green-soft: #A8BBA3;
+                --auticare-green-bg: #D4E5D0;
+                --auticare-blue-bg: #DFEEF5;
+                --auticare-blue-bg-light: #E8F4FC;
+                --auticare-peach-bg: #FAEDE8;
+                --auticare-overlay: #FDF8F5;
                 --auticare-tag-green: #95d7b5;
                 --auticare-tag-blue: #A7C7E7;
                 --auticare-tag-purple: #D8B4FE;
                 --auticare-alert: #F87171;
+            }
+            @keyframes fadeInUp {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .animate-fade-in-up {
+                animation: fadeInUp 0.5s ease-out forwards;
+            }
+            @media (prefers-reduced-motion: reduce) {
+                *, *::before, *::after {
+                    animation-duration: 0.01ms !important;
+                    animation-iteration-count: 1 !important;
+                    transition-duration: 0.01ms !important;
+                }
             }
         </style>
         <script src="https://cdn.tailwindcss.com"></script>
@@ -29,16 +56,38 @@
                         colors: {
                             autocare: {
                                 bg: '#F5F1EB',
-                                text: '#6B7280',
-                                'text-strong': '#4B5563',
+                                text: '#687280',
+                                'text-strong': '#485563',
                                 border: '#E5E0D8',
+                                'border-pastel': '#E8DED5',
                                 accent: '#A7C7E7',
+                                'accent-hover': '#95b8dc',
                                 'accent-soft': '#B8D4ED',
                                 card: '#FFFFFF',
+                                'title-light': '#1e3a5f',
+                                'title-dark': '#93C5FD',
+                                lavender: '#E8DCF0',
+                                'violet-sidebar': '#4B3D6B',
+                                'violet-accent': '#CDB4DB',
+                                'green-soft': '#A8BBA3',
+                                'green-bg': '#D4E5D0',
+                                'blue-bg': '#DFEEF5',
+                                'blue-bg-light': '#E8F4FC',
+                                'peach-bg': '#FAEDE8',
+                                overlay: '#FDF8F5',
                                 'tag-green': '#95d7b5',
                                 'tag-blue': '#A7C7E7',
                                 'tag-purple': '#D8B4FE',
                                 alert: '#F87171',
+                            }
+                        },
+                        animation: {
+                            'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
+                        },
+                        keyframes: {
+                            fadeInUp: {
+                                from: { opacity: '0', transform: 'translateY(20px)' },
+                                to: { opacity: '1', transform: 'translateY(0)' },
                             }
                         }
                     }
@@ -50,7 +99,7 @@
         {% block importmap %}{{ importmap('app') }}{% endblock %}
     {% endblock %}
 </head>
-<body class="bg-[#F5F1EB] text-[#6B7280] antialiased">
+<body class="bg-[#F5F1EB] text-[#687280] antialiased">
     {% block body %}{% endblock %}
 </body>
 </html>

@@ -58,5 +58,32 @@ class FavorisArticleRepository extends ServiceEntityRepository
 
         return array_map(static fn (array $row): int => (int) $row['blog_id'], $rows);
     }
+
+    /**
+     * Retourne les articles les plus ajoutés aux favoris (publiés et visibles uniquement).
+     *
+     * @return list<array{id: int, title: string}>
+     */
+    public function findMostFavoritedArticles(int $limit = 5): array
+    {
+        $rows = $this->createQueryBuilder('fa')
+            ->select('b.id', 'b.titre')
+            ->innerJoin('fa.blog', 'b')
+            ->where('b.isPublished = :published')
+            ->andWhere('b.isVisible = :visible')
+            ->setParameter('published', true)
+            ->setParameter('visible', true)
+            ->groupBy('b.id')
+            ->addGroupBy('b.titre')
+            ->orderBy('COUNT(fa.id)', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getArrayResult();
+
+        return array_map(static fn (array $row): array => [
+            'id' => (int) $row['id'],
+            'title' => $row['titre'] ?? 'Article sans titre',
+        ], $rows);
+    }
 }
 

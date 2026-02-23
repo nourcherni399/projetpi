@@ -7,18 +7,28 @@ namespace App\Controller;
 use App\Entity\Blog;
 use App\Entity\Commentaire;
 use App\Entity\Module;
+use App\Entity\Ressource;
+use App\Service\CloudinaryUploadService;
+use App\Service\GroqBlogGeneratorService;
+use App\Service\GroqSpellCheckService;
+use App\Service\GroqSummaryService;
+use App\Service\PexelsService;
+use App\Service\WikipediaService;
 use App\Form\BlogType;
 use App\Form\CommentaireType;
-use App\Repository\FavorisArticleRepository;
 use App\Repository\BlogRepository;
+use App\Repository\CommentaireReactionRepository;
+use App\Repository\FavorisArticleRepository;
 use App\Repository\FavorisModuleRepository;
 use App\Repository\ModuleRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/blog')]
@@ -29,9 +39,79 @@ final class BlogController extends AbstractController
         private readonly ModuleRepository $moduleRepository,
         private readonly FavorisModuleRepository $favorisModuleRepository,
         private readonly FavorisArticleRepository $favorisArticleRepository,
+        private readonly CommentaireReactionRepository $commentaireReactionRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly SluggerInterface $slugger,
+        private readonly PexelsService $pexelsService,
+        private readonly GroqBlogGeneratorService $groqBlogGenerator,
+        private readonly GroqSpellCheckService $groqSpellCheck,
+        private readonly WikipediaService $wikipediaService,
     ) {
+    }
+
+    #[Route('/apply-spell-check', name: 'user_blog_apply_spell_check', methods: ['POST'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function applySpellCheck(Request $request): Response
+    {
+        $articleId = (int) $request->request->get('article_id', 0);
+        $correctedTitre = trim((string) $request->request->get('corrected_titre', ''));
+        $correctedContenu = trim((string) $request->request->get('corrected_contenu', ''));
+        if ($articleId <= 0) {
+            $this->addFlash('error', 'Article invalide.');
+            return $this->redirectToRoute('user_blog');
+        }
+        if (!$this->isCsrfTokenValid('apply_spell_check_' . $articleId, (string) $request->request->get('_token', ''))) {
+            $this->addFlash('error', 'Jeton de sécurité invalide.');
+            $b = $this->blogRepository->find($articleId);
+            if ($b?->getModule()) {
+                return $this->redirectToRoute('user_blog_module', ['id' => $b->getModule()->getId()]);
+            }
+            return $this->redirectToRoute('user_blog');
+        }
+        $blog = $this->blogRepository->find($articleId);
+        if (!$blog || ($blog->getUser() !== $this->getUser() && !$this->isGranted('ROLE_ADMIN'))) {
+            $this->addFlash('error', 'Article non trouvé ou accès refusé.');
+            return $this->redirectToRoute('user_blog');
+        }
+        $request->getSession()->set('spell_check_draft_' . $articleId, [
+            'titre' => $correctedTitre,
+            'contenu' => $correctedContenu,
+        ]);
+        return $this->redirectToRoute('user_blog_edit_article', ['id' => $articleId]);
+    }
+
+    #[Route('/spell-check', name: 'user_blog_spell_check', methods: ['POST'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function spellCheck(Request $request): JsonResponse
+    {
+        $text = trim((string) $request->request->get('text', ''));
+        if ($text === '') {
+            return $this->json(['error' => 'Texte vide.'], 400);
+        }
+        $result = $this->groqSpellCheck->check($text);
+        if (isset($result['error'])) {
+            return $this->json($result, 400);
+        }
+        return $this->json($result);
+    }
+
+    #[Route('/generate', name: 'user_blog_generate', methods: ['POST'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function generate(Request $request): JsonResponse
+    {
+        $prompt = trim((string) $request->request->get('prompt', ''));
+        $type = trim((string) $request->request->get('type', ''));
+
+        if ($prompt === '') {
+            return $this->json(['error' => 'Veuillez saisir un prompt.'], 400);
+        }
+
+        $result = $this->groqBlogGenerator->generate($prompt, $type);
+        if (isset($result['error'])) {
+            return $this->json($result, 400);
+        }
+
+        return $this->json($result);
     }
 
     #[Route('', name: 'user_blog', methods: ['GET'])]
@@ -45,15 +125,16 @@ final class BlogController extends AbstractController
         
         return $this->render('front/blog/index.html.twig', [
             'categories' => $categoriesData,
-            'popular_articles' => $this->getPopularArticles(),
+            'popular_articles' => $this->favorisArticleRepository->findMostFavoritedArticles(5),
             'popular_tags' => ['Module', 'Autisme', 'TSA', 'Éducation', 'Communication', 'Témoignage'],
             'searchTerm' => $searchTerm,
         ]);
     }
 
     #[Route('/categorie/{slug}', name: 'user_blog_categorie', methods: ['GET'])]
-    public function categorie(string $slug): Response
+    public function categorie(Request $request, string $slug): Response
     {
+        $searchTerm = trim((string) $request->query->get('q', ''));
         // Trouver la catégorie par son slug
         $categorie = null;
         $modules = [];
@@ -81,10 +162,14 @@ final class BlogController extends AbstractController
             $savedModuleIds = $this->favorisModuleRepository->findModuleIdsByUser($user);
         }
 
+        $categoriesData = $this->getCategoriesWithModules('');
+
         return $this->render('front/blog/categorie.html.twig', [
             'categorie' => $categorie,
             'modules' => $modules,
             'savedModuleIds' => $savedModuleIds,
+            'searchTerm' => $searchTerm,
+            'categories' => $categoriesData,
         ]);
     }
 
@@ -97,6 +182,9 @@ final class BlogController extends AbstractController
         }
 
         $searchTerm = trim((string) $request->query->get('q', ''));
+        $locale = $request->getSession()->get('blog_locale', 'fr');
+        $wikiUrl = $this->wikipediaService->getArticleUrlForModule($module, $locale)
+            ?? $this->wikipediaService->getFallbackUrl($locale);
 
         $commentaireForms = [];
         $articleForm = null;
@@ -139,6 +227,8 @@ final class BlogController extends AbstractController
 
             if ($articleFormObject->isSubmitted() && $articleFormObject->isValid()) {
                 $imageFile = $articleFormObject->get('image')->getData();
+                $pexelsUrl = trim((string) $articleFormObject->get('pexels_image_url')->getData());
+
                 if ($imageFile) {
                     $saved = $this->handleImageUpload($imageFile, $newArticle);
                     if (!$saved) {
@@ -148,8 +238,10 @@ final class BlogController extends AbstractController
                             $isModuleSaved = $this->favorisModuleRepository->findOneByUserAndModule($user, $module) !== null;
                         }
                         $savedArticleIds = [];
+                        $reactedCommentTypes = [];
                         if ($user !== null) {
                             $savedArticleIds = $this->favorisArticleRepository->findBlogIdsByUser($user);
+                            $reactedCommentTypes = $this->commentaireReactionRepository->findReactionTypesByUser($user);
                         }
 
                         return $this->render('front/blog/module.html.twig', [
@@ -159,6 +251,27 @@ final class BlogController extends AbstractController
                             'articleForm' => $articleForm,
                             'isModuleSaved' => $isModuleSaved,
                             'savedArticleIds' => $savedArticleIds,
+                            'reactedCommentTypes' => $reactedCommentTypes,
+                            'wikiUrl' => $wikiUrl,
+                        ]);
+                    }
+                } elseif ($pexelsUrl !== '' && filter_var($pexelsUrl, FILTER_VALIDATE_URL)) {
+                    $targetDir = $this->getParameter('uploads_blogs_directory');
+                    $filename = $this->pexelsService->downloadAndSave($pexelsUrl, $targetDir);
+                    if ($filename !== null) {
+                        $newArticle->setImage('uploads/blog/' . $filename);
+                    } else {
+                        $this->addFlash('error', 'Impossible de télécharger l\'image depuis Pexels.');
+                        $articleForm = $articleFormObject->createView();
+                        return $this->render('front/blog/module.html.twig', [
+                            'module' => $module,
+                            'commentaireForms' => $commentaireForms,
+                            'searchTerm' => $searchTerm,
+                            'articleForm' => $articleForm,
+                            'isModuleSaved' => $this->favorisModuleRepository->findOneByUserAndModule($user, $module) !== null,
+                            'savedArticleIds' => $this->favorisArticleRepository->findBlogIdsByUser($user),
+                            'reactedCommentTypes' => $this->commentaireReactionRepository->findReactionTypesByUser($user),
+                            'wikiUrl' => $wikiUrl,
                         ]);
                     }
                 }
@@ -182,8 +295,10 @@ final class BlogController extends AbstractController
             $isModuleSaved = $this->favorisModuleRepository->findOneByUserAndModule($user, $module) !== null;
         }
         $savedArticleIds = [];
+        $reactedCommentTypes = [];
         if ($user !== null) {
             $savedArticleIds = $this->favorisArticleRepository->findBlogIdsByUser($user);
+            $reactedCommentTypes = $this->commentaireReactionRepository->findReactionTypesByUser($user);
         }
 
         return $this->render('front/blog/module.html.twig', [
@@ -193,6 +308,8 @@ final class BlogController extends AbstractController
             'articleForm' => $articleForm,
             'isModuleSaved' => $isModuleSaved,
             'savedArticleIds' => $savedArticleIds,
+            'reactedCommentTypes' => $reactedCommentTypes,
+            'wikiUrl' => $wikiUrl,
         ]);
     }
 
@@ -227,6 +344,77 @@ final class BlogController extends AbstractController
         return $response;
     }
 
+    #[Route('/module/{id}/summary', name: 'module_summary', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function moduleSummary(Module $module, GroqSummaryService $groqService): JsonResponse
+    {
+        if (!$module->isPublished()) {
+            throw $this->createNotFoundException('Module introuvable.');
+        }
+
+        if (!$groqService->isConfigured()) {
+            return $this->json([
+                'summary' => 'Clé API non configurée. Ajoutez GROQ_API_KEY dans .env.local',
+                'success' => false,
+            ]);
+        }
+
+        $contentToSummarize = implode("\n\n", array_filter([
+            $module->getTitre(),
+            $module->getDescription(),
+            $module->getContenu(),
+        ]));
+
+        $result = $groqService->summarize($contentToSummarize);
+
+        $summary = $result['summary'];
+        $error = $result['error'];
+
+        return $this->json([
+            'summary' => $summary ?? ($error ?? 'Impossible de générer le résumé.'),
+            'success' => $summary !== null,
+        ]);
+    }
+
+    #[Route('/ressource/{id}/download', name: 'ressource_download', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function downloadRessource(Ressource $ressource, CloudinaryUploadService $cloudinary, EntityManagerInterface $entityManager): Response
+    {
+        if (!$ressource->isActive()) {
+            throw $this->createNotFoundException('Ressource non disponible.');
+        }
+        $module = $ressource->getModule();
+        if ($module === null || !$module->isPublished()) {
+            throw $this->createNotFoundException('Module non trouvé.');
+        }
+
+        $contenu = trim((string) $ressource->getContenu());
+
+        try {
+            if (str_starts_with($contenu, 'uploads/ressources/')) {
+                $projectDir = $this->getParameter('kernel.project_dir');
+                $localPath = $projectDir . '/public/' . $contenu;
+
+                if (!file_exists($localPath)) {
+                    throw $this->createNotFoundException('Fichier introuvable.');
+                }
+
+                $cloudinary->uploadFromPath($localPath, 'Telechargement');
+            } elseif (preg_match('#^https?://#i', $contenu)) {
+                $cloudinary->uploadFromUrl($contenu, 'Telechargement');
+            } else {
+                throw $this->createNotFoundException('Ressource invalide.');
+            }
+        } catch (\Throwable $e) {
+            if ($e instanceof \Symfony\Component\HttpKernel\Exception\HttpException) {
+                throw $e;
+            }
+            $this->addFlash('error', "Impossible de sauvegarder la ressource dans le cloud : " . $e->getMessage());
+            return $this->redirectToRoute('user_blog_module', ['id' => $module->getId()]);
+        }
+
+        $this->addFlash('success', 'La ressource a été enregistrée dans votre dossier Cloudinary "Telechargement".');
+        return $this->redirectToRoute('user_blog_module', ['id' => $module->getId()]);
+    }
+
     #[Route('/module/{id}/ecrire', name: 'user_blog_ecrire', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
     public function ecrire(Request $request, int $id): Response
     {
@@ -250,9 +438,23 @@ final class BlogController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $imageFile = $form->get('image')->getData();
+            $pexelsUrl = trim((string) $form->get('pexels_image_url')->getData());
+
             if ($imageFile) {
                 $saved = $this->handleImageUpload($imageFile, $blog);
                 if (!$saved) {
+                    return $this->render('front/blog/ecrire.html.twig', [
+                        'module' => $module,
+                        'form' => $form,
+                    ]);
+                }
+            } elseif ($pexelsUrl !== '' && filter_var($pexelsUrl, FILTER_VALIDATE_URL)) {
+                $targetDir = $this->getParameter('uploads_blogs_directory');
+                $filename = $this->pexelsService->downloadAndSave($pexelsUrl, $targetDir);
+                if ($filename !== null) {
+                    $blog->setImage('uploads/blog/' . $filename);
+                } else {
+                    $this->addFlash('error', 'Impossible de télécharger l\'image depuis Pexels.');
                     return $this->render('front/blog/ecrire.html.twig', [
                         'module' => $module,
                         'form' => $form,
@@ -283,6 +485,21 @@ final class BlogController extends AbstractController
             throw $this->createAccessDeniedException('Vous ne pouvez modifier que vos propres articles.');
         }
 
+        $sessionKey = 'spell_check_draft_' . $blog->getId();
+        $session = $request->getSession();
+        if ($request->isMethod('GET') && $session->has($sessionKey)) {
+            $draft = $session->get($sessionKey);
+            $session->remove($sessionKey);
+            if (is_array($draft)) {
+                if (isset($draft['titre'])) {
+                    $blog->setTitre($draft['titre']);
+                }
+                if (isset($draft['contenu'])) {
+                    $blog->setContenu($draft['contenu']);
+                }
+            }
+        }
+
         $form = $this->createForm(BlogType::class, $blog);
         $form->handleRequest($request);
 
@@ -290,9 +507,23 @@ final class BlogController extends AbstractController
             $blog->setDateModif(new \DateTime());
 
             $imageFile = $form->get('image')->getData();
+            $pexelsUrl = trim((string) $form->get('pexels_image_url')->getData());
+
             if ($imageFile) {
                 $saved = $this->handleImageUpload($imageFile, $blog);
                 if (!$saved) {
+                    return $this->render('front/blog/edit_article.html.twig', [
+                        'article' => $blog,
+                        'form' => $form,
+                    ]);
+                }
+            } elseif ($pexelsUrl !== '' && filter_var($pexelsUrl, FILTER_VALIDATE_URL)) {
+                $targetDir = $this->getParameter('uploads_blogs_directory');
+                $filename = $this->pexelsService->downloadAndSave($pexelsUrl, $targetDir);
+                if ($filename !== null) {
+                    $blog->setImage('uploads/blog/' . $filename);
+                } else {
+                    $this->addFlash('error', 'Impossible de télécharger l\'image depuis Pexels.');
                     return $this->render('front/blog/edit_article.html.twig', [
                         'article' => $blog,
                         'form' => $form,
@@ -341,14 +572,20 @@ final class BlogController extends AbstractController
             throw $this->createNotFoundException('Article non trouvé');
         }
 
-        // Créer le formulaire de commentaire
         $commentaire = new Commentaire();
         $commentaireForm = $this->createForm(CommentaireType::class, $commentaire);
+
+        $reactedCommentTypes = [];
+        $user = $this->getUser();
+        if ($user !== null) {
+            $reactedCommentTypes = $this->commentaireReactionRepository->findReactionTypesByUser($user);
+        }
 
         return $this->render('front/blog/show_article.html.twig', [
             'article' => $blog,
             'module' => $blog->getModule(),
-            'commentaireForm' => $commentaireForm->createView()
+            'commentaireForm' => $commentaireForm->createView(),
+            'reactedCommentTypes' => $reactedCommentTypes,
         ]);
     }
 
@@ -447,31 +684,6 @@ final class BlogController extends AbstractController
         return $images[$slug] ?? 'images/logo.png';
     }
     
-    /**
-     * Récupère les articles populaires (blogs)
-     */
-    private function getPopularArticles(): array
-    {
-        $blogs = $this->blogRepository->findBy(
-            [
-                'isPublished' => true,
-                'isVisible' => true,
-            ],
-            ['dateCreation' => 'DESC'],
-            5
-        );
-
-        $popular = [];
-        foreach ($blogs as $blog) {
-            $popular[] = [
-                'id' => $blog->getId(),
-                'title' => $blog->getTitre() ?? 'Article sans titre',
-            ];
-        }
-
-        return $popular;
-    }
-
     private function handleImageUpload(\Symfony\Component\HttpFoundation\File\UploadedFile $imageFile, Blog $blog): bool
     {
         $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);

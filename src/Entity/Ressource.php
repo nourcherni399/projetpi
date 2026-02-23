@@ -173,16 +173,17 @@ class Ressource
 
         $isHttpUrl = (bool) preg_match('#^https?://#i', $contenu);
         $isLocalUploadedFile = str_starts_with($contenu, 'uploads/ressources/');
+        $isCloudinaryUrl = (bool) preg_match('#^https://res\.cloudinary\.com/#i', $contenu);
 
-        if (!$isHttpUrl && !$isLocalUploadedFile) {
-            $context->buildViolation('Le contenu doit etre une URL http(s) ou un media uploade.')
+        if (!$isHttpUrl && !$isLocalUploadedFile && !$isCloudinaryUrl) {
+            $context->buildViolation('Le contenu doit etre une URL http(s), un media Cloudinary ou un media uploade.')
                 ->atPath('contenu')
                 ->addViolation();
             return;
         }
 
-        if ($type === 'video' && $isHttpUrl) {
-            $isVideoUrl = (bool) preg_match('#(youtube\.com|youtu\.be|vimeo\.com|\.mp4($|\?)|\.webm($|\?)|\.mov($|\?))#i', $contenu);
+        if ($type === 'video' && $isHttpUrl && !$isCloudinaryUrl) {
+            $isVideoUrl = (bool) preg_match('#(youtube\.com|youtu\.be|vimeo\.com|res\.cloudinary\.com|\.mp4($|\?)|\.webm($|\?)|\.mov($|\?))#i', $contenu);
             if (!$isVideoUrl) {
                 $context->buildViolation('Pour le type video, fournissez une URL video valide ou uploadez un fichier video.')
                     ->atPath('contenu')
@@ -190,8 +191,8 @@ class Ressource
             }
         }
 
-        if ($type === 'audio' && $isHttpUrl) {
-            $isAudioUrl = (bool) preg_match('#(\.mp3($|\?)|\.wav($|\?)|\.ogg($|\?)|\.m4a($|\?))#i', $contenu);
+        if ($type === 'audio' && $isHttpUrl && !$isCloudinaryUrl) {
+            $isAudioUrl = (bool) preg_match('#(res\.cloudinary\.com|\.mp3($|\?)|\.wav($|\?)|\.ogg($|\?)|\.m4a($|\?))#i', $contenu);
             if (!$isAudioUrl) {
                 $context->buildViolation('Pour le type audio, fournissez une URL audio valide ou uploadez un fichier audio.')
                     ->atPath('contenu')

@@ -42,7 +42,7 @@ private string $type;
     #[ORM\Column]
     private ?\DateTime $dateModif = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $contenu = null;
 
     #[ORM\ManyToOne(inversedBy: 'blogs')]

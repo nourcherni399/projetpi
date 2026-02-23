@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Entity\Module;
 use App\Form\ModuleType;
 use App\Repository\ModuleRepository;
+use App\Service\WikipediaService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,6 +22,7 @@ final class UserModuleController extends AbstractController
         private readonly ModuleRepository $moduleRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly SluggerInterface $slugger,
+        private readonly WikipediaService $wikipediaService,
     ) {
     }
 
@@ -33,14 +35,21 @@ final class UserModuleController extends AbstractController
     }
 
     #[Route('/{id}', name: 'user_module_show', requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function show(int $id): Response
+    public function show(int $id, Request $request): Response
     {
         $module = $this->moduleRepository->find($id);
         if ($module === null || !$module->isPublished()) {
             throw $this->createNotFoundException('Module introuvable.');
         }
 
-        return $this->render('front/modules/show.html.twig', ['module' => $module]);
+        $locale = $request->getSession()->get('blog_locale', 'fr');
+        $wikiUrl = $this->wikipediaService->getArticleUrlForModule($module, $locale)
+            ?? $this->wikipediaService->getFallbackUrl($locale);
+
+        return $this->render('front/modules/show.html.twig', [
+            'module' => $module,
+            'wikiUrl' => $wikiUrl,
+        ]);
     }
 
     #[Route('/{id}/edit', name: 'user_module_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]

@@ -1,0 +1,207 @@
+{% extends 'layouts/user.html.twig' %}
+
+{% block title %}{{ module.titre }} - AutiCare{% endblock %}
+
+{% block user_content %}
+<article class="max-w-7xl mx-auto">
+    <div class="mb-6">
+        <a href="{{ path('user_blog') }}" class="inline-flex items-center gap-2 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded-lg text-sm font-medium">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            {{ 'Retour au blog'|blog_translate }}
+        </a>
+    </div>
+
+    <div class="mb-6 px-4 py-3 rounded-lg bg-[#E0F2FE] border border-[#BAE6FD] text-[#0369A1] text-sm">
+        <span class="font-medium">{{ 'Partagé avec vous'|blog_translate }}</span> — {{ 'Ce module a été partagé.'|blog_translate }} <a href="{{ path('app_login') }}" class="underline hover:text-[#0284C7] font-medium">{{ 'Connectez-vous'|blog_translate }}</a> {{ 'ou'|blog_translate }} <a href="{{ path('register') }}" class="underline hover:text-[#0284C7] font-medium">{{ 'inscrivez-vous'|blog_translate }}</a> {{ 'pour enregistrer et commenter.'|blog_translate }}
+    </div>
+
+    <div class="flex flex-col lg:flex-row gap-8 items-start">
+    <div class="w-full lg:w-2/5 lg:min-w-0 lg:sticky lg:top-8 flex-shrink-0">
+    <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8">
+        <header class="mb-8">
+            <div class="flex items-start justify-between gap-4 mb-3">
+                <h1 class="text-3xl font-bold text-[#4B5563]">{{ module.titre|blog_translate }}</h1>
+                <span class="inline-block px-3 py-1 rounded-lg bg-[#A7C7E7]/30 text-[#4B5563] text-sm font-medium shrink-0">{{ module.niveau|capitalize }}</span>
+            </div>
+            {% if module.dateCreation %}
+            <div class="inline-flex items-center gap-2">
+                <p class="text-[#6B7280] text-sm">{{ 'Publié le'|blog_translate }} {{ module.dateCreation|date('d/m/Y') }}</p>
+                {% if module.titre or module.description or module.contenu %}
+                <button type="button"
+                        class="module-tts-btn inline-flex items-center justify-center w-8 h-8 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 focus:outline focus:ring-2 focus:ring-green-500 shrink-0"
+                        data-tts-text="{{ [(module.titre ?? ''), (module.description ?? ''), (module.contenu ?? '')]|join(' ')|trim|striptags|e('html_attr') }}"
+                        data-tts-lang="{{ app.session.get('blog_locale', 'fr') }}"
+                        title="Écouter le module"
+                        aria-label="Écouter le contenu du module">
+                    <svg class="module-tts-icon-play w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    <svg class="module-tts-icon-pause w-4 h-4" fill="currentColor" viewBox="0 0 24 24" style="display:none">
+                        <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
+                    </svg>
+                </button>
+                {% endif %}
+                <a href="{{ path('user_blog_module_download', { id: module.id }) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 focus:outline focus:ring-2 focus:ring-blue-500 shrink-0" title="{{ 'Télécharger le module'|blog_translate }}">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M8 12l4 4m0 0l4-4m-4 4V4" />
+                    </svg>
+                </a>
+            </div>
+            {% endif %}
+        </header>
+
+        {% if module.description %}
+        <p class="text-lg text-[#6B7280] mb-6 whitespace-normal break-words">{{ module.description|blog_translate }}</p>
+        {% endif %}
+
+        {% if module.image %}
+        <div class="mb-8">
+            <img src="{{ asset(module.image) }}" alt="{{ module.titre|blog_translate }}" class="w-full max-w-[620px] aspect-[16/10] object-cover rounded-lg">
+        </div>
+        {% endif %}
+
+        <div class="prose prose-[#4B5563] max-w-none mb-10 break-words">
+            {% if module.contenu %}
+            <div class="dict-content text-[#4B5563] whitespace-pre-wrap break-words" data-dict-lang="{{ app.session.get('blog_locale', 'fr') }}">{{ module.contenu|blog_translate|raw }}</div>
+            {% else %}
+            <p class="text-[#6B7280]">{{ 'Aucun contenu disponible.'|blog_translate }}</p>
+            {% endif %}
+        </div>
+
+        {% set activeRessources = module.ressources|filter(ressource => ressource.isActive) %}
+        {% set ressources = activeRessources|sort((a, b) => (a.ordre ?? 999999) <=> (b.ordre ?? 999999)) %}
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-[#4B5563] mb-4">{{ 'Ressources du module'|blog_translate }}</h2>
+            {% if ressources|length > 0 %}
+            <div class="space-y-4">
+                {% for ressource in ressources %}
+                {% set contenuUrl = (ressource.contenu starts with 'http://') or (ressource.contenu starts with 'https://') ? ressource.contenu : asset(ressource.contenu) %}
+                {% set isRemoteResource = (ressource.contenu starts with 'http://') or (ressource.contenu starts with 'https://') %}
+                <div class="rounded-lg border border-[#E5E0D8] p-4 bg-[#F9FAFB]">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <h3 class="font-medium text-[#4B5563] truncate">{{ ressource.titre|blog_translate }}</h3>
+                            <a href="{{ path('ressource_download', { id: ressource.id }) }}" {% if ressource.typeRessource == 'url' %}target="_blank" rel="noopener noreferrer"{% else %}download{% endif %} class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#E7EDF8] text-[#2563EB] hover:bg-[#DCE7FA] transition-colors shrink-0" title="{{ 'Télécharger'|blog_translate }} {{ ressource.titre|blog_translate }}">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0l4-4m-4 4l-4-4m-5 8h18" /></svg>
+                            </a>
+                        </div>
+                        <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full {% if ressource.typeRessource == 'url' %}bg-blue-100 text-blue-800{% elseif ressource.typeRessource == 'video' %}bg-purple-100 text-purple-800{% else %}bg-green-100 text-green-800{% endif %}">{{ ressource.typeRessource|upper }}</span>
+                    </div>
+                    {% if ressource.typeRessource == 'url' %}
+                    <a href="{{ contenuUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-[#A7C7E7] hover:text-[#B8D4ED] font-medium text-sm">
+                        {{ 'Ouvrir la ressource'|blog_translate }} <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H18m0 0v4.5M18 6l-7.5 7.5M6 10.5V18h7.5" /></svg>
+                    </a>
+                    {% elseif ressource.typeRessource == 'video' %}
+                    <video controls preload="metadata" class="w-full rounded-lg border border-[#E5E0D8] bg-black/5"><source src="{{ contenuUrl }}">Votre navigateur ne supporte pas la lecture vidéo.</video>
+                    {% elseif ressource.typeRessource == 'audio' %}
+                    <audio controls preload="metadata" class="w-full"><source src="{{ contenuUrl }}">Votre navigateur ne supporte pas la lecture audio.</audio>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-[#6B7280]">{{ 'Aucune ressource active pour ce module.'|blog_translate }}</p>
+            {% endif %}
+        </div>
+
+        {# Lien Wikipedia - En savoir plus sur le module #}
+        <div class="mt-4">
+            <a href="{{ wikiUrl|default('https://fr.wikipedia.org/wiki/Autisme') }}"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="inline-flex items-center gap-2 text-[#1e3a5f] hover:text-[#0369A1] hover:underline font-medium text-sm transition-colors">
+                {{ 'En savoir plus sur ce module'|blog_translate }}
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H18m0 0v4.5M18 6l-7.5 7.5M6 10.5V18h7.5" />
+                </svg>
+            </a>
+        </div>
+    </div>
+    </div>
+
+    <div class="w-full lg:flex-1 lg:min-w-0">
+    {% set articles = module.blogs|filter(blog => blog.isPublished and (blog.isVisible ?? true)) %}
+    {% if articles|length > 0 %}
+    <div>
+        <h2 class="text-xl font-semibold text-[#4B5563] mb-4">{{ 'Articles publiés pour ce module'|blog_translate }}</h2>
+        <div class="space-y-4">
+            {% for article in articles|sort((a, b) => b.dateCreation <=> a.dateCreation) %}
+            <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 hover:shadow-md transition-shadow">
+                <div class="flex items-start gap-3 mb-3">
+                    {% if article.image %}
+                    <div class="flex-shrink-0"><img src="{{ asset(article.image) }}" alt="{{ article.titre }}" class="w-12 h-12 object-cover rounded-lg"></div>
+                    {% endif %}
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold text-[#4B5563] mb-2">{{ article.titre|blog_translate }}</h3>
+                        <div class="flex items-center gap-4 text-sm text-[#6B7280] mb-3">
+                            <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full {% if article.type == 'recommandation' %}bg-blue-100 text-blue-800{% elseif article.type == 'plainte' %}bg-red-100 text-red-800{% elseif article.type == 'question' %}bg-yellow-100 text-yellow-800{% else %}bg-gray-100 text-gray-800{% endif %}">{{ article.type|blog_translate_type }}</span>
+                            <span>{{ 'Par'|blog_translate }} {{ article.user ? (article.user.prenom ~ ' ' ~ article.user.nom) : ('Anonyme'|blog_translate) }}</span>
+                            <span>{{ 'Le'|blog_translate }} {{ article.dateCreation|date('d/m/Y à H:i') }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="prose prose-[#4B5563] max-w-none">
+                    <p class="text-[#4B5563] break-words whitespace-normal">{{ (article.contenu|striptags|length > 200 ? (article.contenu|striptags|slice(0, 200) ~ '...') : article.contenu|striptags)|blog_translate }}</p>
+                    <div class="mt-3 flex items-center gap-4">
+                        <a href="{{ path('user_blog_show_article', {'id': article.id}) }}" class="inline-flex items-center gap-2 text-[#A7C7E7] hover:text-[#B8D4ED] font-medium text-sm">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                            {{ 'Lire la suite'|blog_translate }}
+                        </a>
+                        <a href="{{ path('user_blog_article_download', {'id': article.id}) }}" class="inline-flex items-center gap-1.5 text-[#0369A1] hover:text-[#0284C7] text-sm font-medium" title="Télécharger">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M8 12l4 4m0 0l4-4m-4 4V4" /></svg>
+                            {{ 'Télécharger'|blog_translate }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <p class="text-[#6B7280]">{{ 'Aucun article publié pour ce module.'|blog_translate }}</p>
+    {% endif %}
+    </div>
+    </div>
+</article>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    function initModuleTTS() {
+        document.querySelectorAll('.module-tts-btn').forEach(function (btn) {
+            if (btn._ttsInit) return;
+            btn._ttsInit = true;
+            btn.addEventListener('click', function () {
+                var text = this.getAttribute('data-tts-text');
+                if (!text || !text.trim()) return;
+                if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+                    window.speechSynthesis.cancel();
+                    this.classList.remove('module-tts-active');
+                    return;
+                }
+                if (window.speechSynthesis.paused) {
+                    window.speechSynthesis.resume();
+                    this.classList.add('module-tts-active');
+                    return;
+                }
+                var utterance = new SpeechSynthesisUtterance(text);
+                var locale = this.getAttribute('data-tts-lang') || 'fr';
+                var langMap = { fr: 'fr-FR', en: 'en-US', es: 'es-ES', ar: 'ar-SA', de: 'de-DE', it: 'it-IT', pt: 'pt-PT', ru: 'ru-RU', zh: 'zh-CN', nl: 'nl-NL', ja: 'ja-JP', ko: 'ko-KR', tr: 'tr-TR', pl: 'pl-PL', sv: 'sv-SE', vi: 'vi-VN', id: 'id-ID', th: 'th-TH', uk: 'uk-UA' };
+                utterance.lang = langMap[locale] || (locale + '-' + locale.toUpperCase()) || 'fr-FR';
+                utterance.rate = 1;
+                utterance.pitch = 1;
+                utterance.volume = 1;
+                utterance.onstart = function () { btn.classList.add('module-tts-active'); };
+                utterance.onend = function () { btn.classList.remove('module-tts-active'); };
+                utterance.onerror = function () { btn.classList.remove('module-tts-active'); };
+                window.speechSynthesis.speak(utterance);
+            });
+        });
+    }
+    initModuleTTS();
+});
+</script>
+<style>
+.module-tts-active { background-color: rgb(220 252 231) !important; color: rgb(22 163 74) !important; }
+.module-tts-active .module-tts-icon-play { display: none !important; }
+.module-tts-active .module-tts-icon-pause { display: block !important; }
+</style>
+{% endblock %}
