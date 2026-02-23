@@ -21,6 +21,7 @@
     <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8">
         {{ form_start(form, {
             attr: {
+                id: 'blog-edit-form',
                 class: 'space-y-6',
                 novalidate: 'novalidate'
             },
@@ -119,6 +120,27 @@
                 <p id="blog-edit-pexels-selected-msg" class="text-sm text-emerald-600 hidden"></p>
             </div>
             {{ form_widget(form.pexels_image_url) }}
+        </div>
+
+        {# Section Génération hashtags - après Image de l'article #}
+        <div class="p-4 rounded-xl border border-violet-200 bg-violet-50/50 space-y-3">
+            <h3 class="text-lg font-semibold text-violet-800">{{ 'Générer des hashtags'|blog_translate }}</h3>
+            <p class="text-sm text-[#6B7280]">{{ 'Génère des hashtags à partir du titre de l\'article. Ils seront ajoutés à la fin du contenu et affichés sous l\'article.'|blog_translate }}</p>
+            <div class="flex flex-wrap items-center gap-3">
+                <button type="button" id="blog-generate-hashtags-btn"
+                        class="px-4 py-2.5 rounded-lg bg-violet-600 text-white font-medium hover:bg-violet-700 focus:outline focus:ring-2 focus:ring-violet-500">
+                    {{ 'Générer des hashtags'|blog_translate }}
+                </button>
+            </div>
+            <div id="blog-hashtags-zone" class="hidden mt-2 p-3 rounded-lg bg-white border border-violet-200">
+                <p class="text-sm text-[#4B5563] mb-2">{{ 'Hashtags générés :'|blog_translate }}</p>
+                <p id="blog-hashtags-result" class="text-[#4B5563] font-medium break-words mb-2"></p>
+                <button type="button" id="blog-hashtags-insert-btn"
+                        class="px-3 py-1.5 rounded-lg bg-violet-600 text-white text-sm font-medium hover:bg-violet-700">
+                    {{ 'Insérer à la fin du contenu'|blog_translate }}
+                </button>
+            </div>
+            <p id="blog-hashtags-error" class="text-sm text-red-600 hidden mt-1"></p>
         </div>
 
         <div class="flex flex-wrap gap-6">
@@ -319,6 +341,82 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
         });
     })();
+
+    var blogTitreInput = document.getElementById('blog_titre');
+    var blogContenuInput = document.getElementById('blog_contenu');
+    var hashtagsBtn = document.getElementById('blog-generate-hashtags-btn');
+    var hashtagsZone = document.getElementById('blog-hashtags-zone');
+    var hashtagsResult = document.getElementById('blog-hashtags-result');
+    var hashtagsInsertBtn = document.getElementById('blog-hashtags-insert-btn');
+    var hashtagsError = document.getElementById('blog-hashtags-error');
+    var hashtagsUrl = '{{ path("user_blog_generate_hashtags") }}';
+
+    if (hashtagsBtn && blogTitreInput) {
+        hashtagsBtn.addEventListener('click', function() {
+            var titre = blogTitreInput.value.trim();
+            if (!titre) {
+                if (hashtagsError) {
+                    hashtagsError.textContent = "Veuillez d'abord saisir un titre.";
+                    hashtagsError.classList.remove('hidden');
+                }
+                return;
+            }
+            if (hashtagsError) hashtagsError.classList.add('hidden');
+            hashtagsBtn.disabled = true;
+            hashtagsBtn.textContent = 'Génération...';
+
+            var formData = new FormData();
+            formData.append('titre', titre);
+            fetch(hashtagsUrl, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                hashtagsBtn.disabled = false;
+                hashtagsBtn.textContent = 'Générer des hashtags';
+                if (data.error) {
+                    hashtagsError.textContent = data.error;
+                    hashtagsError.classList.remove('hidden');
+                    if (hashtagsZone) hashtagsZone.classList.add('hidden');
+                } else if (data.hashtags) {
+                    hashtagsResult.textContent = data.hashtags;
+                    hashtagsZone.classList.remove('hidden');
+                    hashtagsZone.dataset.hashtags = data.hashtags;
+                }
+            })
+            .catch(function() {
+                hashtagsBtn.disabled = false;
+                hashtagsBtn.textContent = 'Générer des hashtags';
+                hashtagsError.textContent = 'Erreur lors de la génération.';
+                hashtagsError.classList.remove('hidden');
+            });
+        });
+    }
+
+    if (hashtagsInsertBtn && blogContenuInput && hashtagsZone) {
+            hashtagsInsertBtn.addEventListener('click', function() {
+                var hashtags = hashtagsZone.dataset.hashtags || hashtagsResult.textContent;
+                if (hashtags) {
+                    var contenu = blogContenuInput.value;
+                    blogContenuInput.value = contenu + (contenu ? '\n\n' : '') + hashtags;
+                }
+            });
+        }
+
+    var blogEditForm = document.getElementById('blog-edit-form');
+    if (blogEditForm && blogContenuInput && hashtagsZone) {
+        blogEditForm.addEventListener('submit', function() {
+            var hashtags = hashtagsZone.dataset.hashtags;
+            if (hashtags && !hashtagsZone.classList.contains('hidden')) {
+                var contenu = blogContenuInput.value;
+                if (!contenu.endsWith(hashtags.trim())) {
+                    blogContenuInput.value = contenu + (contenu ? '\n\n' : '') + hashtags;
+                }
+            }
+        });
+    }
 
     var spellCheckUrl = '{{ path("user_blog_spell_check") }}';
     document.querySelectorAll('.spell-check-btn').forEach(function(btn) {

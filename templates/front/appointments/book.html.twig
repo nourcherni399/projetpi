@@ -35,7 +35,7 @@
             <div class="flex gap-2 mb-4">
                 {% if doctor.has_cabinet %}<span class="px-3 py-1.5 rounded-lg border border-[#E5E0D8] text-[#6B7280] text-sm">Cabinet</span>{% endif %}
             </div>
-            <p class="font-semibold text-[#4B5563]">{{ doctor.price }}€ <span class="text-sm font-normal text-[#6B7280]">Tarif de la consultation</span></p>
+            <p class="font-semibold text-[#4B5563]">{{ doctor.price }} DT <span class="text-sm font-normal text-[#6B7280]">Tarif de la consultation</span></p>
         </div>
     </aside>
 
@@ -250,7 +250,7 @@
                         <li>Type: {{ choices.type_label }}</li>
                         <li>Mode: {{ choices.mode_label }}</li>
                         {% if choices.motif %}<li>Motif: {{ choices.motif }}</li>{% endif %}
-                        <li class="font-semibold text-[#4B5563] pt-2">Tarif: {{ doctor.price }}€</li>
+                        <li class="font-semibold text-[#4B5563] pt-2">Tarif: {{ doctor.price }} DT</li>
                     </ul>
                 </div>
                 <div class="flex justify-between">

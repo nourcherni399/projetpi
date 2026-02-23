@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Commande;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -35,6 +36,19 @@ class CommandeRepository extends ServiceEntityRepository
     public function findAllOrderedByDate(): array
     {
         return $this->createQueryBuilder('c')
+            ->orderBy('c.dateCreation', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return Commande[]
+     */
+    public function findByUserOrderedByDate(User $user): array
+    {
+        return $this->createQueryBuilder('c')
+            ->andWhere('c.user = :user')
+            ->setParameter('user', $user)
             ->orderBy('c.dateCreation', 'DESC')
             ->getQuery()
             ->getResult();

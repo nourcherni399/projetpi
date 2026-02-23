@@ -10,11 +10,13 @@ use App\Entity\Thematique;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Range;
@@ -56,10 +58,18 @@ final class ThematiqueType extends AbstractType
                 'constraints' => [new Length(['max' => 20, 'maxMessage' => 'La couleur ne peut pas dépasser {{ limit }} caractères.'])],
                 'attr' => $attr + ['placeholder' => 'Ex. #A7C7E7'],
             ])
-            ->add('image', TextType::class, [
-                'label' => 'Image (URL ou chemin)',
+            ->add('image', FileType::class, [
+                'label' => 'Image (JPG, PNG, GIF, WebP)',
                 'required' => false,
-                'attr' => $attr + ['placeholder' => 'Ex. /images/thematiques/sensoriel.jpg ou https://…'],
+                'mapped' => false,
+                'constraints' => [
+                    new File([
+                        'maxSize' => '5M',
+                        'mimeTypes' => ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+                        'mimeTypesMessage' => 'Veuillez téléverser une image (JPG, PNG, GIF ou WebP).',
+                    ]),
+                ],
+                'attr' => $attr + ['accept' => 'image/jpeg,image/png,image/gif,image/webp'],
             ])
             ->add('sousTitre', TextType::class, [
                 'label' => 'Sous-titre',

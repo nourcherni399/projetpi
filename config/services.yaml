@@ -10,9 +10,13 @@ parameters:
     uploads_ressources_directory: '%kernel.project_dir%/public/uploads/ressources'
     uploads_users_directory: '%kernel.project_dir%/public/uploads/users'
     uploads_commentaires_directory: '%kernel.project_dir%/public/uploads/commentaires'
+    uploads_thematiques_directory: '%kernel.project_dir%/public/uploads/thematiques'
     app_url_default: ''
     libretranslate_api_key_default: ''
     groq_api_key_default: ''
+    ai_recommender_api_key_default: ''
+    ai_recommender_model_default: ''
+    ai_recommender_base_url_default: ''
 
 services:
     # default configuration for services in *this* file
@@ -37,9 +41,22 @@ services:
     # Force l'URI de redirection OAuth (Google) pour éviter redirect_uri_mismatch si APP_URL est défini
     App\EventSubscriber\OAuthRedirectUriContextSubscriber:
         arguments:
-            $appUrl: '%env(default:app_url_default:APP_URL)%'
+            $appUrl: '%env(APP_URL)%'
 
-<<<<<<< HEAD
+
+    App\Service\ZoomApiService:
+        arguments:
+            $accountId: '%env(default::ZOOM_ACCOUNT_ID)%'
+            $clientId: '%env(default::ZOOM_CLIENT_ID)%'
+            $clientSecret: '%env(default::ZOOM_CLIENT_SECRET)%'
+
+    App\Service\ExternalAiRecommendationService:
+        arguments:
+            $enabled: '%env(default::AI_RECOMMENDER_ENABLED)%'
+            $apiKey: '%env(default:ai_recommender_api_key_default:AI_RECOMMENDER_API_KEY)%'
+            $model: '%env(default:ai_recommender_model_default:AI_RECOMMENDER_MODEL)%'
+            $baseUrl: '%env(default:ai_recommender_base_url_default:AI_RECOMMENDER_BASE_URL)%'
+
     App\Service\LibreTranslateService:
         arguments:
             $cache: '@cache.app'
@@ -67,8 +84,14 @@ services:
         arguments:
             $apiKey: '%env(default:groq_api_key_default:GROQ_API_KEY)%'
 
-=======
->>>>>>> 05f2c2d (last but not least)
+    App\Service\GroqHashtagGeneratorService:
+        arguments:
+            $apiKey: '%env(default:groq_api_key_default:GROQ_API_KEY)%'
+
+    App\Service\ProfanityFilterService:
+        arguments:
+            $badWordsFile: '%kernel.project_dir%/config/bad_words.txt'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 

@@ -1,0 +1,74 @@
+{% extends 'layouts/user.html.twig' %}
+
+{% block title %}Connexion faciale - AutiCare{% endblock %}
+
+{% block user_content %}
+<div class="max-w-5xl mx-auto py-8 px-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-[#E5E0D8] overflow-hidden">
+        <div class="grid md:grid-cols-2">
+            <div class="bg-[#F3F4F6] p-8 md:p-10 flex flex-col justify-between min-h-[520px]">
+                <p class="text-[#4B5563] text-lg">Welcome!</p>
+                <div class="flex items-center justify-center py-8">
+                    <img src="{{ asset('images/logo.png') }}" alt="AutiCare" class="h-64 w-auto object-contain" />
+                </div>
+                <p class="text-sm text-[#6B7280]">
+                    Préférez la connexion classique ?
+                    <a href="{{ path('app_login', target_path|default('') is not empty ? {'_target_path': target_path} : {}) }}" class="font-semibold text-[#111827] hover:underline">Log in with password</a>
+                </p>
+            </div>
+
+            <div class="p-8 md:p-10">
+                <h1 class="text-3xl font-bold text-[#23262F] mb-2">Face recognition</h1>
+                <p class="text-sm text-[#6B7280] mb-6">Identify yourself using your webcam.</p>
+
+                {% if app.flashes('error') %}
+                    <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                        {% for message in app.flashes('error') %}
+                            <p class="text-red-600 text-sm">{{ message }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="space-y-4" novalidate>
+                    <div>
+                        <label for="email" class="block text-xs uppercase tracking-wide text-[#9CA3AF] mb-1">Email or username (*)</label>
+                        <input
+                            type="text"
+                            id="email"
+                            name="email"
+                            value=""
+                            placeholder="Email or Username"
+                            autocomplete="email"
+                            class="w-full px-4 py-3 rounded-lg border border-[#E5E7EB] bg-white text-[#374151] placeholder-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#A7C7E7]"
+                        >
+                    </div>
+
+                    <input type="hidden" id="face_recognition_csrf" value="{{ csrf_token('face_recognition') }}">
+                    {% if target_path|default('') is not empty %}
+                    <input type="hidden" id="face_target_path" value="{{ target_path }}">
+                    {% endif %}
+
+                    <div class="rounded-lg border border-[#E5E7EB] p-4 bg-[#F9FAFB]">
+                        <p class="text-sm font-medium text-[#23262F] mb-2">Face check</p>
+                        <p class="text-xs text-[#6B7280] mb-3">1) Start camera. 2) Center your face. 3) Verify.</p>
+                        <div class="grid grid-cols-2 gap-2 mb-3">
+                            <button id="face-start-camera" type="button" class="py-2.5 rounded-lg border border-[#E5E7EB] text-[#4B5563] text-sm hover:bg-white">Start camera</button>
+                            <button id="face-verify-btn" type="button" class="py-2.5 rounded-lg border border-[#D1D5DB] bg-white text-[#4B5563] text-sm hover:bg-[#F3F4F6]">Verify face</button>
+                        </div>
+                        <video id="face-login-video" autoplay playsinline class="w-full rounded-lg border border-[#E5E7EB] bg-black mb-2"></video>
+                        <canvas id="face-login-canvas" width="480" height="360" class="hidden"></canvas>
+                        <p id="face-login-status" class="text-xs text-[#6B7280]"></p>
+                    </div>
+
+                    <a href="{{ path('app_login', target_path|default('') is not empty ? {'_target_path': target_path} : {}) }}" class="block w-full text-center py-3 rounded-lg bg-[#1F2937] text-white font-semibold hover:bg-[#111827] transition">
+                        Back to password login
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<script defer src="{{ asset('js/login.js') }}"></script>
+{% endblock %}
+

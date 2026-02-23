@@ -37,16 +37,21 @@ final class ConnectGoogleController extends AbstractController
     }
 
     #[Route('/connect/google', name: 'app_connect_google_start', methods: ['GET'])]
-    public function connectGoogleStart(): RedirectResponse
-    {
-        if ($this->getUser() instanceof User) {
-            return $this->redirectToRoute('home');
-        }
-
-        return $this->clientRegistry
-            ->getClient('google')
-            ->redirect([], []);
+public function connectGoogleStart(): RedirectResponse
+{
+    if ($this->getUser() instanceof User) {
+        return $this->redirectToRoute('home');
     }
+
+    $client = $this->clientRegistry->getClient('google');
+    
+    // FORCER l'URI à utiliser localhost au lieu de 127.0.0.1
+    $redirectUri = 'http://localhost:8000/connect/google/check';
+    
+    return $client->redirect([], [
+        'redirect_uri' => $redirectUri
+    ]);
+}
 
     #[Route('/connect/google/check', name: 'app_connect_google_check', methods: ['GET'])]
     public function connectGoogleCheck(Request $request): Response

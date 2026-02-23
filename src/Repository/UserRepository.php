@@ -80,4 +80,14 @@ class UserRepository extends ServiceEntityRepository
             'actifs' => $actifs,
         ];
     }
+
+    public function findOneByEmailVerificationToken(string $token): ?User
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.emailVerificationToken = :token')
+            ->setParameter('token', $token)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

@@ -10,6 +10,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
@@ -89,6 +90,14 @@ final class InscriptionType extends AbstractType
                         'minMessage' => 'Le mot de passe doit contenir au moins {{ limit }} caractères.',
                         'maxMessage' => 'Le mot de passe ne peut pas dépasser {{ limit }} caractères.',
                     ]),
+                    new Regex([
+                        'pattern' => '/[A-Z]/',
+                        'message' => 'Le mot de passe doit contenir au moins une lettre majuscule.',
+                    ]),
+                    new Regex([
+                        'pattern' => '/\d/',
+                        'message' => 'Le mot de passe doit contenir au moins un chiffre.',
+                    ]),
                 ],
                 'invalid_message' => 'Les deux mots de passe doivent être identiques.',
             ])
@@ -132,6 +141,10 @@ final class InscriptionType extends AbstractType
                 'placeholder' => 'Choisir',
                 'required' => false,
                 'attr' => $attr + ['data-role-fields' => 'ROLE_PATIENT'],
+            ])
+            ->add('dataFaceApi', HiddenType::class, [
+                'required' => false,
+                'mapped' => false,
             ])
             ->add('submit', SubmitType::class, [
                 'label' => 'Créer mon compte',

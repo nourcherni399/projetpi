@@ -16,6 +16,7 @@ use App\Form\UserEditType;
 use App\Repository\EvenementRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -127,25 +128,15 @@ final class AdminController extends AbstractController
             if ($plainPassword !== null && is_array($plainPassword) && trim((string) ($plainPassword['first'] ?? '')) !== '') {
                 $user->setPassword($this->passwordHasher->hashPassword($user, (string) $plainPassword['first']));
             }
+            $selectedRole = $form->get('role')->getData();
+            if ($selectedRole instanceof UserRole) {
+                $user->setRole($selectedRole);
+            }
             $user->setUpdatedAt(new \DateTimeImmutable());
-            if ($user instanceof Medcin && $form->has('specialite')) {
-                $user->setSpecialite($form->get('specialite')->getData());
-                $user->setNomCabinet($form->get('nomCabinet')->getData());
-                $user->setAdresseCabinet($form->get('adresseCabinet')->getData());
-                $user->setTelephoneCabinet($form->get('telephoneCabinet')->getData());
-                $tarif = $form->get('tarifConsultation')->getData();
-                $user->setTarifConsultation($tarif !== null ? (float) $tarif : null);
-            }
-            if ($user instanceof ParentUser && $form->has('relationAvecPatient')) {
-                $user->setRelationAvecPatient($form->get('relationAvecPatient')->getData());
-            }
-            if ($user instanceof Patient && $form->has('dateNaissance')) {
-                $dn = $form->get('dateNaissance')->getData();
-                $user->setDateNaissance($dn instanceof \DateTimeInterface ? \DateTimeImmutable::createFromInterface($dn) : null);
-                $user->setAdresse($form->get('adresse')->getData());
-                $user->setSexe($form->get('sexe')->getData());
-            }
             $this->entityManager->flush();
+            if ($selectedRole instanceof UserRole) {
+                $this->syncEditedUserTypeAndRoleData($user, $selectedRole, $form);
+            }
             $this->addFlash('success', 'L\'utilisateur a été modifié avec succès.');
             return $this->redirectToRoute('admin_user_show', ['id' => $user->getId()]);
         }
@@ -246,6 +237,62 @@ final class AdminController extends AbstractController
             UserRole::MEDECIN => new Medcin(),
             UserRole::PARENT => new ParentUser(),
             UserRole::USER => new Patient(),
+        };
+    }
+
+    private function syncEditedUserTypeAndRoleData(User $user, UserRole $role, FormInterface $form): void
+    {
+        $connection = $this->entityManager->getConnection();
+        $userMeta = $this->entityManager->getClassMetadata(User::class);
+        $patientMeta = $this->entityManager->getClassMetadata(Patient::class);
+        $parentMeta = $this->entityManager->getClassMetadata(ParentUser::class);
+        $medecinMeta = $this->entityManager->getClassMetadata(Medcin::class);
+
+        $updates = [
+            $userMeta->getColumnName('role') => $role->value,
+            'type' => $this->resolveDiscriminatorForRole($role),
+            $medecinMeta->getColumnName('specialite') => null,
+            $medecinMeta->getColumnName('nomCabinet') => null,
+            $medecinMeta->getColumnName('adresseCabinet') => null,
+            $medecinMeta->getColumnName('telephoneCabinet') => null,
+            $medecinMeta->getColumnName('tarifConsultation') => null,
+            $parentMeta->getColumnName('relationAvecPatient') => null,
+            $patientMeta->getColumnName('dateNaissance') => null,
+            $patientMeta->getColumnName('adresse') => null,
+            $patientMeta->getColumnName('sexe') => null,
+        ];
+
+        if ($role === UserRole::MEDECIN) {
+            $updates[$medecinMeta->getColumnName('specialite')] = $form->get('specialite')->getData();
+            $updates[$medecinMeta->getColumnName('nomCabinet')] = $form->get('nomCabinet')->getData();
+            $updates[$medecinMeta->getColumnName('adresseCabinet')] = $form->get('adresseCabinet')->getData();
+            $updates[$medecinMeta->getColumnName('telephoneCabinet')] = $form->get('telephoneCabinet')->getData();
+            $tarif = $form->get('tarifConsultation')->getData();
+            $updates[$medecinMeta->getColumnName('tarifConsultation')] = $tarif !== null ? (float) $tarif : null;
+        } elseif ($role === UserRole::PARENT) {
+            $updates[$parentMeta->getColumnName('relationAvecPatient')] = $form->get('relationAvecPatient')->getData();
+        } elseif ($role === UserRole::PATIENT || $role === UserRole::USER) {
+            $dn = $form->get('dateNaissance')->getData();
+            $updates[$patientMeta->getColumnName('dateNaissance')] = $dn instanceof \DateTimeInterface ? $dn->format('Y-m-d') : null;
+            $updates[$patientMeta->getColumnName('adresse')] = $form->get('adresse')->getData();
+            $sexe = $form->get('sexe')->getData();
+            $updates[$patientMeta->getColumnName('sexe')] = $sexe?->value;
+        }
+
+        $connection->update(
+            $userMeta->getTableName(),
+            $updates,
+            [$userMeta->getColumnName('id') => $user->getId()]
+        );
+    }
+
+    private function resolveDiscriminatorForRole(UserRole $role): string
+    {
+        return match ($role) {
+            UserRole::ADMIN => 'admin',
+            UserRole::MEDECIN => 'medcin',
+            UserRole::PARENT => 'parent',
+            UserRole::PATIENT, UserRole::USER => 'patient',
         };
     }
 

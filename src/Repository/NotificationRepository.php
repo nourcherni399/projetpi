@@ -33,6 +33,28 @@ class NotificationRepository extends ServiceEntityRepository
     }
 
     /**
+     * Notifications de type commande (confirmée, livraison, reçu) pour un destinataire.
+     *
+     * @return list<Notification>
+     */
+    public function findCommandeForDestinataireOrderByCreatedDesc(User $user, int $limit = 15): array
+    {
+        return $this->createQueryBuilder('n')
+            ->andWhere('n.destinataire = :user')
+            ->andWhere('n.type IN (:types)')
+            ->setParameter('user', $user)
+            ->setParameter('types', [
+                Notification::TYPE_COMMANDE_CONFIRMEE,
+                Notification::TYPE_COMMANDE_LIVRAISON,
+                Notification::TYPE_COMMANDE_RECU,
+            ])
+            ->orderBy('n.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
      * @return list<Notification>
      */
     public function findByDestinataireOrderByCreatedDesc(User $user): array

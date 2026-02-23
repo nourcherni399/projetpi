@@ -7,6 +7,7 @@ namespace App\Twig;
 use App\Entity\Notification;
 use App\Repository\CartRepository;
 use App\Repository\InscritEventsRepository;
+use App\Repository\MessageEvenementRepository;
 use App\Repository\NotificationRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -18,6 +19,7 @@ final class InscriptionNotificationExtension extends AbstractExtension implement
 {
     public function __construct(
         private readonly InscritEventsRepository $inscritEventsRepository,
+        private readonly MessageEvenementRepository $messageEvenementRepository,
         private readonly ManagerRegistry $managerRegistry,
         private readonly Security $security,
         private readonly RequestStack $requestStack,
@@ -29,8 +31,12 @@ final class InscriptionNotificationExtension extends AbstractExtension implement
     {
         $globals = [
             'admin_pending_inscriptions' => [],
+            'admin_unread_event_messages_count' => 0,
+            'admin_first_event_id_with_unread_messages' => null,
             'user_inscription_notifications' => [],
             'user_rdv_notifications' => [],
+            'user_event_message_notifications' => [],
+            'user_commande_notifications' => [],
             'app_cart_count' => 0,
         ];
 
@@ -40,15 +46,32 @@ final class InscriptionNotificationExtension extends AbstractExtension implement
 
         if ($isAdmin) {
             $globals['admin_pending_inscriptions'] = $this->inscritEventsRepository->findPendingOrderByDate();
+            $globals['admin_unread_event_messages_count'] = $this->messageEvenementRepository->countUnreadFromUserByEvenement(null);
+            $globals['admin_first_event_id_with_unread_messages'] = $this->messageEvenementRepository->findFirstEventIdWithUnreadFromUser();
         }
 
         $user = $this->security->getUser();
         if ($user !== null && !$isAdmin) {
             $inscriptions = $this->inscritEventsRepository->findAccepteRefuseOuEnAttenteForUser($user);
             $globals['user_inscription_notifications'] = $this->buildInscriptionNotificationMessages($inscriptions);
-            $globals['user_rdv_notifications'] = $this->buildRdvNotificationMessages($user, $this->managerRegistry->getRepository(Notification::class));
+            $notificationRepo = $this->managerRegistry->getRepository(Notification::class);
+            $globals['user_rdv_notifications'] = $this->buildRdvNotificationMessages($user, $notificationRepo);
+            try {
+                $globals['user_commande_notifications'] = $this->buildCommandeNotificationMessages($user, $notificationRepo);
+            } catch (\Throwable $e) {
+                // Colonne commande_id absente (migration non exécutée) : pas de notifications commande
+                $globals['user_commande_notifications'] = [];
+            }
+            $eventsWithUnread = $this->messageEvenementRepository->findEventsWithUnreadAdminMessagesForUser($user);
+            $globals['user_event_message_notifications'] = array_map(static fn (array $e) => [
+                'message' => sprintf('Nouvelle réponse sur « %s »', $e['eventTitle']),
+                'eventId' => $e['eventId'],
+            ], $eventsWithUnread);
             $cart = $this->cartRepository->findOneBy(['user' => $user]);
             $globals['app_cart_count'] = $cart !== null ? $cart->getTotalItems() : 0;
+        } else {
+            $cartSession = $this->requestStack->getCurrentRequest()?->getSession()->get('cart_items', []);
+            $globals['app_cart_count'] = \is_array($cartSession) ? array_sum($cartSession) : 0;
         }
 
         return $globals;
@@ -114,6 +137,43 @@ final class InscriptionNotificationExtension extends AbstractExtension implement
                     'message' => sprintf('Votre demande de rendez-vous du %s a été refusée.', $label),
                     'type' => 'rdv_refuse',
                     'link' => null,
+                ];
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * Construit les messages de notification de commande (confirmée, livraison, reçu) pour l'utilisateur.
+     *
+     * @return list<array{message: string, type: string, commandeId: int}>
+     */
+    private function buildCommandeNotificationMessages(object $user, NotificationRepository $notificationRepository): array
+    {
+        $notifications = $notificationRepository->findCommandeForDestinataireOrderByCreatedDesc($user, 15);
+        $result = [];
+        foreach ($notifications as $n) {
+            $commande = $n->getCommande();
+            $commandeId = $commande !== null ? (int) $commande->getId() : 0;
+            $num = $commandeId > 0 ? ' #' . $commandeId : '';
+            $type = $n->getType();
+            if ($type === Notification::TYPE_COMMANDE_CONFIRMEE) {
+                $result[] = [
+                    'message' => 'Votre commande' . $num . ' a été acceptée (stock vérifié, en préparation).',
+                    'type' => 'commande_confirmée',
+                    'commandeId' => $commandeId,
+                ];
+            } elseif ($type === Notification::TYPE_COMMANDE_LIVRAISON) {
+                $result[] = [
+                    'message' => 'Votre commande' . $num . ' est en livraison (colis en route).',
+                    'type' => 'commande_livraison',
+                    'commandeId' => $commandeId,
+                ];
+            } elseif ($type === Notification::TYPE_COMMANDE_RECU) {
+                $result[] = [
+                    'message' => 'Votre commande' . $num . ' a été livrée (reçue).',
+                    'type' => 'commande_recu',
+                    'commandeId' => $commandeId,
                 ];
             }
         }

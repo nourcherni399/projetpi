@@ -9,9 +9,12 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
         </svg>
     </div>
-    <h1 class="text-3xl font-bold text-[#4B5563] mb-3">Commande Confirmée!</h1>
-    <p class="text-[#6B7280]">Merci pour votre achat. Votre commande a été reçue avec succès.</p>
+    <h1 class="text-3xl font-bold text-[#4B5563] mb-3">{% if commande.statut == 'annulée' %}Commande annulée{% else %}Commande Confirmée!{% endif %}</h1>
+    <p class="text-[#6B7280]">{% if commande.statut == 'annulée' %}Cette commande a été annulée.{% else %}Merci pour votre achat. Votre commande a été reçue avec succès.{% endif %}</p>
 </section>
+{% if commande.statut == 'annulée' %}
+<div class="mb-8 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800">Cette commande n'est plus active.</div>
+{% endif %}
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
     <div class="lg:col-span-2">
@@ -30,13 +33,13 @@
                 </div>
                 <div>
                     <p class="text-sm text-[#6B7280] mb-1">Statut</p>
-                    <p class="text-lg font-semibold {% if commande.statut == 'en_attente' %}text-amber-600{% elseif commande.statut == 'recu' %}text-emerald-600{% else %}text-[#4B5563]{% endif %}">
-                        {% if commande.statut == 'en_attente' %}En attente (validation admin){% elseif commande.statut == 'recu' %}Reçu{% elseif commande.statut == 'payée' %}Payée{% elseif commande.statut == 'livrée' %}Livrée{% elseif commande.statut == 'annulée' %}Annulée{% else %}{{ commande.statut }}{% endif %}
+                    <p class="text-lg font-semibold {% if commande.statut == 'en_attente' %}text-amber-600{% elseif commande.statut == 'recu' or commande.statut == 'confirmer' or commande.statut == 'livraison' %}text-emerald-600{% elseif commande.statut == 'annulée' %}text-red-600{% else %}text-[#4B5563]{% endif %}">
+                        {% if commande.statut == 'en_attente' %}En attente{% elseif commande.statut == 'confirmer' %}Préparation{% elseif commande.statut == 'livraison' %}En livraison{% elseif commande.statut == 'recu' %}Reçu{% elseif commande.statut == 'annulée' %}Annulée{% elseif commande.statut == 'payée' %}Payée{% elseif commande.statut == 'livrée' %}Livrée{% else %}{{ commande.statut }}{% endif %}
                     </p>
                 </div>
                 <div>
                     <p class="text-sm text-[#6B7280] mb-1">Mode de Paiement</p>
-                    <p class="text-lg font-semibold text-[#4B5563]">{% if commande.modePayment == 'delivery' %}Livraison{% else %}Carte Bancaire{% endif %}</p>
+                    <p class="text-lg font-semibold text-[#4B5563]">{% if commande.modePayment == 'a_la_livraison' or commande.modePayment == 'delivery' %}À la livraison{% elseif commande.modePayment starts with 'carte_' %}Carte Bancaire{% else %}Livraison{% endif %}</p>
                 </div>
             </div>
 
@@ -74,42 +77,45 @@
         </div>
     </div>
 
-    <!-- Prochaines étapes (étape 1 = en_attente, étape 2 = recu) -->
+    <!-- Prochaines étapes : en attente jusqu'à ce que l'admin accepte, puis passage à l'étape suivante -->
     <div>
         <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6 sticky top-20">
-            <h3 class="text-lg font-semibold text-[#4B5563] mb-4">Suivi de la commande</h3>
-            {% set etape1_ok = true %}
-            {% set etape2_ok = commande.statut == 'recu' or commande.statut == 'payée' or commande.statut == 'livrée' %}
-            <div class="space-y-3">
+            <h3 class="text-lg font-semibold text-[#4B5563] mb-4">Prochaines Étapes</h3>
+            {% set s = commande.statut %}
+            {% set step1_done = true %}
+            {% set step2_done = s != 'en_attente' and s != 'annulée' %}
+            {% set step3_done = s == 'livraison' or s == 'recu' or s == 'payée' or s == 'livrée' %}
+            {% set step4_done = s == 'recu' or s == 'livrée' %}
+            <div class="space-y-4">
                 <div class="flex gap-3">
                     <div class="w-8 h-8 rounded-full bg-[#A7C7E7] text-white flex items-center justify-center flex-shrink-0 font-semibold">✓</div>
                     <div>
-                        <p class="font-semibold text-[#4B5563]">Étape 1 – Commande enregistrée</p>
-                        <p class="text-sm text-[#6B7280]">Votre commande a bien été reçue</p>
+                        <p class="font-semibold text-[#4B5563]">1. Commande Reçue</p>
+                        <p class="text-sm text-[#6B7280]">Votre commande a été validée</p>
                     </div>
                 </div>
 
                 <div class="flex gap-3">
-                    <div class="w-8 h-8 rounded-full {{ etape2_ok ? 'bg-[#A7C7E7] text-white' : 'bg-[#E5E0D8] text-[#6B7280]' }} flex items-center justify-center flex-shrink-0 font-semibold">{{ etape2_ok ? '✓' : '2' }}</div>
+                    <div class="w-8 h-8 rounded-full {{ step2_done ? 'bg-[#A7C7E7] text-white' : 'bg-[#E5E0D8] text-[#6B7280]' }} flex items-center justify-center flex-shrink-0 font-semibold">{{ step2_done ? '✓' : '2' }}</div>
                     <div>
-                        <p class="font-semibold text-[#4B5563]">Étape 2 – Payé</p>
-                        <p class="text-sm text-[#6B7280]">{% if etape2_ok %}Paiement effectué{% else %}Paiement en attente{% endif %}</p>
+                        <p class="font-semibold text-[#4B5563]">2. Vérification du stock</p>
+                        <p class="text-sm text-[#6B7280]">{% if step2_done %}Stock vérifié, commande acceptée par l'admin{% else %}En attente de validation par l'admin{% endif %}</p>
                     </div>
                 </div>
 
                 <div class="flex gap-3">
-                    <div class="w-8 h-8 rounded-full bg-[#E5E0D8] text-[#6B7280] flex items-center justify-center flex-shrink-0 font-semibold">3</div>
+                    <div class="w-8 h-8 rounded-full {{ step3_done ? 'bg-[#A7C7E7] text-white' : 'bg-[#E5E0D8] text-[#6B7280]' }} flex items-center justify-center flex-shrink-0 font-semibold">{{ step3_done ? '✓' : '3' }}</div>
                     <div>
-                        <p class="font-semibold text-[#4B5563]">Livraison</p>
-                        <p class="text-sm text-[#6B7280]">Votre colis en route</p>
+                        <p class="font-semibold text-[#4B5563]">3. Suivi du produit</p>
+                        <p class="text-sm text-[#6B7280]">{% if s == 'recu' or s == 'livrée' %}Livré{% elseif step3_done %}Colis a quitté le magasin — En route{% else %}Colis a quitté le magasin → En route → Livré{% endif %}</p>
                     </div>
                 </div>
 
                 <div class="flex gap-3">
-                    <div class="w-8 h-8 rounded-full bg-[#E5E0D8] text-[#6B7280] flex items-center justify-center flex-shrink-0 font-semibold">4</div>
+                    <div class="w-8 h-8 rounded-full {{ step4_done ? 'bg-[#A7C7E7] text-white' : 'bg-[#E5E0D8] text-[#6B7280]' }} flex items-center justify-center flex-shrink-0 font-semibold">{{ step4_done ? '✓' : '4' }}</div>
                     <div>
-                        <p class="font-semibold text-[#4B5563]">Livré</p>
-                        <p class="text-sm text-[#6B7280]">Commande livrée</p>
+                        <p class="font-semibold text-[#4B5563]">4. Reçu</p>
+                        <p class="text-sm text-[#6B7280]">Votre commande livrée</p>
                     </div>
                 </div>
             </div>

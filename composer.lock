@@ -4,11 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-<<<<<<< HEAD
     "content-hash": "bc434c5f170ce67dbd3428e4eac8ada3",
-=======
     "content-hash": "5f1a0e9bca9658f21e848490e3c2984b",
->>>>>>> 05f2c2d (last but not least)
     "packages": [
         {
             "name": "cloudinary/cloudinary_php",
@@ -2026,7 +2023,6 @@
             "time": "2025-07-25T09:04:22+00:00"
         },
         {
-<<<<<<< HEAD
             "name": "meilisearch/meilisearch-php",
             "version": "v1.16.1",
             "source": {
@@ -2107,8 +2103,6 @@
             "time": "2025-09-18T10:15:45+00:00"
         },
         {
-=======
->>>>>>> 05f2c2d (last but not least)
             "name": "monolog/monolog",
             "version": "3.10.0",
             "source": {
@@ -2302,7 +2296,6 @@
             "time": "2024-04-08T12:52:34+00:00"
         },
         {
-<<<<<<< HEAD
             "name": "php-http/discovery",
             "version": "1.20.0",
             "source": {
@@ -2382,8 +2375,6 @@
             "time": "2024-10-02T11:20:13+00:00"
         },
         {
-=======
->>>>>>> 05f2c2d (last but not least)
             "name": "phpdocumentor/reflection-common",
             "version": "2.2.0",
             "source": {
@@ -11451,11 +11442,8 @@
         "ext-iconv": "*"
     },
     "platform-dev": {},
-<<<<<<< HEAD
     "platform-overrides": {
         "php": "8.4"
     },
-=======
->>>>>>> 05f2c2d (last but not least)
     "plugin-api-version": "2.6.0"
 }

@@ -153,7 +153,7 @@ final class UserCreateType extends AbstractType
                 'attr' => $attr + ['placeholder' => '01 23 45 67 89', 'data-role-fields' => 'ROLE_MEDECIN'],
             ])
             ->add('tarifConsultation', NumberType::class, [
-                'label' => 'Tarif consultation (€)',
+                'label' => 'Tarif consultation (DT)',
                 'required' => false,
                 'constraints' => [new Range(['min' => 0, 'max' => 99999.99, 'notInRangeMessage' => 'Le tarif doit être entre {{ min }} et {{ max }}.'])],
                 'attr' => $attr + ['placeholder' => '0', 'data-role-fields' => 'ROLE_MEDECIN'],
