@@ -148,9 +148,9 @@ final class ProfileType extends AbstractType
                     'attr' => self::ATTR + ['placeholder' => '01 23 45 67 89'],
                 ])
                 ->add('tarifConsultation', NumberType::class, [
-                    'label' => 'Tarif consultation (€)',
+                    'label' => 'Tarif consultation (DT)',
                     'required' => false,
-                    'constraints' => [new \Symfony\Component\Validator\Constraints\Range(['min' => 0, 'max' => 99999.99, 'notInRangeMessage' => 'Le tarif doit être entre {{ min }} et {{ max }} €.'])],
+                    'constraints' => [new \Symfony\Component\Validator\Constraints\Range(['min' => 0, 'max' => 99999.99, 'notInRangeMessage' => 'Le tarif doit être entre {{ min }} et {{ max }} DT.'])],
                     'attr' => self::ATTR + ['placeholder' => '80', 'step' => '0.01', 'min' => '0'],
                 ]);
         }
@@ -158,7 +158,7 @@ final class ProfileType extends AbstractType
         $builder->add('submit', SubmitType::class, [
             'label' => 'Enregistrer les modifications',
             'attr' => [
-                'class' => 'inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-[#A7C7E7] text-white font-semibold shadow-lg shadow-[#A7C7E7]/30 hover:bg-[#8BB8E0] hover:shadow-xl hover:shadow-[#A7C7E7]/25 focus:outline focus:ring-2 focus:ring-[#A7C7E7] focus:ring-offset-2 transition-all duration-200 cursor-pointer',
+                'class' => 'inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-[#7E9C87] text-white font-semibold shadow-lg shadow-[#7E9C87]/30 hover:bg-[#6E8D77] hover:shadow-xl hover:shadow-[#7E9C87]/25 focus:outline focus:ring-2 focus:ring-[#7E9C87] focus:ring-offset-2 transition-all duration-200 cursor-pointer',
             ],
         ]);
     }

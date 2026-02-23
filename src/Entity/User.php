@@ -69,6 +69,29 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $image = null;
 
+    /** Code PIN pour réinitialisation du mot de passe (valide 15 min). */
+    #[ORM\Column(length: 6, nullable: true)]
+    private ?string $resetPin = null;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $resetPinExpiresAt = null;
+
+    #[ORM\Column(length: 64, nullable: true)]
+    private ?string $emailVerificationToken = null;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $emailVerificationExpiresAt = null;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $emailVerifiedAt = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $googleId = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $dataFaceApi = null;
+
+
     public function __construct()
     {
         $this->blogs = new ArrayCollection();
@@ -191,6 +214,61 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function getResetPin(): ?string
+    {
+        return $this->resetPin;
+    }
+
+    public function setResetPin(?string $resetPin): static
+    {
+        $this->resetPin = $resetPin;
+        return $this;
+    }
+
+    public function getResetPinExpiresAt(): ?\DateTimeImmutable
+    {
+        return $this->resetPinExpiresAt;
+    }
+
+    public function setResetPinExpiresAt(?\DateTimeImmutable $resetPinExpiresAt): static
+    {
+        $this->resetPinExpiresAt = $resetPinExpiresAt;
+        return $this;
+    }
+
+    public function getEmailVerificationToken(): ?string
+    {
+        return $this->emailVerificationToken;
+    }
+
+    public function setEmailVerificationToken(?string $emailVerificationToken): static
+    {
+        $this->emailVerificationToken = $emailVerificationToken;
+        return $this;
+    }
+
+    public function getEmailVerificationExpiresAt(): ?\DateTimeImmutable
+    {
+        return $this->emailVerificationExpiresAt;
+    }
+
+    public function setEmailVerificationExpiresAt(?\DateTimeImmutable $emailVerificationExpiresAt): static
+    {
+        $this->emailVerificationExpiresAt = $emailVerificationExpiresAt;
+        return $this;
+    }
+
+    public function getEmailVerifiedAt(): ?\DateTimeImmutable
+    {
+        return $this->emailVerifiedAt;
+    }
+
+    public function setEmailVerifiedAt(?\DateTimeImmutable $emailVerifiedAt): static
+    {
+        $this->emailVerifiedAt = $emailVerifiedAt;
+        return $this;
+    }
+
     public function getGoogleId(): ?string
     {
         return $this->googleId;
@@ -199,6 +277,17 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setGoogleId(?string $googleId): static
     {
         $this->googleId = $googleId;
+        return $this;
+    }
+
+    public function getDataFaceApi(): ?string
+    {
+        return $this->dataFaceApi;
+    }
+
+    public function setDataFaceApi(?string $dataFaceApi): static
+    {
+        $this->dataFaceApi = $dataFaceApi;
         return $this;
     }
 

@@ -33,16 +33,38 @@
             </div>
 
             <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
-                <h2 class="text-xl font-semibold text-[#4B5563] mb-4">Mode de paiement</h2>
-                {{ form_row(form.modePayment) }}
+                <h2 class="text-xl font-semibold text-[#4B5563] mb-4">Mode de Paiement *</h2>
+                <div class="space-y-4" id="mode-payment-choices">
+                    {% for choice in form.modePayment.vars.choices %}
+                    <label class="flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition {{ form.modePayment.vars.value == choice.value ? 'border-[#A7C7E7] bg-[#A7C7E7]/5' : 'border-[#E5E0D8] hover:border-[#E5E0D8] hover:bg-[#F9FAFB]' }}">
+                        <input type="radio" name="{{ form.modePayment.vars.full_name }}" value="{{ choice.value }}" {{ form.modePayment.vars.value == choice.value ? 'checked' : '' }} class="mt-1 w-4 h-4 text-[#A7C7E7] focus:ring-[#A7C7E7]">
+                        <div>
+                            <span class="font-medium text-[#4B5563]">{{ choice.label }}</span>
+                            {% if choice.value == 'a_la_livraison' %}
+                            <p class="text-sm text-[#6B7280] mt-1">Payez à la réception de votre commande</p>
+                            {% else %}
+                            <p class="text-sm text-[#6B7280] mt-1">Visa, Mastercard, American Express</p>
+                            {% endif %}
+                        </div>
+                    </label>
+                    {% endfor %}
+                </div>
+                {{ form_errors(form.modePayment) }}
+                <div id="card-fields" class="mt-6 space-y-4 hidden">
+                    <div>{{ form_row(form.numeroCarte, { label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }, attr: { class: 'w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] focus:ring-2 focus:ring-[#A7C7E7] focus:border-[#A7C7E7]' } }) }}</div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>{{ form_row(form.dateExpiration, { label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }, attr: { class: 'w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] focus:ring-2 focus:ring-[#A7C7E7] focus:border-[#A7C7E7]' } }) }}</div>
+                        <div>{{ form_row(form.cvv, { label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }, attr: { class: 'w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] focus:ring-2 focus:ring-[#A7C7E7] focus:border-[#A7C7E7]' } }) }}</div>
+                    </div>
+                </div>
             </div>
 
-            <div class="flex flex-wrap gap-4">
-                <button type="submit" class="px-6 py-3 bg-[#A7C7E7] text-white rounded-lg font-semibold hover:bg-[#B8D4ED] transition">
-                    Passer la commande
+            <div class="flex flex-wrap gap-4 mt-6">
+                <button type="submit" class="px-6 py-3 bg-[#3B82F6] text-white rounded-lg font-semibold hover:bg-[#2563EB] transition">
+                    Confirmer la Commande
                 </button>
-                <a href="{{ path('cart_index') }}" class="px-6 py-3 border border-[#A7C7E7] text-[#A7C7E7] rounded-lg font-semibold hover:bg-[#F5F1EB] transition inline-block">
-                    Retour au panier
+                <a href="{{ path('cart_index') }}" class="px-6 py-3 bg-white border border-[#E5E0D8] text-[#4B5563] rounded-lg font-semibold hover:bg-[#F5F1EB] transition inline-block">
+                    Retour au Panier
                 </a>
             </div>
         {{ form_end(form) }}
@@ -74,4 +96,18 @@
         </div>
     </div>
 </div>
+
+<script>
+(function() {
+    var cardFields = document.getElementById('card-fields');
+    var radios = document.querySelectorAll('input[name="{{ form.modePayment.vars.full_name|e('js') }}"]');
+    function toggleCardFields() {
+        var isCard = false;
+        radios.forEach(function(r) { if (r.checked && r.value === 'carte_bancaire') isCard = true; });
+        if (cardFields) cardFields.classList.toggle('hidden', !isCard);
+    }
+    radios.forEach(function(r) { r.addEventListener('change', toggleCardFields); });
+    toggleCardFields();
+})();
+</script>
 {% endblock %}

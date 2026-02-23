@@ -17,6 +17,9 @@ final class UserChecker implements UserCheckerInterface
             return;
         }
         if ($user->isActive() === false) {
+            if ($user->getEmailVerificationToken() !== null) {
+                throw new CustomUserMessageAuthenticationException('Votre compte n\'est pas encore activé. Vérifiez votre e-mail de confirmation.');
+            }
             throw new CustomUserMessageAuthenticationException('Votre compte est désactivé. Contactez l\'équipe pour le réactiver.');
         }
     }

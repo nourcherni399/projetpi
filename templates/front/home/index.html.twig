@@ -26,6 +26,76 @@
     </div>
 </section>
 
+{% if app.user and suggestions is not null and (suggestions.productSuggestions is not empty or suggestions.eventSuggestions is not empty or suggestions.doctorSuggestions is not empty) %}
+<section class="py-10 border-t border-[#E5E0D8]">
+    <div class="max-w-6xl mx-auto px-4">
+        <style>
+            .suggestion-ticker {
+                position: relative;
+                overflow: hidden;
+            }
+            .suggestion-ticker-track {
+                display: flex;
+                width: max-content;
+                animation: suggestionTickerMove 30s linear infinite;
+            }
+            .suggestion-ticker:hover .suggestion-ticker-track {
+                animation-play-state: paused;
+            }
+            @keyframes suggestionTickerMove {
+                from { transform: translateX(0); }
+                to { transform: translateX(-50%); }
+            }
+        </style>
+        {% set tickerItems = [] %}
+        {% for produit in suggestions.productSuggestions %}
+            {% set tickerItems = tickerItems|merge([{
+                label: 'Produit: ' ~ produit.nom,
+                url: path('user_product_show', {id: produit.id})
+            }]) %}
+        {% endfor %}
+        {% for event in suggestions.eventSuggestions %}
+            {% set tickerItems = tickerItems|merge([{
+                label: 'Evenement: ' ~ event.title,
+                url: path('user_event_show', {id: event.id})
+            }]) %}
+        {% endfor %}
+        {% for doctor in suggestions.doctorSuggestions %}
+            {% set tickerItems = tickerItems|merge([{
+                label: 'Medecin: Dr. ' ~ doctor.nom ~ ' ' ~ doctor.prenom,
+                url: path('user_appointment_book', {id: doctor.id})
+            }]) %}
+        {% endfor %}
+
+        <div class="flex rounded-xl overflow-hidden border border-[#E5E0D8]">
+            <div class="shrink-0 bg-[#D82222] text-white px-4 py-2 text-sm font-semibold">
+                Suggestions
+            </div>
+            <div class="suggestion-ticker flex-1 bg-white py-2">
+                {% if tickerItems is not empty %}
+                    <div class="suggestion-ticker-track whitespace-nowrap text-sm text-[#4B5563]">
+                        <div class="inline-flex items-center">
+                            {% for item in tickerItems %}
+                                <a href="{{ item.url }}" class="px-4 hover:text-[#1F2937] hover:underline transition">{{ item.label }}</a>
+                                <span class="text-[#9CA3AF]">•</span>
+                            {% endfor %}
+                        </div>
+                        <div class="inline-flex items-center">
+                            {% for item in tickerItems %}
+                                <a href="{{ item.url }}" class="px-4 hover:text-[#1F2937] hover:underline transition">{{ item.label }}</a>
+                                <span class="text-[#9CA3AF]">•</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="px-4 text-sm text-[#6B7280]">Aucune suggestion pour le moment.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
 {# Statistiques #}
 <section class="py-12 border-t border-[#E5E0D8]">
     <div class="max-w-5xl mx-auto px-4">

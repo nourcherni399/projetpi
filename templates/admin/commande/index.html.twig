@@ -1,0 +1,117 @@
+{% extends 'layouts/admin.html.twig' %}
+
+{% block title %}Gestion des Commandes - AutiCare Admin{% endblock %}
+
+{% block admin_content %}
+<div class="mb-6">
+    <h1 class="text-2xl md:text-3xl font-bold text-[#4B5563]">Gestion des Commandes</h1>
+    <p class="text-[#6B7280] mt-1">Consultez et confirmez les commandes des clients</p>
+</div>
+
+<div class="mb-4 flex flex-wrap items-center gap-2">
+    <a href="{{ path('admin_commande_creer_demo') }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED]">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+        Créer une commande démo (comme si le formulaire était envoyé)
+    </a>
+</div>
+
+{% for message in app.flashes('success') %}
+    <div class="mb-4 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">{{ message }}</div>
+{% endfor %}
+{% for message in app.flashes('error') %}
+    <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-800">{{ message }}</div>
+{% endfor %}
+{% for message in app.flashes('warning') %}
+    <div class="mb-4 px-4 py-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800">{{ message }}</div>
+{% endfor %}
+
+<section class="bg-white rounded-xl border border-[#E5E0D8] shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead class="bg-[#F5F1EB] border-b border-[#E5E0D8]">
+                <tr>
+                    <th class="px-6 py-4 font-semibold text-[#4B5563] text-xs uppercase tracking-wider">N° Commande</th>
+                    <th class="px-6 py-4 font-semibold text-[#4B5563] text-xs uppercase tracking-wider">Client</th>
+                    <th class="px-6 py-4 font-semibold text-[#4B5563] text-xs uppercase tracking-wider">Date</th>
+                    <th class="px-6 py-4 font-semibold text-[#4B5563] text-xs uppercase tracking-wider">Total</th>
+                    <th class="px-6 py-4 font-semibold text-[#4B5563] text-xs uppercase tracking-wider">Statut</th>
+                    <th class="px-6 py-4 font-semibold text-[#4B5563] text-xs uppercase tracking-wider">Paiement</th>
+                    <th class="px-6 py-4 font-semibold text-[#4B5563] text-xs uppercase tracking-wider text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-[#E5E0D8]">
+                {% for commande in commandes %}
+                <tr class="hover:bg-[#F9FAFB]">
+                    <td class="px-6 py-4 font-medium text-[#4B5563]">#{{ commande.id }}</td>
+                    <td class="px-6 py-4">
+                        <div class="text-[#4B5563] font-medium">{{ commande.nom }}</div>
+                        <div class="text-[#6B7280] text-sm">{{ commande.email }}</div>
+                        <div class="text-[#6B7280] text-sm">{{ commande.telephone }}</div>
+                    </td>
+                    <td class="px-6 py-4 text-[#6B7280]">{{ commande.dateCreation ? commande.dateCreation|date('d/m/Y H:i') : '—' }}</td>
+                    <td class="px-6 py-4 font-medium text-[#4B5563]">{{ commande.total|number_format(2, ',', ' ') }} د.ت</td>
+                    <td class="px-6 py-4">
+                        {% if commande.statut == 'en_attente' %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-sky-50 text-sky-700 border border-sky-200">En attente</span>
+                        {% elseif commande.statut == 'confirmer' %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">Préparation</span>
+                        {% elseif commande.statut == 'livraison' %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">Livraison</span>
+                        {% elseif commande.statut == 'recu' %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">Reçu</span>
+                        {% elseif commande.statut == 'annulée' %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-200">Annulée</span>
+                        {% else %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-[#F5F1EB] text-[#6B7280] border border-[#E5E0D8]">{{ commande.statut }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-[#6B7280]">
+                        {% if commande.modePayment == 'a_la_livraison' or commande.modePayment == 'delivery' %}À la livraison{% elseif commande.modePayment == 'carte_bancaire' or commande.modePayment starts with 'carte_' %}Carte Bancaire{% else %}Livraison{% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        {% if commande.statut == 'en_attente' %}
+                            <form method="post" action="{{ path('admin_commande_changer_statut', { id: commande.id }) }}" class="inline">
+                                <input type="hidden" name="_token" value="{{ csrf_token('commande_statut_' ~ commande.id) }}">
+                                <input type="hidden" name="statut" value="confirmer">
+                                <button type="submit" class="px-3 py-1.5 rounded-lg bg-[#A7C7E7] text-white text-sm font-medium hover:bg-[#B8D4ED]">Confirmer</button>
+                            </form>
+                            <form method="post" action="{{ path('admin_commande_changer_statut', { id: commande.id }) }}" class="inline ml-1" onsubmit="return confirm('Annuler cette commande ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('commande_statut_' ~ commande.id) }}">
+                                <input type="hidden" name="statut" value="annulée">
+                                <button type="submit" class="px-3 py-1.5 rounded-lg border border-red-200 text-red-600 text-sm hover:bg-red-50">Annuler</button>
+                            </form>
+                        {% elseif commande.statut == 'confirmer' %}
+                            <form method="post" action="{{ path('admin_commande_changer_statut', { id: commande.id }) }}" class="inline">
+                                <input type="hidden" name="_token" value="{{ csrf_token('commande_statut_' ~ commande.id) }}">
+                                <input type="hidden" name="statut" value="livraison">
+                                <button type="submit" class="px-3 py-1.5 rounded-lg bg-amber-500 text-white text-sm font-medium hover:bg-amber-600">Envoyer en livraison</button>
+                            </form>
+                        {% elseif commande.statut == 'livraison' %}
+                            <form method="post" action="{{ path('admin_commande_changer_statut', { id: commande.id }) }}" class="inline">
+                                <input type="hidden" name="_token" value="{{ csrf_token('commande_statut_' ~ commande.id) }}">
+                                <input type="hidden" name="statut" value="recu">
+                                <button type="submit" class="px-3 py-1.5 rounded-lg bg-emerald-500 text-white text-sm font-medium hover:bg-emerald-600">Marquer reçu</button>
+                            </form>
+                        {% elseif commande.statut == 'recu' %}
+                            <span class="text-[#6B7280] text-sm">Livrée</span>
+                        {% elseif commande.statut == 'annulée' %}
+                            <span class="text-[#6B7280] text-sm">—</span>
+                        {% else %}
+                            <form method="post" action="{{ path('admin_commande_changer_statut', { id: commande.id }) }}" class="inline">
+                                <input type="hidden" name="_token" value="{{ csrf_token('commande_statut_' ~ commande.id) }}">
+                                <input type="hidden" name="statut" value="confirmer">
+                                <button type="submit" class="px-3 py-1.5 rounded-lg bg-[#A7C7E7] text-white text-sm font-medium">Confirmer</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="px-6 py-12 text-center text-[#6B7280]">Aucune commande.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

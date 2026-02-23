@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Entity\Produit;
 use App\Form\ProduitType;
+use App\Repository\LigneCommandeRepository;
 use App\Repository\ProduitRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,6 +21,7 @@ final class ProduitController extends AbstractController
 {
     public function __construct(
         private readonly ProduitRepository $produitRepository,
+        private readonly LigneCommandeRepository $ligneCommandeRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly SluggerInterface $slugger,
     ) {
@@ -54,6 +56,7 @@ final class ProduitController extends AbstractController
         }
 
         $stats = $this->getProduitStats();
+        $produitIdsAvecCommandes = $this->ligneCommandeRepository->getProduitIdsAvecCommandes();
 
         return $this->render('admin/produit/index.html.twig', [
             'produits' => $produits,
@@ -61,6 +64,7 @@ final class ProduitController extends AbstractController
             'sortBy' => $sortBy,
             'sortOrder' => $sortOrder,
             'stats' => $stats,
+            'produitIdsAvecCommandes' => $produitIdsAvecCommandes,
         ]);
     }
 
@@ -236,11 +240,16 @@ final class ProduitController extends AbstractController
     #[Route('/{id}', name: 'admin_produit_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function delete(Request $request, Produit $produit): Response
     {
-        if ($this->isCsrfTokenValid('delete' . $produit->getId(), $request->request->get('_token'))) {
-            $this->entityManager->remove($produit);
-            $this->entityManager->flush();
-            $this->addFlash('success', 'Le produit a été supprimé avec succès.');
+        if (!$this->isCsrfTokenValid('delete' . $produit->getId(), $request->request->get('_token'))) {
+            return $this->redirectToRoute('admin_produit_index');
         }
+        if ($this->ligneCommandeRepository->countByProduit($produit) > 0) {
+            $this->addFlash('error', 'Ce produit ne peut pas être supprimé car il est présent dans une ou plusieurs commandes.');
+            return $this->redirectToRoute('admin_produit_index');
+        }
+        $this->entityManager->remove($produit);
+        $this->entityManager->flush();
+        $this->addFlash('success', 'Le produit a été supprimé avec succès.');
         return $this->redirectToRoute('admin_produit_index');
     }
 
@@ -249,13 +258,26 @@ final class ProduitController extends AbstractController
     {
         $ids = $request->request->all('ids');
 
-        if (!empty($ids) && $this->isCsrfTokenValid('bulk_delete', $request->request->get('_token'))) {
-            $produits = $this->produitRepository->findBy(['id' => $ids]);
-            foreach ($produits as $produit) {
-                $this->entityManager->remove($produit);
+        if (empty($ids) || !$this->isCsrfTokenValid('bulk_delete', $request->request->get('_token'))) {
+            return $this->redirectToRoute('admin_produit_index');
+        }
+        $produits = $this->produitRepository->findBy(['id' => $ids]);
+        $deleted = 0;
+        $blocked = [];
+        foreach ($produits as $produit) {
+            if ($this->ligneCommandeRepository->countByProduit($produit) > 0) {
+                $blocked[] = $produit->getNom();
+                continue;
             }
-            $this->entityManager->flush();
-            $this->addFlash('success', count($produits) . ' produit(s) supprimé(s) avec succès.');
+            $this->entityManager->remove($produit);
+            $deleted++;
+        }
+        $this->entityManager->flush();
+        if ($deleted > 0) {
+            $this->addFlash('success', $deleted . ' produit(s) supprimé(s) avec succès.');
+        }
+        if ($blocked !== []) {
+            $this->addFlash('error', 'Produit(s) non supprimé(s) (présents dans des commandes) : ' . implode(', ', $blocked) . '.');
         }
         return $this->redirectToRoute('admin_produit_index');
     }

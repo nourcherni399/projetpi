@@ -8,6 +8,7 @@ parameters:
     uploads_modules_directory: '%kernel.project_dir%/public/uploads/modules'
     uploads_blogs_directory: '%kernel.project_dir%/public/uploads/blog'
     uploads_users_directory: '%kernel.project_dir%/public/uploads/users'
+    uploads_thematiques_directory: '%kernel.project_dir%/public/uploads/thematiques'
     app_url_default: ''
 
 services:
@@ -33,7 +34,21 @@ services:
     # Force l'URI de redirection OAuth (Google) pour éviter redirect_uri_mismatch si APP_URL est défini
     App\EventSubscriber\OAuthRedirectUriContextSubscriber:
         arguments:
-            $appUrl: '%env(default:app_url_default:APP_URL)%'
+            $appUrl: '%env(APP_URL)%'
+
+
+    App\Service\ZoomApiService:
+        arguments:
+            $accountId: '%env(default::ZOOM_ACCOUNT_ID)%'
+            $clientId: '%env(default::ZOOM_CLIENT_ID)%'
+            $clientSecret: '%env(default::ZOOM_CLIENT_SECRET)%'
+
+    App\Service\ExternalAiRecommendationService:
+        arguments:
+            $enabled: '%env(default::AI_RECOMMENDER_ENABLED)%'
+            $apiKey: '%env(default::AI_RECOMMENDER_API_KEY)%'
+            $model: '%env(default::AI_RECOMMENDER_MODEL)%'
+            $baseUrl: '%env(default::AI_RECOMMENDER_BASE_URL)%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

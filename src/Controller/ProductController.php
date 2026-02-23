@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Repository\ProduitRepository;
 use App\Enum\Categorie;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -84,6 +85,42 @@ final class ProductController extends AbstractController
             'sortBy' => $sortBy,
             'sortOrder' => $sortOrder,
             'cart_add' => true,
+        ]);
+    }
+
+    #[Route('/suggest', name: 'user_products_suggest', methods: ['POST'])]
+    public function suggest(Request $request): JsonResponse
+    {
+        $message = $request->request->get('message') ?? $request->getContent();
+        if (is_string($message) && trim($message) === '' && $request->getContent() !== '') {
+            $data = json_decode($request->getContent(), true);
+            $message = $data['message'] ?? '';
+        }
+        $message = is_string($message) ? trim($message) : '';
+
+        $produits = $this->produitRepository->suggestByNeed($message);
+
+        if (count($produits) === 0) {
+            $reply = 'Aucun produit ne correspond exactement à votre demande. Essayez d\'autres mots (ex. sensoriel, relaxation, jeu, communication) ou parcourez les catégories.';
+        } else {
+            $reply = 'Voici ' . count($produits) . ' produit(s) qui peuvent correspondre à votre besoin :';
+        }
+
+        $productsData = array_map(function ($p) {
+            return [
+                'id' => $p->getId(),
+                'nom' => $p->getNom(),
+                'description' => $p->getDescription() ? mb_substr($p->getDescription(), 0, 120) . '…' : null,
+                'prix' => $p->getPrix(),
+                'categorie' => $p->getCategorie() ? $p->getCategorie()->label() : null,
+                'image' => $p->getImage(),
+                'disponibilite' => $p->isDisponibilite(),
+            ];
+        }, $produits);
+
+        return new JsonResponse([
+            'reply' => $reply,
+            'products' => $productsData,
         ]);
     }
 }

@@ -25,9 +25,21 @@
                 {{ form_row(form.heureDebut) }}
                 {{ form_row(form.heureFin) }}
             </div>
+            {{ form_row(form.mode) }}
             {{ form_row(form.lieu) }}
-            {{ form_row(form.thematique) }}
             {{ form_row(form.locationUrl) }}
+            {{ form_row(form.meetingUrl) }}
+            <div class="flex flex-wrap items-end gap-4">
+                <div class="flex-1 min-w-[140px]">{{ form_row(form.latitude) }}</div>
+                <div class="flex-1 min-w-[140px]">{{ form_row(form.longitude) }}</div>
+                <div>
+                    <label class="block text-[#4B5563] font-medium mb-1">&nbsp;</label>
+                    <button type="button" id="btn-geocode" class="px-4 py-2.5 rounded-lg border border-[#A7C7E7] bg-[#A7C7E7]/20 text-[#4B5563] font-medium hover:bg-[#A7C7E7]/30 focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                        Récupérer les coordonnées (lieu)
+                    </button>
+                </div>
+            </div>
+            {{ form_row(form.thematique) }}
         </div>
         <div class="flex flex-wrap gap-3 pt-4">
             <button type="submit" class="px-5 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
@@ -40,4 +52,32 @@
         {{ form_end(form) }}
     </div>
 </div>
+<script>
+(function() {
+    var btn = document.getElementById('btn-geocode');
+    var lieuInput = document.querySelector('input[name="{{ form.lieu.vars.full_name }}"]');
+    var latInput = document.querySelector('input[name="{{ form.latitude.vars.full_name }}"]');
+    var lngInput = document.querySelector('input[name="{{ form.longitude.vars.full_name }}"]');
+    if (!btn || !lieuInput || !latInput || !lngInput) return;
+    var url = '{{ path('admin_evenement_geocode')|e('js') }}';
+    btn.addEventListener('click', function() {
+        var address = lieuInput.value.trim();
+        if (!address) { alert('Renseignez d\'abord le lieu / adresse.'); return; }
+        btn.disabled = true;
+        btn.textContent = 'Recherche…';
+        fetch(url + '?address=' + encodeURIComponent(address))
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.lat != null && data.lng != null) {
+                    latInput.value = data.lat;
+                    lngInput.value = data.lng;
+                } else {
+                    alert(data.error || 'Adresse introuvable.');
+                }
+            })
+            .catch(function() { alert('Erreur réseau.'); })
+            .finally(function() { btn.disabled = false; btn.textContent = 'Récupérer les coordonnées (lieu)'; });
+    });
+})();
+</script>
 {% endblock %}

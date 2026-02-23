@@ -9,10 +9,12 @@ use App\Form\ThematiqueType;
 use App\Repository\ThematiqueRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/admin/thematiques')]
 final class ThematiqueController extends AbstractController
@@ -20,6 +22,7 @@ final class ThematiqueController extends AbstractController
     public function __construct(
         private readonly ThematiqueRepository $thematiqueRepository,
         private readonly EntityManagerInterface $entityManager,
+        private readonly SluggerInterface $slugger,
     ) {
     }
 
@@ -63,6 +66,10 @@ final class ThematiqueController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $imageFile = $form->get('image')->getData();
+            if ($imageFile instanceof UploadedFile) {
+                $this->handleThematiqueImageUpload($imageFile, $thematique);
+            }
             $this->entityManager->persist($thematique);
             $this->entityManager->flush();
             $this->addFlash('success', 'La thématique a été créée avec succès.');
@@ -97,6 +104,10 @@ final class ThematiqueController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $imageFile = $form->get('image')->getData();
+            if ($imageFile instanceof UploadedFile) {
+                $this->handleThematiqueImageUpload($imageFile, $thematique);
+            }
             $this->entityManager->flush();
             $this->addFlash('success', 'La thématique a été modifiée avec succès.');
             return $this->redirectToRoute('admin_thematique_show', ['id' => $thematique->getId()]);
@@ -124,5 +135,18 @@ final class ThematiqueController extends AbstractController
         $this->entityManager->flush();
         $this->addFlash('success', 'La thématique a été supprimée.');
         return $this->redirectToRoute('admin_thematique_index');
+    }
+
+    private function handleThematiqueImageUpload(UploadedFile $imageFile, Thematique $thematique): void
+    {
+        $dir = $this->getParameter('uploads_thematiques_directory');
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+        $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+        $safeFilename = $this->slugger->slug($originalFilename);
+        $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
+        $imageFile->move($dir, $newFilename);
+        $thematique->setImage('uploads/thematiques/' . $newFilename);
     }
 }

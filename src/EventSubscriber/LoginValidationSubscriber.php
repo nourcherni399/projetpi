@@ -19,6 +19,8 @@ final class LoginValidationSubscriber implements EventSubscriberInterface
     private const LOGIN_PATH = '/connexion';
     public const SESSION_LAST_USERNAME = 'app_login_last_username';
     public const SESSION_VALIDATION_ERRORS = 'app_login_validation_errors';
+    public const SESSION_CAPTCHA_QUESTION = 'app_login_captcha_question';
+    public const SESSION_CAPTCHA_EXPECTED = 'app_login_captcha_expected';
 
     public function __construct(
         private UrlGeneratorInterface $urlGenerator,
@@ -41,6 +43,8 @@ final class LoginValidationSubscriber implements EventSubscriberInterface
 
         $email = trim((string) $request->request->get('email', ''));
         $password = $request->request->get('password');
+        $captchaAnswer = trim((string) $request->request->get('captcha_answer', ''));
+        $expectedCaptcha = (string) $request->getSession()->get(self::SESSION_CAPTCHA_EXPECTED, '');
 
         $errors = [];
 
@@ -50,6 +54,12 @@ final class LoginValidationSubscriber implements EventSubscriberInterface
 
         if ($password === null || trim((string) $password) === '') {
             $errors['password'] = 'Veuillez renseigner votre mot de passe.';
+        }
+
+        if ($captchaAnswer === '') {
+            $errors['captcha'] = 'Veuillez confirmer que vous n\'êtes pas un robot.';
+        } elseif ($expectedCaptcha === '' || !hash_equals($expectedCaptcha, mb_strtoupper($captchaAnswer))) {
+            $errors['captcha'] = 'Vérification anti-robot invalide. Veuillez réessayer.';
         }
 
         if ($errors === []) {
