@@ -186,4 +186,22 @@
         </div>
     </div>
 </div>
+
+<script>
+(function() {
+    var input = document.getElementById('password');
+    var btn = document.getElementById('toggle-password');
+    var iconOpen = document.getElementById('icon-eye-open');
+    var iconClosed = document.getElementById('icon-eye-closed');
+    if (!btn || !input) return;
+    btn.addEventListener('click', function() {
+        var isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        iconOpen.classList.toggle('hidden', !isPassword);
+        iconClosed.classList.toggle('hidden', isPassword);
+        btn.setAttribute('aria-label', isPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+        btn.setAttribute('title', isPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+    });
+})();
+</script>
 {% endblock %}

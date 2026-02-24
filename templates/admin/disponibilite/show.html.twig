@@ -1,0 +1,73 @@
+{% extends 'layouts/admin.html.twig' %}
+
+{% block title %}Détails de la disponibilité - AutiCare Admin{% endblock %}
+
+{% block admin_content %}
+<div class="max-w-3xl space-y-6">
+    <div class="flex items-center justify-between gap-4">
+        <a href="{{ path('admin_disponibilite_index') }}" class="inline-flex items-center gap-2 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded-lg">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            Retour aux disponibilités
+        </a>
+        <div class="flex flex-wrap gap-2">
+            <a href="{{ path('admin_disponibilite_edit', { id: disponibilite.id }) }}" class="px-4 py-2 rounded-lg bg-[#A7C7E7] text-white text-sm font-medium hover:bg-[#B8D4ED]">
+                Modifier
+            </a>
+            <form method="post" action="{{ path('admin_disponibilite_delete', { id: disponibilite.id }) }}" onsubmit="return confirm('Supprimer cette disponibilité ?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('admin_disponibilite_delete_' ~ disponibilite.id) }}">
+                <button type="submit" class="px-4 py-2 rounded-lg border border-red-200 text-red-700 text-sm font-medium hover:bg-red-50">
+                    Supprimer
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <h1 class="text-2xl font-semibold text-[#4B5563]">Détails de la disponibilité</h1>
+
+    <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8 space-y-4">
+        <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <dt class="text-sm font-medium text-[#6B7280]">Médecin</dt>
+                <dd class="mt-1 text-[#4B5563]">
+                    {% if disponibilite.medecin %}
+                        {{ disponibilite.medecin.prenom }} {{ disponibilite.medecin.nom }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </dd>
+            </div>
+            <div>
+                <dt class="text-sm font-medium text-[#6B7280]">Jour</dt>
+                <dd class="mt-1 text-[#4B5563]">
+                    {{ disponibilite.jourLabel ? disponibilite.jourLabel|capitalize : (disponibilite.date ? disponibilite.date|date('d/m/Y') : '—') }}
+                </dd>
+            </div>
+            <div>
+                <dt class="text-sm font-medium text-[#6B7280]">Heure de début</dt>
+                <dd class="mt-1 text-[#4B5563]">
+                    {{ disponibilite.heureDebut ? disponibilite.heureDebut|date('H:i') : '—' }}
+                </dd>
+            </div>
+            <div>
+                <dt class="text-sm font-medium text-[#6B7280]">Heure de fin</dt>
+                <dd class="mt-1 text-[#4B5563]">
+                    {{ disponibilite.heureFin ? disponibilite.heureFin|date('H:i') : '—' }}
+                </dd>
+            </div>
+            <div>
+                <dt class="text-sm font-medium text-[#6B7280]">Durée (minutes)</dt>
+                <dd class="mt-1 text-[#4B5563]">
+                    {{ disponibilite.duree }}
+                </dd>
+            </div>
+            <div>
+                <dt class="text-sm font-medium text-[#6B7280]">Disponible</dt>
+                <dd class="mt-1 text-[#4B5563]">
+                    {{ disponibilite.estDispo ? 'Oui' : 'Non' }}
+                </dd>
+            </div>
+        </dl>
+    </div>
+</div>
+{% endblock %}
+

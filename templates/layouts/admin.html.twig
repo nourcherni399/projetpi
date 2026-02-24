@@ -62,128 +62,129 @@
 {% endblock %}
 
 {% block body %}
-<div class="min-h-screen flex flex-col bg-[#F5F1EB]">
-    <header class="bg-white border-b border-[#E5E0D8] shrink-0">
-        <div class="flex items-center justify-between gap-4 px-6 py-4">
-            <a href="{{ path('admin_dashboard') }}" class="flex items-center gap-2 text-[#4B5563] font-semibold text-lg">
-                <img src="{{ asset('images/logo.png') }}" alt="AutiCare" class="h-20 w-auto object-contain" />
-                AutiCare Admin
+{% set _route = app.request.get('_route') ?? '' %}
+<div class="min-h-screen flex bg-[#f8fafc] dark:bg-gray-800 transition-colors duration-200">
+    <aside class="w-64 shrink-0 flex flex-col bg-[#E8DCF0] dark:bg-gray-700 border-r border-[#E8DED5]/50 dark:border-gray-600 transition-colors duration-200">
+        <div class="p-4 border-b border-[#E8DED5]/50 dark:border-gray-600">
+            <a href="{{ path('admin_dashboard') }}" class="flex items-center gap-2 text-[#4B3D6B] dark:text-white font-bold text-lg tracking-tight">
+                <img src="{{ asset('images/logo.png') }}" alt="AutiCare" class="h-10 w-auto object-contain" />
+                AutiCare
             </a>
+        </div>
+        <div class="p-3">
+            <a href="{{ path('admin_evenement_new') }}" class="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-gradient-to-r from-[#CDB4DB] to-[#B8A4CC] dark:from-[#9B7BB8] dark:to-[#7B5B9E] text-white font-semibold text-sm shadow-lg shadow-[#CDB4DB]/30 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                Nouvel événement
+            </a>
+        </div>
+        <nav class="p-3 flex-1 overflow-y-auto" aria-label="Navigation principale">
+            <ul class="space-y-1">
+                <li><a href="{{ path('admin_dashboard') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-[#5C4B6B] dark:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-600 focus:outline focus:ring-2 focus:ring-[#CDB4DB]/50 transition-colors {{ _route == 'admin_dashboard' ? 'bg-gradient-to-r from-[#CDB4DB]/30 to-[#A8BBA3]/20 dark:from-[#CDB4DB]/40 dark:to-[#93C5FD]/20 text-[#4B3D6B] dark:text-white font-semibold shadow-sm' : '' }}">
+                    <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" /></svg>
+                    Tableau de bord
+                </a></li>
+                <li><a href="{{ path('admin_users') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-[#5C4B6B] dark:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-600 transition-colors {{ _route == 'admin_users' ? 'bg-gradient-to-r from-[#CDB4DB]/30 to-[#A8BBA3]/20 dark:from-[#CDB4DB]/40 dark:to-[#93C5FD]/20 text-[#4B3D6B] dark:text-white font-semibold shadow-sm' : '' }}">
+                    <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
+                    Utilisateurs
+                </a></li>
+                <li><a href="{{ path('admin_produit_index') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-[#5C4B6B] dark:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-600 transition-colors {{ _route starts with 'admin_produit' ? 'bg-gradient-to-r from-[#CDB4DB]/30 to-[#A8BBA3]/20 dark:from-[#CDB4DB]/40 dark:to-[#93C5FD]/20 text-[#4B3D6B] dark:text-white font-semibold shadow-sm' : '' }}">
+                    <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" /></svg>
+                    Produits
+                </a></li>
+                <li><a href="{{ path('admin_stock_index') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-[#5C4B6B] dark:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-600 transition-colors {{ _route starts with 'admin_stock' ? 'bg-gradient-to-r from-[#CDB4DB]/30 to-[#A8BBA3]/20 dark:from-[#CDB4DB]/40 dark:to-[#93C5FD]/20 text-[#4B3D6B] dark:text-white font-semibold shadow-sm' : '' }}">
+                    <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h13.125c.621 0 1.125.504 1.125 1.125v4.125c0 .621-.504 1.125-1.125 1.125H3.375c-.621 0-1.125-.504-1.125-1.125V8.625C2.25 8.004 2.754 7.5 3.375 7.5" /></svg>
+                    Stocks
+                </a></li>
+                <li><a href="{{ path('admin_commandes_index') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-[#5C4B6B] dark:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-600 transition-colors {{ _route starts with 'admin_commandes' ? 'bg-gradient-to-r from-[#CDB4DB]/30 to-[#A8BBA3]/20 dark:from-[#CDB4DB]/40 dark:to-[#93C5FD]/20 text-[#4B3D6B] dark:text-white font-semibold shadow-sm' : '' }}">
+                    <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+                    Commandes
+                </a></li>
+                <li><a href="{{ path('admin_evenement_index') }}" class="relative flex items-center gap-3 px-4 py-2.5 rounded-xl text-[#5C4B6B] dark:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-600 transition-colors {{ _route starts with 'admin_evenement' ? 'bg-gradient-to-r from-[#CDB4DB]/30 to-[#A8BBA3]/20 dark:from-[#CDB4DB]/40 dark:to-[#93C5FD]/20 text-[#4B3D6B] dark:text-white font-semibold shadow-sm' : '' }}">
+                    <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+                    Événements
+                    {% if admin_unread_event_messages_count|default(0) > 0 %}<span class="absolute right-3 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-amber-500 px-1.5 text-xs font-medium text-white">{{ admin_unread_event_messages_count > 99 ? '99+' : admin_unread_event_messages_count }}</span>{% endif %}
+                </a></li>
+                <li><a href="{{ path('admin_thematique_index') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-[#5C4B6B] dark:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-600 transition-colors {{ _route starts with 'admin_thematique' ? 'bg-gradient-to-r from-[#CDB4DB]/30 to-[#A8BBA3]/20 dark:from-[#CDB4DB]/40 dark:to-[#93C5FD]/20 text-[#4B3D6B] dark:text-white font-semibold shadow-sm' : '' }}">
+                    <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" /></svg>
+                    Thématiques
+                </a></li>
+                <li><a href="{{ path('admin_dashboard') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-[#5C4B6B] dark:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-600 transition-colors {{ _route == 'admin_module_index' or _route starts with 'admin_module' ? 'bg-gradient-to-r from-[#CDB4DB]/30 to-[#A8BBA3]/20 dark:from-[#CDB4DB]/40 dark:to-[#93C5FD]/20 text-[#4B3D6B] dark:text-white font-semibold shadow-sm' : '' }}">
+                    <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg>
+                    Modules
+                </a></li>
+            </ul>
+        </nav>
+        <div class="p-3 border-t border-[#E8DED5]/50 dark:border-gray-600">
+            <div class="rounded-xl bg-white/60 dark:bg-gray-600/60 p-4 border border-[#E8DED5]/50 dark:border-gray-500">
+                <p class="text-[#4B3D6B] dark:text-gray-200 font-semibold text-sm mb-1">Espace admin</p>
+                <p class="text-[#6B5B7B] dark:text-gray-400 text-xs mb-3">Gérez utilisateurs, contenu et commandes.</p>
+                <a href="{{ path('home') }}" class="inline-flex items-center gap-1.5 text-[#CDB4DB] dark:text-[#93C5FD] text-xs font-medium hover:underline">Retour au site <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg></a>
+                <a href="{{ path('app_logout') }}" class="mt-2 block text-red-600 dark:text-red-400 text-xs font-medium hover:underline">Se déconnecter</a>
+            </div>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col min-h-0">
+        <header class="shrink-0 flex items-center justify-between gap-4 px-6 py-4 bg-white dark:bg-gray-700/80 border-b border-[#e2e8f0] dark:border-gray-600 shadow-sm">
+            <h1 class="text-xl font-bold text-[#1e293b] dark:text-white tracking-tight">Tableau de bord</h1>
             <div class="flex-1 max-w-md mx-4">
                 <div class="relative">
-                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]">Q</span>
-                    <input type="search" placeholder="Rechercher..." class="w-full pl-8 pr-4 py-2 rounded-full border border-[#E5E0D8] bg-[#F5F1EB] text-[#6B7280] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#94a3b8]"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg></span>
+                    <input type="search" placeholder="Rechercher…" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#e2e8f0] dark:border-gray-500 bg-[#f8fafc] dark:bg-gray-600/50 text-[#1e293b] dark:text-gray-100 placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#CDB4DB] focus:border-transparent text-sm transition-all">
                 </div>
             </div>
-            <div class="flex items-center gap-4">
-                <details class="relative group">
-                    <summary class="relative list-none cursor-pointer p-2 rounded-full text-[#6B7280] hover:bg-[#F5F1EB]" aria-label="Notifications">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
+            <div class="flex items-center gap-2">
+                <button type="button" id="theme-toggle" aria-label="Mode nuit / jour" class="p-2.5 rounded-xl text-[#64748b] dark:text-gray-300 hover:bg-[#E8DCF0]/50 dark:hover:bg-gray-600 transition-colors" title="Mode nuit / jour">
+                    <span class="hidden dark:inline-block"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg></span>
+                    <span class="inline-block dark:hidden"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg></span>
+                </button>
+                <details class="relative">
+                    <summary class="relative list-none cursor-pointer p-2.5 rounded-xl text-[#64748b] dark:text-gray-300 hover:bg-[#E8DCF0]/50 dark:hover:bg-gray-600" aria-label="Notifications">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
                         {% set _admin_notif_total = (admin_pending_inscriptions|default([])|length) + (admin_unread_event_messages_count|default(0)) %}
-                        {% if _admin_notif_total > 0 %}
-                        <span class="absolute -top-0.5 -right-0.5 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-amber-500 px-1.5 text-xs font-medium text-white">{{ _admin_notif_total > 99 ? '99+' : _admin_notif_total }}</span>
-                        {% endif %}
+                        {% if _admin_notif_total > 0 %}<span class="absolute top-1 right-1 min-w-[1.25rem] h-5 px-1 rounded-full bg-amber-500 text-white text-xs font-medium flex items-center justify-center">{{ _admin_notif_total > 99 ? '99+' : _admin_notif_total }}</span>{% endif %}
                     </summary>
-                    <div class="absolute right-0 mt-2 w-80 rounded-xl bg-white shadow-lg border border-[#E5E0D8] py-2 z-50">
-                        <div class="px-4 py-2 border-b border-[#E5E0D8]">
-                            <p class="font-medium text-[#4B5563] text-sm">Notifications</p>
-                        </div>
+                    <div class="absolute right-0 mt-2 w-80 rounded-xl bg-white dark:bg-gray-600 shadow-lg border border-[#e2e8f0] dark:border-gray-500 py-2 z-50">
+                        <div class="px-4 py-2 border-b border-[#e2e8f0] dark:border-gray-500"><p class="font-medium text-[#1e293b] dark:text-gray-100 text-sm">Notifications</p></div>
                         {% if admin_unread_event_messages_count|default(0) > 0 %}
                         {% set _event_id_unread = admin_first_event_id_with_unread_messages|default(null) %}
-                        <a href="{{ _event_id_unread ? path('admin_evenement_show', { id: _event_id_unread }) : path('admin_evenement_index') }}" class="block px-4 py-3 border-b border-[#E5E0D8] bg-sky-50/50 hover:bg-sky-100/70 transition-colors">
-                            <p class="text-xs text-[#6B7280] mb-1">Messages événements</p>
-                            <span class="flex items-center gap-2 text-sm font-medium text-sky-700">
-                                <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 003.83-.498c1.085-.163 2.037-.369 2.707-.622a3.578 3.578 0 001.67-1.618 3.575 3.575 0 00.281-1.236V6.26c0-1.6-1.123-2.994-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg>
-                                {{ admin_unread_event_messages_count }} message(s) non lu(s)
-                            </span>
-                            <p class="text-xs text-[#6B7280] mt-1">Cliquez pour ouvrir l'événement et voir les discussions →</p>
+                        <a href="{{ _event_id_unread ? path('admin_evenement_show', { id: _event_id_unread }) : path('admin_evenement_index') }}" class="block px-4 py-3 border-b border-[#e2e8f0] dark:border-gray-500 bg-sky-50/50 dark:bg-sky-900/20 hover:bg-sky-100/70 dark:hover:bg-sky-900/30 transition-colors">
+                            <p class="text-xs text-[#64748b] dark:text-gray-400 mb-1">Messages événements</p>
+                            <span class="flex items-center gap-2 text-sm font-medium text-sky-700 dark:text-sky-300">{{ admin_unread_event_messages_count }} message(s) non lu(s)</span>
                         </a>
                         {% endif %}
-                        <div class="px-4 py-2 border-b border-[#E5E0D8]">
-                            <p class="font-medium text-[#4B5563] text-sm">Demandes d'inscription</p>
-                        </div>
+                        <div class="px-4 py-2 border-b border-[#e2e8f0] dark:border-gray-500"><p class="font-medium text-[#1e293b] dark:text-gray-100 text-sm">Demandes d'inscription</p></div>
                         {% if admin_pending_inscriptions|default([]) is empty %}
-                        <p class="px-4 py-3 text-[#6B7280] text-sm">Aucune demande en attente.</p>
+                        <p class="px-4 py-3 text-[#64748b] dark:text-gray-400 text-sm">Aucune demande en attente.</p>
                         {% else %}
                         {% for ins in admin_pending_inscriptions %}
-                        <a href="{{ path('admin_evenement_show', { id: ins.evenement.id }) }}" class="block px-4 py-3 hover:bg-[#F5F1EB] text-sm text-[#4B5563]">
-                            <span class="font-medium">{{ ins.user.prenom }} {{ ins.user.nom }}</span> – {{ ins.evenement.title }}
-                        </a>
+                        <a href="{{ path('admin_evenement_show', { id: ins.evenement.id }) }}" class="block px-4 py-3 hover:bg-[#f8fafc] dark:hover:bg-gray-500 text-sm text-[#1e293b] dark:text-gray-200">{{ ins.user.prenom }} {{ ins.user.nom }} – {{ ins.evenement.title }}</a>
                         {% endfor %}
                         {% endif %}
                     </div>
                 </details>
-                <div class="flex items-center gap-3">
-                    <a href="{{ path('admin_profile') }}" class="flex items-center gap-3 hover:opacity-90 transition-opacity group" title="Modifier mon profil">
-                        <span class="flex items-center justify-center w-10 h-10 rounded-full overflow-hidden bg-[#A7C7E7] text-white font-semibold text-sm group-hover:ring-2 group-hover:ring-[#A7C7E7] group-hover:ring-offset-1 transition-all shrink-0">{% if app.user and app.user.image %}<img src="{{ asset(app.user.image) }}" alt="" class="w-full h-full object-cover">{% else %}{{ app.user ? (app.user.prenom|slice(0,1) ~ app.user.nom|slice(0,1))|upper : 'AD' }}{% endif %}</span>
-                        <div>
-                            <p class="font-medium text-[#4B5563] text-sm group-hover:text-[#A7C7E7]">{{ app.user ? app.user.prenom ~ ' ' ~ app.user.nom : 'Admin' }}</p>
-                            <p class="text-[#6B7280] text-xs">{{ app.user ? app.user.email : 'admin@auticare.fr' }}</p>
-                        </div>
-                    </a>
-                    <a href="{{ path('app_logout') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl text-[#6B7280] hover:bg-red-50 hover:text-red-600 text-sm font-medium transition-colors" title="Se déconnecter">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                        Se déconnecter
-                    </a>
-                </div>
-            </div>
-        </div>
-    </header>
-    <div class="flex flex-1 min-h-0">
-        <aside class="w-64 bg-white border-r border-[#E5E0D8] flex flex-col shrink-0">
-            <nav class="p-4 flex-1" aria-label="Navigation principale">
-                <ul class="space-y-1">
-                    <li><a href="{{ path('admin_dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#A7C7E7]/15 text-[#A7C7E7] font-medium focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" /></svg>
-                        Tableau de bord
-                    </a></li>
-                    <li><a href="{{ path('admin_users') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#6B7280] hover:bg-[#F5F1EB] hover:text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
-                        Utilisateurs
-                    </a></li>
-                    <li><a href="{{ path('admin_produit_index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#6B7280] hover:bg-[#F5F1EB] hover:text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" /></svg>
-                        Produits
-                    </a></li>
-                    <li><a href="{{ path('admin_stock_index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#6B7280] hover:bg-[#F5F1EB] hover:text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h13.125c.621 0 1.125.504 1.125 1.125v4.125c0 .621-.504 1.125-1.125 1.125H3.375c-.621 0-1.125-.504-1.125-1.125V8.625C2.25 8.004 2.754 7.5 3.375 7.5" /></svg>
-                        Stocks
-                    </a></li>
-                    <li><a href="{{ path('admin_commandes_index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#6B7280] hover:bg-[#F5F1EB] hover:text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
-                        Commandes
-                    </a></li>
-                    <li><a href="{{ path('admin_evenement_index') }}" class="relative flex items-center gap-3 px-4 py-3 rounded-xl text-[#6B7280] hover:bg-[#F5F1EB] hover:text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
-                        Événements
-                        {% if admin_unread_event_messages_count|default(0) > 0 %}
-                        <span class="absolute right-3 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-sky-500 px-1.5 text-xs font-medium text-white" title="Messages non lus">{{ admin_unread_event_messages_count > 99 ? '99+' : admin_unread_event_messages_count }}</span>
-                        {% endif %}
-                    </a></li>
-                    <li><a href="{{ path('admin_thematique_index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#6B7280] hover:bg-[#F5F1EB] hover:text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" /></svg>
-                        Thématiques
-                    </a></li>
-                    <li><a href="{{ path('admin_dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#6B7280] hover:bg-[#F5F1EB] hover:text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg>
-                        Modules
-                    </a></li>
-                    <li><a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#6B7280] hover:bg-[#F5F1EB] hover:text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.329-.183.581-.495.644-.869l.214-1.281z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                        Paramètres
-                    </a></li>
-                </ul>
-            </nav>
-            <div class="p-4 border-t border-[#E5E0D8]">
-                <a href="{{ path('admin_dashboard') }}" class="flex items-center gap-2 px-4 py-2 text-sm text-[#A7C7E7] hover:underline font-medium">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" /></svg>
-                    Accueil admin
+                <a href="{{ path('admin_profile') }}" class="flex items-center gap-2 pl-2 border-l border-[#e2e8f0] dark:border-gray-500" title="Mon profil">
+                    <span class="flex items-center justify-center w-9 h-9 rounded-xl overflow-hidden bg-gradient-to-br from-[#CDB4DB] to-[#A8BBA3] text-white font-semibold text-sm shrink-0">{% if app.user and app.user.image %}<img src="{{ asset(app.user.image) }}" alt="" class="w-full h-full object-cover">{% else %}{{ app.user ? (app.user.prenom|slice(0,1) ~ app.user.nom|slice(0,1))|upper : 'AD' }}{% endif %}</span>
+                    <div class="hidden sm:block text-left">
+                        <p class="font-medium text-[#1e293b] dark:text-gray-100 text-sm leading-tight">{{ app.user ? app.user.prenom ~ ' ' ~ app.user.nom : 'Admin' }}</p>
+                        <p class="text-[#64748b] dark:text-gray-400 text-xs">Profil</p>
+                    </div>
                 </a>
             </div>
-        </aside>
-        <main class="flex-1 overflow-auto p-8">
+        </header>
+        <main class="flex-1 overflow-auto p-6 bg-[#f8fafc] dark:bg-gray-800/50 transition-colors duration-200">
+            {% include 'partials/_flash_messages.html.twig' %}
             {% block admin_content %}{% endblock %}
         </main>
     </div>
 </div>
+<script>
+(function() {
+    var btn = document.getElementById('theme-toggle');
+    if (btn) btn.addEventListener('click', function() {
+        var isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('auticare-theme', isDark ? 'dark' : 'light');
+    });
+})();
+</script>
 {% endblock %}

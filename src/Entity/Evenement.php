@@ -232,9 +232,13 @@ class Evenement
 
     /**
      * URL d'intégration iframe pour la carte (Google Maps).
+     * Priorité : latitude/longitude (exact) > locationUrl > lieu.
      */
     public function getMapEmbedUrl(): ?string
     {
+        if ($this->latitude !== null && $this->longitude !== null) {
+            return 'https://www.google.com/maps?q=' . $this->latitude . ',' . $this->longitude . '&output=embed';
+        }
         $url = $this->locationUrl;
         if ($url !== null && $url !== '') {
             $urlLower = strtolower($url);
@@ -256,9 +260,13 @@ class Evenement
 
     /**
      * URL pour ouvrir la localisation dans Google Maps (page complète).
+     * Priorité : latitude/longitude (exact) > locationUrl > lieu.
      */
     public function getMapsPageUrl(): ?string
     {
+        if ($this->latitude !== null && $this->longitude !== null) {
+            return 'https://www.google.com/maps?q=' . $this->latitude . ',' . $this->longitude;
+        }
         $url = $this->locationUrl;
         if ($url !== null && $url !== '') {
             $urlLower = strtolower($url);

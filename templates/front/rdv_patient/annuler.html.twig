@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Confirmer l'annulation - AutiCare{% endblock %}
+
+{% block body %}
+<div class="min-h-screen flex items-center justify-center p-4 bg-pastel-bg">
+    <div class="w-full max-w-lg rounded-2xl bg-white shadow-lg border border-pastel-border p-8">
+        <div class="flex items-center gap-3 mb-6">
+            <a href="{{ path('rdv_patient_page', { token: token }) }}" class="text-pastel-text hover:text-pastel-lavender focus:outline focus:ring-2 focus:ring-pastel-lavender rounded p-1" title="Retour">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            </a>
+            <h1 class="text-xl font-bold text-pastel-text-strong">Annuler le rendez-vous</h1>
+        </div>
+
+        <div class="bg-pastel-cream/60 rounded-xl p-5 mb-6 border border-pastel-border">
+            <p class="text-sm text-pastel-text mb-1">Médecin</p>
+            <p class="font-semibold text-pastel-text-strong">{{ rdv.medecin ? (rdv.medecin.prenom ~ ' ' ~ rdv.medecin.nom) : '—' }}</p>
+            <p class="text-sm text-pastel-text mt-3 mb-1">Date et heure</p>
+            <p class="font-semibold text-pastel-text-strong">
+                {% if rdv.dateRdv and rdv.disponibilite %}
+                    {{ rdv.dateRdv|date('l d/m/Y')|replace({'Monday':'Lundi','Tuesday':'Mardi','Wednesday':'Mercredi','Thursday':'Jeudi','Friday':'Vendredi','Saturday':'Samedi','Sunday':'Dimanche'}) }}, {{ rdv.disponibilite.heureDebut ? rdv.disponibilite.heureDebut|date('H:i') : '—' }} - {{ rdv.disponibilite.heureFin ? rdv.disponibilite.heureFin|date('H:i') : '—' }}
+                {% else %}
+                    —
+                {% endif %}
+            </p>
+        </div>
+
+        <p class="text-pastel-text mb-6">Êtes-vous sûr de vouloir annuler ce rendez-vous ?</p>
+
+        <form method="post" action="{{ path('rdv_patient_annuler', { token: token }) }}" class="flex flex-wrap gap-3">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('rdv_annuler') }}">
+            <button type="submit" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-red-600 text-white font-medium hover:bg-red-700 focus:outline focus:ring-2 focus:ring-red-500 transition-colors">
+                Oui, annuler le rendez-vous
+            </button>
+            <a href="{{ path('rdv_patient_page', { token: token }) }}" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl border-2 border-pastel-border text-pastel-text font-medium hover:bg-pastel-cream focus:outline focus:ring-2 focus:ring-pastel-lavender transition-colors">
+                Non, garder le rendez-vous
+            </a>
+        </form>
+    </div>
+</div>
+{% endblock %}

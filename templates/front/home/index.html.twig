@@ -2,209 +2,183 @@
 
 {% block title %}Accueil - AutiCare{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        @keyframes hero-cta-pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.15), 0 8px 10px -6px rgb(0 0 0 / 0.1); }
+            50% { transform: scale(1.02); box-shadow: 0 20px 35px -5px rgb(0 0 0 / 0.18), 0 10px 15px -6px rgb(0 0 0 / 0.12); }
+        }
+        .hero-cta-btn { animation: hero-cta-pulse 2.5s ease-in-out infinite; }
+        .hero-cta-btn-2 { animation-delay: 0.4s; }
+        .hero-cta-btn:hover, .hero-cta-btn-2:hover { animation-play-state: paused; }
+    </style>
+{% endblock %}
+
 {% block user_content %}
-{# Hero + message d'accueil #}
-<section class="flex flex-col items-center justify-center text-center px-4 py-12 md:py-16">
-    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#E5E7EB] text-[#4B5563] text-sm font-medium mb-6">
-        <svg class="w-5 h-5 text-[#6B7280]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" /></svg>
-        Bienvenue sur AutiCare
-    </div>
-    <h1 class="text-4xl md:text-5xl font-bold text-[#4B5563] mb-4 max-w-3xl">
-        Accompagnement bienveillant pour les <span class="text-[#A7C7E7]">personnes autistes</span>
-    </h1>
-    <p class="text-lg text-[#6B7280] max-w-2xl mx-auto mb-8">
-        Une plateforme dédiée aux personnes autistes et à leurs familles. Découvrez nos produits adaptés, participez à nos événements et rejoignez une communauté bienveillante.
-    </p>
-    <div class="flex flex-wrap gap-4 justify-center">
-        <a href="{{ path('user_products_index') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
-            Découvrir nos produits
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-        </a>
-        <a href="{{ path('user_events') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-[#E5E7EB] bg-[#F5F1EB] text-[#4B5563] font-medium hover:bg-[#E5E0D8] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
-            Voir les événements
-        </a>
+{# Hero : fond = bande d'images défilant horizontalement (layout, visible) #}
+<section class="relative min-h-[85vh] flex flex-col items-center justify-center text-center px-4 overflow-hidden">
+    {# Légère ombre sous le texte pour lisibilité sur le fond défilant #}
+    <div class="absolute inset-0 z-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none"></div>
+
+    <div class="relative z-10 max-w-4xl mx-auto">
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 text-[#5C5C5C] text-sm font-medium mb-6 shadow-lg">
+            <svg class="w-5 h-5 text-[#CDB4DB]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" /></svg>
+            Bienvenue sur AutiCare
+        </div>
+        <h1 class="text-4xl md:text-6xl font-bold text-white drop-shadow-lg mb-5 tracking-tight">
+            Accompagnement bienveillant pour les <span class="text-[#FFF8F0]">personnes autistes</span>
+        </h1>
+        <p class="text-lg md:text-xl text-white/95 max-w-2xl mx-auto mb-10 leading-relaxed drop-shadow">
+            Une plateforme dédiée aux personnes autistes et à leurs familles. Produits adaptés, événements et une communauté à vos côtés.
+        </p>
+        <div class="flex flex-wrap gap-4 justify-center">
+            <a href="{{ path('user_products_index') }}" class="hero-cta-btn inline-flex items-center gap-2 px-7 py-4 rounded-2xl bg-white text-[#3D3D3D] font-semibold hover:bg-[#FFF8F0] shadow-xl transition-all hover:scale-105">
+                Découvrir nos produits
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+            </a>
+            <a href="{{ path('user_events') }}" class="hero-cta-btn hero-cta-btn-2 inline-flex items-center gap-2 px-7 py-4 rounded-2xl bg-white/90 text-[#3D3D3D] font-semibold hover:bg-white border-2 border-white/50 shadow-xl transition-all hover:scale-105">
+                Voir les événements
+            </a>
+        </div>
     </div>
 </section>
 
-{% if app.user and suggestions is not null and (suggestions.productSuggestions is not empty or suggestions.eventSuggestions is not empty or suggestions.doctorSuggestions is not empty) %}
-<section class="py-10 border-t border-[#E5E0D8]">
+{# Section image + texte — Notre mission #}
+<section class="py-20 bg-[#E8E0F0]/40 dark:bg-gray-600/40">
     <div class="max-w-6xl mx-auto px-4">
-        <style>
-            .suggestion-ticker {
-                position: relative;
-                overflow: hidden;
-            }
-            .suggestion-ticker-track {
-                display: flex;
-                width: max-content;
-                animation: suggestionTickerMove 30s linear infinite;
-            }
-            .suggestion-ticker:hover .suggestion-ticker-track {
-                animation-play-state: paused;
-            }
-            @keyframes suggestionTickerMove {
-                from { transform: translateX(0); }
-                to { transform: translateX(-50%); }
-            }
-        </style>
-        {% set tickerItems = [] %}
-        {% for produit in suggestions.productSuggestions %}
-            {% set tickerItems = tickerItems|merge([{
-                label: 'Produit: ' ~ produit.nom,
-                url: path('user_product_show', {id: produit.id})
-            }]) %}
-        {% endfor %}
-        {% for event in suggestions.eventSuggestions %}
-            {% set tickerItems = tickerItems|merge([{
-                label: 'Evenement: ' ~ event.title,
-                url: path('user_event_show', {id: event.id})
-            }]) %}
-        {% endfor %}
-        {% for doctor in suggestions.doctorSuggestions %}
-            {% set tickerItems = tickerItems|merge([{
-                label: 'Medecin: Dr. ' ~ doctor.nom ~ ' ' ~ doctor.prenom,
-                url: path('user_appointment_book', {id: doctor.id})
-            }]) %}
-        {% endfor %}
-
-        <div class="flex rounded-xl overflow-hidden border border-[#E5E0D8]">
-            <div class="shrink-0 bg-[#D82222] text-white px-4 py-2 text-sm font-semibold">
-                Suggestions
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div class="order-2 lg:order-1">
+                <img src="https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?w=1200&q=90" alt="Enfant et parent, moment d'accompagnement bienveillant" class="rounded-3xl shadow-pastel-md w-full object-cover max-h-[400px]" />
             </div>
-            <div class="suggestion-ticker flex-1 bg-white py-2">
-                {% if tickerItems is not empty %}
-                    <div class="suggestion-ticker-track whitespace-nowrap text-sm text-[#4B5563]">
-                        <div class="inline-flex items-center">
-                            {% for item in tickerItems %}
-                                <a href="{{ item.url }}" class="px-4 hover:text-[#1F2937] hover:underline transition">{{ item.label }}</a>
-                                <span class="text-[#9CA3AF]">•</span>
-                            {% endfor %}
-                        </div>
-                        <div class="inline-flex items-center">
-                            {% for item in tickerItems %}
-                                <a href="{{ item.url }}" class="px-4 hover:text-[#1F2937] hover:underline transition">{{ item.label }}</a>
-                                <span class="text-[#9CA3AF]">•</span>
-                            {% endfor %}
-                        </div>
-                    </div>
-                {% else %}
-                    <div class="px-4 text-sm text-[#6B7280]">Aucune suggestion pour le moment.</div>
-                {% endif %}
+            <div class="order-1 lg:order-2">
+                <span class="text-[#CDB4DB] font-semibold text-sm uppercase tracking-wider">Notre mission</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-[#3D3D3D] dark:text-gray-100 mt-2 mb-4">Écouter, aider, accompagner</h2>
+                <p class="text-[#5C5C5C] dark:text-gray-300 text-lg leading-relaxed mb-6">
+                    AutiCare propose un accompagnement adapté aux personnes autistes et à leurs proches : produits spécialisés, ateliers, événements et un espace d'échange bienveillant.
+                </p>
+                <a href="{{ path('about') }}" class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-[#CDB4DB] text-white font-medium hover:bg-[#B8A4CC] transition-colors">
+                    En savoir plus
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                </a>
             </div>
         </div>
     </div>
 </section>
-{% endif %}
 
-{# Statistiques #}
-<section class="py-12 border-t border-[#E5E0D8]">
+{# Statistiques avec pastels différents #}
+<section class="py-20 bg-[#FDF8F5] dark:bg-gray-600/30">
     <div class="max-w-5xl mx-auto px-4">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            <div class="flex flex-col items-center">
-                <div class="w-16 h-16 rounded-full bg-[#A7C7E7]/30 text-[#A7C7E7] flex items-center justify-center mb-4">
-                    <svg class="w-8 h-8" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-10 text-center">
+            <div class="flex flex-col items-center p-8 rounded-3xl bg-[#D4E5D0] border-2 border-[#A8BBA3]/50">
+                <div class="w-20 h-20 rounded-2xl bg-[#A8BBA3] text-white flex items-center justify-center mb-4 shadow-pastel">
+                    <svg class="w-10 h-10" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>
                 </div>
-                <p class="text-3xl font-bold text-[#6B7280]">500+</p>
-                <p class="text-[#6B7280] mt-1">Familles accompagnées</p>
+                <p class="text-4xl font-bold text-[#3D3D3D]">500+</p>
+                <p class="text-[#5C5C5C] mt-2 font-medium">Familles accompagnées</p>
             </div>
-            <div class="flex flex-col items-center">
-                <div class="w-16 h-16 rounded-full bg-[#A7C7E7]/30 text-[#A7C7E7] flex items-center justify-center mb-4">
-                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
+            <div class="flex flex-col items-center p-8 rounded-3xl bg-[#DFEEF5] border-2 border-[#B5D4E8]/50">
+                <div class="w-20 h-20 rounded-2xl bg-[#B5D4E8] text-white flex items-center justify-center mb-4 shadow-pastel">
+                    <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
                 </div>
-                <p class="text-3xl font-bold text-[#6B7280]">50+</p>
-                <p class="text-[#6B7280] mt-1">Événements par an</p>
+                <p class="text-4xl font-bold text-[#3D3D3D]">50+</p>
+                <p class="text-[#5C5C5C] mt-2 font-medium">Événements par an</p>
             </div>
-            <div class="flex flex-col items-center">
-                <div class="w-16 h-16 rounded-full bg-[#A7C7E7]/30 text-[#A7C7E7] flex items-center justify-center mb-4">
-                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" /></svg>
+            <div class="flex flex-col items-center p-8 rounded-3xl bg-[#FAEDE8] border-2 border-[#F0D5C8]/50">
+                <div class="w-20 h-20 rounded-2xl bg-[#F0D5C8] text-[#5C5C5C] flex items-center justify-center mb-4 shadow-pastel">
+                    <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" /></svg>
                 </div>
-                <p class="text-3xl font-bold text-[#6B7280]">100+</p>
-                <p class="text-[#6B7280] mt-1">Produits adaptés</p>
+                <p class="text-4xl font-bold text-[#3D3D3D]">100+</p>
+                <p class="text-[#5C5C5C] mt-2 font-medium">Produits adaptés</p>
             </div>
         </div>
     </div>
 </section>
 
-{# Tout ce dont vous avez besoin #}
-<section class="py-12 border-t border-[#E5E0D8]">
-    <div class="max-w-5xl mx-auto px-4 text-center">
-        <h2 class="text-2xl font-bold text-[#4B5563] mb-4">Tout ce dont vous avez besoin</h2>
-        <p class="text-[#6B7280] max-w-2xl mx-auto">AutiCare propose un ensemble complet de services pour accompagner les personnes autistes et leurs proches au quotidien.</p>
+{# Tout ce dont vous avez besoin — avec image #}
+<section class="py-20 bg-[#FAEDE8]/60 dark:bg-gray-600/25">
+    <div class="max-w-6xl mx-auto px-4 text-center">
+        <h2 class="text-3xl font-bold text-[#3D3D3D] dark:text-gray-100 mb-3">Tout ce dont vous avez besoin</h2>
+        <p class="text-[#5C5C5C] dark:text-gray-300 max-w-2xl mx-auto text-lg">AutiCare réunit produits, événements et communauté pour accompagner le quotidien.</p>
     </div>
 </section>
 
-{# 4 cartes de fonctionnalités #}
-<section class="py-12 border-t border-[#E5E0D8]">
+{# 4 cartes avec couleurs pastel et images décoratives #}
+<section class="py-16 pb-24 bg-[#FDF8F5] dark:bg-gray-600/25">
     <div class="max-w-6xl mx-auto px-4">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <article class="bg-white rounded-2xl border border-[#E5E0D8] p-6 shadow-sm hover:shadow-md transition-shadow">
-                <div class="w-12 h-12 rounded-full bg-[#A7C7E7]/20 text-[#A7C7E7] flex items-center justify-center mb-4">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+            <article class="group bg-white dark:bg-gray-600/70 rounded-3xl border-2 border-[#D4E5D0] dark:border-gray-600 p-6 shadow-pastel hover:shadow-pastel-md transition-all overflow-hidden">
+                <div class="w-full h-36 -mx-6 -mt-6 mb-4 overflow-hidden rounded-t-3xl bg-[#A8BBA3]">
+                    <img src="https://images.unsplash.com/photo-1616486338811-3dada111a655?w=800&q=90" alt="Jeux sensoriels et jouets apaisants" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                 </div>
-                <h3 class="font-semibold text-[#4B5563] mb-2">Produits Spécialisés</h3>
-                <p class="text-[#6B7280] text-sm">Une sélection de produits conçus pour la stimulation sensorielle, la concentration et l'apaisement.</p>
+                <h3 class="font-bold text-[#3D3D3D] dark:text-gray-100 mb-2">Produits spécialisés</h3>
+                <p class="text-[#5C5C5C] dark:text-gray-300 text-sm leading-relaxed">Stimulation sensorielle, concentration et apaisement au quotidien.</p>
+                <a href="{{ path('user_products_index') }}" class="inline-block mt-3 text-[#A8BBA3] font-medium text-sm hover:underline">Découvrir →</a>
             </article>
-            <article class="bg-white rounded-2xl border border-[#E5E0D8] p-6 shadow-sm hover:shadow-md transition-shadow">
-                <div class="w-12 h-12 rounded-full bg-[#A7C7E7]/20 text-[#A7C7E7] flex items-center justify-center mb-4">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+            <article class="group bg-white dark:bg-gray-600/70 rounded-3xl border-2 border-[#E8DCF0] dark:border-gray-600 p-6 shadow-pastel hover:shadow-pastel-md transition-all overflow-hidden">
+                <div class="w-full h-36 -mx-6 -mt-6 mb-4 overflow-hidden rounded-t-3xl bg-[#CDB4DB]">
+                    <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=90" alt="Ateliers et groupe de soutien" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                 </div>
-                <h3 class="font-semibold text-[#4B5563] mb-2">Événements & Ateliers</h3>
-                <p class="text-[#6B7280] text-sm">Participez à des ateliers, rencontres et séances de sensibilisation adaptés à vos besoins.</p>
+                <h3 class="font-bold text-[#3D3D3D] dark:text-gray-100 mb-2">Événements & ateliers</h3>
+                <p class="text-[#5C5C5C] dark:text-gray-300 text-sm leading-relaxed">Ateliers, rencontres et sensibilisation adaptés à vos besoins.</p>
+                <a href="{{ path('user_events') }}" class="inline-block mt-3 text-[#CDB4DB] font-medium text-sm hover:underline">Voir le programme →</a>
             </article>
-            <article class="bg-white rounded-2xl border border-[#E5E0D8] p-6 shadow-sm hover:shadow-md transition-shadow">
-                <div class="w-12 h-12 rounded-full bg-[#A7C7E7]/20 text-[#A7C7E7] flex items-center justify-center mb-4">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.256A8.967 8.967 0 016 18c2.295 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.256A8.967 8.967 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+            <article class="group bg-white dark:bg-gray-600/70 rounded-3xl border-2 border-[#DFEEF5] dark:border-gray-600 p-6 shadow-pastel hover:shadow-pastel-md transition-all overflow-hidden">
+                <div class="w-full h-36 -mx-6 -mt-6 mb-4 overflow-hidden rounded-t-3xl bg-[#B5D4E8]">
+                    <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=90" alt="Ressources et lecture adaptée" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                 </div>
-                <h3 class="font-semibold text-[#4B5563] mb-2">Blog & Ressources</h3>
-                <p class="text-[#6B7280] text-sm">Partagez vos expériences, échangez des conseils et découvrez des articles inspirants.</p>
+                <h3 class="font-bold text-[#3D3D3D] dark:text-gray-100 mb-2">Blog & ressources</h3>
+                <p class="text-[#5C5C5C] dark:text-gray-300 text-sm leading-relaxed">Expériences, conseils et articles pour les familles.</p>
+                <a href="{{ path('user_blog') }}" class="inline-block mt-3 text-[#B5D4E8] font-medium text-sm hover:underline">Lire le blog →</a>
             </article>
-            <article class="bg-white rounded-2xl border border-[#E5E0D8] p-6 shadow-sm hover:shadow-md transition-shadow">
-                <div class="w-12 h-12 rounded-full bg-[#A7C7E7]/20 text-[#A7C7E7] flex items-center justify-center mb-4">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741.479 3 3 0 003-3v.72m-12 0a9.094 9.094 0 003.741.479 3 3 0 003-3v.72m12 0a9.094 9.094 0 01-3.741.479 3 3 0 01-3-3v.72m-9 0a9.094 9.094 0 013.741.479 3 3 0 013-3v.72" /></svg>
+            <article class="group bg-white dark:bg-gray-600/70 rounded-3xl border-2 border-[#FAEDE8] dark:border-gray-600 p-6 shadow-pastel hover:shadow-pastel-md transition-all overflow-hidden">
+                <div class="w-full h-36 -mx-6 -mt-6 mb-4 overflow-hidden rounded-t-3xl bg-[#F0D5C8]">
+                    <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&q=90" alt="Communauté inclusive et bienveillante" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                 </div>
-                <h3 class="font-semibold text-[#4B5563] mb-2">Communauté Bienveillante</h3>
-                <p class="text-[#6B7280] text-sm">Rejoignez une communauté de soutien où chaque personne est accueillie avec respect.</p>
+                <h3 class="font-bold text-[#3D3D3D] dark:text-gray-100 mb-2">Communauté bienveillante</h3>
+                <p class="text-[#5C5C5C] dark:text-gray-300 text-sm leading-relaxed">Un espace d'échange où chacun est accueilli avec respect.</p>
+                <a href="{{ path('user_events') }}" class="inline-block mt-3 text-[#E8A598] font-medium text-sm hover:underline">Rejoindre →</a>
             </article>
         </div>
     </div>
 </section>
 
-{# Ce que dit notre communauté #}
-<section class="py-16 border-t border-[#E5E0D8]">
+{# Témoignages avec fond pastel et images #}
+<section class="py-20 bg-[#E8DCF0]/30 dark:bg-gray-600/30">
     <div class="max-w-6xl mx-auto px-4">
-        <h2 class="text-2xl font-bold text-[#4B5563] text-center mb-2">Ce que dit notre communauté</h2>
-        <p class="text-[#6B7280] text-center max-w-2xl mx-auto mb-10">Découvrez les témoignages de familles et de personnes qui nous font confiance.</p>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <article class="bg-white rounded-2xl border border-[#E5E0D8] p-6 shadow-sm">
-                <p class="text-4xl text-[#A7C7E7] font-serif leading-none mb-4">"</p>
-                <p class="text-[#6B7280] mb-6">AutiCare nous a accompagnés avec une bienveillance rare. Les produits recommandés ont vraiment aidé notre fils au quotidien.</p>
-                <div class="flex items-center gap-3">
-                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-[#A7C7E7] text-[#4B5563] font-semibold text-sm">ML</span>
+        <h2 class="text-3xl font-bold text-[#3D3D3D] dark:text-gray-100 text-center mb-2">Ce que dit notre communauté</h2>
+        <p class="text-[#5C5C5C] dark:text-gray-300 text-center max-w-2xl mx-auto mb-12 text-lg">Des familles et des personnes qui nous font confiance.</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <article class="bg-white dark:bg-gray-600/70 rounded-3xl border-2 border-[#E8DCF0] dark:border-gray-600 p-8 shadow-pastel">
+                <p class="text-5xl text-[#CDB4DB] font-serif leading-none mb-4">"</p>
+                <p class="text-[#5C5C5C] dark:text-gray-300 mb-6 leading-relaxed">AutiCare nous a accompagnés avec une bienveillance rare. Les produits recommandés ont vraiment aidé notre fils au quotidien.</p>
+                <div class="flex items-center gap-4">
+                    <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=160&h=160&fit=crop&q=90" alt="" class="w-12 h-12 rounded-full object-cover border-2 border-[#CDB4DB]" />
                     <div>
-                        <p class="font-medium text-[#4B5563]">Marie L.</p>
-                        <p class="text-sm text-[#6B7280]">Maman d'un enfant autiste</p>
+                        <p class="font-semibold text-[#3D3D3D]">Marie L.</p>
+                        <p class="text-sm text-[#5C5C5C]">Maman d'un enfant autiste</p>
                     </div>
                 </div>
             </article>
-            <article class="bg-white rounded-2xl border border-[#E5E0D8] p-6 shadow-sm">
-                <p class="text-4xl text-[#A7C7E7] font-serif leading-none mb-4">"</p>
-                <p class="text-[#6B7280] mb-6">Enfin une plateforme qui me comprend. Les événements en ligne m'ont permis de rencontrer d'autres personnes comme moi.</p>
-                <div class="flex items-center gap-3">
-                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-[#A7C7E7] text-[#4B5563] font-semibold text-sm">TD</span>
+            <article class="bg-white dark:bg-gray-600/70 rounded-3xl border-2 border-[#D4E5D0] dark:border-gray-600 p-8 shadow-pastel">
+                <p class="text-5xl text-[#A8BBA3] font-serif leading-none mb-4">"</p>
+                <p class="text-[#5C5C5C] dark:text-gray-300 mb-6 leading-relaxed">Enfin une plateforme qui me comprend. Les événements en ligne m'ont permis de rencontrer d'autres personnes comme moi.</p>
+                <div class="flex items-center gap-4">
+                    <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&h=160&fit=crop&q=90" alt="" class="w-12 h-12 rounded-full object-cover border-2 border-[#A8BBA3]" />
                     <div>
-                        <p class="font-medium text-[#4B5563]">Thomas D.</p>
-                        <p class="text-sm text-[#6B7280]">Personne autiste</p>
+                        <p class="font-semibold text-[#3D3D3D]">Thomas D.</p>
+                        <p class="text-sm text-[#5C5C5C]">Personne autiste</p>
                     </div>
                 </div>
             </article>
-            <article class="bg-white rounded-2xl border border-[#E5E0D8] p-6 shadow-sm">
-                <p class="text-4xl text-[#A7C7E7] font-serif leading-none mb-4">"</p>
-                <p class="text-[#6B7280] mb-6">En tant qu'éducatrice, j'oriente les familles vers AutiCare. Les ressources et le blog sont d'une grande qualité.</p>
-                <div class="flex items-center gap-3">
-                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-[#A7C7E7] text-[#4B5563] font-semibold text-sm">SR</span>
+            <article class="bg-white dark:bg-gray-600/70 rounded-3xl border-2 border-[#DFEEF5] dark:border-gray-600 p-8 shadow-pastel">
+                <p class="text-5xl text-[#B5D4E8] font-serif leading-none mb-4">"</p>
+                <p class="text-[#5C5C5C] dark:text-gray-300 mb-6 leading-relaxed">En tant qu'éducatrice, j'oriente les familles vers AutiCare. Les ressources et le blog sont d'une grande qualité.</p>
+                <div class="flex items-center gap-4">
+                    <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=160&h=160&fit=crop&q=90" alt="" class="w-12 h-12 rounded-full object-cover border-2 border-[#B5D4E8]" />
                     <div>
-                        <p class="font-medium text-[#4B5563]">Sophie R.</p>
-                        <p class="text-sm text-[#6B7280]">Éducatrice spécialisée</p>
+                        <p class="font-semibold text-[#3D3D3D]">Sophie R.</p>
+                        <p class="text-sm text-[#5C5C5C]">Éducatrice spécialisée</p>
                     </div>
                 </div>
             </article>
@@ -212,34 +186,32 @@
     </div>
 </section>
 
-{# Rejoignez notre communauté (visiteurs) OU message pour les connectés #}
-<section class="py-16 border-t border-[#E5E0D8]">
-    <div class="max-w-2xl mx-auto px-4 text-center">
-        <div class="flex justify-center mb-6">
-            <span class="flex items-center justify-center w-20 h-20 rounded-full bg-[#A7C7E7] text-white">
-                <svg class="w-10 h-10" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>
-            </span>
+{# CTA final avec image et fond pastel #}
+<section class="py-24 bg-gradient-to-br from-[#D4E5D0] via-[#E8DCF0] to-[#FAEDE8] dark:from-gray-600 dark:via-gray-600 dark:to-gray-700">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+        <div class="flex justify-center mb-8">
+            <img src="{{ asset('images/logo.png') }}" alt="AutiCare" class="h-24 w-auto object-contain drop-shadow-lg" />
         </div>
         {% if app.user %}
-            <h2 class="text-2xl font-bold text-[#6B7280] mb-3">Vous faites partie de la communauté</h2>
-            <p class="text-[#6B7280] mb-8">Accédez à vos services : produits adaptés, événements et votre espace personnel.</p>
+            <h2 class="text-3xl font-bold text-[#3D3D3D] dark:text-gray-100 mb-3">Vous faites partie de la communauté</h2>
+            <p class="text-[#5C5C5C] dark:text-gray-300 mb-8 text-lg">Accédez à vos services : produits, événements et votre espace personnel.</p>
             <div class="flex flex-wrap gap-4 justify-center">
-                <a href="{{ path('user_profile') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                <a href="{{ path('user_profile') }}" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-[#CDB4DB] text-white font-semibold hover:bg-[#B8A4CC] shadow-pastel transition-colors">
                     Mon profil
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                 </a>
-                <a href="{{ path('user_products_index') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-[#E5E7EB] bg-white text-[#6B7280] font-medium hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Découvrir les produits</a>
-                <a href="{{ path('user_events') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-[#E5E7EB] bg-white text-[#6B7280] font-medium hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Voir les événements</a>
+                <a href="{{ path('user_products_index') }}" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl border-2 border-[#E8DED5] bg-white text-[#5C5C5C] font-semibold hover:bg-[#FFF8F0] transition-colors">Découvrir les produits</a>
+                <a href="{{ path('user_events') }}" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl border-2 border-[#E8DED5] bg-white text-[#5C5C5C] font-semibold hover:bg-[#FFF8F0] transition-colors">Voir les événements</a>
             </div>
         {% else %}
-            <h2 class="text-2xl font-bold text-[#6B7280] mb-3">Rejoignez notre communauté</h2>
-            <p class="text-[#6B7280] mb-8">Créez votre compte gratuitement et accédez à tous nos services : produits adaptés, événements exclusifs et un espace d'échange bienveillant.</p>
+            <h2 class="text-3xl font-bold text-[#3D3D3D] dark:text-gray-100 mb-3">Rejoignez notre communauté</h2>
+            <p class="text-[#5C5C5C] dark:text-gray-300 mb-8 text-lg">Créez votre compte et accédez aux produits adaptés, événements et à un espace d'échange bienveillant.</p>
             <div class="flex flex-wrap gap-4 justify-center">
-                <a href="{{ path('register') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                <a href="{{ path('register') }}" class="inline-flex items-center gap-2 px-7 py-4 rounded-2xl bg-[#A8BBA3] text-white font-semibold hover:bg-[#94B08E] shadow-pastel-md transition-colors">
                     Créer mon compte
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                 </a>
-                <a href="#" class="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-[#E5E7EB] bg-white text-[#6B7280] font-medium hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Nous contacter</a>
+                <a href="{{ path('app_login') }}" class="inline-flex items-center gap-2 px-7 py-4 rounded-2xl border-2 border-[#E8DED5] bg-white text-[#5C5C5C] font-semibold hover:bg-[#FFF8F0] transition-colors">Se connecter</a>
             </div>
         {% endif %}
     </div>

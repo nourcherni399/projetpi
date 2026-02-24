@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
@@ -15,6 +17,8 @@ final class ZoomApiService
 {
     private const TOKEN_URL = 'https://zoom.us/oauth/token';
     private const API_BASE = 'https://api.zoom.us/v2';
+
+    private string $lastTokenError = '';
 
     public function __construct(
         private readonly HttpClientInterface $httpClient,
@@ -47,7 +51,11 @@ final class ZoomApiService
 
         $token = $this->getAccessToken();
         if ($token === null) {
-            return ['error' => 'Impossible d\'obtenir le token Zoom. Vérifiez les identifiants.'];
+            $detail = $this->lastTokenError !== '' ? ' ' . $this->lastTokenError : ' Vérifiez les identifiants dans .env.';
+            if (stripos($this->lastTokenError, 'Internal Error') !== false) {
+                $detail .= ' Souvent : app Zoom "Server-to-Server OAuth" non activée pour le compte, ou ZOOM_ACCOUNT_ID incorrect (voir marketplace.zoom.us).';
+            }
+            return ['error' => 'Impossible d\'obtenir le token Zoom.' . $detail];
         }
 
         try {
@@ -85,6 +93,7 @@ final class ZoomApiService
 
     private function getAccessToken(): ?string
     {
+        $this->lastTokenError = '';
         $auth = base64_encode($this->clientId . ':' . $this->clientSecret);
         try {
             $response = $this->httpClient->request('POST', self::TOKEN_URL, [
@@ -99,9 +108,19 @@ final class ZoomApiService
                 'timeout' => 10,
             ]);
             $data = $response->toArray();
-        } catch (\Throwable) {
+            return $data['access_token'] ?? null;
+        } catch (ClientExceptionInterface|ServerExceptionInterface $e) {
+            try {
+                $body = $e->getResponse()->getContent(false);
+                $decoded = json_decode($body, true);
+                $this->lastTokenError = $decoded['reason'] ?? $decoded['error_description'] ?? $decoded['error'] ?? substr($body, 0, 200);
+            } catch (\Throwable) {
+                $this->lastTokenError = $e->getMessage();
+            }
+            return null;
+        } catch (\Throwable $e) {
+            $this->lastTokenError = $e->getMessage();
             return null;
         }
-        return $data['access_token'] ?? null;
     }
 }

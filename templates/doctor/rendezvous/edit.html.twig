@@ -22,7 +22,12 @@
             </div>
             <div>
                 <dt class="text-sm text-[#6B7280]">Date du rendez-vous</dt>
-                <dd class="font-medium text-[#4B5563]">{{ rdv.dateRdv ? rdv.dateRdv|date('d/m/Y') : '—' }}</dd>
+                <dd class="font-medium text-[#4B5563]">
+                    {{ rdv.dateRdv ? rdv.dateRdv|date('d/m/Y') : '—' }}
+                    {% if rdv.disponibilite and rdv.disponibilite.heureDebut and rdv.disponibilite.heureFin %}
+                        <span class="text-[#6B7280] font-normal">à {{ rdv.disponibilite.heureDebut|date('H:i') }} - {{ rdv.disponibilite.heureFin|date('H:i') }}</span>
+                    {% endif %}
+                </dd>
             </div>
             <div>
                 <dt class="text-sm text-[#6B7280]">Téléphone</dt>

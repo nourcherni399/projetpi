@@ -4,6 +4,15 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    gemini_api_key_default: ''
+    groq_api_key_default: ''
+    hf_token_default: ''
+    pexels_api_key_default: ''
+    app.rappel_sms_nom_cabinet: 'AutiCare'
+    app_mailer_from_default: 'noreply@auticare.fr'
+    app_mailer_from_name_default: 'AutiCare'
+    # Code pays par défaut pour les numéros sans indicatif (ex: 33 France, 216 Tunisie)
+    app.rappel_sms_default_country_code: '216'
     uploads_directory: '%kernel.project_dir%/public/uploads/produits'
     uploads_modules_directory: '%kernel.project_dir%/public/uploads/modules'
     uploads_blogs_directory: '%kernel.project_dir%/public/uploads/blog'
@@ -11,9 +20,10 @@ parameters:
     uploads_users_directory: '%kernel.project_dir%/public/uploads/users'
     uploads_commentaires_directory: '%kernel.project_dir%/public/uploads/commentaires'
     uploads_thematiques_directory: '%kernel.project_dir%/public/uploads/thematiques'
+    uploads_tsa_generated_directory: '%kernel.project_dir%/public/uploads/tsa_generated'
+    rorschach_plates_directory: '%kernel.project_dir%/public/images/rorschach'
     app_url_default: ''
     libretranslate_api_key_default: ''
-    groq_api_key_default: ''
     ai_recommender_api_key_default: ''
     ai_recommender_model_default: ''
     ai_recommender_base_url_default: ''
@@ -42,13 +52,6 @@ services:
     App\EventSubscriber\OAuthRedirectUriContextSubscriber:
         arguments:
             $appUrl: '%env(APP_URL)%'
-
-
-    App\Service\ZoomApiService:
-        arguments:
-            $accountId: '%env(default::ZOOM_ACCOUNT_ID)%'
-            $clientId: '%env(default::ZOOM_CLIENT_ID)%'
-            $clientSecret: '%env(default::ZOOM_CLIENT_SECRET)%'
 
     App\Service\ExternalAiRecommendationService:
         arguments:
@@ -91,6 +94,58 @@ services:
     App\Service\ProfanityFilterService:
         arguments:
             $badWordsFile: '%kernel.project_dir%/config/bad_words.txt'
+
+    App\Service\ZoomApiService:
+        arguments:
+            $accountId: '%env(default::ZOOM_ACCOUNT_ID)%'
+            $clientId: '%env(default::ZOOM_CLIENT_ID)%'
+            $clientSecret: '%env(default::ZOOM_CLIENT_SECRET)%'
+
+    App\Service\RendezVousConfirmationMailer:
+        arguments:
+            $fromEmail: '%env(default:app_mailer_from_default:MAILER_FROM)%'
+            $fromName: '%env(default:app_mailer_from_name_default:MAILER_FROM_NAME)%'
+
+    App\Command\TestMailCommand:
+        arguments:
+            $fromEmail: '%env(default:app_mailer_from_default:MAILER_FROM)%'
+            $fromName: '%env(default:app_mailer_from_name_default:MAILER_FROM_NAME)%'
+
+    App\Service\RappelSmsService:
+        arguments:
+            $nomCabinet: '%app.rappel_sms_nom_cabinet%'
+            $defaultCountryCode: '%app.rappel_sms_default_country_code%'
+
+    App\Command\SmsTestRappelCommand:
+        arguments:
+            $nomCabinet: '%app.rappel_sms_nom_cabinet%'
+
+    App\Service\GoogleCalendarService:
+        arguments:
+            $credentialsPath: '%env(default::GOOGLE_CALENDAR_CREDENTIALS)%'
+            $calendarId: '%env(default::GOOGLE_CALENDAR_ID)%'
+
+    App\Service\GeminiChatService:
+        arguments:
+            $apiKey: '%env(default:gemini_api_key_default:GEMINI_API_KEY)%'
+
+    App\Service\GroqChatService:
+        arguments:
+            $apiKey: '%env(default:groq_api_key_default:GROQ_API_KEY)%'
+
+    App\Service\HuggingFaceImageService:
+        arguments:
+            $apiToken: '%env(default:hf_token_default:HF_TOKEN)%'
+            $uploadDir: '%uploads_tsa_generated_directory%'
+
+    App\Service\PexelsImageService:
+        arguments:
+            $apiKey: '%env(default:pexels_api_key_default:PEXELS_API_KEY)%'
+
+    App\Service\RorschachSvgService:
+        arguments:
+            $uploadDir: '%uploads_tsa_generated_directory%'
+            $platesDir: '%rorschach_plates_directory%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

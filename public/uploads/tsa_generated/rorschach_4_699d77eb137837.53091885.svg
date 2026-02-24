@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" fill="#ffffff"/>
+  <ellipse cx="100" cy="100" rx="28" ry="45" fill="#222222"/>
+    <ellipse cx="63" cy="91" rx="46" ry="30" fill="#222222"/>
+    <ellipse cx="137" cy="91" rx="46" ry="30" fill="#222222"/>
+    <ellipse cx="42" cy="171" rx="22" ry="31" fill="#222222"/>
+    <ellipse cx="158" cy="171" rx="22" ry="31" fill="#222222"/>
+    <ellipse cx="29" cy="73" rx="41" ry="44" fill="#222222"/>
+    <ellipse cx="171" cy="73" rx="41" ry="44" fill="#222222"/>
+    <ellipse cx="27" cy="40" rx="37" ry="35" fill="#222222"/>
+    <ellipse cx="173" cy="40" rx="37" ry="35" fill="#222222"/>
+    <ellipse cx="58" cy="34" rx="46" ry="27" fill="#222222"/>
+    <ellipse cx="142" cy="34" rx="46" ry="27" fill="#222222"/>
+    <ellipse cx="42" cy="63" rx="24" ry="47" fill="#222222"/>
+    <ellipse cx="158" cy="63" rx="24" ry="47" fill="#222222"/>
+    <ellipse cx="46" cy="33" rx="21" ry="52" fill="#222222"/>
+    <ellipse cx="154" cy="33" rx="21" ry="52" fill="#222222"/>
+    <ellipse cx="60" cy="56" rx="29" ry="30" fill="#222222"/>
+    <ellipse cx="140" cy="56" rx="29" ry="30" fill="#222222"/>
+</svg>

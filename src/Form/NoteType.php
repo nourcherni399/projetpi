@@ -36,12 +36,17 @@ final class NoteType extends AbstractType
                 'attr' => $attr,
             ])
             ->add('contenu', TextareaType::class, [
-                'label' => 'Contenu de la note',
+                'label' => 'Note de côté médecin',
                 'constraints' => [
                     new NotBlank(message: 'Le contenu est obligatoire.'),
-                    new Length(min: 3, max: 5000, minMessage: 'Le contenu doit contenir au moins {{ limit }} caractères.', maxMessage: 'Le contenu ne peut pas dépasser {{ limit }} caractères.'),
+                    new Length(min: 1, max: 15000, minMessage: 'Le contenu est obligatoire.', maxMessage: 'Le contenu ne peut pas dépasser {{ limit }} caractères.'),
                 ],
-                'attr' => array_merge($attr, ['rows' => 4]),
+                'attr' => array_merge($attr, [
+                    'rows' => 6,
+                    'id' => 'note_contenu_field',
+                    'data-note-editor' => 'target',
+                    'placeholder' => 'Déposez les fichiers ici ou cliquez pour ajouter du texte.',
+                ]),
             ]);
     }
 

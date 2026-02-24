@@ -94,4 +94,5 @@ class InscritEventsRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult();
     }
+
 }

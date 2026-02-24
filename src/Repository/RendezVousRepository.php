@@ -22,6 +22,14 @@ class RendezVousRepository extends ServiceEntityRepository
         parent::__construct($registry, RendezVous::class);
     }
 
+    public function findOneByToken(string $token): ?RendezVous
+    {
+        if ($token === '') {
+            return null;
+        }
+        return $this->findOneBy(['tokenAnnulation' => $token]);
+    }
+
     /**
      * Liste des rendez-vous d'un médecin, triés par date.
      *
@@ -36,6 +44,48 @@ class RendezVousRepository extends ServiceEntityRepository
             ->setParameter('medecin', $medecin)
             ->orderBy('r.dateRdv', $dir)
             ->addOrderBy('r.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Liste des rendez-vous d'un médecin pour un statut donné, triés par date.
+     *
+     * @return list<RendezVous>
+     */
+    public function findByMedecinAndStatusOrderByDate(Medcin $medecin, StatusRendezVous $status, string $direction = 'ASC'): array
+    {
+        $dir = strtoupper($direction) === 'DESC' ? 'DESC' : 'ASC';
+
+        return $this->createQueryBuilder('r')
+            ->andWhere('r.medecin = :medecin')
+            ->andWhere('r.status = :status')
+            ->setParameter('medecin', $medecin)
+            ->setParameter('status', $status)
+            ->orderBy('r.dateRdv', $dir)
+            ->addOrderBy('r.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * RDV d'un médecin entre deux dates (pour le calendrier). Exclut les annulés.
+     *
+     * @return list<RendezVous>
+     */
+    public function findByMedecinBetweenDates(Medcin $medecin, \DateTimeInterface $start, \DateTimeInterface $end): array
+    {
+        return $this->createQueryBuilder('r')
+            ->andWhere('r.medecin = :medecin')
+            ->andWhere('r.status != :annuler')
+            ->andWhere('r.dateRdv >= :start')
+            ->andWhere('r.dateRdv <= :end')
+            ->setParameter('medecin', $medecin)
+            ->setParameter('annuler', StatusRendezVous::ANNULER)
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->orderBy('r.dateRdv', 'ASC')
+            ->addOrderBy('r.id', 'ASC')
             ->getQuery()
             ->getResult();
     }
@@ -127,17 +177,93 @@ class RendezVousRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    /** Créneau (disponibilite + date) déjà pris (en_attente ou confirmer). */
-    public function isSlotTaken(Disponibilite $disponibilite, \DateTimeInterface $date): bool
+    /** Créneau bloqué uniquement quand le médecin a accepté la demande (confirmer). Les demandes en attente ne bloquent pas le créneau. Les créneaux passés sont considérés comme libres. */
+    public function isSlotTaken(Disponibilite $disponibilite): bool
+    {
+        $date = $disponibilite->getDate();
+        $heureFin = $disponibilite->getHeureFin();
+        if ($date !== null && $heureFin !== null) {
+            $day = $date instanceof \DateTimeImmutable ? $date : \DateTimeImmutable::createFromInterface($date);
+            $endAt = $day->setTime(
+                (int) $heureFin->format('H'),
+                (int) $heureFin->format('i'),
+                (int) $heureFin->format('s')
+            );
+            if ($endAt < new \DateTimeImmutable('now')) {
+                return false;
+            }
+        }
+
+        $count = (int) $this->createQueryBuilder('r')
+            ->select('COUNT(r.id)')
+            ->andWhere('r.disponibilite = :dispo')
+            ->andWhere('r.status = :status')
+            ->setParameter('dispo', $disponibilite)
+            ->setParameter('status', StatusRendezVous::CONFIRMER->value)
+            ->getQuery()
+            ->getSingleScalarResult();
+        return $count > 0;
+    }
+
+    /** Créneau pris par un autre RDV (exclut le RDV donné, pour le report). */
+    public function isSlotTakenExceptRdv(Disponibilite $disponibilite, RendezVous $except): bool
+    {
+        $date = $disponibilite->getDate();
+        $heureFin = $disponibilite->getHeureFin();
+        if ($date !== null && $heureFin !== null) {
+            $day = $date instanceof \DateTimeImmutable ? $date : \DateTimeImmutable::createFromInterface($date);
+            $endAt = $day->setTime(
+                (int) $heureFin->format('H'),
+                (int) $heureFin->format('i'),
+                (int) $heureFin->format('s')
+            );
+            if ($endAt < new \DateTimeImmutable('now')) {
+                return false;
+            }
+        }
+        $count = (int) $this->createQueryBuilder('r')
+            ->select('COUNT(r.id)')
+            ->andWhere('r.disponibilite = :dispo')
+            ->andWhere('r.status = :status')
+            ->andWhere('r.id != :exclude')
+            ->setParameter('dispo', $disponibilite)
+            ->setParameter('status', StatusRendezVous::CONFIRMER->value)
+            ->setParameter('exclude', $except->getId())
+            ->getQuery()
+            ->getSingleScalarResult();
+        return $count > 0;
+    }
+
+    /** Vérifie si ce patient a déjà un RDV (en attente ou confirmé) sur ce créneau. */
+    public function userAlreadyHasRdvForDisponibilite(Disponibilite $dispo, Patient $patient): bool
     {
         $count = (int) $this->createQueryBuilder('r')
             ->select('COUNT(r.id)')
             ->andWhere('r.disponibilite = :dispo')
-            ->andWhere('r.dateRdv = :date')
+            ->andWhere('r.patient = :patient')
             ->andWhere('r.status IN (:statuses)')
-            ->setParameter('dispo', $disponibilite)
-            ->setParameter('date', $date->format('Y-m-d'))
-            ->setParameter('statuses', [StatusRendezVous::EN_ATTENTE, StatusRendezVous::CONFIRMER])
+            ->setParameter('dispo', $dispo)
+            ->setParameter('patient', $patient)
+            ->setParameter('statuses', [StatusRendezVous::EN_ATTENTE->value, StatusRendezVous::CONFIRMER->value])
+            ->getQuery()
+            ->getSingleScalarResult();
+        return $count > 0;
+    }
+
+    /** Vérifie si un RDV existe déjà sur ce créneau pour cet email (utilisateur non-Patient). */
+    public function hasRdvForDisponibiliteAndEmail(Disponibilite $dispo, string $email): bool
+    {
+        if ($email === '') {
+            return false;
+        }
+        $count = (int) $this->createQueryBuilder('r')
+            ->select('COUNT(r.id)')
+            ->andWhere('r.disponibilite = :dispo')
+            ->andWhere('r.email = :email')
+            ->andWhere('r.status IN (:statuses)')
+            ->setParameter('dispo', $dispo)
+            ->setParameter('email', $email)
+            ->setParameter('statuses', [StatusRendezVous::EN_ATTENTE->value, StatusRendezVous::CONFIRMER->value])
             ->getQuery()
             ->getSingleScalarResult();
         return $count > 0;
@@ -174,6 +300,38 @@ class RendezVousRepository extends ServiceEntityRepository
             ->setParameter('medecin', $medecin)
             ->getQuery()
             ->getSingleScalarResult();
+    }
+
+    /**
+     * Recherche dans les rendez-vous (nom, prénom patient, date) pour un médecin.
+     *
+     * @return list<RendezVous>
+     */
+    public function searchByMedecin(Medcin $medecin, string $query, int $limit = 20): array
+    {
+        $term = '%' . addcslashes(trim($query), '%_') . '%';
+        if ($term === '%%') {
+            return [];
+        }
+        $qb = $this->createQueryBuilder('r')
+            ->andWhere('r.medecin = :medecin')
+            ->setParameter('medecin', $medecin)
+            ->orderBy('r.dateRdv', 'DESC')
+            ->addOrderBy('r.id', 'DESC')
+            ->setMaxResults($limit);
+
+        $dateStr = null;
+        if (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', trim($query), $m)) {
+            $dateStr = trim($query);
+        } elseif (preg_match('/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/', trim($query), $m)) {
+            $dateStr = sprintf('%04d-%02d-%02d', (int) $m[3], (int) $m[2], (int) $m[1]);
+        }
+        if ($dateStr !== null) {
+            $qb->andWhere('r.dateRdv = :date')->setParameter('date', $dateStr);
+        } else {
+            $qb->andWhere('r.nom LIKE :term OR r.prenom LIKE :term')->setParameter('term', $term);
+        }
+        return $qb->getQuery()->getResult();
     }
 
     /**
@@ -228,6 +386,35 @@ class RendezVousRepository extends ServiceEntityRepository
             ->setParameter('medecin', $medecin)
             ->orderBy('r.id', 'DESC')
             ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Candidats pour un rappel SMS : RDV à venir (prochains jours), non annulés, avec téléphone, pas encore rappelés.
+     * Filtrer ensuite en PHP pour la fenêtre "X heures avant" (ex. 24h).
+     *
+     * @return list<RendezVous>
+     */
+    public function findCandidatsRappelSms(int $joursAhead = 2): array
+    {
+        $today = new \DateTimeImmutable('today');
+        $maxDate = $today->modify('+' . $joursAhead . ' days');
+
+        return $this->createQueryBuilder('r')
+            ->leftJoin('r.disponibilite', 'd')
+            ->addSelect('d')
+            ->andWhere('r.dateRdv >= :today')
+            ->andWhere('r.dateRdv <= :maxDate')
+            ->andWhere('r.status IN (:statuses)')
+            ->andWhere('r.rappelSmsEnvoyeAt IS NULL')
+            ->andWhere('r.telephone IS NOT NULL')
+            ->andWhere("r.telephone != ''")
+            ->setParameter('today', $today)
+            ->setParameter('maxDate', $maxDate)
+            ->setParameter('statuses', [StatusRendezVous::EN_ATTENTE, StatusRendezVous::CONFIRMER])
+            ->orderBy('r.dateRdv', 'ASC')
+            ->addOrderBy('r.id', 'ASC')
             ->getQuery()
             ->getResult();
     }

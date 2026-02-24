@@ -46,7 +46,7 @@ final class ProduitType extends AbstractType
                 ],
             ])
             ->add('prix', NumberType::class, [
-                'label' => 'Prix (€)',
+                'label' => 'Prix (DT)',
                 'html5' => true,
                 'scale' => 2,
                 'attr' => [

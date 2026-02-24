@@ -29,4 +29,8 @@ framework:
 
             # Les autres messages restent asynchrones
             Symfony\Component\Notifier\Message\ChatMessage: async
-            Symfony\Component\Notifier\Message\SmsMessage: async
+           
+            # SMS envoyés tout de suite (sinon ils restent en file et ne partent jamais sans worker)
+            Symfony\Component\Notifier\Message\SmsMessage: sync
+
+

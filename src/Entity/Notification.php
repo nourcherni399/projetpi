@@ -15,6 +15,10 @@ class Notification
     public const TYPE_DEMANDE_RDV = 'demande_rdv';
     public const TYPE_RDV_ACCEPTE = 'rdv_accepte';
     public const TYPE_RDV_REFUSE = 'rdv_refuse';
+    /** Patient a annulé le RDV via le lien email/SMS. */
+    public const TYPE_RDV_ANNULE_PATIENT = 'rdv_annule_patient';
+    /** Patient a reporté le RDV via le lien email/SMS. */
+    public const TYPE_RDV_REPORTE_PATIENT = 'rdv_reporte_patient';
     public const TYPE_COMMANDE_CONFIRMEE = 'commande_confirmée';
     public const TYPE_COMMANDE_LIVRAISON = 'commande_livraison';
     public const TYPE_COMMANDE_RECU = 'commande_recu';

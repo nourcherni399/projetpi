@@ -1,43 +1,68 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-<div class="min-h-screen flex flex-col">
-    <header class="bg-white shadow-sm shrink-0">
-        <div class="w-full px-4 py-4 flex flex-nowrap items-center gap-3">
-            <a href="{{ path('home') }}" class="flex items-center gap-3 text-[#4B5563] font-semibold text-lg shrink-0 order-first" title="AutiCare - Accueil">
-                <img src="{{ asset('images/logo.png') }}" alt="AutiCare" class="h-16 w-auto object-contain shrink-0" />
-                <span class="hidden md:inline whitespace-nowrap text-[#4B5563]">AutiCare</span>
+{# Fond avec images qui défilent horizontalement en continu #}
+<div class="fixed inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
+    <div class="bg-scroll-track flex h-full w-max animate-bg-scroll">
+        <div class="bg-scroll-set flex h-full shrink-0">
+            <div class="h-full w-[70vw] min-w-[280px] shrink-0 bg-[#E8DCF0]"><img src="https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=1400&q=90" alt="" class="h-full w-full object-cover opacity-90" /></div>
+            <div class="h-full w-[70vw] min-w-[280px] shrink-0 bg-[#D4E5D0]"><img src="https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=1400&q=90" alt="" class="h-full w-full object-cover opacity-90" /></div>
+            <div class="h-full w-[70vw] min-w-[280px] shrink-0 bg-[#DFEEF5]"><img src="https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?w=1400&q=90" alt="" class="h-full w-full object-cover opacity-90" /></div>
+            <div class="h-full w-[70vw] min-w-[280px] shrink-0 bg-[#FAEDE8]"><img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1400&q=90" alt="" class="h-full w-full object-cover opacity-90" /></div>
+            <div class="h-full w-[70vw] min-w-[280px] shrink-0 bg-[#E8DCF0]"><img src="https://images.unsplash.com/photo-1476703993599-0034a4d71e1e?w=1400&q=90" alt="" class="h-full w-full object-cover opacity-90" /></div>
+        </div>
+        <div class="bg-scroll-set flex h-full shrink-0" aria-hidden="true">
+            <div class="h-full w-[70vw] min-w-[280px] shrink-0 bg-[#E8DCF0]"><img src="https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=1400&q=90" alt="" class="h-full w-full object-cover opacity-90" /></div>
+            <div class="h-full w-[70vw] min-w-[280px] shrink-0 bg-[#D4E5D0]"><img src="https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=1400&q=90" alt="" class="h-full w-full object-cover opacity-90" /></div>
+            <div class="h-full w-[70vw] min-w-[280px] shrink-0 bg-[#DFEEF5]"><img src="https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?w=1400&q=90" alt="" class="h-full w-full object-cover opacity-90" /></div>
+            <div class="h-full w-[70vw] min-w-[280px] shrink-0 bg-[#FAEDE8]"><img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1400&q=90" alt="" class="h-full w-full object-cover opacity-90" /></div>
+            <div class="h-full w-[70vw] min-w-[280px] shrink-0 bg-[#E8DCF0]"><img src="https://images.unsplash.com/photo-1476703993599-0034a4d71e1e?w=1400&q=90" alt="" class="h-full w-full object-cover opacity-90" /></div>
+        </div>
+    </div>
+    <div class="absolute inset-0 bg-[#FDF8F5]/50 dark:bg-gray-600/50 transition-colors duration-200"></div>
+</div>
+<style>
+    .animate-bg-scroll { animation: bg-scroll 60s linear infinite; }
+    @keyframes bg-scroll {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+    }
+</style>
+
+<div class="relative z-10 min-h-screen flex flex-col pb-14">
+    <header class="bg-white/95 dark:bg-gray-600/90 backdrop-blur-sm border-b border-[#E8DED5] dark:border-gray-700 shadow-pastel shrink-0 transition-colors duration-200">
+        <div class="max-w-6xl mx-auto pl-4 pr-4 py-4 flex flex-nowrap items-center gap-6">
+            <a href="{{ path('home') }}" class="flex items-center gap-3 text-[#3D3D3D] dark:text-gray-100 font-semibold text-lg shrink-0 mr-6 tracking-tight" title="AutiCare - Accueil" aria-label="AutiCare - Accueil">
+                <img src="{{ asset('images/logo.png') }}" alt="AutiCare - École, Aide, Accompagnement" class="h-14 w-auto object-contain" />
             </a>
-            <div class="flex flex-nowrap items-center gap-2 md:gap-3 flex-1 min-w-0 justify-end">
-            <nav class="flex flex-nowrap items-center gap-2 md:gap-3 shrink-0 pl-2 pr-2" aria-label="Navigation principale">
-                <a href="{{ path('home') }}" class="flex items-center gap-1.5 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded px-2 py-1 whitespace-nowrap">
+            <div class="flex flex-nowrap items-center gap-4 md:gap-5 flex-1 min-w-0 justify-end">
+            <nav class="flex flex-nowrap items-center gap-2 md:gap-4 shrink-0 pl-4 border-l border-[#E8DED5] dark:border-gray-600" aria-label="Navigation principale">
+                <a href="{{ path('home') }}" class="flex items-center gap-1.5 text-[#5C5C5C] dark:text-gray-100 hover:text-[#CDB4DB] dark:hover:text-[#E8D4F0] focus:outline focus:ring-2 focus:ring-[#CDB4DB]/40 rounded-xl px-3 py-2 whitespace-nowrap transition-colors font-medium">
                     <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>
                     <span class="hidden sm:inline">Accueil</span>
                 </a>
-                <a href="{{ path('user_products_index') }}" class="flex items-center gap-1.5 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded px-2 py-1 whitespace-nowrap">
+                <a href="{{ path('user_products_index') }}" class="flex items-center gap-1.5 text-[#5C5C5C] dark:text-gray-100 hover:text-[#CDB4DB] dark:hover:text-[#E8D4F0] focus:outline focus:ring-2 focus:ring-[#CDB4DB]/40 rounded-xl px-3 py-2 whitespace-nowrap transition-colors font-medium">
                     <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
                     <span class="hidden sm:inline">Produits</span>
                 </a>
-                <a href="{{ path('user_appointments') }}" class="flex items-center gap-1.5 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded px-2 py-1 whitespace-nowrap">
+                <a href="{{ path('user_appointments') }}" class="flex items-center gap-1.5 text-[#5C5C5C] dark:text-gray-100 hover:text-[#CDB4DB] dark:hover:text-[#E8D4F0] focus:outline focus:ring-2 focus:ring-[#CDB4DB]/40 rounded-xl px-3 py-2 whitespace-nowrap transition-colors font-medium">
                     <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     <span class="hidden sm:inline">Rendez-vous</span>
                 </a>
-                <a href="{{ path('user_events') }}" class="flex items-center gap-1.5 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded px-2 py-1 whitespace-nowrap">
+                <a href="{{ path('user_events') }}" class="flex items-center gap-1.5 text-[#5C5C5C] dark:text-gray-100 hover:text-[#CDB4DB] dark:hover:text-[#E8D4F0] focus:outline focus:ring-2 focus:ring-[#CDB4DB]/40 rounded-xl px-3 py-2 whitespace-nowrap transition-colors font-medium">
                     <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
                     <span class="hidden sm:inline">Événements</span>
                 </a>
-                <a href="{{ path('user_blog') }}" class="flex items-center gap-1.5 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded px-2 py-1 whitespace-nowrap">
+                <a href="{{ path('user_blog') }}" class="flex items-center gap-1.5 text-[#5C5C5C] dark:text-gray-100 hover:text-[#CDB4DB] dark:hover:text-[#E8D4F0] focus:outline focus:ring-2 focus:ring-[#CDB4DB]/40 rounded-xl px-3 py-2 whitespace-nowrap transition-colors font-medium">
                     <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.256A8.967 8.967 0 016 18c2.295 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.256A8.967 8.967 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
                     <span class="hidden sm:inline">Blog</span>
                 </a>
-                {% if app.user %}
-                <a href="{{ path('order_my_orders') }}" class="flex items-center gap-1.5 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded px-2 py-1 whitespace-nowrap" title="Consulter le suivi de mes commandes">
-                    <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z" /></svg>
-                    <span class="hidden sm:inline">Mes commandes</span>
-                </a>
-                {% endif %}
             </nav>
-            <div class="flex flex-nowrap items-center gap-2 md:gap-3 shrink-0 pl-2">
+            <div class="flex flex-nowrap items-center gap-2 md:gap-3 shrink-0 pl-4 border-l border-[#E8DED5] dark:border-gray-600">
+                <button type="button" id="theme-toggle" aria-label="Basculer mode nuit / jour" class="p-2.5 rounded-xl text-[#5C5C5C] dark:text-gray-300 hover:bg-[#E8DCF0] dark:hover:bg-gray-700 focus:outline focus:ring-2 focus:ring-[#CDB4DB]/40 transition-colors" title="Mode nuit / jour">
+                    <span id="theme-icon-sun" class="hidden dark:inline-block" aria-hidden="true"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg></span>
+                    <span id="theme-icon-moon" class="inline-block dark:hidden" aria-hidden="true"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg></span>
+                </button>
                 {% if app.user %}
                     {% set _event_msg_notifs = user_event_message_notifications|default([]) %}
                     {% set _commande_notifs_header = user_commande_notifications|default([]) %}
@@ -50,25 +75,26 @@
                         </svg>
                     </a>
                     <a href="{{ path('cart_index') }}" class="relative p-2 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded-full" title="Mon panier" aria-label="Panier{% if app_cart_count|default(0) > 0 %} ({{ app_cart_count }} article(s)){% endif %}">
+                    <a href="{{ path('cart_index') }}" class="relative p-2.5 text-[#5C5C5C] dark:text-gray-100 hover:text-[#CDB4DB] dark:hover:text-[#E8D4F0] focus:outline focus:ring-2 focus:ring-[#CDB4DB]/40 rounded-xl transition-colors" title="Mon panier" aria-label="Panier{% if app_cart_count|default(0) > 0 %} ({{ app_cart_count }} article(s)){% endif %}">
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
                         {% if app_cart_count|default(0) > 0 %}
-                        <span class="absolute -top-0.5 -right-0.5 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-[#A7C7E7] px-1.5 text-xs font-medium text-white">{{ app_cart_count > 99 ? '99+' : app_cart_count }}</span>
+                        <span class="absolute top-0.5 right-0.5 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-[#A8BBA3] px-1.5 text-xs font-medium text-white">{{ app_cart_count > 99 ? '99+' : app_cart_count }}</span>
                         {% endif %}
                     </a>
                     <div class="relative" id="notif-dropdown-wrap">
-                        <button type="button" id="notif-dropdown-btn" aria-expanded="false" aria-haspopup="true" aria-controls="notif-dropdown-panel" class="relative p-2 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded-full" title="Voir mes notifications" aria-label="Notifications{% if _notif_count > 0 %} ({{ _notif_count }}){% endif %}">
+                        <button type="button" id="notif-dropdown-btn" aria-expanded="false" aria-haspopup="true" aria-controls="notif-dropdown-panel" class="relative p-2.5 text-[#5C5C5C] dark:text-gray-100 hover:text-[#CDB4DB] dark:hover:text-[#E8D4F0] focus:outline focus:ring-2 focus:ring-[#CDB4DB]/40 rounded-xl transition-colors" title="Voir mes notifications" aria-label="Notifications{% if _notif_count > 0 %} ({{ _notif_count }}){% endif %}">
                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
                             {% if _notif_count > 0 %}
                             <span class="absolute -top-0.5 -right-0.5 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-[#DC2626] px-1.5 text-xs font-medium text-white">{{ _notif_count > 99 ? '99+' : _notif_count }}</span>
                             {% endif %}
                         </button>
-                        <div id="notif-dropdown-panel" class="absolute right-0 top-full mt-2 w-[380px] max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-lg border border-[#E5E0D8] z-50 overflow-hidden hidden" role="region" aria-label="Liste des notifications">
-                            <div class="p-3 border-b border-[#E5E0D8] bg-white">
-                                <h2 class="font-semibold text-[#4B5563] text-base">Notifications</h2>
+                        <div id="notif-dropdown-panel" class="absolute right-0 top-full mt-2 w-[380px] max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-pastel-md border border-[#E8DED5] z-50 overflow-hidden hidden" role="region" aria-label="Liste des notifications">
+                            <div class="p-3 border-b border-[#E8DED5] bg-white">
+                                <h2 class="font-semibold text-[#3D3D3D] text-base">Notifications</h2>
                             </div>
                             <div class="max-h-[min(70vh,420px)] overflow-y-auto">
                                 {% if _event_notifs_header is empty and _rdv_notifs_header is empty and _event_msg_notifs is empty and _commande_notifs_header is empty %}
-                                <div class="p-6 text-center text-[#6B7280] text-sm">Aucune notification.</div>
+                                <div class="p-6 text-center text-[#5C5C5C] text-sm">Aucune notification.</div>
                                 {% else %}
                                 <div class="p-2 space-y-1">
                                     {% for notif in _event_msg_notifs %}
@@ -120,8 +146,8 @@
                                 </div>
                                 {% endif %}
                             </div>
-                            <div class="p-2 border-t border-[#E5E0D8] bg-[#F5F1EB]">
-                                <a href="{{ path('user_notifications') }}" class="block text-center py-2.5 text-sm font-medium text-[#A7C7E7] hover:text-[#4B5563] rounded-lg notif-dropdown-link">Voir toutes les notifications</a>
+                            <div class="p-2 border-t border-[#E8DED5] bg-slate-50">
+                                <a href="{{ path('user_notifications') }}" class="block text-center py-2.5 text-sm font-medium text-[#CDB4DB] hover:text-[#3D3D3D] rounded-xl notif-dropdown-link transition-colors">Voir toutes les notifications</a>
                             </div>
                         </div>
                     </div>
@@ -140,10 +166,10 @@
                     })();
                     </script>
                     <div class="flex items-center gap-3">
-                        <a href="{{ path('user_profile') }}" class="flex items-center justify-center w-10 h-10 rounded-full overflow-hidden bg-[#A7C7E7] text-white font-semibold text-sm shrink-0 hover:opacity-90 transition-opacity" title="Modifier mon profil">{% if app.user.image %}<img src="{{ asset(app.user.image) }}" alt="" class="w-full h-full object-cover">{% else %}{{ (app.user.prenom|slice(0,1) ~ app.user.nom|slice(0,1))|upper }}{% endif %}</a>
+                        <a href="{{ path('user_profile') }}" class="flex items-center justify-center w-10 h-10 rounded-xl overflow-hidden bg-[#A8BBA3] text-white font-semibold text-sm shrink-0 hover:opacity-90 transition-opacity shadow-pastel" title="Modifier mon profil">{% if app.user.image %}<img src="{{ asset(app.user.image) }}" alt="" class="w-full h-full object-cover">{% else %}{{ (app.user.prenom|slice(0,1) ~ app.user.nom|slice(0,1))|upper }}{% endif %}</a>
                         <div class="flex flex-col items-start min-w-0">
-                            <a href="{{ path('user_profile') }}" class="font-medium text-[#4B5563] hover:text-[#A7C7E7] whitespace-nowrap">{{ app.user.prenom }} {{ app.user.nom }} <span class="text-[#DC2626]">{{ '%04d'|format(app.user.id) }}</span></a>
-                            <a href="{{ path('app_logout') }}" class="text-[#9CA3AF] hover:text-[#6B7280] text-sm focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded whitespace-nowrap mt-0.5" title="Se déconnecter">Se déconnecter</a>
+                            <a href="{{ path('user_profile') }}" class="font-medium text-[#3D3D3D] dark:text-gray-100 hover:text-[#CDB4DB] dark:hover:text-[#E8D4F0] whitespace-nowrap transition-colors">{{ app.user.prenom }} {{ app.user.nom }} <span class="text-red-500">{{ '%04d'|format(app.user.id) }}</span></a>
+                            <a href="{{ path('app_logout') }}" class="text-[#9CA3AF] dark:text-gray-400 hover:text-[#5C5C5C] dark:hover:text-gray-200 text-sm focus:outline focus:ring-2 focus:ring-[#CDB4DB]/40 rounded-xl whitespace-nowrap mt-0.5 transition-colors" title="Se déconnecter">Se déconnecter</a>
                         </div>
                     </div>
                     {% set _blog_locale = app.session.get('blog_locale', 'fr') %}
@@ -180,8 +206,11 @@
                     })();
                     </script>
                 {% else %}
-                    <a href="{{ path('app_login') }}" class="text-[#4B5563] hover:text-[#A7C7E7] font-medium focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded whitespace-nowrap">Connexion</a>
-                    <a href="{{ path('register') }}" class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7] whitespace-nowrap">
+                    {% set _return_uri = app.request.pathInfo ~ (app.request.queryString ? '?' ~ app.request.queryString : '') %}
+                    {% set _login_url = app.request.attributes.get('_route') is defined and (app.request.attributes.get('_route') starts with 'user_appointment') ? path('app_login', { _target_path: _return_uri }) : path('app_login') %}
+                    <a href="{{ _login_url }}" class="text-[#3D3D3D] dark:text-gray-100 hover:text-[#CDB4DB] dark:hover:text-[#E8D4F0] font-medium focus:outline focus:ring-2 focus:ring-[#CDB4DB]/40 rounded-xl px-3 py-2 transition-colors whitespace-nowrap">Connexion</a>
+                    {% set _register_url = app.request.attributes.get('_route') is defined and (app.request.attributes.get('_route') starts with 'user_appointment') ? path('register', { _target_path: _return_uri }) : path('register') %}
+                    <a href="{{ _register_url }}" class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#A8BBA3] text-white font-medium hover:bg-[#94B08E] focus:outline focus:ring-2 focus:ring-[#CDB4DB]/50 shadow-pastel transition-colors whitespace-nowrap">
                         <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                         </svg>
@@ -225,52 +254,116 @@
             </div>
         </div>
     </header>
+    <script>
+    (function() {
+        var btn = document.getElementById('theme-toggle');
+        if (!btn) return;
+        btn.addEventListener('click', function() {
+            var isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('auticare-theme', isDark ? 'dark' : 'light');
+        });
+    })();
+    </script>
     <main class="flex-1 w-full mx-auto px-4 py-8">
+        {% include 'partials/_flash_messages.html.twig' %}
         {% block user_content %}{% endblock %}
     </main>
+    {# Bande Actualités fixe en bas — couleurs projet (mint / vert pastel) #}
+    <div class="fixed bottom-0 left-0 right-0 z-40 flex h-12 md:h-14 shadow-pastel-md border-t border-[#E8DED5] dark:border-gray-700 dark:bg-gray-600 transition-colors duration-200" role="region" aria-label="Actualités">
+        <div class="flex items-center shrink-0 bg-[#A8BBA3] dark:bg-gray-500 pl-4 pr-4 md:pl-6 md:pr-6 rounded-tl-lg h-full">
+            <span class="font-bold text-[#3D3D3D] dark:text-gray-200 text-sm md:text-base whitespace-nowrap">Actualités</span>
+        </div>
+        <div class="flex-1 min-w-0 bg-[#8FA88A] dark:bg-gray-500/80 flex items-center overflow-hidden">
+            <div class="ticker-wrap overflow-hidden py-2 w-full">
+                <div class="ticker-track flex items-center gap-6 animate-ticker whitespace-nowrap w-max">
+                    <div class="ticker-inner flex items-center gap-6 shrink-0">
+                        <a href="{{ path('user_events') }}" class="flex items-center gap-2 text-white dark:text-gray-100 text-sm md:text-base hover:underline hover:text-[#FFF8F0] dark:hover:text-white">
+                            <svg class="w-4 h-4 shrink-0 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                            Move Your Body 1.0 : Quand sport et créativité s'unissent
+                        </a>
+                        <span class="text-white/80" aria-hidden="true">•</span>
+                        <a href="{{ path('user_events') }}" class="flex items-center gap-2 text-white dark:text-gray-100 text-sm md:text-base hover:underline hover:text-[#FFF8F0] dark:hover:text-white">
+                            <svg class="w-4 h-4 shrink-0 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                            Hackathon H12 Innovation : innover pour l'inclusion
+                        </a>
+                        <span class="text-white/80" aria-hidden="true">•</span>
+                        <a href="{{ path('user_events') }}" class="flex items-center gap-2 text-white dark:text-gray-100 text-sm md:text-base hover:underline hover:text-[#FFF8F0] dark:hover:text-white">
+                            <svg class="w-4 h-4 shrink-0 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                            Ateliers sensoriels : découverte des outils d'apaisement
+                        </a>
+                    </div>
+                    <div class="ticker-inner flex items-center gap-6 shrink-0" aria-hidden="true">
+                        <a href="{{ path('user_events') }}" class="flex items-center gap-2 text-white dark:text-gray-100 text-sm md:text-base hover:underline hover:text-[#FFF8F0] dark:hover:text-white">
+                            <svg class="w-4 h-4 shrink-0 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                            Move Your Body 1.0 : Quand sport et créativité s'unissent
+                        </a>
+                        <span class="text-white/80">•</span>
+                        <a href="{{ path('user_events') }}" class="flex items-center gap-2 text-white dark:text-gray-100 text-sm md:text-base hover:underline hover:text-[#FFF8F0] dark:hover:text-white">
+                            <svg class="w-4 h-4 shrink-0 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                            Hackathon H12 Innovation : innover pour l'inclusion
+                        </a>
+                        <span class="text-white/80">•</span>
+                        <a href="{{ path('user_events') }}" class="flex items-center gap-2 text-white dark:text-gray-100 text-sm md:text-base hover:underline hover:text-[#FFF8F0] dark:hover:text-white">
+                            <svg class="w-4 h-4 shrink-0 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                            Ateliers sensoriels : découverte des outils d'apaisement
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <style>
+        .ticker-wrap { overflow: hidden; }
+        .ticker-track { animation: ticker 45s linear infinite; }
+        .ticker-wrap:hover .ticker-track { animation-play-state: paused; }
+        @keyframes ticker {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+    </style>
+
     {% block footer %}
-    <footer class="bg-white border-t border-[#E5E0D8] mt-auto">
-        <div class="max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer class="bg-white dark:bg-gray-600 border-t border-[#E8DED5] dark:border-gray-700 mt-auto transition-colors duration-200">
+        <div class="max-w-6xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-                <a href="{{ path('home') }}" class="flex items-center gap-2 text-[#4B5563] font-semibold mb-3">
-                    <img src="{{ asset('images/logo.png') }}" alt="AutiCare" class="h-20 w-auto object-contain" />
+                <a href="{{ path('home') }}" class="flex items-center gap-2 text-[#3D3D3D] dark:text-gray-100 font-semibold mb-3 tracking-tight">
+                    <img src="{{ asset('images/logo.png') }}" alt="AutiCare" class="h-16 w-auto object-contain" />
                     AutiCare
                 </a>
-                <p class="text-[#6B7280] text-sm">Accompagner les personnes autistes et leurs familles avec bienveillance et expertise.</p>
-                <p class="text-[#6B7280] text-sm mt-2">contact@auticare.fr</p>
-                <p class="text-[#6B7280] text-sm">23 19 88 13</p>
-                <p class="text-[#6B7280] text-sm">El Ghazela, Tunis</p>
+                <p class="text-[#5C5C5C] dark:text-gray-300 text-sm leading-relaxed">Accompagner les personnes autistes et leurs familles avec bienveillance et expertise.</p>
+                <p class="text-[#5C5C5C] text-sm mt-2">contact@auticare.fr · 23 19 88 13</p>
+                <p class="text-[#5C5C5C] text-sm">El Ghazela, Tunis</p>
             </div>
             <div>
-                <h3 class="font-semibold text-[#4B5563] mb-3">Navigation</h3>
-                <ul class="space-y-2 text-[#6B7280] text-sm">
-                    <li><a href="{{ path('home') }}" class="hover:text-[#A7C7E7]">Accueil</a></li>
-                    <li><a href="{{ path('user_products_index') }}" class="hover:text-[#A7C7E7]">Produits</a></li>
-                    <li><a href="{{ path('user_appointments') }}" class="hover:text-[#A7C7E7]">Rendez-vous</a></li>
-                    <li><a href="{{ path('user_events') }}" class="hover:text-[#A7C7E7]">Événements</a></li>
-                    <li><a href="{{ path('user_blog') }}" class="hover:text-[#A7C7E7]">Blog</a></li>
-                    {% if app.user %}<li><a href="{{ path('user_notifications') }}" class="hover:text-[#A7C7E7]">Notifications</a></li>{% endif %}
+                <h3 class="font-semibold text-[#3D3D3D] dark:text-gray-100 mb-3">Navigation</h3>
+                <ul class="space-y-2 text-[#5C5C5C] dark:text-gray-300 text-sm">
+                    <li><a href="{{ path('home') }}" class="hover:text-[#CDB4DB] transition-colors">Accueil</a></li>
+                    <li><a href="{{ path('user_products_index') }}" class="hover:text-[#CDB4DB] transition-colors">Produits</a></li>
+                    <li><a href="{{ path('user_appointments') }}" class="hover:text-[#CDB4DB] transition-colors">Rendez-vous</a></li>
+                    <li><a href="{{ path('user_events') }}" class="hover:text-[#CDB4DB] transition-colors">Événements</a></li>
+                    <li><a href="{{ path('user_blog') }}" class="hover:text-[#CDB4DB] transition-colors">Blog</a></li>
+                    {% if app.user %}<li><a href="{{ path('user_notifications') }}" class="hover:text-[#CDB4DB] transition-colors">Notifications</a></li>{% endif %}
                 </ul>
             </div>
             <div>
-                <h3 class="font-semibold text-[#4B5563] mb-3">Support</h3>
-                <ul class="space-y-2 text-[#6B7280] text-sm">
-                    <li><a href="#" class="hover:text-[#A7C7E7]">FAQ</a></li>
-                    <li><a href="#" class="hover:text-[#A7C7E7]">Contact</a></li>
-                    <li><a href="#" class="hover:text-[#A7C7E7]">Accessibilité</a></li>
+                <h3 class="font-semibold text-[#3D3D3D] dark:text-gray-100 mb-3">Support</h3>
+                <ul class="space-y-2 text-[#5C5C5C] dark:text-gray-300 text-sm">
+                    <li><a href="#" class="hover:text-[#CDB4DB] transition-colors">FAQ</a></li>
+                    <li><a href="#" class="hover:text-[#CDB4DB] transition-colors">Contact</a></li>
+                    <li><a href="#" class="hover:text-[#CDB4DB] transition-colors">Accessibilité</a></li>
                 </ul>
             </div>
             <div>
-                <h3 class="font-semibold text-[#4B5563] mb-3">Informations</h3>
-                <ul class="space-y-2 text-[#6B7280] text-sm">
-                    <li><a href="#" class="hover:text-[#A7C7E7]">Mentions légales</a></li>
-                    <li><a href="#" class="hover:text-[#A7C7E7]">Politique de confidentialité</a></li>
-                    <li><a href="#" class="hover:text-[#A7C7E7]">CGV</a></li>
+                <h3 class="font-semibold text-[#3D3D3D] dark:text-gray-100 mb-3">Informations</h3>
+                <ul class="space-y-2 text-[#5C5C5C] dark:text-gray-300 text-sm">
+                    <li><a href="#" class="hover:text-[#CDB4DB] transition-colors">Mentions légales</a></li>
+                    <li><a href="#" class="hover:text-[#CDB4DB] transition-colors">Politique de confidentialité</a></li>
+                    <li><a href="#" class="hover:text-[#CDB4DB] transition-colors">CGV</a></li>
                 </ul>
             </div>
         </div>
-        <div class="border-t border-[#E5E0D8] py-4 text-center text-[#6B7280] text-sm">
-            © {{ "now"|date("Y") }} AutiCare — Ecouter - Aider - Accompagner.
+        <div class="border-t border-[#E8DED5] dark:border-gray-700 py-4 text-center text-[#5C5C5C] dark:text-gray-400 text-sm">
+            © {{ "now"|date("Y") }} AutiCare — Écouter · Aider · Accompagner
         </div>
     </footer>
     {% endblock %}

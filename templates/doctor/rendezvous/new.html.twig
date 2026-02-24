@@ -1,0 +1,40 @@
+{% extends 'layouts/doctor.html.twig' %}
+
+{% block title %}Nouveau rendez-vous - AutiCare Médecin{% endblock %}
+
+{% block doctor_content %}
+<div class="space-y-6 max-w-2xl">
+    <div class="flex items-center gap-4">
+        <a href="{{ path('doctor_rendezvous_calendrier') }}" class="inline-flex items-center gap-2 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded-lg">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            Retour au calendrier
+        </a>
+    </div>
+
+    <h1 class="text-2xl font-semibold text-[#4B5563] dark:text-white">Nouveau rendez-vous</h1>
+    <p class="text-[#6B7280] dark:text-gray-400">Créneau : <strong>{{ date_label }}</strong></p>
+
+    <div class="bg-white dark:bg-gray-700/80 rounded-xl border border-[#E5E0D8] dark:border-gray-600 p-6">
+        {{ form_start(form, {
+            attr: { class: 'space-y-4' },
+            label_attr: { class: 'block text-[#4B5563] dark:text-gray-200 font-medium mb-1' }
+        }) }}
+        {{ form_row(form.patient) }}
+        {{ form_row(form.nom) }}
+        {{ form_row(form.prenom) }}
+        {{ form_row(form.email) }}
+        {{ form_row(form.telephone) }}
+        {{ form_row(form.notePatient) }}
+        {{ form_row(form.motif) }}
+        <div class="flex gap-3 pt-4">
+            <button type="submit" class="px-5 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                Créer le rendez-vous
+            </button>
+            <a href="{{ path('doctor_rendezvous_calendrier') }}" class="px-5 py-2.5 rounded-lg border border-[#E5E0D8] dark:border-gray-500 text-[#6B7280] dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                Annuler
+            </a>
+        </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

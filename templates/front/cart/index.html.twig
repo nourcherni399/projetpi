@@ -4,12 +4,6 @@
 
 {% block user_content %}
 <span class="cart-items-count hidden">{{ cart.totalItems }}</span>
-{% for message in app.flashes('error') %}
-    <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-800">{{ message }}</div>
-{% endfor %}
-{% for message in app.flashes('success') %}
-    <div class="mb-4 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">{{ message }}</div>
-{% endfor %}
 <section class="text-center mb-10">
     <h1 class="text-3xl font-bold text-[#4B5563] mb-3">Mon Panier</h1>
 </section>

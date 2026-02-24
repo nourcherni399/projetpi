@@ -1,0 +1,491 @@
+{# Widget chat "Besoin d'aide ?" pour les pages rendez-vous - position droite ou gauche #}
+<div id="chat-help-wrap" class="fixed bottom-6 right-6 z-50 flex flex-col items-end" data-chat-user-id="{{ app.user ? app.user.id : 'anon' }}">
+    <button type="button" id="chat-help-toggle" aria-expanded="false" aria-label="Besoin d'aide ? Ouvrir le chat"
+        class="flex items-center gap-2 px-4 py-3 rounded-full bg-[#1e3a5f] hover:bg-[#152a47] text-white font-medium shadow-lg focus:outline-none focus:ring-2 focus:ring-[#1e3a5f] focus:ring-offset-2 transition-all">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" /></svg>
+        <span>Besoin d'aide ?</span>
+    </button>
+    <div id="chat-help-panel" class="hidden w-full max-w-sm mt-3 rounded-2xl shadow-xl border border-[#E8DED5] dark:border-gray-600 overflow-hidden bg-white dark:bg-gray-800" style="max-height: 70vh;">
+        <div class="p-3 border-b border-[#E8DED5] dark:border-gray-600 bg-[#F5F0EB] dark:bg-gray-700/50 flex justify-between items-center gap-2">
+            <span class="font-bold text-[#1e3a5f] dark:text-white text-sm">Assistant AutiCare</span>
+            <div class="flex items-center gap-1">
+                <button type="button" id="chat-help-clear" aria-label="Effacer l'historique" title="Effacer l'historique du chat" class="p-1.5 rounded-lg hover:bg-[#E5E0D8] dark:hover:bg-gray-600 text-[#6B7280] dark:text-gray-400">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                </button>
+                <button type="button" id="chat-help-close" aria-label="Fermer" class="p-1.5 rounded-lg hover:bg-[#E5E0D8] dark:hover:bg-gray-600 text-[#6B7280]">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+        </div>
+        <div id="chat-help-messages" class="p-3 min-h-[200px] max-h-[40vh] overflow-y-auto space-y-2 bg-[#FDF8F5] dark:bg-gray-800/80 text-sm">
+            <div id="chat-help-welcome" class="text-center py-4 text-[#6B7280] dark:text-gray-400 text-xs space-y-3">
+                <p class="font-medium text-[#1e3a5f] dark:text-[#93C5FD]">Bonjour, je suis l'assistant AutiCare.</p>
+                <p>Je peux vous aider à explorer vos émotions, la routine, le sensoriel ou la communication avec des images. Vous pouvez aussi faire le <strong>quiz inspiré du test de Rorschach</strong> : regarder une image et dire ce que vous voyez ou ressentez — sans bonne ou mauvaise réponse.</p>
+                <p class="text-[#5C5C5C] dark:text-gray-500">Choisissez un thème ou écrivez librement :</p>
+                <div class="flex flex-wrap justify-center gap-1.5">
+                    <button type="button" class="chat-help-suggest px-2.5 py-1.5 rounded-lg bg-[#D4E5D0]/80 dark:bg-gray-600/70 text-[#2D5A2A] dark:text-gray-200 text-xs hover:bg-[#D4E5D0] dark:hover:bg-gray-600 transition-colors font-medium" data-msg="Je veux faire le quiz textuel (questions) pour mieux me connaître">Quiz texte</button>
+                    <button type="button" class="chat-help-suggest px-2.5 py-1.5 rounded-lg bg-[#DFEEF5]/80 dark:bg-gray-600/70 text-[#1E4D6B] dark:text-gray-200 text-xs hover:bg-[#DFEEF5] dark:hover:bg-gray-600 transition-colors font-medium" data-msg="Je veux faire le quiz inspiré du test de Rorschach (images)">Quiz Rorschach</button>
+                    <button type="button" class="chat-help-suggest px-2.5 py-1.5 rounded-lg bg-[#E8DCF0]/70 dark:bg-gray-600/70 text-[#4B3D6B] dark:text-gray-200 text-xs hover:bg-[#E8DCF0] dark:hover:bg-gray-600 transition-colors" data-msg="Je voudrais une image sur les émotions">Émotions</button>
+                    <button type="button" class="chat-help-suggest px-2.5 py-1.5 rounded-lg bg-[#E8DCF0]/70 dark:bg-gray-600/70 text-[#4B3D6B] dark:text-gray-200 text-xs hover:bg-[#E8DCF0] dark:hover:bg-gray-600 transition-colors" data-msg="Une image sur le sensoriel">Sensoriel</button>
+                    <button type="button" class="chat-help-suggest px-2.5 py-1.5 rounded-lg bg-[#E8DCF0]/70 dark:bg-gray-600/70 text-[#4B3D6B] dark:text-gray-200 text-xs hover:bg-[#E8DCF0] dark:hover:bg-gray-600 transition-colors" data-msg="Une image sur la routine et les repères">Routine</button>
+                    <button type="button" class="chat-help-suggest px-2.5 py-1.5 rounded-lg bg-[#E8DCF0]/70 dark:bg-gray-600/70 text-[#4B3D6B] dark:text-gray-200 text-xs hover:bg-[#E8DCF0] dark:hover:bg-gray-600 transition-colors" data-msg="Une image calme et apaisante">Calme</button>
+                </div>
+            </div>
+        </div>
+        <form id="chat-help-form" class="p-3 border-t border-[#E8DED5] dark:border-gray-600 bg-white dark:bg-gray-800 flex flex-col gap-2">
+            <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-[#6B7280] dark:text-gray-400 text-xs">Rapide :</span>
+                <button type="button" class="chat-help-suggest px-2.5 py-1.5 rounded-lg bg-[#D4E5D0]/80 dark:bg-gray-600/70 text-[#2D5A2A] dark:text-gray-200 text-xs hover:bg-[#D4E5D0] dark:hover:bg-gray-600 transition-colors font-medium" data-msg="Je veux faire le quiz textuel (questions) pour mieux me connaître">Quiz texte</button>
+                <button type="button" class="chat-help-suggest px-2.5 py-1.5 rounded-lg bg-[#DFEEF5]/80 dark:bg-gray-600/70 text-[#1E4D6B] dark:text-gray-200 text-xs hover:bg-[#DFEEF5] dark:hover:bg-gray-600 transition-colors font-medium" data-msg="Je veux faire le quiz inspiré du test de Rorschach (images)">Quiz Rorschach</button>
+            </div>
+            <div class="flex gap-2">
+            <input type="file" id="chat-help-image" accept="image/*" class="hidden" aria-label="Joindre une image">
+            <div class="flex-1 flex gap-1.5">
+                <button type="button" id="chat-help-attach" aria-label="Joindre une photo" title="Joindre une photo pour analyse"
+                    class="shrink-0 p-2 rounded-xl border border-[#E5E0D8] dark:border-gray-600 bg-[#F5F1EB] dark:bg-gray-700 text-[#1e3a5f] hover:bg-[#E5E0D8] dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/40">
+                    <svg class="w-5 h-5 block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                </button>
+                <input type="text" id="chat-help-input" placeholder="Parlez ou écrivez... (ou joignez une photo)" autocomplete="off"
+                    class="flex-1 min-w-0 px-3 py-2 rounded-xl border border-[#E5E0D8] dark:border-gray-600 bg-[#F5F1EB] dark:bg-gray-700 text-[#374151] dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/40">
+                <button type="button" id="chat-help-mic" aria-label="Parler au micro" title="Cliquez pour parler"
+                    class="shrink-0 p-2 rounded-xl border border-[#E5E0D8] dark:border-gray-600 bg-[#F5F1EB] dark:bg-gray-700 text-[#1e3a5f] hover:bg-[#E5E0D8] dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/40 transition-colors">
+                    <svg class="w-5 h-5 block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3z" /></svg>
+                </button>
+            </div>
+            <button type="submit" id="chat-help-send" class="px-4 py-2 rounded-xl bg-[#1e3a5f] hover:bg-[#152a47] text-white font-medium text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a5f] disabled:opacity-50 shrink-0">
+                Envoyer
+            </button>
+            </div>
+        </form>
+    </div>
+    {# Lightbox : clic sur une photo du chat pour l'agrandir #}
+    <div id="chat-help-lightbox" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/80 p-4" aria-hidden="true" role="dialog" aria-label="Image agrandie">
+        <button type="button" id="chat-help-lightbox-close" class="absolute top-4 right-4 p-2 rounded-full bg-white/20 hover:bg-white/30 text-white focus:outline-none focus:ring-2 focus:ring-white" aria-label="Fermer">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        <img id="chat-help-lightbox-img" src="" alt="Image agrandie" class="max-w-full max-h-[90vh] w-auto h-auto object-contain rounded-lg shadow-2xl">
+    </div>
+</div>
+<script>
+(function() {
+    var wrap = document.getElementById('chat-help-wrap');
+    var userId = (wrap && wrap.getAttribute('data-chat-user-id')) ? wrap.getAttribute('data-chat-user-id') : 'anon';
+    var STORAGE_KEY = 'auticare_tsa_chat_' + userId;
+    const MAX_STORED = 50;
+    const toggle = document.getElementById('chat-help-toggle');
+    const panel = document.getElementById('chat-help-panel');
+    const closeBtn = document.getElementById('chat-help-close');
+    const form = document.getElementById('chat-help-form');
+    const input = document.getElementById('chat-help-input');
+    const messagesEl = document.getElementById('chat-help-messages');
+    var welcomeEl = document.getElementById('chat-help-welcome');
+    var welcomeHtml = welcomeEl ? welcomeEl.outerHTML : '';
+    const baseUrl = '{{ app.request.getSchemeAndHttpHost() }}';
+    const chatApiUrl = '{{ path('api_chat') }}';
+
+    let history = [];
+    var storedEntries = [];
+    var pendingImageBase64 = null;
+
+    function loadStoredHistory() {
+        try {
+            var raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return [];
+            var arr = JSON.parse(raw);
+            return Array.isArray(arr) ? arr.slice(-MAX_STORED) : [];
+        } catch (_) { return []; }
+    }
+    function saveStoredHistory(entries) {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(entries.slice(-MAX_STORED))); } catch (_) {}
+    }
+
+    function removeTypingIndicator() {
+        var el = document.getElementById('chat-help-typing');
+        if (el && el.parentNode) el.parentNode.removeChild(el);
+    }
+
+    function addTypingIndicator() {
+        if (welcomeEl) welcomeEl.remove();
+        removeTypingIndicator();
+        var div = document.createElement('div');
+        div.id = 'chat-help-typing';
+        div.className = 'flex justify-start chat-msg';
+        div.setAttribute('data-role', 'model');
+        div.innerHTML = '<div class="max-w-[90%] px-3 py-2 rounded-xl rounded-bl-sm bg-white dark:bg-gray-700 border border-[#E5E0D8] text-[#6B7280] dark:text-gray-400 text-xs"><span class="typing-dots">L\'assistant réfléchit</span><span class="animate-pulse">...</span></div>';
+        messagesEl.appendChild(div);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function addMsg(text, isUser, genUrl, userImageUrl, withEditBtn) {
+        if (welcomeEl) welcomeEl.remove();
+        removeTypingIndicator();
+        var div = document.createElement('div');
+        div.className = (isUser ? 'flex justify-end' : 'flex justify-start') + ' chat-msg';
+        div.setAttribute('data-role', isUser ? 'user' : 'model');
+        if (isUser) div.setAttribute('data-text', text);
+        var col = document.createElement('div');
+        col.className = 'max-w-[90%] flex flex-col gap-1';
+        if (isUser && userImageUrl) {
+            var uImg = document.createElement('img');
+            uImg.alt = 'Photo envoyée';
+            uImg.className = 'chat-help-img max-w-[180px] max-h-[200px] w-auto h-auto rounded-lg object-contain cursor-pointer hover:opacity-90 transition-opacity';
+            uImg.src = userImageUrl;
+            uImg.title = 'Cliquer pour agrandir';
+            uImg.onerror = function() { uImg.alt = 'Photo non chargée'; uImg.style.background = '#E5E7EB'; };
+            col.appendChild(uImg);
+        }
+        var bubble = document.createElement('div');
+        bubble.className = isUser ? 'px-3 py-2 rounded-xl rounded-br-sm bg-[#1e3a5f] text-white text-xs' : 'px-3 py-2 rounded-xl rounded-bl-sm bg-white dark:bg-gray-700 border border-[#E5E0D8] text-[#374151] dark:text-gray-100 text-xs';
+        bubble.textContent = text;
+        col.appendChild(bubble);
+        if (genUrl && !isUser) {
+            var img = document.createElement('img');
+            img.alt = 'Image';
+            img.className = 'chat-help-img max-w-[180px] h-auto rounded-lg object-contain cursor-pointer hover:opacity-90 transition-opacity';
+            img.title = 'Cliquer pour agrandir';
+            if (genUrl.startsWith('http') || genUrl.startsWith('/')) {
+                img.src = genUrl;
+            } else {
+                img.src = baseUrl + (genUrl.startsWith('/') ? genUrl : '/' + genUrl);
+            }
+            img.onerror = function() { img.alt = 'Image non chargée'; img.style.background = 'var(--tw-gray-200, #E5E7EB)'; };
+            col.appendChild(img);
+        }
+        if (isUser && withEditBtn) {
+            var row = document.createElement('div');
+            row.className = 'flex items-end gap-1 justify-end';
+            row.appendChild(col);
+            var editBtn = document.createElement('button');
+            editBtn.type = 'button';
+            editBtn.className = 'chat-msg-edit shrink-0 p-1 rounded hover:bg-[#152a47]/80 text-white/80 hover:text-white text-xs';
+            editBtn.setAttribute('aria-label', 'Modifier');
+            editBtn.setAttribute('title', 'Modifier le message');
+            editBtn.innerHTML = '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>';
+            row.appendChild(editBtn);
+            var saveBtn = document.createElement('button');
+            saveBtn.type = 'button';
+            saveBtn.className = 'chat-msg-save hidden shrink-0 p-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-xs';
+            saveBtn.setAttribute('aria-label', 'Enregistrer');
+            saveBtn.setAttribute('title', 'Enregistrer');
+            saveBtn.innerHTML = '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>';
+            row.appendChild(saveBtn);
+            div.appendChild(row);
+        } else {
+            div.appendChild(col);
+        }
+        messagesEl.appendChild(div);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function initFromStorage() {
+        storedEntries = loadStoredHistory();
+        if (storedEntries.length === 0) return;
+        if (welcomeEl) welcomeEl.remove();
+        history = [];
+        for (var i = 0; i < storedEntries.length; i++) {
+            var e = storedEntries[i];
+            var isUser = e.role === 'user';
+            addMsg(e.content, isUser, e.generatedImageUrl || null, null, isUser);
+            if (e.role === 'user' || e.role === 'model') history.push({ role: e.role, content: e.content });
+        }
+    }
+    initFromStorage();
+
+    toggle.addEventListener('click', function() {
+        var open = !panel.classList.contains('hidden');
+        panel.classList.toggle('hidden', open);
+        toggle.setAttribute('aria-expanded', open ? 'false' : 'true');
+    });
+    closeBtn.addEventListener('click', function() {
+        panel.classList.add('hidden');
+        toggle.setAttribute('aria-expanded', 'false');
+    });
+
+    var clearBtn = document.getElementById('chat-help-clear');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+            try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
+            history = [];
+            storedEntries = [];
+            removeTypingIndicator();
+            messagesEl.innerHTML = welcomeHtml;
+            welcomeEl = document.getElementById('chat-help-welcome');
+            messagesEl.scrollTop = 0;
+        });
+    }
+
+    var lightbox = document.getElementById('chat-help-lightbox');
+    var lightboxImg = document.getElementById('chat-help-lightbox-img');
+    var lightboxClose = document.getElementById('chat-help-lightbox-close');
+    function openLightbox(src) {
+        if (!lightbox || !lightboxImg) return;
+        lightboxImg.src = src;
+        lightbox.classList.remove('hidden');
+        lightbox.classList.add('flex');
+        lightbox.setAttribute('aria-hidden', 'false');
+    }
+    function closeLightbox() {
+        if (!lightbox) return;
+        lightbox.classList.add('hidden');
+        lightbox.classList.remove('flex');
+        lightbox.setAttribute('aria-hidden', 'true');
+    }
+    if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
+    if (lightbox) {
+        lightbox.addEventListener('click', function(e) {
+            if (e.target === lightbox) closeLightbox();
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && lightbox && !lightbox.classList.contains('hidden')) closeLightbox();
+        });
+    }
+    messagesEl.addEventListener('click', function(e) {
+        var img = e.target && e.target.closest && e.target.closest('.chat-help-img');
+        if (!img && e.target && e.target.tagName === 'IMG' && messagesEl.contains(e.target)) img = e.target;
+        if (img && img.src) {
+            e.preventDefault();
+            openLightbox(img.src);
+        }
+    });
+
+    var attachBtn = document.getElementById('chat-help-attach');
+    var imageInput = document.getElementById('chat-help-image');
+    var MAX_IMAGE_PX = 800;
+    var JPEG_QUALITY = 0.82;
+
+    function compressImageAsDataUrl(file, callback) {
+        var img = document.createElement('img');
+        img.onload = function() {
+            var w = img.naturalWidth, h = img.naturalHeight;
+            if (w <= MAX_IMAGE_PX && h <= MAX_IMAGE_PX && file.type === 'image/jpeg' && file.size < 500000) {
+                var r = new FileReader();
+                r.onload = function() { callback(r.result); };
+                r.readAsDataURL(file);
+                return;
+            }
+            var scale = Math.min(MAX_IMAGE_PX / w, MAX_IMAGE_PX / h, 1);
+            var c = document.createElement('canvas');
+            c.width = Math.round(w * scale);
+            c.height = Math.round(h * scale);
+            var ctx = c.getContext('2d');
+            ctx.drawImage(img, 0, 0, c.width, c.height);
+            try {
+                callback(c.toDataURL('image/jpeg', JPEG_QUALITY));
+            } catch (err) {
+                var fr = new FileReader();
+                fr.onload = function() { callback(fr.result); };
+                fr.readAsDataURL(file);
+            }
+        };
+        img.onerror = function() {
+            var fr = new FileReader();
+            fr.onload = function() { callback(fr.result); };
+            fr.readAsDataURL(file);
+        };
+        img.src = URL.createObjectURL(file);
+    }
+
+    if (attachBtn && imageInput) {
+        attachBtn.addEventListener('click', function() { imageInput.click(); });
+        imageInput.addEventListener('change', function() {
+            var file = this.files && this.files[0];
+            if (!file || !file.type.startsWith('image/')) return;
+            if (file.size > 10000000) {
+                input.placeholder = 'Image trop grande (max 10 Mo).';
+                return;
+            }
+            compressImageAsDataUrl(file, function(data) {
+                if (typeof data === 'string' && data.startsWith('data:')) {
+                    pendingImageBase64 = data;
+                    input.placeholder = 'Photo jointe. Envoyez ou ajoutez un message.';
+                }
+            });
+            this.value = '';
+        });
+    }
+
+    messagesEl.addEventListener('click', function(e) {
+        var editBtn = e.target && e.target.closest && e.target.closest('.chat-msg-edit');
+        var saveBtn = e.target && e.target.closest && e.target.closest('.chat-msg-save');
+        if (editBtn) {
+            var userDiv = editBtn.closest('.chat-msg[data-role="user"]');
+            if (!userDiv) return;
+            var bubble = userDiv.querySelector('.px-3.py-2.rounded-xl');
+            if (!bubble) return;
+            bubble.contentEditable = 'true';
+            bubble.focus();
+            editBtn.classList.add('hidden');
+            var sv = userDiv.querySelector('.chat-msg-save');
+            if (sv) sv.classList.remove('hidden');
+        } else if (saveBtn) {
+            var userDiv = saveBtn.closest('.chat-msg[data-role="user"]');
+            if (!userDiv) return;
+            var bubble = userDiv.querySelector('.px-3.py-2.rounded-xl');
+            if (!bubble) return;
+            var newText = (bubble.textContent || '').trim();
+            if (!newText) return;
+            bubble.contentEditable = 'false';
+            bubble.textContent = newText;
+            userDiv.setAttribute('data-text', newText);
+            saveBtn.classList.add('hidden');
+            var eb = userDiv.querySelector('.chat-msg-edit');
+            if (eb) eb.classList.remove('hidden');
+            var all = messagesEl.querySelectorAll('.chat-msg');
+            var idx = Array.prototype.indexOf.call(all, userDiv);
+            if (idx < 0) return;
+            storedEntries[idx].content = newText;
+            history[idx].content = newText;
+            var nextDiv = all[idx + 1];
+            var loadingEl = document.createElement('div');
+            loadingEl.className = 'flex justify-start chat-msg';
+            loadingEl.setAttribute('data-role', 'model');
+            loadingEl.innerHTML = '<div class="max-w-[90%] px-3 py-2 rounded-xl rounded-bl-sm bg-[#E5E0D8] dark:bg-gray-600 text-[#6B7280] text-xs">En cours...</div>';
+            if (nextDiv && nextDiv.getAttribute('data-role') === 'model') {
+                nextDiv.replaceWith(loadingEl);
+            } else {
+                userDiv.parentNode.insertBefore(loadingEl, userDiv.nextSibling);
+            }
+            saveBtn.disabled = true;
+            var histBefore = history.slice(0, idx);
+            fetch(chatApiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: JSON.stringify({ message: newText, history: histBefore })
+            }).then(function(res) { return res.json(); }).then(function(data) {
+                var reply = data.reply || 'Aucune réponse.';
+                var genUrl = data.generated_image_url || data.pexels_url || null;
+                if (genUrl && !genUrl.startsWith('http')) genUrl = baseUrl + (genUrl.startsWith('/') ? genUrl : '/' + genUrl);
+                storedEntries[idx + 1] = { role: 'model', content: reply, generatedImageUrl: genUrl || null };
+                history[idx + 1] = { role: 'model', content: reply };
+                while (storedEntries.length > idx + 2) { storedEntries.pop(); history.pop(); }
+                saveStoredHistory(storedEntries);
+                var replyCol = document.createElement('div');
+                replyCol.className = 'max-w-[90%] flex flex-col gap-1';
+                var replyBubble = document.createElement('div');
+                replyBubble.className = 'px-3 py-2 rounded-xl rounded-bl-sm bg-white dark:bg-gray-700 border border-[#E5E0D8] text-[#374151] dark:text-gray-100 text-xs';
+                replyBubble.textContent = reply;
+                replyCol.appendChild(replyBubble);
+                if (genUrl) {
+                    var img = document.createElement('img');
+                    img.src = genUrl;
+                    img.alt = 'Image';
+                    img.className = 'max-w-[180px] h-auto rounded-lg object-contain';
+                    replyCol.appendChild(img);
+                }
+                var replyDiv = document.createElement('div');
+                replyDiv.className = 'flex justify-start chat-msg';
+                replyDiv.setAttribute('data-role', 'model');
+                replyDiv.appendChild(replyCol);
+                loadingEl.replaceWith(replyDiv);
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+            }).catch(function() {
+                loadingEl.innerHTML = '<div class="max-w-[90%] px-3 py-2 rounded-xl rounded-bl-sm bg-red-50 dark:bg-red-900/20 border border-red-200 text-red-700 text-xs">Erreur. Réessayez.</div>';
+            }).finally(function() {
+                saveBtn.disabled = false;
+            });
+        }
+    });
+
+    (wrap || document).addEventListener('click', function(e) {
+        var btn = e.target && e.target.closest && e.target.closest('.chat-help-suggest');
+        if (!btn) return;
+        var msg = btn.getAttribute('data-msg');
+        if (msg) {
+            input.value = msg;
+            if (typeof form.requestSubmit === 'function') form.requestSubmit(); else form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+        }
+    });
+
+    var micBtn = document.getElementById('chat-help-mic');
+    var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition && micBtn) {
+        var recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        var navLang = (navigator.language || navigator.userLanguage || 'fr-FR').toLowerCase();
+        recognition.lang = navLang.startsWith('ar') ? 'ar-TN' : (navLang.startsWith('en') ? 'en-US' : (navLang.startsWith('fr') ? 'fr-FR' : navLang));
+        var isListening = false;
+        var baseText = '';
+        micBtn.addEventListener('click', function() {
+            if (isListening) {
+                recognition.stop();
+                return;
+            }
+            baseText = input.value.trim();
+            recognition.start();
+            isListening = true;
+            micBtn.classList.add('bg-red-100', 'dark:bg-red-900/30', 'border-red-400');
+            micBtn.setAttribute('title', 'Cliquez pour arrêter');
+            micBtn.setAttribute('aria-label', 'Arrêter la dictée');
+        });
+        recognition.onresult = function(e) {
+            var transcript = '';
+            var lastIsFinal = false;
+            for (var i = e.resultIndex; i < e.results.length; i++) {
+                transcript += e.results[i][0].transcript;
+                lastIsFinal = e.results[i].isFinal;
+            }
+            if (lastIsFinal) {
+                baseText = (baseText ? baseText + ' ' : '') + transcript.trim();
+                input.value = baseText;
+            } else {
+                input.value = (baseText ? baseText + ' ' : '') + transcript;
+            }
+        };
+        recognition.onend = function() {
+            isListening = false;
+            micBtn.classList.remove('bg-red-100', 'dark:bg-red-900/30', 'border-red-400');
+            micBtn.setAttribute('title', 'Cliquez pour parler');
+            micBtn.setAttribute('aria-label', 'Parler au micro');
+        };
+        recognition.onerror = function(e) {
+            isListening = false;
+            micBtn.classList.remove('bg-red-100', 'dark:bg-red-900/30', 'border-red-400');
+            if (e.error !== 'aborted') {
+                input.placeholder = 'Micro non disponible. Écrivez votre message.';
+            }
+        };
+    } else if (micBtn) {
+        micBtn.style.display = 'none';
+    }
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var msg = input.value.trim();
+        if (!msg && !pendingImageBase64) return;
+        if (!msg) msg = "Quelle émotion ou situation voyez-vous dans cette photo ?";
+        var imgToSend = pendingImageBase64;
+        pendingImageBase64 = null;
+        addMsg(msg, true, null, imgToSend, true);
+        input.value = '';
+        input.placeholder = 'Parlez ou écrivez...';
+        var sendBtn = document.getElementById('chat-help-send');
+        sendBtn.disabled = true;
+        addTypingIndicator();
+        var body = { message: msg, history: history };
+        if (imgToSend) body.image_base64 = imgToSend;
+        fetch(chatApiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            body: JSON.stringify(body)
+        }).then(function(res) { return res.json(); }).then(function(data) {
+            removeTypingIndicator();
+            var reply = data.reply || 'Je n\'ai pas pu répondre. Réessayez.';
+            var genUrl = data.generated_image_url || data.pexels_url || null;
+            if (genUrl && !genUrl.startsWith('http') && !genUrl.startsWith('/')) genUrl = (baseUrl + (genUrl.startsWith('/') ? genUrl : '/' + genUrl));
+            addMsg(reply, false, genUrl, null);
+            history.push({ role: 'user', content: msg });
+            history.push({ role: 'model', content: reply });
+            if (history.length > 20) history = history.slice(-20);
+            storedEntries.push({ role: 'user', content: msg, generatedImageUrl: null });
+            storedEntries.push({ role: 'model', content: reply, generatedImageUrl: genUrl || null });
+            saveStoredHistory(storedEntries);
+        }).catch(function() {
+            removeTypingIndicator();
+            addMsg('Connexion impossible. Vérifiez votre réseau et réessayez.', false, null, null);
+        }).finally(function() {
+            sendBtn.disabled = false;
+        });
+    });
+})();
+</script>

@@ -3,44 +3,45 @@
 {% block title %}Nos Produits - AutiCare{% endblock %}
 
 {% block user_content %}
+<div class="bg-white/95 dark:bg-gray-700/95 backdrop-blur-sm rounded-3xl shadow-pastel-md border-2 border-[#E8DED5] dark:border-gray-600 p-6 md:p-8">
 <section class="text-center mb-10">
-    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#A7C7E7]/20 text-[#A7C7E7] mb-4">
+    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#CDB4DB]/30 dark:bg-[#93C5FD]/30 text-[#4B3D6B] dark:text-[#93C5FD] mb-4">
         <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
     </div>
-    <h1 class="text-3xl font-bold text-[#4B5563] mb-3">Nos Produits</h1>
-    <p class="text-[#6B7280] max-w-2xl mx-auto">
+    <h1 class="text-3xl md:text-4xl font-bold text-[#2D2D2D] dark:text-white mb-3">Nos Produits</h1>
+    <p class="text-[#4A4A4A] dark:text-gray-200 max-w-2xl mx-auto text-lg">
         Découvrez notre sélection de produits spécialisés pour la stimulation sensorielle, la concentration et l'apaisement. Chaque produit est soigneusement choisi pour répondre aux besoins des personnes autistes.
     </p>
 </section>
 
 <div class="flex flex-col lg:flex-row gap-8">
     <aside class="lg:w-64 shrink-0 space-y-6">
-        <div class="bg-white rounded-xl shadow-sm p-5 border border-[#E5E0D8]">
-            <h2 class="font-semibold text-[#4B5563] mb-4">Catégories</h2>
-            <ul class="space-y-3 text-[#6B7280]">
+        <div class="bg-[#FDF8F5] dark:bg-gray-600/50 rounded-2xl shadow-pastel p-5 border-2 border-[#E8DED5] dark:border-gray-500">
+            <h2 class="font-semibold text-[#2D2D2D] dark:text-white mb-4">Catégories</h2>
+            <ul class="space-y-3 text-[#4A4A4A] dark:text-gray-300">
                 <li>
-                    <a href="{{ path('user_products_index') }}" class="block px-3 py-2 rounded-lg {% if not selectedCategorie %}bg-[#A7C7E7] text-white{% else %}hover:bg-[#F5F1EB]{% endif %}">
+                    <a href="{{ path('user_products_index') }}" class="block px-3 py-2.5 rounded-xl transition-colors {% if not selectedCategorie %}bg-[#A8BBA3] text-white font-medium{% else %}hover:bg-[#E8DCF0]/50 dark:hover:bg-gray-500{% endif %}">
                         Toutes les catégories
                     </a>
                 </li>
                 {% for categorie in categories %}
                 <li>
-                    <a href="{{ path('user_products_index', {categorie: categorie.value}) }}" class="block px-3 py-2 rounded-lg {% if selectedCategorie == categorie.value %}bg-[#A7C7E7] text-white{% else %}hover:bg-[#F5F1EB]{% endif %}">
+                    <a href="{{ path('user_products_index', {categorie: categorie.value}) }}" class="block px-3 py-2.5 rounded-xl transition-colors {% if selectedCategorie == categorie.value %}bg-[#A8BBA3] text-white font-medium{% else %}hover:bg-[#E8DCF0]/50 dark:hover:bg-gray-500{% endif %}">
                         {{ categorie.label() }}
                     </a>
                 </li>
                 {% endfor %}
             </ul>
         </div>
-        <div class="bg-white rounded-xl shadow-sm p-5 border border-[#E5E0D8]">
-            <h2 class="font-semibold text-[#4B5563] mb-4">Prix</h2>
-            <div class="space-y-3 text-[#6B7280] text-sm">
-                <a href="{{ path('user_products_index') }}" class="block px-3 py-2 rounded-lg {% if minPrice|default(null) is null and maxPrice|default(null) is null %}bg-[#A7C7E7] text-white{% else %}hover:bg-[#F5F1EB]{% endif %}">Tous les prix</a>
-                <a href="{{ path('user_products_index', {minPrice: 0, maxPrice: 500000}) }}" class="block px-3 py-2 rounded-lg {% if minPrice|default(null) == '0' and maxPrice|default(null) == '500000' %}bg-[#A7C7E7] text-white{% else %}hover:bg-[#F5F1EB]{% endif %}">0 — 500K د.ت</a>
-                <a href="{{ path('user_products_index', {minPrice: 500000, maxPrice: 1000000}) }}" class="block px-3 py-2 rounded-lg {% if minPrice|default(null) == '500000' and maxPrice|default(null) == '1000000' %}bg-[#A7C7E7] text-white{% else %}hover:bg-[#F5F1EB]{% endif %}">500K — 1M د.ت</a>
-                <a href="{{ path('user_products_index', {minPrice: 1000000, maxPrice: 2000000}) }}" class="block px-3 py-2 rounded-lg {% if minPrice|default(null) == '1000000' and maxPrice|default(null) == '2000000' %}bg-[#A7C7E7] text-white{% else %}hover:bg-[#F5F1EB]{% endif %}">1M — 2M د.ت</a>
-                <a href="{{ path('user_products_index', {minPrice: 2000000, maxPrice: 5000000}) }}" class="block px-3 py-2 rounded-lg {% if minPrice|default(null) == '2000000' and maxPrice|default(null) == '5000000' %}bg-[#A7C7E7] text-white{% else %}hover:bg-[#F5F1EB]{% endif %}">2M — 5M د.ت</a>
-                <a href="{{ path('user_products_index', {minPrice: 5000000, maxPrice: 10000000}) }}" class="block px-3 py-2 rounded-lg {% if minPrice|default(null) == '5000000' and maxPrice|default(null) == '10000000' %}bg-[#A7C7E7] text-white{% else %}hover:bg-[#F5F1EB]{% endif %}">5M — 10M د.ت</a>
+        <div class="bg-[#FDF8F5] dark:bg-gray-600/50 rounded-2xl shadow-pastel p-5 border-2 border-[#E8DED5] dark:border-gray-500">
+            <h2 class="font-semibold text-[#2D2D2D] dark:text-white mb-4">Prix</h2>
+            <div class="space-y-3 text-[#4A4A4A] dark:text-gray-300 text-sm">
+                <a href="{{ path('user_products_index') }}" class="block px-3 py-2.5 rounded-xl transition-colors {% if minPrice|default(null) is null and maxPrice|default(null) is null %}bg-[#A8BBA3] text-white font-medium{% else %}hover:bg-[#E8DCF0]/50 dark:hover:bg-gray-500{% endif %}">Tous les prix</a>
+                <a href="{{ path('user_products_index', {minPrice: 0, maxPrice: 500000}) }}" class="block px-3 py-2.5 rounded-xl transition-colors {% if minPrice|default(null) == '0' and maxPrice|default(null) == '500000' %}bg-[#A8BBA3] text-white font-medium{% else %}hover:bg-[#E8DCF0]/50 dark:hover:bg-gray-500{% endif %}">0 — 500K د.ت</a>
+                <a href="{{ path('user_products_index', {minPrice: 500000, maxPrice: 1000000}) }}" class="block px-3 py-2.5 rounded-xl transition-colors {% if minPrice|default(null) == '500000' and maxPrice|default(null) == '1000000' %}bg-[#A8BBA3] text-white font-medium{% else %}hover:bg-[#E8DCF0]/50 dark:hover:bg-gray-500{% endif %}">500K — 1M د.ت</a>
+                <a href="{{ path('user_products_index', {minPrice: 1000000, maxPrice: 2000000}) }}" class="block px-3 py-2.5 rounded-xl transition-colors {% if minPrice|default(null) == '1000000' and maxPrice|default(null) == '2000000' %}bg-[#A8BBA3] text-white font-medium{% else %}hover:bg-[#E8DCF0]/50 dark:hover:bg-gray-500{% endif %}">1M — 2M د.ت</a>
+                <a href="{{ path('user_products_index', {minPrice: 2000000, maxPrice: 5000000}) }}" class="block px-3 py-2.5 rounded-xl transition-colors {% if minPrice|default(null) == '2000000' and maxPrice|default(null) == '5000000' %}bg-[#A8BBA3] text-white font-medium{% else %}hover:bg-[#E8DCF0]/50 dark:hover:bg-gray-500{% endif %}">2M — 5M د.ت</a>
+                <a href="{{ path('user_products_index', {minPrice: 5000000, maxPrice: 10000000}) }}" class="block px-3 py-2.5 rounded-xl transition-colors {% if minPrice|default(null) == '5000000' and maxPrice|default(null) == '10000000' %}bg-[#A8BBA3] text-white font-medium{% else %}hover:bg-[#E8DCF0]/50 dark:hover:bg-gray-500{% endif %}">5M — 10M د.ت</a>
             </div>
         </div>
     </aside>
@@ -48,38 +49,30 @@
     <div class="flex-1 min-w-0">
         <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-                <h2 class="text-2xl font-bold text-[#4B5563] mb-1">Nos Produits</h2>
-                <p class="text-[#6B7280]">{{ produits|length }} produit(s) trouvé(s)</p>
+                <h2 class="text-2xl font-bold text-[#2D2D2D] dark:text-white mb-1">Nos Produits</h2>
+                <p class="text-[#4A4A4A] dark:text-gray-300"><span class="font-semibold text-[#CDB4DB] dark:text-[#93C5FD]">{{ produits|length }}</span> produit(s) trouvé(s)</p>
             </div>
             <div class="flex flex-col md:flex-row items-start md:items-center gap-4">
                 <div class="flex flex-col md:flex-row items-start md:items-center gap-3">
                     <div class="relative">
                         <div class="flex items-center space-x-3">
-                            <div class="flex bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-                                <a href="{{ path('user_products_index', {sortBy: 'nom', sortOrder: 'asc'}) }}" class="px-4 py-2.5 text-sm font-medium transition-all duration-200 flex items-center gap-2 {% if sortBy == 'nom' and sortOrder == 'asc' %}bg-blue-500 text-white{% else %}text-gray-700 hover:bg-gray-50{% endif %}">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path>
-                                    </svg>
+                            <div class="flex bg-[#FDF8F5] dark:bg-gray-600/50 rounded-xl border-2 border-[#E8DED5] dark:border-gray-500 overflow-hidden">
+                                <a href="{{ path('user_products_index', {sortBy: 'nom', sortOrder: 'asc'}) }}" class="px-4 py-2.5 text-sm font-medium transition-all duration-200 flex items-center gap-2 rounded-l-lg {% if sortBy == 'nom' and sortOrder == 'asc' %}bg-[#A8BBA3] text-white{% else %}text-[#3D3D3D] dark:text-gray-200 hover:bg-[#E8DCF0]/50 dark:hover:bg-gray-500{% endif %}">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path></svg>
                                     <span>A→Z</span>
                                 </a>
-                                <a href="{{ path('user_products_index', {sortBy: 'nom', sortOrder: 'desc'}) }}" class="px-4 py-2.5 text-sm font-medium transition-all duration-200 flex items-center gap-2 {% if sortBy == 'nom' and sortOrder == 'desc' %}bg-blue-500 text-white{% else %}text-gray-700 hover:bg-gray-50{% endif %}">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4"></path>
-                                    </svg>
+                                <a href="{{ path('user_products_index', {sortBy: 'nom', sortOrder: 'desc'}) }}" class="px-4 py-2.5 text-sm font-medium transition-all duration-200 flex items-center gap-2 {% if sortBy == 'nom' and sortOrder == 'desc' %}bg-[#A8BBA3] text-white{% else %}text-[#3D3D3D] dark:text-gray-200 hover:bg-[#E8DCF0]/50 dark:hover:bg-gray-500{% endif %}">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4"></path></svg>
                                     <span>Z→A</span>
                                 </a>
                             </div>
-                            <div class="flex bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-                                <a href="{{ path('user_products_index', {sortBy: 'prix', sortOrder: 'asc'}) }}" class="px-4 py-2.5 text-sm font-medium transition-all duration-200 flex items-center gap-2 {% if sortBy == 'prix' and sortOrder == 'asc' %}bg-green-500 text-white{% else %}text-gray-700 hover:bg-gray-50{% endif %}">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"></path>
-                                    </svg>
+                            <div class="flex bg-[#FDF8F5] dark:bg-gray-600/50 rounded-xl border-2 border-[#E8DED5] dark:border-gray-500 overflow-hidden">
+                                <a href="{{ path('user_products_index', {sortBy: 'prix', sortOrder: 'asc'}) }}" class="px-4 py-2.5 text-sm font-medium transition-all duration-200 flex items-center gap-2 {% if sortBy == 'prix' and sortOrder == 'asc' %}bg-[#A8BBA3] text-white{% else %}text-[#3D3D3D] dark:text-gray-200 hover:bg-[#E8DCF0]/50 dark:hover:bg-gray-500{% endif %}">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"></path></svg>
                                     <span>Prix +</span>
                                 </a>
-                                <a href="{{ path('user_products_index', {sortBy: 'prix', sortOrder: 'desc'}) }}" class="px-4 py-2.5 text-sm font-medium transition-all duration-200 flex items-center gap-2 {% if sortBy == 'prix' and sortOrder == 'desc' %}bg-green-500 text-white{% else %}text-gray-700 hover:bg-gray-50{% endif %}">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"></path>
-                                    </svg>
+                                <a href="{{ path('user_products_index', {sortBy: 'prix', sortOrder: 'desc'}) }}" class="px-4 py-2.5 text-sm font-medium transition-all duration-200 flex items-center gap-2 rounded-r-lg {% if sortBy == 'prix' and sortOrder == 'desc' %}bg-[#A8BBA3] text-white{% else %}text-[#3D3D3D] dark:text-gray-200 hover:bg-[#E8DCF0]/50 dark:hover:bg-gray-500{% endif %}">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"></path></svg>
                                     <span>Prix -</span>
                                 </a>
                             </div>
@@ -101,10 +94,8 @@
                         <input type="hidden" name="sortBy" value="{{ sortBy|default('nom') }}">
                         <input type="hidden" name="sortOrder" value="{{ sortOrder|default('asc') }}">
                         {% endif %}
-                        <input type="text" name="search" placeholder="Rechercher un produit..." value="{{ search|default('') }}" class="px-4 py-2 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#4B5563] placeholder-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#A7C7E7] w-full md:w-64" autocomplete="off">
-                        <button type="submit" class="px-3 py-2 rounded-lg border border-[#E5E0D8] text-[#6B7280] hover:bg-[#F5F1EB]">
-                            Rechercher
-                        </button>
+                        <input type="text" name="search" placeholder="Rechercher un produit..." value="{{ search|default('') }}" class="px-4 py-2.5 rounded-xl border-2 border-[#E8DED5] dark:border-gray-500 bg-white dark:bg-gray-500/50 text-[#3D3D3D] dark:text-gray-100 placeholder-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#CDB4DB] focus:border-[#CDB4DB] dark:focus:ring-[#93C5FD] w-full md:w-64 transition-colors" autocomplete="off">
+                        <button type="submit" class="px-4 py-2.5 rounded-xl bg-[#A8BBA3] text-white font-medium hover:bg-[#94B08E] transition-colors">Rechercher</button>
                         {% if search|default('') != '' %}
                             {% set params_effacer = {} %}
                             {% if selectedCategorie|default('') != '' %}
@@ -119,9 +110,7 @@
                             {% if sortBy|default('nom') != 'nom' or sortOrder|default('asc') != 'asc' %}
                                 {% set params_effacer = params_effacer|merge({sortBy: sortBy|default('nom'), sortOrder: sortOrder|default('asc')}) %}
                             {% endif %}
-                            <a href="{{ path('user_products_index', params_effacer) }}" class="px-3 py-2 rounded-lg border border-[#E5E0D8] text-[#6B7280] hover:bg-[#F5F1EB]">
-                                Effacer
-                            </a>
+                            <a href="{{ path('user_products_index', params_effacer) }}" class="px-4 py-2.5 rounded-xl border-2 border-[#E8DED5] dark:border-gray-500 text-[#3D3D3D] dark:text-gray-200 font-medium hover:bg-[#E8DCF0]/50 dark:hover:bg-gray-500 transition-colors">Effacer</a>
                         {% endif %}
                     </form>
                 </div>
@@ -130,8 +119,8 @@
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {% if produits|length > 0 %}
                 {% for produit in produits %}
-                <article class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] overflow-hidden flex flex-col produit-card" data-nom="{{ produit.nom|lower }}" data-categorie="{{ produit.categorie ? produit.categorie.label|lower : '' }}" data-description="{{ produit.description|lower }}" data-prix="{{ produit.prix }}">
-                    <div class="aspect-square bg-[#F5F1EB] flex items-center justify-center text-[#6B7280] text-sm overflow-hidden">
+                <article class="bg-white dark:bg-gray-600/80 rounded-2xl shadow-pastel border-2 border-[#E8DED5] dark:border-gray-500 overflow-hidden flex flex-col produit-card hover:shadow-pastel-md hover:border-[#CDB4DB]/50 dark:hover:border-gray-400 transition-all duration-200" data-nom="{{ produit.nom|lower }}" data-categorie="{{ produit.categorie ? produit.categorie.label|lower : '' }}" data-description="{{ produit.description|lower }}" data-prix="{{ produit.prix }}">
+                    <div class="aspect-square bg-[#F5F1EB] dark:bg-gray-500 flex items-center justify-center text-[#4A4A4A] dark:text-gray-400 text-sm overflow-hidden">
                         {% if produit.image %}
                             <img src="{{ asset(produit.image) }}" alt="{{ produit.nom }}" class="w-full h-full object-cover">
                         {% else %}
@@ -139,18 +128,18 @@
                         {% endif %}
                     </div>
                     <div class="p-4 relative flex-1 flex flex-col">
-                        <span class="absolute top-2 left-4 px-2 py-0.5 rounded text-xs font-medium text-white bg-[#A7C7E7]">{{ produit.categorie ? produit.categorie.label() : '—' }}</span>
-                        <h2 class="font-semibold text-[#4B5563] mt-6">{{ produit.nom }}</h2>
+                        <span class="absolute top-2 left-4 px-2.5 py-1 rounded-lg text-xs font-medium text-white bg-[#A8BBA3] dark:bg-[#93C5FD]/80">{{ produit.categorie ? produit.categorie.label() : '—' }}</span>
+                        <h2 class="font-semibold text-[#2D2D2D] dark:text-white mt-6">{{ produit.nom }}</h2>
                         {% if produit.description %}
-                        <p class="text-[#6B7280] text-sm mt-2 flex-1 line-clamp-2">{{ produit.description }}</p>
+                        <p class="text-[#4A4A4A] dark:text-gray-300 text-sm mt-2 flex-1 line-clamp-2">{{ produit.description }}</p>
                         {% endif %}
-                        <p class="font-semibold text-[#A7C7E7] mt-3">{{ produit.prix|number_format(2, ',', ' ') }} د.ت</p>
+                        <p class="font-semibold text-[#CDB4DB] dark:text-[#93C5FD] mt-3">{{ produit.prix|number_format(2, ',', ' ') }} د.ت</p>
                         <div class="flex gap-2 mt-4">
-                            <a href="{{ path('user_product_show', { id: produit.id }) }}" class="inline-flex items-center justify-center gap-1 flex-1 px-4 py-2 rounded-lg bg-[#A7C7E7] text-white text-sm font-medium hover:bg-[#B8D4ED]">Voir détails</a>
+                            <a href="{{ path('user_product_show', { id: produit.id }) }}" class="inline-flex items-center justify-center gap-1 flex-1 px-4 py-2.5 rounded-xl bg-[#A8BBA3] text-white text-sm font-medium hover:bg-[#94B08E] shadow-pastel transition-all">Voir détails</a>
                             {% if cart_add is defined and produit.disponibilite and app.user %}
                             <form method="POST" action="{{ path('cart_add', { id: produit.id }) }}" class="inline">
                                 <input type="hidden" name="_token" value="{{ csrf_token('cart_add_' ~ produit.id) }}">
-                                <button type="submit" class="p-2 rounded-lg border border-[#E5E0D8] text-[#6B7280] hover:bg-[#F5F1EB] inline-flex items-center justify-center" aria-label="Ajouter au panier"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg></button>
+                                <button type="submit" class="p-2.5 rounded-xl border-2 border-[#E8DED5] dark:border-gray-500 text-[#4A4A4A] dark:text-gray-300 hover:bg-[#E8DCF0]/50 dark:hover:bg-gray-500 inline-flex items-center justify-center transition-colors" aria-label="Ajouter au panier"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg></button>
                             </form>
                             {% endif %}
                         </div>
@@ -159,7 +148,7 @@
                 {% endfor %}
             {% else %}
                 <div class="col-span-full text-center py-12">
-                    <p class="text-[#6B7280]">Aucun produit trouvé dans cette catégorie.</p>
+                    <p class="text-[#4A4A4A] dark:text-gray-300 text-lg">Aucun produit trouvé dans cette catégorie.</p>
                 </div>
             {% endif %}
         </div>

@@ -50,7 +50,7 @@ private string $type;
     private ?Module $module = null;
 
     #[ORM\ManyToOne(inversedBy: 'blogs')]
-    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'CASCADE')]
     private ?User $user = null;
 
     /**

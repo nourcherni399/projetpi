@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Twig;
 
+use App\Entity\Medcin;
 use App\Entity\Notification;
 use App\Repository\CartRepository;
 use App\Repository\InscritEventsRepository;
@@ -38,11 +39,14 @@ final class InscriptionNotificationExtension extends AbstractExtension implement
             'user_event_message_notifications' => [],
             'user_commande_notifications' => [],
             'app_cart_count' => 0,
+            'notif_count' => 0,
         ];
 
         $request = $this->requestStack->getCurrentRequest();
         $route = $request?->attributes->get('_route', '');
-        $isAdmin = $route !== null && str_starts_with((string) $route, 'admin_');
+        $routeStr = (string) $route;
+        $isAdmin = $route !== null && str_starts_with($routeStr, 'admin_');
+        $isDoctor = $route !== null && str_starts_with($routeStr, 'doctor_');
 
         if ($isAdmin) {
             $globals['admin_pending_inscriptions'] = $this->inscritEventsRepository->findPendingOrderByDate();
@@ -51,6 +55,12 @@ final class InscriptionNotificationExtension extends AbstractExtension implement
         }
 
         $user = $this->security->getUser();
+        if ($isDoctor && $user instanceof Medcin) {
+            $notificationRepo = $this->managerRegistry->getRepository(Notification::class);
+            if ($notificationRepo instanceof NotificationRepository) {
+                $globals['notif_count'] = $notificationRepo->countUnreadByDestinataire($user);
+            }
+        }
         if ($user !== null && !$isAdmin) {
             $inscriptions = $this->inscritEventsRepository->findAccepteRefuseOuEnAttenteForUser($user);
             $globals['user_inscription_notifications'] = $this->buildInscriptionNotificationMessages($inscriptions);

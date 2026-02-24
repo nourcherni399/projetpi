@@ -42,7 +42,7 @@
                 <div class="flex-1 min-w-[140px]">{{ form_row(form.longitude) }}</div>
                 <div>
                     <label class="block text-[#4B5563] font-medium mb-1">&nbsp;</label>
-                    <button type="button" id="btn-geocode" class="px-4 py-2.5 rounded-lg border border-[#A7C7E7] bg-[#A7C7E7]/20 text-[#4B5563] font-medium hover:bg-[#A7C7E7]/30 focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                    <button type="button" id="btn-geocode" class="px-4 py-2.5 rounded-lg border border-[#A7C7E7] bg-[#A7C7E7]/20 text-[#4B5563] font-medium hover:bg-[#A7C7E7]/30 focus:outline focus:ring-2 focus:ring-[#A7C7E7]" title="Recherche approximative à partir du texte du lieu">
                         Récupérer les coordonnées (lieu)
                     </button>
                 </div>
@@ -66,6 +66,7 @@
     var lieuInput = document.querySelector('input[name="{{ form.lieu.vars.full_name }}"]');
     var latInput = document.querySelector('input[name="{{ form.latitude.vars.full_name }}"]');
     var lngInput = document.querySelector('input[name="{{ form.longitude.vars.full_name }}"]');
+    var locationUrlInput = document.querySelector('input[name="{{ form.locationUrl.vars.full_name }}"]');
     if (!btn || !lieuInput || !latInput || !lngInput) return;
     var url = '{{ path('admin_evenement_geocode')|e('js') }}';
     btn.addEventListener('click', function() {
@@ -79,6 +80,9 @@
                 if (data.lat != null && data.lng != null) {
                     latInput.value = data.lat;
                     lngInput.value = data.lng;
+                    if (locationUrlInput) {
+                        locationUrlInput.value = 'https://www.google.com/maps?q=' + encodeURIComponent(data.lat + ',' + data.lng);
+                    }
                 } else {
                     alert(data.error || 'Adresse introuvable.');
                 }
@@ -100,10 +104,16 @@
     if (modeSelect) { modeSelect.addEventListener('change', toggleZoomRow); toggleZoomRow(); }
     if (btnZoom && meetingUrlInput) {
         btnZoom.addEventListener('click', function() {
+            var mode = modeSelect ? modeSelect.value : '';
+            if (mode !== 'en_ligne' && mode !== 'hybride') {
+                alert('Sélectionnez d\'abord le mode « En ligne » ou « Hybride » pour générer un lien Zoom.');
+                return;
+            }
             btnZoom.disabled = true;
             btnZoom.textContent = 'Génération…';
             var body = new FormData();
             body.append('_token', zoomToken);
+            body.append('mode', mode);
             fetch(genererZoomUrl, { method: 'POST', body: body })
                 .then(function(r) { return r.json(); })
                 .then(function(data) {

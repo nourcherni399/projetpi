@@ -307,9 +307,16 @@ final class EvenementController extends AbstractController
         if (!$this->isCsrfTokenValid('admin_evenement_generer_zoom_' . $id, (string) $request->request->get('_token'))) {
             return new JsonResponse(['error' => 'Jeton de sécurité invalide.'], Response::HTTP_FORBIDDEN);
         }
-        $mode = $evenement->getMode();
+        // Utiliser le mode envoyé par le formulaire (changement Présentiel → En ligne / Hybride sans enregistrer)
+        $modeFromRequest = $request->request->get('mode');
+        if ($modeFromRequest === null && $request->request->has('evenement')) {
+            $data = $request->request->all('evenement');
+            $modeFromRequest = $data['mode'] ?? null;
+        }
+        $modeFromRequest = \is_string($modeFromRequest) ? trim($modeFromRequest) : null;
+        $mode = \in_array($modeFromRequest, ['en_ligne', 'hybride'], true) ? $modeFromRequest : $evenement->getMode();
         if ($mode !== 'en_ligne' && $mode !== 'hybride') {
-            return new JsonResponse(['error' => 'Le lien Zoom est réservé aux événements en ligne ou hybrides.'], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(['error' => 'Le lien Zoom est réservé aux événements en ligne ou hybrides. Sélectionnez « En ligne » ou « Hybride » et réessayez.'], Response::HTTP_BAD_REQUEST);
         }
         $dateEvent = $evenement->getDateEvent();
         $heureDebut = $evenement->getHeureDebut();
