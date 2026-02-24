@@ -46,12 +46,13 @@ final class GoogleCustomSearchService
         if (str_contains(mb_strtolower($query), 'événement') === false && str_contains(mb_strtolower($query), 'event') === false) {
             $searchQuery = 'upcoming events ' . $query . ' ' . $period;
         }
+        $queryForApi = $this->sanitizeQueryForApi($searchQuery);
         try {
             $response = $this->httpClient->request('GET', self::API_URL, [
                 'query' => [
                     'key' => trim($this->apiKey),
                     'cx' => trim($this->searchEngineId),
-                    'q' => $searchQuery,
+                    'q' => $queryForApi,
                     'num' => 15,
                 ],
                 'timeout' => 15,
@@ -147,5 +148,23 @@ Exemples d'événements qui fonctionnent bien pour les familles et l'inclusion (
 - Journées portes ouvertes des structures : découvrir les lieux et les activités avant de s'engager.
 - Ateliers créatifs (peinture, musique, théâtre) adaptés : cadre bienveillant, consignes claires, pause possible.
 TEXT;
+    }
+
+    /**
+     * Normalise la requête pour l'API Google (évite les 400 avec caractères accentués ou spéciaux).
+     */
+    private function sanitizeQueryForApi(string $query): string
+    {
+        $map = [
+            'à' => 'a', 'â' => 'a', 'ä' => 'a', 'é' => 'e', 'è' => 'e', 'ê' => 'e', 'ë' => 'e',
+            'ï' => 'i', 'î' => 'i', 'ô' => 'o', 'ù' => 'u', 'û' => 'u', 'ü' => 'u', 'ç' => 'c',
+            'æ' => 'ae', 'œ' => 'oe', 'À' => 'A', 'Â' => 'A', 'Ä' => 'A', 'É' => 'E', 'È' => 'E',
+            'Ê' => 'E', 'Ë' => 'E', 'Ï' => 'I', 'Î' => 'I', 'Ô' => 'O', 'Ù' => 'U', 'Û' => 'U',
+            'Ü' => 'U', 'Ç' => 'C', 'Æ' => 'AE', 'Œ' => 'OE', '’' => ' ', '"' => ' ', '«' => ' ', '»' => ' ',
+        ];
+        $out = strtr($query, $map);
+        $out = preg_replace('/[^\pL\pN\s\-]/u', ' ', $out);
+        $out = preg_replace('/\s+/u', ' ', $out);
+        return trim($out);
     }
 }

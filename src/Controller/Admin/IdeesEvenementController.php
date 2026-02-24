@@ -15,6 +15,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 #[Route('/admin/idees-evenements', name: 'admin_idees_evenement_')]
 #[IsGranted('ROLE_ADMIN')]
@@ -28,12 +30,15 @@ final class IdeesEvenementController extends AbstractController
         'Sensibilisation' => 'sensibilisation autisme école inclusion',
     ];
 
+    private const CACHE_TTL_SEARCH_SECONDS = 300;
+
     public function __construct(
         private readonly IdeeEvenementRepository $ideeRepository,
         private readonly GoogleCustomSearchService $googleSearch,
         private readonly FallbackSearchService $fallbackSearch,
         private readonly HuggingFaceService $huggingFace,
         private readonly EntityManagerInterface $entityManager,
+        private readonly CacheInterface $cache,
     ) {
     }
 
@@ -47,6 +52,7 @@ final class IdeesEvenementController extends AbstractController
     private const SESSION_UPCOMING_KEY = 'idees_evenement_upcoming_search';
     private const SESSION_UPCOMING_KEY_EVENTS = 'evenement_recherche_mondiale';
     private const SESSION_LAST_GENERATED_IDS = 'idees_last_generated_ids';
+    private const SESSION_LAST_ANALYSE = 'idees_last_analyse';
 
     #[Route('', name: 'index', methods: ['GET'])]
     public function index(Request $request): Response
@@ -61,8 +67,14 @@ final class IdeesEvenementController extends AbstractController
         $idees = $onlyLastBatch
             ? $this->ideeRepository->findByIdsOrdered($lastIds)
             : $this->ideeRepository->findRecentOrderByCreatedAt(30);
+        usort($idees, static function (IdeeEvenement $a, IdeeEvenement $b): int {
+            $sa = $a->getScore() ?? -1;
+            $sb = $b->getScore() ?? -1;
+            return $sb <=> $sa;
+        });
         $upcoming = $session->get(self::SESSION_UPCOMING_KEY);
         $session->remove(self::SESSION_UPCOMING_KEY);
+        $lastAnalyse = $session->get(self::SESSION_LAST_ANALYSE);
 
         $params = [
             'idees' => $idees,
@@ -77,6 +89,7 @@ final class IdeesEvenementController extends AbstractController
             'upcomingSearchPerformed' => $upcoming !== null,
             'upcomingSearchQuery' => $upcoming['query'] ?? '',
             'upcomingSearchPeriod' => $upcoming['periodKey'] ?? '2025',
+            'lastAnalyse' => $lastAnalyse,
         ];
 
         return $this->render('admin/idees_evenement/index.html.twig', $params);
@@ -156,31 +169,39 @@ final class IdeesEvenementController extends AbstractController
             ]);
             return $this->redirectToRoute($redirectRoute, ['_fragment' => 'resultats-recherche-mondiale']);
         }
-        $searchQuery = 'upcoming events ' . $query . ' ' . $period;
-        $results = [];
-        $error = null;
 
-        if ($this->googleSearch->isConfigured()) {
-            $searchResult = $this->googleSearch->searchUpcomingEvents($query, $period);
-            $results = $searchResult['items'];
-            $error = $searchResult['error'];
-            $searchQuery = $searchResult['searchQuery'];
-        } else {
-            $error = 'Google non configuré';
-        }
-
-        if ($error !== null && empty($results)) {
-            $fallback = $this->fallbackSearch->search($searchQuery, 15);
-            if (!empty($fallback['items'])) {
-                $results = $fallback['items'];
-                $error = null;
+        $cacheKey = 'idees_search_' . md5($query . '|' . $periodKey);
+        $data = $this->cache->get($cacheKey, function (ItemInterface $item) use ($query, $period): array {
+            $item->expiresAfter(self::CACHE_TTL_SEARCH_SECONDS);
+            $searchQuery = 'upcoming events ' . $query . ' ' . $period;
+            $results = [];
+            $error = null;
+            if ($this->googleSearch->isConfigured()) {
+                $searchResult = $this->googleSearch->searchUpcomingEvents($query, $period);
+                $results = $searchResult['items'];
+                $error = $searchResult['error'];
+                $searchQuery = $searchResult['searchQuery'];
+            } else {
+                $error = 'Google non configuré';
             }
+            if ($error !== null && empty($results)) {
+                $fallback = $this->fallbackSearch->search($searchQuery, 15);
+                if (!empty($fallback['items'])) {
+                    $results = $fallback['items'];
+                    $error = null;
+                }
+            }
+            return ['results' => $results, 'error' => $error, 'searchQuery' => $searchQuery];
+        });
+
+        if (empty($data['results'])) {
+            $this->cache->delete($cacheKey);
         }
 
         $session->set($sessionKey, [
-            'results' => $results,
-            'error' => $error,
-            'searchQuery' => $searchQuery,
+            'results' => $data['results'],
+            'error' => $data['error'],
+            'searchQuery' => $data['searchQuery'],
             'query' => $query,
             'periodKey' => $periodKey,
         ]);
@@ -268,6 +289,94 @@ final class IdeesEvenementController extends AbstractController
         }
 
         return $this->redirectToRoute($redirectRoute, ['_fragment' => $fragment]);
+    }
+
+    /**
+     * Analyse les résultats de recherche affichés (envoyés en POST) et propose des idées avec pourquoi + score.
+     * POST: _token, return_to, upcoming_query, upcoming_period, results_json (JSON array of {name, snippet}).
+     */
+    #[Route('/analyser-recherche-et-proposer', name: 'analyze_and_propose', methods: ['POST'])]
+    public function analyzeAndPropose(Request $request): Response
+    {
+        if (!$this->isCsrfTokenValid('admin_idees_evenement_analyze_and_propose', (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton de sécurité invalide. Réessayez.');
+            return $this->redirectToRoute('admin_idees_evenement_index', ['_fragment' => 'resultats-recherche-mondiale']);
+        }
+
+        // Toujours rediriger vers la page Idées après « Générer », pour afficher le résultat ou l’erreur au bon endroit
+        $redirectToIdees = fn (string $fragment = 'resultats-recherche-mondiale') => $this->redirectToRoute('admin_idees_evenement_index', ['_fragment' => $fragment]);
+
+        if (!$this->huggingFace->hasApiKey()) {
+            $this->addFlash('warning', 'L’IA n’est pas configurée. Ajoutez HUGGINGFACE_API_KEY dans .env.');
+            return $redirectToIdees();
+        }
+
+        $query = trim($request->request->getString('upcoming_query', ''));
+        $periodKey = $request->request->getString('upcoming_period', '2025');
+        $period = self::PERIODS[$periodKey] ?? '2025';
+        $resultsJson = $request->request->getString('results_json', '');
+        $results = [];
+        if ($resultsJson !== '') {
+            try {
+                $decoded = json_decode($resultsJson, true, 512, \JSON_THROW_ON_ERROR);
+                if (\is_array($decoded)) {
+                    $results = $decoded;
+                }
+            } catch (\JsonException) {
+                // ignore
+            }
+        }
+
+        if ($results !== []) {
+            $searchResultsText = '';
+            foreach ($results as $item) {
+                $name = isset($item['name']) && \is_string($item['name']) ? trim($item['name']) : '';
+                $snippet = isset($item['snippet']) && \is_string($item['snippet']) ? trim($item['snippet']) : '';
+                if ($name !== '' || $snippet !== '') {
+                    $searchResultsText .= "Titre : " . $name . "\nRésumé : " . $snippet . "\n---\n";
+                }
+            }
+            if ($searchResultsText === '') {
+                $this->addFlash('warning', 'Les résultats ne contiennent pas de texte à analyser.');
+                return $redirectToIdees();
+            }
+            $out = $this->huggingFace->analyzeSearchResultsAndSuggestEvents($searchResultsText, $query !== '' ? $query : 'recherche', $periodKey);
+        } else {
+            if ($query === '') {
+                $this->addFlash('warning', 'Saisissez des mots-clés pour que l’IA propose des idées (ex. violence, éducation Tunisie).');
+                return $redirectToIdees();
+            }
+            $out = $this->huggingFace->suggestEventIdeasFromQueryWithAnalysis($query, $periodKey);
+        }
+        if ($out === [] || ($out['propositions'] ?? []) === []) {
+            $err = $this->huggingFace->getLastApiError();
+            $this->addFlash('warning', $err !== null
+                ? 'L’IA n’a pas pu analyser. ' . ($err['message'] ?? '')
+                : 'Aucune proposition générée. Réessayez avec d’autres résultats.');
+            return $redirectToIdees();
+        }
+
+        $created = [];
+        foreach ($out['propositions'] as $prop) {
+            $idee = new IdeeEvenement();
+            $idee->setTitre($prop['titre']);
+            $idee->setDescription($prop['description'] ?? '');
+            $idee->setTheme($prop['theme'] ?? '');
+            $idee->setPourquoi($prop['pourquoi'] ?? '');
+            $idee->setScore(\array_key_exists('score', $prop) ? (int) $prop['score'] : null);
+            $idee->setMotsCle($query !== '' ? $query : null);
+            $this->entityManager->persist($idee);
+            $created[] = $idee;
+        }
+        $this->entityManager->flush();
+
+        $session = $request->getSession();
+        $session->set(self::SESSION_LAST_GENERATED_IDS, array_map(static fn (IdeeEvenement $e) => $e->getId(), $created));
+        $session->set(self::SESSION_LAST_ANALYSE, $out['analyse'] ?? '');
+
+        $this->addFlash('success', 'Créé avec succès.');
+
+        return $this->redirectToRoute('admin_idees_evenement_index', ['_fragment' => 'resultats-analyse']);
     }
 
     #[Route('/creer-brouillon/{id}', name: 'creer_brouillon', requirements: ['id' => '\d+'], methods: ['GET'])]

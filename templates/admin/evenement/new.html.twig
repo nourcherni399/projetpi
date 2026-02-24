@@ -14,7 +14,7 @@
 
     <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8">
         {{ form_start(form, {
-            attr: { class: 'space-y-6', novalidate: 'novalidate', autocomplete: 'off' },
+            attr: { class: 'space-y-6', novalidate: 'novalidate', autocomplete: 'off', 'data-turbo': 'false' },
             label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }
         }) }}
         <div class="grid grid-cols-1 gap-6">
@@ -33,23 +33,25 @@
             </div>
             {{ form_row(form.mode) }}
             {{ form_row(form.lieu) }}
-            {{ form_row(form.locationUrl) }}
+            <div class="presentiel-location-row" data-visible-mode="presentiel" style="display:none">
+                {{ form_row(form.locationUrl) }}
+                <div class="flex flex-wrap items-end gap-4">
+                    <div class="flex-1 min-w-[140px]">{{ form_row(form.latitude) }}</div>
+                    <div class="flex-1 min-w-[140px]">{{ form_row(form.longitude) }}</div>
+                    <div>
+                        <label class="block text-[#4B5563] font-medium mb-1">&nbsp;</label>
+                        <button type="button" id="btn-geocode" class="px-4 py-2.5 rounded-lg border border-[#A7C7E7] bg-[#A7C7E7]/20 text-[#4B5563] font-medium hover:bg-[#A7C7E7]/30 focus:outline focus:ring-2 focus:ring-[#A7C7E7]" title="Recherche approximative à partir du texte du lieu">
+                            Récupérer les coordonnées (lieu)
+                        </button>
+                    </div>
+                </div>
+            </div>
             <div class="flex flex-wrap items-end gap-4 zoom-meeting-row" data-visible-mode="en_ligne,hybride">
                 <div class="flex-1 min-w-[200px]">{{ form_row(form.meetingUrl) }}</div>
                 <div>
                     <label class="block text-[#4B5563] font-medium mb-1">&nbsp;</label>
                     <button type="button" id="btn-generer-zoom" class="px-4 py-2.5 rounded-lg border border-[#A7C7E7] bg-[#A7C7E7]/20 text-[#4B5563] font-medium hover:bg-[#A7C7E7]/30 focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
                         Générer le lien Zoom
-                    </button>
-                </div>
-            </div>
-            <div class="flex flex-wrap items-end gap-4">
-                <div class="flex-1 min-w-[140px]">{{ form_row(form.latitude) }}</div>
-                <div class="flex-1 min-w-[140px]">{{ form_row(form.longitude) }}</div>
-                <div>
-                    <label class="block text-[#4B5563] font-medium mb-1">&nbsp;</label>
-                    <button type="button" id="btn-geocode" class="px-4 py-2.5 rounded-lg border border-[#A7C7E7] bg-[#A7C7E7]/20 text-[#4B5563] font-medium hover:bg-[#A7C7E7]/30 focus:outline focus:ring-2 focus:ring-[#A7C7E7]" title="Recherche approximative à partir du texte du lieu">
-                        Récupérer les coordonnées (lieu)
                     </button>
                 </div>
             </div>
@@ -69,12 +71,21 @@
 <script>
 (function() {
     var zoomRow = document.querySelector('.zoom-meeting-row');
+    var presentielRow = document.querySelector('.presentiel-location-row');
     var modeSelect = document.querySelector('select[name="{{ form.mode.vars.full_name }}"]');
     function toggleZoomRow() {
         var mode = modeSelect ? modeSelect.value : '';
         if (zoomRow) zoomRow.style.display = (mode === 'en_ligne' || mode === 'hybride') ? '' : 'none';
     }
-    if (modeSelect) { modeSelect.addEventListener('change', toggleZoomRow); toggleZoomRow(); }
+    function togglePresentielRow() {
+        var mode = modeSelect ? modeSelect.value : '';
+        if (presentielRow) presentielRow.style.display = (mode === 'presentiel') ? '' : 'none';
+    }
+    if (modeSelect) {
+        modeSelect.addEventListener('change', function() { toggleZoomRow(); togglePresentielRow(); });
+        toggleZoomRow();
+        togglePresentielRow();
+    }
 
     function dateToYmd(val) {
         if (!val) return '';

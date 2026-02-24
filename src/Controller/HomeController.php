@@ -421,6 +421,70 @@ final class HomeController extends AbstractController
         return $this->redirectToRoute('user_event_show', ['id' => $id]);
     }
 
+    #[Route('/evenements/{id}/message/{messageId}/supprimer', name: 'user_event_message_delete', requirements: ['id' => '\d+', 'messageId' => '\d+'], methods: ['POST'])]
+    public function eventMessageDelete(int $id, int $messageId, Request $request): Response
+    {
+        $user = $this->getUser();
+        if ($user === null) {
+            $this->addFlash('error', 'Connectez-vous pour gérer vos messages.');
+            return $this->redirectToRoute('app_login', ['_target_path' => $this->generateUrl('user_event_show', ['id' => $id])]);
+        }
+        $evenement = $this->evenementRepository->find($id);
+        if ($evenement === null) {
+            throw $this->createNotFoundException('Événement introuvable.');
+        }
+        $message = $this->messageEvenementRepository->find($messageId);
+        if ($message === null || $message->getEvenement()->getId() !== $evenement->getId() || $message->getUser()->getId() !== $user->getId() || $message->getEnvoyePar() !== MessageEvenement::ENVOYE_PAR_USER) {
+            $this->addFlash('error', 'Message introuvable ou vous ne pouvez pas le supprimer.');
+            return $this->redirectToRoute('user_event_show', ['id' => $id]);
+        }
+        if (!$this->isCsrfTokenValid('user_message_delete_' . $messageId, (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton de sécurité invalide.');
+            return $this->redirectToRoute('user_event_show', ['id' => $id]);
+        }
+        $this->entityManager->remove($message);
+        $this->entityManager->flush();
+        $this->addFlash('success', 'Le message a été supprimé.');
+        return $this->redirectToRoute('user_event_show', ['id' => $id]);
+    }
+
+    #[Route('/evenements/{id}/message/{messageId}/modifier', name: 'user_event_message_edit', requirements: ['id' => '\d+', 'messageId' => '\d+'], methods: ['GET', 'POST'])]
+    public function eventMessageEdit(int $id, int $messageId, Request $request): Response
+    {
+        $user = $this->getUser();
+        if ($user === null) {
+            $this->addFlash('error', 'Connectez-vous pour gérer vos messages.');
+            return $this->redirectToRoute('app_login', ['_target_path' => $this->generateUrl('user_event_show', ['id' => $id])]);
+        }
+        $evenement = $this->evenementRepository->find($id);
+        if ($evenement === null) {
+            throw $this->createNotFoundException('Événement introuvable.');
+        }
+        $message = $this->messageEvenementRepository->find($messageId);
+        if ($message === null || $message->getEvenement()->getId() !== $evenement->getId() || $message->getUser()->getId() !== $user->getId() || $message->getEnvoyePar() !== MessageEvenement::ENVOYE_PAR_USER) {
+            $this->addFlash('error', 'Message introuvable ou vous ne pouvez pas le modifier.');
+            return $this->redirectToRoute('user_event_show', ['id' => $id]);
+        }
+        $form = $this->createForm(MessageEvenementType::class, $message);
+        $form->handleRequest($request);
+        if ($form->isSubmitted()) {
+            if (!$this->isCsrfTokenValid('user_message_edit_' . $messageId, (string) $request->request->get('_token'))) {
+                $this->addFlash('error', 'Jeton de sécurité invalide.');
+                return $this->redirectToRoute('user_event_show', ['id' => $id]);
+            }
+            if ($form->isValid()) {
+                $this->entityManager->flush();
+                $this->addFlash('success', 'Le message a été modifié.');
+                return $this->redirectToRoute('user_event_show', ['id' => $id]);
+            }
+        }
+        return $this->render('front/events/message_edit.html.twig', [
+            'evenement' => $evenement,
+            'message' => $message,
+            'form' => $form,
+        ]);
+    }
+
     #[Route('/rendez-vous', name: 'user_appointments', methods: ['GET'])]
     public function appointments(): Response
     {

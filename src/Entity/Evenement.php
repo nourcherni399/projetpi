@@ -41,20 +41,24 @@ class Evenement
     private ?\DateTimeInterface $heureFin = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Assert\Length(max: 255)]
+    #[Assert\NotBlank(message: 'Le lieu est obligatoire.')]
+    #[Assert\Length(max: 255, maxMessage: 'Le lieu ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $lieu = null;
 
     /** URL de localisation (lien Google Maps ou iframe). */
     #[ORM\Column(length: 500, nullable: true)]
     #[Assert\Length(max: 500)]
+    #[Assert\Url(message: 'Le lien Google Maps doit être une URL valide.', protocols: ['http', 'https'])]
     private ?string $locationUrl = null;
 
     /** Latitude pour affichage sur carte (Google Maps). */
     #[ORM\Column(type: Types::FLOAT, nullable: true)]
+    #[Assert\Range(min: -90, max: 90, notInRangeMessage: 'La latitude doit être entre {{ min }} et {{ max }}.')]
     private ?float $latitude = null;
 
     /** Longitude pour affichage sur carte (Google Maps). */
     #[ORM\Column(type: Types::FLOAT, nullable: true)]
+    #[Assert\Range(min: -180, max: 180, notInRangeMessage: 'La longitude doit être entre {{ min }} et {{ max }}.')]
     private ?float $longitude = null;
 
     /** Mode de l'événement : presentiel | en_ligne | hybride */
@@ -65,6 +69,7 @@ class Evenement
     /** Lien de la réunion Zoom (généré via API ou saisi à la main). */
     #[ORM\Column(length: 500, nullable: true)]
     #[Assert\Length(max: 500)]
+    #[Assert\Url(message: 'Le lien de réunion doit être une URL valide.', protocols: ['http', 'https'])]
     private ?string $meetingUrl = null;
 
     /** Image générée (affiche) : chemin relatif ex. uploads/evenements/xxx.png. */
@@ -75,6 +80,7 @@ class Evenement
     /** Agrégation : un événement appartient à une thématique (sans cascade delete). */
     #[ORM\ManyToOne(inversedBy: 'evenements')]
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    #[Assert\NotNull(message: 'Veuillez choisir une thématique.')]
     private ?Thematique $thematique = null;
 
     /** @var Collection<int, InscritEvents> */

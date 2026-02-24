@@ -22,23 +22,24 @@ class Thematique
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: 'Ce champ est obligatoire.')]
+    #[Assert\NotBlank(message: 'Le nom est obligatoire.')]
     #[Assert\Length(max: 255, maxMessage: 'Le nom ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $nomThematique = null;
 
     #[ORM\Column(length: 50)]
-    #[Assert\NotBlank(message: 'Ce champ est obligatoire.')]
+    #[Assert\NotBlank(message: 'Le code est obligatoire.')]
     #[Assert\Length(max: 50, maxMessage: 'Le code ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $codeThematique = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
-    #[Assert\NotBlank(message: 'Ce champ est obligatoire.')]
+    #[Assert\NotBlank(message: 'La description est obligatoire.')]
     #[Assert\Length(max: 65535, maxMessage: 'La description ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $description = null;
 
     #[ORM\Column(length: 20, nullable: true)]
-    #[Assert\NotBlank(message: 'Ce champ est obligatoire.')]
+    #[Assert\NotBlank(message: 'La couleur est obligatoire.')]
     #[Assert\Length(max: 20)]
+    #[Assert\Regex(pattern: '/^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/u', message: 'La couleur doit être un code hexadécimal (ex. #A7C7E7 ou #F00).')]
     private ?string $couleur = null;
 
     /** Chemin de l'image représentant la thématique (upload) */
@@ -47,12 +48,11 @@ class Thematique
     private ?string $image = null;
 
     #[ORM\Column(name: 'sous_titre', length: 255, nullable: true)]
-    #[Assert\NotBlank(message: 'Ce champ est obligatoire.')]
-    #[Assert\Length(max: 255)]
+    #[Assert\NotBlank(message: 'Le sous-titre est obligatoire.')]
+    #[Assert\Length(max: 255, maxMessage: 'Le sous-titre ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $sousTitre = null;
 
     #[ORM\Column(type: 'smallint', nullable: true)]
-    #[Assert\NotNull(message: 'Ce champ est obligatoire.')]
     #[Assert\Range(min: 0, max: 32767, notInRangeMessage: 'L\'ordre doit être entre {{ min }} et {{ max }}.')]
     private ?int $ordre = null;
 
@@ -60,9 +60,11 @@ class Thematique
     private bool $actif = true;
 
     #[ORM\Column(type: 'string', enumType: PublicCible::class, columnDefinition: "ENUM('Enfant', 'Parent', 'Médecin', 'Éducateur', 'Aidant', 'Autre')", nullable: true)]
+    #[Assert\NotNull(message: 'Veuillez choisir un public cible.')]
     private ?PublicCible $publicCible = null;
 
     #[ORM\Column(type: 'string', enumType: NiveauDifficulte::class, columnDefinition: "ENUM('Débutant', 'Intermédiaire', 'Avancé')", nullable: true)]
+    #[Assert\NotNull(message: 'Veuillez choisir un niveau de difficulté.')]
     private ?NiveauDifficulte $niveauDifficulte = null;
 
     /** @var Collection<int, Evenement> */

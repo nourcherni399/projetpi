@@ -32,6 +32,10 @@ class IdeeEvenement
     #[ORM\Column(name: 'mots_cle', length: 255, nullable: true)]
     private ?string $motsCle = null;
 
+    /** Score de pertinence (0-100) fourni par l'IA pour les propositions issues de l'analyse des résultats. */
+    #[ORM\Column(nullable: true)]
+    private ?int $score = null;
+
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -97,6 +101,17 @@ class IdeeEvenement
     public function setMotsCle(?string $motsCle): static
     {
         $this->motsCle = $motsCle;
+        return $this;
+    }
+
+    public function getScore(): ?int
+    {
+        return $this->score;
+    }
+
+    public function setScore(?int $score): static
+    {
+        $this->score = $score;
         return $this;
     }
 

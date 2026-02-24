@@ -16,6 +16,9 @@ final class FallbackSearchService
     private const SEARX_INSTANCES = [
         'https://search.bus-hit.me',
         'https://searx.be',
+        'https://paulgo.io',
+        'https://search.ononoki.org',
+        'https://searx.work',
     ];
 
     private const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; rv:109.0) Gecko/20100101 Firefox/115.0';

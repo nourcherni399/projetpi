@@ -276,6 +276,66 @@ final class EvenementController extends AbstractController
         return $this->redirectToRoute('admin_evenement_show', ['id' => $id, 'user' => $userId]);
     }
 
+    #[Route('/message/{messageId}/supprimer', name: 'admin_evenement_message_delete', requirements: ['messageId' => '\d+'], methods: ['POST'])]
+    public function deleteMessage(Request $request, int $messageId): Response
+    {
+        $message = $this->messageEvenementRepository->find($messageId);
+        if ($message === null) {
+            throw new NotFoundHttpException('Message introuvable.');
+        }
+        $evenement = $message->getEvenement();
+        if ($evenement === null) {
+            throw new NotFoundHttpException('Événement introuvable.');
+        }
+        $userId = $message->getUser()?->getId();
+        if ($message->getEnvoyePar() !== MessageEvenement::ENVOYE_PAR_ADMIN) {
+            $this->addFlash('error', 'Vous ne pouvez supprimer que vos propres messages.');
+            return $this->redirectToRoute('admin_evenement_show', ['id' => $evenement->getId(), 'user' => $userId]);
+        }
+        if (!$this->isCsrfTokenValid('admin_message_delete_' . $messageId, (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton de sécurité invalide.');
+            return $this->redirectToRoute('admin_evenement_show', ['id' => $evenement->getId(), 'user' => $userId]);
+        }
+        $this->entityManager->remove($message);
+        $this->entityManager->flush();
+        $this->addFlash('success', 'Le message a été supprimé.');
+        return $this->redirectToRoute('admin_evenement_show', ['id' => $evenement->getId(), 'user' => $userId]);
+    }
+
+    #[Route('/message/{messageId}/modifier', name: 'admin_evenement_message_edit', requirements: ['messageId' => '\d+'], methods: ['GET', 'POST'])]
+    public function editMessage(Request $request, int $messageId): Response
+    {
+        $message = $this->messageEvenementRepository->find($messageId);
+        if ($message === null) {
+            throw new NotFoundHttpException('Message introuvable.');
+        }
+        if ($message->getEnvoyePar() !== MessageEvenement::ENVOYE_PAR_ADMIN) {
+            $this->addFlash('error', 'Seuls les messages envoyés par l\'admin peuvent être modifiés.');
+            return $this->redirectToRoute('admin_evenement_show', ['id' => $message->getEvenement()->getId(), 'user' => $message->getUser()?->getId()]);
+        }
+        $evenement = $message->getEvenement();
+        $userId = $message->getUser()?->getId();
+        $form = $this->createForm(MessageEvenementType::class, $message);
+        $form->handleRequest($request);
+        if ($form->isSubmitted()) {
+            if (!$this->isCsrfTokenValid('admin_message_edit_' . $messageId, (string) $request->request->get('_token'))) {
+                $this->addFlash('error', 'Jeton de sécurité invalide.');
+                return $this->redirectToRoute('admin_evenement_show', ['id' => $evenement->getId(), 'user' => $userId]);
+            }
+            if ($form->isValid()) {
+                $this->entityManager->flush();
+                $this->addFlash('success', 'Le message a été modifié.');
+                return $this->redirectToRoute('admin_evenement_show', ['id' => $evenement->getId(), 'user' => $userId]);
+            }
+        }
+        return $this->render('admin/evenement/message_edit.html.twig', [
+            'evenement' => $evenement,
+            'message' => $message,
+            'form' => $form,
+            'conversationUser' => $message->getUser(),
+        ]);
+    }
+
     #[Route('/{id}/send-reminders', name: 'admin_evenement_send_reminders', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function sendReminders(Request $request, int $id): Response
     {

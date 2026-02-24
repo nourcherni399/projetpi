@@ -1,15 +1,20 @@
 {% extends "form_div_layout.html.twig" %}
 
-{# Un seul message par champ pour éviter les doublons (entité + formulaire) #}
+{# Affichage des erreurs : "errors" est la variable fournie par Symfony dans ce bloc #}
 {% block form_errors %}
-    {% if errors|length > 0 %}
+    {% set form_errors_list = errors is defined ? errors : (form.vars.errors|default([])) %}
+    {% if form_errors_list|length > 0 %}
         {% if compound %}
-            <div class="rounded-lg bg-red-50 border border-red-200 p-3 mt-1 text-sm text-red-700">
-                {{ block('form_errors_compound') }}
+            <div class="rounded-lg bg-red-50 border border-red-200 p-3 mt-1 text-sm text-red-700" role="alert">
+                {% for error in form_errors_list %}
+                    <div>{{ error.message }}</div>
+                {% endfor %}
             </div>
         {% else %}
-            <div class="mt-1 text-sm font-medium text-red-600" role="alert">
-                {{ errors|first.message }}
+            <div class="mt-1 mb-1 text-sm font-medium text-red-600" role="alert" style="min-height:1.25rem;">
+                {% for error in form_errors_list %}
+                    <span class="block">{{ error.message }}</span>
+                {% endfor %}
             </div>
         {% endif %}
     {% endif %}
@@ -17,7 +22,7 @@
 
 {# Personnalisation des champs de formulaire #}
 {% block form_row %}
-    <div class="form-group">
+    <div class="form-group mb-4">
         {{ form_label(form) }}
         {{ form_widget(form) }}
         {{ form_errors(form) }}
@@ -54,6 +59,9 @@
 {# Personnalisation des textarea #}
 {% block textarea_widget %}
     {% set attr = attr|merge({class: (attr.class|default('') ~ ' form-control')|trim}) %}
+    {% if form.vars.errors|length > 0 %}
+        {% set attr = attr|merge({class: (attr.class|default('')) ~ ' border-red-500 ring-2 ring-red-200'}) %}
+    {% endif %}
     <textarea {{ block('widget_attributes') }}>{{ value }}</textarea>
 {% endblock textarea_widget %}
 
@@ -68,6 +76,9 @@
 
 {% block choice_widget_collapsed %}
     {% set attr = attr|merge({class: (attr.class|default('') ~ ' form-control')|trim}) %}
+    {% if form.vars.errors|length > 0 and attr.class is defined %}
+        {% set attr = attr|merge({class: (attr.class|default('')) ~ ' border-red-500 ring-2 ring-red-200'}) %}
+    {% endif %}
     <select {{ block('widget_attributes') }}{% if multiple %} multiple="multiple"{% endif %}>
         {% if placeholder is not none %}
             <option value=""{% if required and value is empty %} selected="selected"{% endif %}>{{ placeholder|trans({}, translation_domain) }}</option>

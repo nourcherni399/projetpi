@@ -16,7 +16,7 @@ use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Valid;
 
 final class EvenementType extends AbstractType
 {
@@ -29,10 +29,6 @@ final class EvenementType extends AbstractType
         $builder
             ->add('title', TextType::class, [
                 'label' => 'Titre',
-                'constraints' => [
-                    new NotBlank(message: 'Le titre est obligatoire.'),
-                    new Length(['min' => 1, 'max' => 255, 'maxMessage' => 'Le titre ne peut pas dépasser {{ limit }} caractères.']),
-                ],
                 'attr' => $attr + ['placeholder' => 'Ex. Atelier sensoriel'],
             ])
             ->add('description', TextareaType::class, [
@@ -44,21 +40,17 @@ final class EvenementType extends AbstractType
             ->add('dateEvent', DateType::class, [
                 'label' => 'Date',
                 'widget' => 'single_text',
-                'format' => 'dd/MM/yyyy',
-                'html5' => false,
-                'constraints' => [new NotBlank(message: 'La date est obligatoire.')],
-                'attr' => $attr + ['placeholder' => 'JJ/MM/AAAA', 'autocomplete' => 'off'],
+                'html5' => true,
+                'attr' => $attr + ['autocomplete' => 'off'],
             ])
             ->add('heureDebut', TimeType::class, [
                 'label' => 'Heure de début',
                 'widget' => 'single_text',
-                'constraints' => [new NotBlank(message: 'L\'heure de début est obligatoire.')],
                 'attr' => $attr,
             ])
             ->add('heureFin', TimeType::class, [
                 'label' => 'Heure de fin',
                 'widget' => 'single_text',
-                'constraints' => [new NotBlank(message: 'L\'heure de fin est obligatoire.')],
                 'attr' => $attr,
             ])
             ->add('mode', ChoiceType::class, [
@@ -73,10 +65,6 @@ final class EvenementType extends AbstractType
             ->add('lieu', TextType::class, [
                 'label' => 'Lieu / Adresse',
                 'required' => true,
-                'constraints' => [
-                    new NotBlank(message: 'Le lieu est obligatoire.'),
-                    new Length(['min' => 1, 'max' => 255, 'maxMessage' => 'Le lieu ne peut pas dépasser {{ limit }} caractères.']),
-                ],
                 'attr' => $attr + ['placeholder' => 'Ex. Salle principale'],
             ])
             ->add('locationUrl', TextType::class, [
@@ -110,7 +98,7 @@ final class EvenementType extends AbstractType
 
         $floatToString = new CallbackTransformer(
             fn (?float $v) => $v !== null ? (string) $v : '',
-            fn (string $v) => trim($v) === '' ? null : (float) str_replace(',', '.', $v)
+            fn (?string $v) => $v === null || trim($v) === '' ? null : (float) str_replace(',', '.', trim($v))
         );
         $builder->get('latitude')->addModelTransformer($floatToString);
         $builder->get('longitude')->addModelTransformer($floatToString);
@@ -120,6 +108,7 @@ final class EvenementType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Evenement::class,
+            'constraints' => [new Valid()],
         ]);
     }
 }

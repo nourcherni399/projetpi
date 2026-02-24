@@ -619,13 +619,269 @@ final class HuggingFaceService
     }
 
     /**
-     * Suggestion de courte description à partir du lieu, thème et date.
-     * Pour l'instant template simple ; on peut brancher un modèle de génération plus tard.
+     * À partir des seuls mots-clés et de la période (sans résultats de recherche), propose des idées avec analyse, pourquoi et score.
+     * Même format de retour que analyzeSearchResultsAndSuggestEvents.
+     *
+     * @return array{analyse: string, propositions: array<int, array{titre: string, description: string, theme: string, pourquoi: string, score: int}>}|array{}
+     */
+    public function suggestEventIdeasFromQueryWithAnalysis(string $userQuery, string $period = '2025'): array
+    {
+        $key = $this->getApiKey();
+        if ($key === null) {
+            return [];
+        }
+        $userQuery = trim($userQuery);
+        if ($userQuery === '') {
+            return [];
+        }
+        $periodInfo = $period !== '' ? ' Période : ' . $period . '.' : '';
+
+        $this->lastApiError = null;
+        $prompt = self::CONTEXTE_AUTICARE . "\n\n"
+            . "L'utilisateur a fait une recherche avec les mots-clés : « " . $userQuery . " ». " . $periodInfo . " Aucun résultat de recherche web n'est fourni.\n\n"
+            . "TÂCHE :\n"
+            . "1) Fais une ANALYSE courte (2 à 4 phrases) : quels types d'événements pourraient correspondre à ce thème pour AutiCare (familles, inclusion, autisme).\n"
+            . "2) Propose 3 à 5 idées d'événements qui correspondent au thème « " . $userQuery . " ». Pour CHAQUE proposition :\n"
+            . "   - titre (court), description (2 à 3 phrases), theme\n"
+            . "   - pourquoi : explique pourquoi tu choisis cette proposition (critères, adéquation avec le thème)\n"
+            . "   - score : nombre entre 0 et 100 (pertinence par rapport au thème ; la meilleure idée 85-100, les autres proportionnellement).\n\n"
+            . "Réponds UNIQUEMENT avec un objet JSON valide, sans markdown :\n"
+            . "{\"analyse\":\"...\",\"propositions\":[{\"titre\":\"...\",\"description\":\"...\",\"theme\":\"...\",\"pourquoi\":\"...\",\"score\":85},...]}";
+
+        try {
+            $response = $this->httpClient->request('POST', self::ROUTER_CHAT_URL, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $key,
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => [
+                    'model' => $this->getChatModel(),
+                    'messages' => [['role' => 'user', 'content' => $prompt]],
+                    'max_tokens' => 1200,
+                ],
+                'timeout' => 90,
+            ]);
+            $data = $response->toArray();
+            if (!isset($data['choices'][0]['message']['content'])) {
+                if (isset($data['error'])) {
+                    $this->lastApiError = ['status' => $response->getStatusCode(), 'message' => $this->errorToString($data['error'])];
+                }
+                return [];
+            }
+            $content = trim((string) $data['choices'][0]['message']['content']);
+            $content = preg_replace('/^```\w*\s*|\s*```$/m', '', $content);
+            $decoded = json_decode($content, true, 512, \JSON_THROW_ON_ERROR);
+            if (!\is_array($decoded)) {
+                return [];
+            }
+            $analyse = isset($decoded['analyse']) && \is_string($decoded['analyse']) ? trim($decoded['analyse']) : '';
+            $propositionsRaw = $decoded['propositions'] ?? [];
+            if (!\is_array($propositionsRaw)) {
+                $propositionsRaw = [];
+            }
+            $propositions = [];
+            foreach ($propositionsRaw as $item) {
+                if (!\is_array($item)) {
+                    continue;
+                }
+                $titre = isset($item['titre']) && \is_string($item['titre']) ? trim($item['titre']) : '';
+                if ($titre === '') {
+                    continue;
+                }
+                $description = isset($item['description']) && \is_string($item['description']) ? trim($item['description']) : '';
+                $theme = isset($item['theme']) && \is_string($item['theme']) ? trim($item['theme']) : '';
+                $pourquoi = isset($item['pourquoi']) && \is_string($item['pourquoi']) ? trim($item['pourquoi']) : '';
+                $score = isset($item['score']) ? (int) $item['score'] : null;
+                if ($score !== null && ($score < 0 || $score > 100)) {
+                    $score = max(0, min(100, $score));
+                }
+                $propositions[] = [
+                    'titre' => mb_substr($titre, 0, 255),
+                    'description' => mb_substr($description, 0, 2000),
+                    'theme' => mb_substr($theme, 0, 100),
+                    'pourquoi' => mb_substr($pourquoi, 0, 500),
+                    'score' => $score ?? 0,
+                ];
+            }
+            return [
+                'analyse' => mb_substr($analyse, 0, 2000),
+                'propositions' => $propositions,
+            ];
+        } catch (\JsonException) {
+            return [];
+        } catch (ClientExceptionInterface|ServerExceptionInterface $e) {
+            try {
+                $response = $e->getResponse();
+                $this->lastApiError = ['status' => $response->getStatusCode(), 'message' => $e->getMessage()];
+            } catch (\Throwable) {
+                $this->lastApiError = ['status' => 0, 'message' => $e->getMessage()];
+            }
+            return [];
+        } catch (\Throwable $t) {
+            $this->lastApiError = ['status' => 0, 'message' => $t->getMessage()];
+            return [];
+        }
+    }
+
+    /**
+     * Analyse les résultats de recherche affichés et propose des idées d'événements avec justification et score.
+     * Pour chaque proposition : pourquoi ce choix (critères, points forts), score de pertinence (0-100).
+     *
+     * @return array{analyse: string, propositions: array<int, array{titre: string, description: string, theme: string, pourquoi: string, score: int}>}|array{}
+     */
+    public function analyzeSearchResultsAndSuggestEvents(string $searchResultsText, string $userQuery, ?string $period = null): array
+    {
+        $key = $this->getApiKey();
+        if ($key === null) {
+            return [];
+        }
+        $searchResultsText = trim($searchResultsText);
+        if ($searchResultsText === '') {
+            return [];
+        }
+        if (mb_strlen($searchResultsText) > 4000) {
+            $searchResultsText = mb_substr($searchResultsText, 0, 4000);
+        }
+        $userQuery = trim($userQuery);
+        $periodInfo = $period !== null && $period !== '' ? ' Période concernée : ' . $period . '.' : '';
+
+        $this->lastApiError = null;
+        $prompt = self::CONTEXTE_AUTICARE . "\n\n"
+            . "L'utilisateur a fait une recherche avec les mots-clés : « " . $userQuery . " ». " . $periodInfo . "\n\n"
+            . "Voici les RÉSULTATS AFFICHÉS de cette recherche (titres et extraits des pages trouvées) :\n\n---\n"
+            . $searchResultsText
+            . "\n---\n\n"
+            . "TÂCHE :\n"
+            . "1) Fais une ANALYSE courte (3 à 5 phrases) de ces résultats : quels thèmes ressortent, quels types d'événements, en quoi cela correspond (ou non) à la recherche.\n"
+            . "2) Propose 3 à 5 idées d'événements pour AutiCare qui correspondent le mieux à la recherche et aux résultats. Pour CHAQUE proposition :\n"
+            . "   - titre (court), description (2 à 3 phrases), theme\n"
+            . "   - pourquoi : explique pourquoi tu choisis cette proposition (critères, points forts, adéquation avec la recherche)\n"
+            . "   - score : un nombre entre 0 et 100 (pourcentage de pertinence / correspondance de cette proposition par rapport à la recherche et aux résultats)\n\n"
+            . "Réponds UNIQUEMENT avec un objet JSON valide, sans markdown, de la forme :\n"
+            . "{\"analyse\":\"...\",\"propositions\":[{\"titre\":\"...\",\"description\":\"...\",\"theme\":\"...\",\"pourquoi\":\"...\",\"score\":85},...]}\n"
+            . "Exemple de score : la proposition la plus pertinente peut avoir 90-100, les autres proportionnellement moins.";
+
+        try {
+            $response = $this->httpClient->request('POST', self::ROUTER_CHAT_URL, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $key,
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => [
+                    'model' => $this->getChatModel(),
+                    'messages' => [['role' => 'user', 'content' => $prompt]],
+                    'max_tokens' => 1200,
+                ],
+                'timeout' => 90,
+            ]);
+            $data = $response->toArray();
+            if (!isset($data['choices'][0]['message']['content'])) {
+                if (isset($data['error'])) {
+                    $this->lastApiError = ['status' => $response->getStatusCode(), 'message' => $this->errorToString($data['error'])];
+                }
+                return [];
+            }
+            $content = trim((string) $data['choices'][0]['message']['content']);
+            $content = preg_replace('/^```\w*\s*|\s*```$/m', '', $content);
+            $decoded = json_decode($content, true, 512, \JSON_THROW_ON_ERROR);
+            if (!\is_array($decoded)) {
+                return [];
+            }
+            $analyse = isset($decoded['analyse']) && \is_string($decoded['analyse']) ? trim($decoded['analyse']) : '';
+            $propositionsRaw = $decoded['propositions'] ?? [];
+            if (!\is_array($propositionsRaw)) {
+                $propositionsRaw = [];
+            }
+            $propositions = [];
+            foreach ($propositionsRaw as $item) {
+                if (!\is_array($item)) {
+                    continue;
+                }
+                $titre = isset($item['titre']) && \is_string($item['titre']) ? trim($item['titre']) : '';
+                if ($titre === '') {
+                    continue;
+                }
+                $description = isset($item['description']) && \is_string($item['description']) ? trim($item['description']) : '';
+                $theme = isset($item['theme']) && \is_string($item['theme']) ? trim($item['theme']) : '';
+                $pourquoi = isset($item['pourquoi']) && \is_string($item['pourquoi']) ? trim($item['pourquoi']) : '';
+                $score = isset($item['score']) ? (int) $item['score'] : null;
+                if ($score !== null && ($score < 0 || $score > 100)) {
+                    $score = max(0, min(100, $score));
+                }
+                $propositions[] = [
+                    'titre' => mb_substr($titre, 0, 255),
+                    'description' => mb_substr($description, 0, 2000),
+                    'theme' => mb_substr($theme, 0, 100),
+                    'pourquoi' => mb_substr($pourquoi, 0, 500),
+                    'score' => $score ?? 0,
+                ];
+            }
+            return [
+                'analyse' => mb_substr($analyse, 0, 2000),
+                'propositions' => $propositions,
+            ];
+        } catch (\JsonException) {
+            return [];
+        } catch (ClientExceptionInterface|ServerExceptionInterface $e) {
+            try {
+                $response = $e->getResponse();
+                $this->lastApiError = ['status' => $response->getStatusCode(), 'message' => $e->getMessage()];
+            } catch (\Throwable) {
+                $this->lastApiError = ['status' => 0, 'message' => $e->getMessage()];
+            }
+            return [];
+        } catch (\Throwable $t) {
+            $this->lastApiError = ['status' => 0, 'message' => $t->getMessage()];
+            return [];
+        }
+    }
+
+    /**
+     * Suggestion de description à partir du lieu, thème et date.
+     * Appelle l'IA pour un paragraphe descriptif ; repli sur une courte phrase si API indisponible.
      */
     public function suggestDescription(string $lieu, string $thematique, string $dateStr): string
     {
         $lieu = trim($lieu);
         $thematique = trim($thematique);
+        $dateStr = trim($dateStr);
+
+        $key = $this->getApiKey();
+        if ($key !== null) {
+            $this->lastApiError = null;
+            $prompt = self::CONTEXTE_AUTICARE . "\n\n"
+                . "Génère une description d'événement attrayante et détaillée pour la plateforme AutiCare. "
+                . "Un seul paragraphe de 3 à 5 phrases, chaleureux et informatif, qui incite à l'inscription.\n\n"
+                . "Informations : Thématique : " . ($thematique !== '' ? $thematique : 'non précisée') . ". "
+                . "Lieu : " . ($lieu !== '' ? $lieu : 'non précisé') . ". "
+                . "Date : " . ($dateStr !== '' ? $dateStr : 'non précisée') . ".\n\n"
+                . "Réponds UNIQUEMENT avec le paragraphe de description, sans titre ni préambule.";
+
+            try {
+                $response = $this->httpClient->request('POST', self::ROUTER_CHAT_URL, [
+                    'headers' => [
+                        'Authorization' => 'Bearer ' . $key,
+                        'Content-Type' => 'application/json',
+                    ],
+                    'json' => [
+                        'model' => $this->getChatModel(),
+                        'messages' => [['role' => 'user', 'content' => $prompt]],
+                        'max_tokens' => 400,
+                    ],
+                    'timeout' => 60,
+                ]);
+                $data = $response->toArray();
+                if (isset($data['choices'][0]['message']['content'])) {
+                    $content = trim((string) $data['choices'][0]['message']['content']);
+                    if ($content !== '') {
+                        return mb_substr($content, 0, 65535);
+                    }
+                }
+            } catch (\Throwable $e) {
+                $this->lastApiError = ['status' => 0, 'message' => $e->getMessage()];
+            }
+        }
+
         $parts = [];
         if ($thematique !== '') {
             $parts[] = 'Activité ' . $thematique;
