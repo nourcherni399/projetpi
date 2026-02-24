@@ -69,6 +69,13 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $image = null;
 
+    /** Code PIN pour réinitialisation du mot de passe (valide 15 min). */
+    #[ORM\Column(length: 6, nullable: true)]
+    private ?string $resetPin = null;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $resetPinExpiresAt = null;
+
     public function __construct()
     {
         $this->blogs = new ArrayCollection();
@@ -188,6 +195,28 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setImage(?string $image): static
     {
         $this->image = $image;
+        return $this;
+    }
+
+    public function getResetPin(): ?string
+    {
+        return $this->resetPin;
+    }
+
+    public function setResetPin(?string $resetPin): static
+    {
+        $this->resetPin = $resetPin;
+        return $this;
+    }
+
+    public function getResetPinExpiresAt(): ?\DateTimeImmutable
+    {
+        return $this->resetPinExpiresAt;
+    }
+
+    public function setResetPinExpiresAt(?\DateTimeImmutable $resetPinExpiresAt): static
+    {
+        $this->resetPinExpiresAt = $resetPinExpiresAt;
         return $this;
     }
 

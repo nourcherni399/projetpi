@@ -1,5 +1,6 @@
 
 ###> symfony/framework-bundle ###
+/.env
 /.env.local
 /.env.local.php
 /.env.*.local
@@ -8,6 +9,9 @@
 /var/
 /vendor/
 ###< symfony/framework-bundle ###
+
+# Google Calendar API (compte de service)
+/config/google-calendar-credentials.json
 
 ###> phpunit/phpunit ###
 /phpunit.xml
@@ -23,3 +27,6 @@
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+.env
+config/packages/client_secret_*.json
+

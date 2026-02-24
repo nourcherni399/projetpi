@@ -3,128 +3,232 @@
 {% block title %}Tableau de bord - AutiCare Admin{% endblock %}
 
 {% block admin_content %}
-<h1 class="text-2xl font-bold text-[#4B5563] mb-1">Tableau de bord</h1>
-<p class="text-[#6B7280] mb-8">Bienvenue sur le panneau d'administration AutiCare</p>
-
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <div class="bg-white rounded-2xl shadow-sm border border-[#E5E0D8] p-6 flex flex-col items-center text-center">
-        <div class="w-12 h-12 rounded-full bg-[#A7C7E7]/20 text-[#A7C7E7] flex items-center justify-center mb-3">
-            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
-        </div>
-        <p class="text-3xl font-bold text-[#4B5563]">1,234</p>
-        <p class="text-[#6B7280] text-sm">Utilisateurs</p>
-        <p class="mt-2 text-sm text-emerald-600 font-medium">+12%</p>
+{# Message de bienvenue + illustration #}
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 p-6 rounded-2xl bg-white dark:bg-gray-700/80 border border-[#e2e8f0] dark:border-gray-600 shadow-sm">
+    <div>
+        <h2 class="text-xl font-bold text-[#1e293b] dark:text-white mb-1">
+            Bonjour, {{ app.user ? app.user.prenom : 'Admin' }}
+        </h2>
+        <p class="text-[#64748b] dark:text-gray-400 text-sm mb-0.5">Consultez les statistiques et gérez le contenu.</p>
+        <p class="text-[#94a3b8] dark:text-gray-500 text-sm">Bonne journée.</p>
     </div>
-    <div class="bg-white rounded-2xl shadow-sm border border-[#E5E0D8] p-6 flex flex-col items-center text-center">
-        <div class="w-12 h-12 rounded-full bg-[#A7C7E7]/20 text-[#A7C7E7] flex items-center justify-center mb-3">
-            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
-        </div>
-        <p class="text-3xl font-bold text-[#4B5563]">456</p>
-        <p class="text-[#6B7280] text-sm">Commandes</p>
-        <p class="mt-2 text-sm text-emerald-600 font-medium">+8%</p>
-    </div>
-    <div class="bg-white rounded-2xl shadow-sm border border-[#E5E0D8] p-6 flex flex-col items-center text-center">
-        <div class="w-12 h-12 rounded-full bg-[#A7C7E7]/20 text-[#A7C7E7] flex items-center justify-center mb-3">
-            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
-        </div>
-        <p class="text-3xl font-bold text-[#4B5563]">{{ totalEvenements|default(0) }}</p>
-        <p class="text-[#6B7280] text-sm">Événements</p>
-        <p class="mt-2 text-sm text-emerald-600 font-medium">+2</p>
-    </div>
-    <div class="bg-white rounded-2xl shadow-sm border border-[#E5E0D8] p-6 flex flex-col items-center text-center">
-        <div class="w-12 h-12 rounded-full bg-[#A7C7E7]/20 text-[#A7C7E7] flex items-center justify-center mb-3">
-            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg>
-        </div>
-        <p class="text-3xl font-bold text-[#4B5563]">89</p>
-        <p class="text-[#6B7280] text-sm">Commentaires</p>
-        <p class="mt-2 text-sm text-red-500 font-medium">-5%</p>
+    <div class="flex items-center justify-center w-24 h-24 rounded-2xl bg-gradient-to-br from-[#E8DCF0] to-[#D4E5D0] dark:from-[#CDB4DB]/30 dark:to-[#A8BBA3]/30 shrink-0">
+        <svg class="w-12 h-12 text-[#CDB4DB] dark:text-[#93C5FD]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" /></svg>
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <section class="bg-white rounded-2xl shadow-sm border border-[#E5E0D8] p-6">
-        <div class="flex items-center justify-between mb-4">
+{# KPIs - 4 cartes #}
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="rounded-2xl border border-[#e2e8f0] dark:border-gray-600 bg-white dark:bg-gray-700/80 p-5 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between">
             <div>
-                <h2 class="text-lg font-semibold text-[#4B5563]">Nouveaux utilisateurs</h2>
-                <p class="text-sm text-[#6B7280]">Les dernières inscriptions</p>
+                <p class="text-[#64748b] dark:text-gray-400 text-sm font-medium">Utilisateurs</p>
+                <p class="text-2xl font-bold text-[#1e293b] dark:text-white mt-1">{{ totalUsers|default(0) }}</p>
+                <p class="text-[#94a3b8] dark:text-gray-500 text-xs mt-0.5">Total inscrits</p>
             </div>
-            <a href="{{ path('admin_users') }}" class="px-3 py-1.5 rounded-full bg-[#E5E7EB] text-[#4B5563] text-sm font-medium hover:bg-[#D1D5DB]">Voir tout</a>
+            <div class="w-12 h-12 rounded-xl bg-[#E8DCF0] dark:bg-[#CDB4DB]/30 flex items-center justify-center">
+                <svg class="w-6 h-6 text-[#CDB4DB] dark:text-[#93C5FD]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
+            </div>
         </div>
-        <ul class="space-y-4">
-            <li class="flex items-center gap-4 p-3 rounded-xl hover:bg-[#F5F1EB]">
-                <span class="flex items-center justify-center w-10 h-10 rounded-full bg-[#A7C7E7] text-white text-sm font-semibold">MD</span>
-                <div class="flex-1 min-w-0">
-                    <p class="font-medium text-[#4B5563]">Marie Dupont</p>
-                    <p class="text-sm text-[#6B7280]">marie.d@email.com</p>
-                </div>
-                <span class="text-sm text-[#6B7280]">Il y a 2h</span>
-            </li>
-            <li class="flex items-center gap-4 p-3 rounded-xl hover:bg-[#F5F1EB]">
-                <span class="flex items-center justify-center w-10 h-10 rounded-full bg-[#95d7b5] text-[#4B5563] text-sm font-semibold">TB</span>
-                <div class="flex-1 min-w-0">
-                    <p class="font-medium text-[#4B5563]">Thomas Bernard</p>
-                    <p class="text-sm text-[#6B7280]">thomas.b@email.com</p>
-                </div>
-                <span class="text-sm text-[#6B7280]">Il y a 5h</span>
-            </li>
-            <li class="flex items-center gap-4 p-3 rounded-xl hover:bg-[#F5F1EB]">
-                <span class="flex items-center justify-center w-10 h-10 rounded-full bg-[#B8D4ED] text-white text-sm font-semibold">SL</span>
-                <div class="flex-1 min-w-0">
-                    <p class="font-medium text-[#4B5563]">Sophie Martin</p>
-                    <p class="text-sm text-[#6B7280]">sophie.m@email.com</p>
-                </div>
-                <span class="text-sm text-[#6B7280]">Hier</span>
-            </li>
-            <li class="flex items-center gap-4 p-3 rounded-xl hover:bg-[#F5F1EB]">
-                <span class="flex items-center justify-center w-10 h-10 rounded-full bg-[#D8B4FE] text-[#4B5563] text-sm font-semibold">JL</span>
-                <div class="flex-1 min-w-0">
-                    <p class="font-medium text-[#4B5563]">Jean Leroy</p>
-                    <p class="text-sm text-[#6B7280]">jean.l@email.com</p>
-                </div>
-                <span class="text-sm text-[#6B7280]">Il y a 2 jours</span>
-            </li>
-        </ul>
-    </section>
-    <section class="bg-white rounded-2xl shadow-sm border border-[#E5E0D8] p-6">
-        <div class="flex items-center justify-between mb-4">
+    </div>
+    <div class="rounded-2xl border border-[#e2e8f0] dark:border-gray-600 bg-white dark:bg-gray-700/80 p-5 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between">
             <div>
-                <h2 class="text-lg font-semibold text-[#4B5563]">Commentaires récents</h2>
-                <p class="text-sm text-[#6B7280]">À modérer</p>
+                <p class="text-[#64748b] dark:text-gray-400 text-sm font-medium">Commandes</p>
+                <p class="text-2xl font-bold text-[#1e293b] dark:text-white mt-1">{{ totalCommandes|default(0) }}</p>
+                <p class="text-[#94a3b8] dark:text-gray-500 text-xs mt-0.5">Total commandes</p>
             </div>
-            <a href="{{ path('admin_module_index') }}" class="px-3 py-1.5 rounded-full bg-[#E5E7EB] text-[#4B5563] text-sm font-medium hover:bg-[#D1D5DB]">Voir tout</a>
+            <div class="w-12 h-12 rounded-xl bg-[#D4E5D0] dark:bg-[#A8BBA3]/30 flex items-center justify-center">
+                <svg class="w-6 h-6 text-[#A8BBA3] dark:text-[#93C5FD]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+            </div>
         </div>
-        <ul class="space-y-4">
-            <li class="p-4 rounded-xl border border-[#E5E0D8]">
-                <div class="flex justify-between items-start gap-2 mb-2">
-                    <p class="font-medium text-[#4B5563]">Sophie R.</p>
-                    <span class="px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-700">Approuvé</span>
-                </div>
-                <p class="text-sm text-[#6B7280] mb-1">« Un article très utile, merci pour ces conseils... »</p>
-                <p class="text-xs text-[#6B7280]">Sur : Notre parcours vers le diagnostic</p>
-            </li>
-            <li class="p-4 rounded-xl border border-[#E5E0D8]">
-                <div class="flex justify-between items-start gap-2 mb-2">
-                    <p class="font-medium text-[#4B5563]">Thomas D.</p>
-                    <span class="px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-700">En attente</span>
-                </div>
-                <p class="text-sm text-[#6B7280] mb-3">« Je voulais partager notre expérience avec le... »</p>
-                <div class="flex gap-2">
-                    <button type="button" class="px-3 py-1.5 rounded-full bg-[#A7C7E7] text-white text-sm font-medium hover:bg-[#B8D4ED]">Approuver</button>
-                    <button type="button" class="px-3 py-1.5 rounded-full bg-[#E5E7EB] text-[#4B5563] text-sm font-medium hover:bg-[#D1D5DB]">Rejeter</button>
-                </div>
-            </li>
-            <li class="p-4 rounded-xl border border-[#E5E0D8]">
-                <div class="flex justify-between items-start gap-2 mb-2">
-                    <p class="font-medium text-[#4B5563]">Claire B.</p>
-                    <span class="px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-700">En attente</span>
-                </div>
-                <p class="text-sm text-[#6B7280] mb-3">« Merci pour cet atelier, les enfants ont adoré... »</p>
-                <div class="flex gap-2">
-                    <button type="button" class="px-3 py-1.5 rounded-full bg-[#A7C7E7] text-white text-sm font-medium hover:bg-[#B8D4ED]">Approuver</button>
-                    <button type="button" class="px-3 py-1.5 rounded-full bg-[#E5E7EB] text-[#4B5563] text-sm font-medium hover:bg-[#D1D5DB]">Rejeter</button>
-                </div>
-            </li>
-        </ul>
-    </section>
+    </div>
+    <div class="rounded-2xl border border-[#e2e8f0] dark:border-gray-600 bg-white dark:bg-gray-700/80 p-5 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-[#64748b] dark:text-gray-400 text-sm font-medium">Événements</p>
+                <p class="text-2xl font-bold text-[#1e293b] dark:text-white mt-1">{{ totalEvenements|default(0) }}</p>
+                <p class="text-[#94a3b8] dark:text-gray-500 text-xs mt-0.5">Total événements</p>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-[#E8DCF0] dark:bg-[#CDB4DB]/30 flex items-center justify-center">
+                <svg class="w-6 h-6 text-[#CDB4DB] dark:text-[#93C5FD]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+            </div>
+        </div>
+    </div>
+    <div class="rounded-2xl border border-[#e2e8f0] dark:border-gray-600 bg-white dark:bg-gray-700/80 p-5 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-[#64748b] dark:text-gray-400 text-sm font-medium">Produits</p>
+                <p class="text-2xl font-bold text-[#1e293b] dark:text-white mt-1">{{ totalProduits|default(0) }}</p>
+                <p class="text-[#94a3b8] dark:text-gray-500 text-xs mt-0.5">Catalogue</p>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-[#D4E5D0] dark:bg-[#A8BBA3]/30 flex items-center justify-center">
+                <svg class="w-6 h-6 text-[#A8BBA3] dark:text-[#93C5FD]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" /></svg>
+            </div>
+        </div>
+    </div>
 </div>
+
+{# Grille : Demandes en attente / Profil + Aujourd'hui #}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <div class="lg:col-span-2 space-y-6">
+        <div class="rounded-2xl border border-[#e2e8f0] dark:border-gray-600 bg-white dark:bg-gray-700/80 overflow-hidden shadow-sm">
+            <div class="px-6 py-4 border-b border-[#e2e8f0] dark:border-gray-600 flex items-center justify-between">
+                <h3 class="font-semibold text-[#1e293b] dark:text-white">Activité</h3>
+                <span class="text-xs text-[#94a3b8] dark:text-gray-500">Derniers 6 mois</span>
+            </div>
+            <div class="p-6">
+                <div class="h-56">
+                    <canvas id="adminActivityChart" class="w-full h-full"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="rounded-2xl border border-[#e2e8f0] dark:border-gray-600 bg-white dark:bg-gray-700/80 overflow-hidden shadow-sm">
+            <div class="px-6 py-4 border-b border-[#e2e8f0] dark:border-gray-600 flex items-center justify-between">
+                <h3 class="font-semibold text-[#1e293b] dark:text-white">Demandes d'inscription événements</h3>
+                <a href="{{ path('admin_evenement_index') }}" class="text-sm text-[#CDB4DB] dark:text-[#93C5FD] font-medium hover:underline">Voir les événements →</a>
+            </div>
+            <div class="p-4">
+                {% if admin_pending_inscriptions|default([]) is not empty %}
+                    <ul class="space-y-2">
+                        {% for ins in admin_pending_inscriptions|slice(0, 5) %}
+                        <li>
+                            <a href="{{ path('admin_evenement_show', { id: ins.evenement.id }) }}" class="flex items-center gap-4 p-3 rounded-xl hover:bg-[#f8fafc] dark:hover:bg-gray-600/50 transition-colors group">
+                                <span class="flex items-center justify-center w-10 h-10 rounded-full bg-[#E8DCF0] dark:bg-[#CDB4DB]/30 text-[#CDB4DB] dark:text-[#93C5FD] font-semibold text-sm shrink-0">
+                                    {{ (ins.user.prenom|slice(0,1) ~ ins.user.nom|slice(0,1))|upper }}
+                                </span>
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-medium text-[#1e293b] dark:text-white text-sm truncate">{{ ins.user.prenom }} {{ ins.user.nom }}</p>
+                                    <p class="text-xs text-[#64748b] dark:text-gray-400 truncate">{{ ins.evenement.title }}</p>
+                                </div>
+                                <svg class="w-5 h-5 text-[#94a3b8] dark:text-gray-500 group-hover:text-[#CDB4DB] dark:group-hover:text-[#93C5FD] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="text-center py-10">
+                        <div class="w-14 h-14 rounded-2xl bg-[#f1f5f9] dark:bg-gray-600 mx-auto mb-3 flex items-center justify-center">
+                            <svg class="w-7 h-7 text-[#cbd5e1] dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        </div>
+                        <p class="text-[#64748b] dark:text-gray-400 text-sm">Aucune demande en attente</p>
+                        <a href="{{ path('admin_evenement_index') }}" class="inline-block mt-2 text-sm text-[#CDB4DB] dark:text-[#93C5FD] font-medium hover:underline">Voir les événements</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="space-y-6">
+        <div class="rounded-2xl border border-[#e2e8f0] dark:border-gray-600 bg-white dark:bg-gray-700/80 overflow-hidden shadow-sm">
+            <div class="px-6 py-4 border-b border-[#e2e8f0] dark:border-gray-600">
+                <h3 class="font-semibold text-[#1e293b] dark:text-white">Mon profil</h3>
+            </div>
+            <div class="p-6 text-center">
+                <span class="inline-flex items-center justify-center w-16 h-16 rounded-2xl overflow-hidden bg-gradient-to-br from-[#CDB4DB] to-[#A8BBA3] text-white font-bold text-lg mb-3">
+                    {% if app.user and app.user.image %}<img src="{{ asset(app.user.image) }}" alt="" class="w-full h-full object-cover">{% else %}{{ app.user ? (app.user.prenom|slice(0,1) ~ app.user.nom|slice(0,1))|upper : 'AD' }}{% endif %}
+                </span>
+                <p class="font-semibold text-[#1e293b] dark:text-white">{{ app.user ? app.user.prenom ~ ' ' ~ app.user.nom : 'Admin' }}</p>
+                <p class="text-xs text-[#64748b] dark:text-gray-400 mt-0.5">{{ app.user ? app.user.email : '' }}</p>
+                <a href="{{ path('admin_profile') }}" class="inline-block mt-4 px-4 py-2 rounded-xl bg-[#E8DCF0] dark:bg-[#CDB4DB]/30 text-[#4B3D6B] dark:text-white text-sm font-medium hover:bg-[#CDB4DB]/50 dark:hover:bg-[#CDB4DB]/50 transition-colors">Voir le profil</a>
+            </div>
+        </div>
+
+        <div class="rounded-2xl border border-[#e2e8f0] dark:border-gray-600 bg-white dark:bg-gray-700/80 overflow-hidden shadow-sm">
+            <div class="px-6 py-4 border-b border-[#e2e8f0] dark:border-gray-600 flex items-center justify-between">
+                <h3 class="font-semibold text-[#1e293b] dark:text-white">Aujourd'hui</h3>
+                <span class="text-xs text-[#94a3b8] dark:text-gray-500">{{ "now"|date("d/m/Y") }}</span>
+            </div>
+            <div class="p-4">
+                <div class="rounded-xl bg-[#f8fafc] dark:bg-gray-600/50 p-4 mb-4">
+                    <p class="text-center text-2xl font-bold text-[#1e293b] dark:text-white">{{ "now"|date("d") }}</p>
+                    <p class="text-center text-xs text-[#64748b] dark:text-gray-400">{{ "now"|date("F") }}</p>
+                </div>
+                <p class="text-sm text-[#64748b] dark:text-gray-400">{{ totalCommandes|default(0) }} commandes au total.</p>
+                <a href="{{ path('admin_commandes_index') }}" class="inline-flex items-center gap-1.5 mt-3 text-sm text-[#CDB4DB] dark:text-[#93C5FD] font-medium hover:underline">
+                    Voir les commandes
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Actions rapides #}
+<div class="rounded-2xl border border-[#e2e8f0] dark:border-gray-600 bg-white dark:bg-gray-700/80 p-6 shadow-sm">
+    <h3 class="font-semibold text-[#1e293b] dark:text-white mb-4">Actions rapides</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <a href="{{ path('admin_evenement_new') }}" class="flex items-center gap-3 p-4 rounded-xl bg-[#E8DCF0]/50 dark:bg-[#CDB4DB]/20 hover:bg-[#E8DCF0] dark:hover:bg-[#CDB4DB]/30 transition-colors group">
+            <span class="w-10 h-10 rounded-xl bg-[#CDB4DB] dark:bg-[#9B7BB8] flex items-center justify-center text-white group-hover:scale-105 transition-transform">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+            </span>
+            <div>
+                <p class="font-medium text-[#1e293b] dark:text-white text-sm">Nouvel événement</p>
+                <p class="text-xs text-[#64748b] dark:text-gray-400">Créer un événement</p>
+            </div>
+        </a>
+        <a href="{{ path('admin_users') }}" class="flex items-center gap-3 p-4 rounded-xl bg-[#D4E5D0]/50 dark:bg-[#A8BBA3]/20 hover:bg-[#D4E5D0] dark:hover:bg-[#A8BBA3]/30 transition-colors group">
+            <span class="w-10 h-10 rounded-xl bg-[#A8BBA3] dark:bg-[#7B9B6E] flex items-center justify-center text-white group-hover:scale-105 transition-transform">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
+            </span>
+            <div>
+                <p class="font-medium text-[#1e293b] dark:text-white text-sm">Utilisateurs</p>
+                <p class="text-xs text-[#64748b] dark:text-gray-400">Gérer les comptes</p>
+            </div>
+        </a>
+        <a href="{{ path('admin_commandes_index') }}" class="flex items-center gap-3 p-4 rounded-xl bg-[#E8DCF0]/50 dark:bg-[#CDB4DB]/20 hover:bg-[#E8DCF0] dark:hover:bg-[#CDB4DB]/30 transition-colors group">
+            <span class="w-10 h-10 rounded-xl bg-[#CDB4DB] dark:bg-[#9B7BB8] flex items-center justify-center text-white group-hover:scale-105 transition-transform">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z" /></svg>
+            </span>
+            <div>
+                <p class="font-medium text-[#1e293b] dark:text-white text-sm">Commandes</p>
+                <p class="text-xs text-[#64748b] dark:text-gray-400">Voir les commandes</p>
+            </div>
+        </a>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var canvas = document.getElementById('adminActivityChart');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var months = ['Janv.', 'Févr.', 'Mars', 'Avr.', 'Mai', 'Juin'];
+    var data = [8, 14, 12, 22, 18, 25];
+    var gradient = ctx.createLinearGradient(0, 0, 0, 220);
+    gradient.addColorStop(0, 'rgba(205, 180, 219, 0.35)');
+    gradient.addColorStop(1, 'rgba(205, 180, 219, 0.02)');
+    if (typeof Chart === 'undefined') return;
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Activité',
+                data: data,
+                borderColor: '#CDB4DB',
+                backgroundColor: gradient,
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#CDB4DB',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 11 } } },
+                y: { beginAtZero: true, grid: { color: 'rgba(148, 163, 184, 0.2)' }, ticks: { color: '#94a3b8', font: { size: 11 } } }
+            }
+        }
+    });
+});
+</script>
 {% endblock %}

@@ -19,13 +19,6 @@
         </div>
     </div>
 
-    {% for message in app.flashes('success') %}
-        <div class="mb-4 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">{{ message }}</div>
-    {% endfor %}
-    {% for message in app.flashes('error') %}
-        <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-800">{{ message }}</div>
-    {% endfor %}
-
     {% if stats is defined and stats is not empty %}
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div class="bg-gradient-to-br from-red-50 to-red-100 rounded-xl border border-red-200 p-6">
@@ -44,6 +37,29 @@
             <p class="text-green-600 text-sm font-medium">Cette semaine</p>
             <p class="text-3xl font-bold text-green-900 mt-2">{{ stats.this_week_notifications|default(0) }}</p>
         </div>
+    </div>
+    {% endif %}
+
+    {% if notif_annule_reporte_patient is defined and notif_annule_reporte_patient|length > 0 %}
+    <div class="bg-white rounded-2xl border border-[#E5E0D8] shadow-lg overflow-hidden border-l-4 border-l-orange-500">
+        <div class="p-6 border-b border-[#E5E0D8] bg-gradient-to-r from-orange-50 to-amber-50">
+            <h2 class="text-xl font-semibold text-gray-800">Annulations et reports par le patient ({{ notif_annule_reporte_patient|length }})</h2>
+            <p class="text-sm text-gray-600 mt-1">Le patient a annulé ou reporté un rendez-vous via le lien de l’email</p>
+        </div>
+        <ul class="divide-y divide-[#E5E0D8]">
+            {% for notif in notif_annule_reporte_patient %}
+            <li class="p-4">
+                {% if notif.type == 'rdv_annule_patient' %}
+                    <p class="text-[#4B5563] font-medium">Le patient a annulé le rendez-vous</p>
+                    <p class="text-[#6B7280] text-sm">{% if notif.rendezVous %}{{ notif.rendezVous.prenom }} {{ notif.rendezVous.nom }}{% else %}—{% endif %}</p>
+                {% else %}
+                    <p class="text-[#4B5563] font-medium">Le patient a reporté le rendez-vous</p>
+                    <p class="text-[#6B7280] text-sm">{% if notif.rendezVous %}{{ notif.rendezVous.prenom }} {{ notif.rendezVous.nom }} — Nouvelle date : {{ notif.rendezVous.dateRdv ? notif.rendezVous.dateRdv|date('d/m/Y') : '—' }}{% if notif.rendezVous.disponibilite %} à {{ notif.rendezVous.disponibilite.heureDebut|date('H:i') }}{% endif %}{% else %}—{% endif %}</p>
+                {% endif %}
+                <p class="text-[#9CA3AF] text-xs mt-1">{{ notif.createdAt ? notif.createdAt|date('d/m/Y H:i') : '—' }}</p>
+            </li>
+            {% endfor %}
+        </ul>
     </div>
     {% endif %}
 
@@ -96,6 +112,12 @@
                     {% if notif.type is defined and notif.type == 'demande_rdv' %}
                         <p class="text-[#4B5563] font-medium">Nouvelle demande de rendez-vous</p>
                         <p class="text-[#6B7280] text-sm">{% if notif.rendezVous is defined %}{{ notif.rendezVous.nom }} {{ notif.rendezVous.prenom }} — {{ notif.rendezVous.dateRdv is defined ? notif.rendezVous.dateRdv|date('d/m/Y') : '' }}{% else %}—{% endif %}</p>
+                    {% elseif notif.type is defined and notif.type == 'rdv_annule_patient' %}
+                        <p class="text-[#4B5563] font-medium">Le patient a annulé le rendez-vous</p>
+                        <p class="text-[#6B7280] text-sm">{% if notif.rendezVous is defined %}{{ notif.rendezVous.prenom }} {{ notif.rendezVous.nom }}{% else %}—{% endif %}</p>
+                    {% elseif notif.type is defined and notif.type == 'rdv_reporte_patient' %}
+                        <p class="text-[#4B5563] font-medium">Le patient a reporté le rendez-vous</p>
+                        <p class="text-[#6B7280] text-sm">{% if notif.rendezVous is defined %}{{ notif.rendezVous.prenom }} {{ notif.rendezVous.nom }} — Nouvelle date : {{ notif.rendezVous.dateRdv is defined ? notif.rendezVous.dateRdv|date('d/m/Y') : '—' }}{% if notif.rendezVous.disponibilite %} à {{ notif.rendezVous.disponibilite.heureDebut|date('H:i') }}{% endif %}{% else %}—{% endif %}</p>
                     {% else %}
                         <p class="text-[#6B7280] text-sm">Notification {{ notif.type is defined ? ('(' ~ notif.type ~ ')') : '' }}</p>
                     {% endif %}

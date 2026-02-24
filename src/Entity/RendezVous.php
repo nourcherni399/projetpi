@@ -60,6 +60,12 @@ class RendezVous
     #[Assert\Regex(pattern: '/^[\d\s\-\+\.\(\)]{0,30}$/', message: 'Le téléphone contient des caractères non autorisés.')]
     private ?string $telephone = null;
 
+    /** Email du patient pour envoi des confirmations (patient connecté ou saisi par un invité). */
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Email(message: "L'adresse email n'est pas valide.")]
+    #[Assert\Length(max: 255)]
+    private ?string $email = null;
+
     #[ORM\Column(type: Types::TEXT, nullable: true, options: ['default' => 'vide'])]
     #[Assert\Length(max: 5000, maxMessage: 'La note ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $notePatient = 'vide';
@@ -71,6 +77,14 @@ class RendezVous
     #[ORM\Column(type: 'string', enumType: Motif::class, columnDefinition: "ENUM('urgence', 'suivie', 'normal')")]
     #[Assert\NotNull(message: 'Le motif est obligatoire.')]
     private ?Motif $motif = null;
+
+    /** Date d'envoi du rappel SMS (évite les envois en double). */
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $rappelSmsEnvoyeAt = null;
+
+    /** Token pour annulation/report par le patient (lien email/SMS, sans connexion). */
+    #[ORM\Column(length: 64, unique: true, nullable: true)]
+    private ?string $tokenAnnulation = null;
 
     public function getId(): ?int
     {
@@ -176,6 +190,17 @@ class RendezVous
         return $this;
     }
 
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(?string $email): static
+    {
+        $this->email = $email;
+        return $this;
+    }
+
     public function getNotePatient(): ?string
     {
         return $this->notePatient;
@@ -206,6 +231,28 @@ class RendezVous
     public function setMotif(?Motif $motif): static
     {
         $this->motif = $motif;
+        return $this;
+    }
+
+    public function getRappelSmsEnvoyeAt(): ?\DateTimeImmutable
+    {
+        return $this->rappelSmsEnvoyeAt;
+    }
+
+    public function setRappelSmsEnvoyeAt(?\DateTimeImmutable $rappelSmsEnvoyeAt): static
+    {
+        $this->rappelSmsEnvoyeAt = $rappelSmsEnvoyeAt;
+        return $this;
+    }
+
+    public function getTokenAnnulation(): ?string
+    {
+        return $this->tokenAnnulation;
+    }
+
+    public function setTokenAnnulation(?string $tokenAnnulation): static
+    {
+        $this->tokenAnnulation = $tokenAnnulation;
         return $this;
     }
 }

@@ -13,7 +13,9 @@ use App\Enum\UserRole;
 use App\Form\ProfileType;
 use App\Form\UserCreateType;
 use App\Form\UserEditType;
+use App\Repository\CommandeRepository;
 use App\Repository\EvenementRepository;
+use App\Repository\ProduitRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -30,6 +32,8 @@ final class AdminController extends AbstractController
     public function __construct(
         private readonly UserRepository $userRepository,
         private readonly EvenementRepository $evenementRepository,
+        private readonly CommandeRepository $commandeRepository,
+        private readonly ProduitRepository $produitRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly SluggerInterface $slugger,
@@ -39,9 +43,11 @@ final class AdminController extends AbstractController
     #[Route('/admin', name: 'admin_dashboard', methods: ['GET'])]
     public function dashboard(): Response
     {
-        $totalEvenements = $this->evenementRepository->countAll();
         return $this->render('admin/dashboard/index.html.twig', [
-            'totalEvenements' => $totalEvenements,
+            'totalEvenements' => $this->evenementRepository->countAll(),
+            'totalUsers' => $this->userRepository->count([]),
+            'totalCommandes' => $this->commandeRepository->count([]),
+            'totalProduits' => $this->produitRepository->count([]),
         ]);
     }
 

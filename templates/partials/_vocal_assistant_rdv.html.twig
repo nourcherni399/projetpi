@@ -1,0 +1,220 @@
+{# Assistant vocal (gratuit) — Web Speech API : l'utilisateur parle, l'IA comprend la date, confirmation vocale du RDV #}
+{% set _doctor_id = doctor_id|default('') %}
+{% set _doctor_name = doctor_name|default('') %}
+{% set _api_url = api_vocal_rdv|default('') %}
+<div id="vocal-rdv-wrap" class="mt-6 p-4 rounded-2xl border-2 border-[#A7C7E7] bg-[#E8F4FC]/50" data-doctor-id="{{ _doctor_id }}" data-doctor-name="{{ _doctor_name|e('html_attr') }}" data-api-url="{{ _api_url }}">
+    <h3 class="font-bold text-[#1e3a5f] dark:text-[#93C5FD] text-sm mb-2 flex items-center gap-2">
+        <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v3m0 0V10m0 7V7a7 7 0 0114 0v3h-3zM12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" /></svg>
+        Assistant vocal (gratuit)
+    </h3>
+    <div class="flex flex-wrap items-center gap-2 mb-3">
+        <span class="text-[#6B7280] dark:text-gray-400 text-xs">Langue de parole :</span>
+        <select id="vocal-rdv-lang" class="text-xs px-2 py-1.5 rounded-lg border border-[#E5E0D8] dark:border-gray-500 bg-white dark:bg-gray-700 text-[#4B5563] dark:text-gray-200 focus:ring-2 focus:ring-[#A7C7E7]">
+            <option value="fr-FR">Français</option>
+            <option value="en-US">English</option>
+            <option value="ar-TN">العربية</option>
+            <option value="ar-SA">العربية (السعودية)</option>
+            <option value="es-ES">Español</option>
+            <option value="de-DE">Deutsch</option>
+            <option value="it-IT">Italiano</option>
+        </select>
+        <span class="text-[#6B7280] dark:text-gray-500 text-xs italic">Sélectionnez avant de parler.</span>
+    </div>
+    <div id="vocal-rdv-unsupported" class="hidden text-amber-700 dark:text-amber-400 text-xs mb-2">Votre navigateur ne supporte pas la reconnaissance vocale. Utilisez Chrome ou Edge.</div>
+    <button type="button" id="vocal-rdv-btn" aria-label="Parler pour prendre rendez-vous"
+        class="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-[#A7C7E7] hover:bg-[#95b8dc] text-white font-medium text-sm focus:outline-none focus:ring-2 focus:ring-[#A7C7E7] focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+        <svg id="vocal-rdv-icon-mic" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" /></svg>
+        <span id="vocal-rdv-btn-text">Parler pour prendre RDV</span>
+    </button>
+    <p id="vocal-rdv-status" class="mt-2 text-xs text-[#6B7280] dark:text-gray-400 min-h-[1.25rem]" aria-live="polite"></p>
+    <div id="vocal-rdv-success-msg" class="mt-2 px-3 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-700 text-emerald-800 dark:text-emerald-200 text-xs font-medium flex items-center gap-2" role="status" style="display: none;">
+        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        <span id="vocal-rdv-success-text">Rendez-vous enregistré. Redirection…</span>
+    </div>
+</div>
+<script>
+(function() {
+    var wrap = document.getElementById('vocal-rdv-wrap');
+    if (!wrap) return;
+    var btn = document.getElementById('vocal-rdv-btn');
+    var btnText = document.getElementById('vocal-rdv-btn-text');
+    var statusEl = document.getElementById('vocal-rdv-status');
+    var successBox = document.getElementById('vocal-rdv-success-msg');
+    var successText = document.getElementById('vocal-rdv-success-text');
+    var unsupportedEl = document.getElementById('vocal-rdv-unsupported');
+    var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    var SpeechSynthesis = window.speechSynthesis;
+    var SpeechSynthesisUtterance = window.SpeechSynthesisUtterance;
+
+    var doctorId = (wrap.getAttribute('data-doctor-id') || '').trim();
+    var doctorName = (wrap.getAttribute('data-doctor-name') || '').trim();
+    var apiUrl = (wrap.getAttribute('data-api-url') || '').trim();
+    if (!apiUrl) return;
+
+    if (!SpeechRecognition || !SpeechSynthesis) {
+        if (unsupportedEl) unsupportedEl.classList.remove('hidden');
+        if (btn) btn.disabled = true;
+        return;
+    }
+
+    var recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 4;
+
+    var langSelect = document.getElementById('vocal-rdv-lang');
+    function getRecognitionLang() {
+        return (langSelect && langSelect.value) ? langSelect.value : 'fr-FR';
+    }
+    recognition.lang = getRecognitionLang();
+    if (langSelect) {
+        langSelect.addEventListener('change', function() { recognition.lang = getRecognitionLang(); });
+    }
+
+    var msgByLang = {
+        'fr-FR': { noSpeech: 'Aucune parole détectée. Réessayez.', notHeard: 'Je n\'ai pas entendu. Pouvez-vous répéter la date et l\'heure souhaitées ?', error: 'Désolé, une erreur s\'est produite. Veuillez réessayer ou choisir un créneau ci-dessous.', errorConnection: 'Erreur de connexion. Réessayez.', listening: 'Écoute en cours… Dites la date et l\'heure, puis cliquez sur Arrêter.', understood: 'Compris : « ', checking: ' ». Vérification…', success: 'Rendez-vous enregistré. Redirection…', noSpeechShort: 'Aucune parole détectée. Cliquez pour réessayer.', errorMic: 'Erreur micro. Réessayez.' },
+        'en-US': { noSpeech: 'No speech detected. Try again.', notHeard: 'I didn\'t hear you. Could you repeat the date and time you would like?', error: 'Sorry, an error occurred. Please try again or select a time slot below.', errorConnection: 'Connection error. Try again.', listening: 'Listening… Say the date and time, then click Stop.', understood: 'Understood: « ', checking: ' ». Checking…', success: 'Appointment booked. Redirecting…', noSpeechShort: 'No speech detected. Click to try again.', errorMic: 'Microphone error. Try again.' },
+        'ar-TN': { noSpeech: 'لم يتم اكتشاف كلام. حاول مرة أخرى.', notHeard: 'لم أسمع. هل يمكنك تكرار التاريخ والوقت المطلوبين؟', error: 'عذراً، حدث خطأ. يرجى المحاولة مرة أخرى أو اختيار وقت أدناه.', errorConnection: 'خطأ في الاتصال. حاول مرة أخرى.', listening: 'جاري الاستماع… قل التاريخ والوقت ثم انقر إيقاف.', understood: 'تم الفهم: « ', checking: ' ». جاري التحقق…', success: 'تم حجز الموعد. جاري إعادة التوجيه…', noSpeechShort: 'لم يتم اكتشاف كلام. انقر للمحاولة مرة أخرى.', errorMic: 'خطأ في الميكروفون. حاول مرة أخرى.' },
+        'ar-SA': { noSpeech: 'لم يتم اكتشاف كلام. حاول مرة أخرى.', notHeard: 'لم أسمع. هل يمكنك تكرار التاريخ والوقت المطلوبين؟', error: 'عذراً، حدث خطأ. يرجى المحاولة مرة أخرى أو اختيار وقت أدناه.', errorConnection: 'خطأ في الاتصال. حاول مرة أخرى.', listening: 'جاري الاستماع… قل التاريخ والوقت ثم انقر إيقاف.', understood: 'تم الفهم: « ', checking: ' ». جاري التحقق…', success: 'تم حجز الموعد. جاري إعادة التوجيه…', noSpeechShort: 'لم يتم اكتشاف كلام. انقر للمحاولة مرة أخرى.', errorMic: 'خطأ في الميكروفون. حاول مرة أخرى.' },
+        'es-ES': { noSpeech: 'No se detectó voz. Inténtelo de nuevo.', notHeard: 'No le he oído. ¿Puede repetir la fecha y la hora deseadas?', error: 'Lo sentimos, ha ocurrido un error. Inténtelo de nuevo o elija un horario abajo.', errorConnection: 'Error de conexión. Inténtelo de nuevo.', listening: 'Escuchando… Diga la fecha y la hora, luego haga clic en Detener.', understood: 'Entendido: « ', checking: ' ». Comprobando…', success: 'Cita registrada. Redirigiendo…', noSpeechShort: 'No se detectó voz. Haga clic para intentar de nuevo.', errorMic: 'Error de micrófono. Inténtelo de nuevo.' },
+        'de-DE': { noSpeech: 'Keine Sprache erkannt. Bitte erneut versuchen.', notHeard: 'Ich habe Sie nicht verstanden. Könnten Sie bitte Datum und Uhrzeit wiederholen?', error: 'Entschuldigung, ein Fehler ist aufgetreten. Bitte erneut versuchen oder einen Termin wählen.', errorConnection: 'Verbindungsfehler. Bitte erneut versuchen.', listening: 'Höre zu… Sagen Sie Datum und Uhrzeit, dann Stopp klicken.', understood: 'Verstanden: « ', checking: ' ». Wird geprüft…', success: 'Termin gebucht. Weiterleitung…', noSpeechShort: 'Keine Sprache erkannt. Klicken zum erneuten Versuch.', errorMic: 'Mikrofonfehler. Bitte erneut versuchen.' },
+        'it-IT': { noSpeech: 'Nessuna voce rilevata. Riprovare.', notHeard: 'Non l\'ho sentita. Può ripetere la data e l\'ora desiderate?', error: 'Si è verificato un errore. Riprovi o scelga un orario qui sotto.', errorConnection: 'Errore di connessione. Riprovare.', listening: 'In ascolto… Dica data e ora, poi clicchi su Stop.', understood: 'Capito: « ', checking: ' ». Verifica in corso…', success: 'Appuntamento registrato. Reindirizzamento…', noSpeechShort: 'Nessuna voce rilevata. Cliccare per riprovare.', errorMic: 'Errore microfono. Riprovare.' }
+    };
+    function getMsg(key) {
+        var lang = getRecognitionLang();
+        var m = msgByLang[lang] || msgByLang['fr-FR'];
+        return m[key] || msgByLang['fr-FR'][key] || '';
+    }
+
+    function setStatus(text) {
+        if (statusEl) statusEl.textContent = text || '';
+    }
+
+    function speak(text, langCode) {
+        if (!SpeechSynthesis || !text) return;
+        var u = new SpeechSynthesisUtterance(text);
+        u.lang = (langCode && langCode.length >= 2) ? langCode : 'fr-FR';
+        u.rate = 0.95;
+        SpeechSynthesis.cancel();
+        SpeechSynthesis.speak(u);
+    }
+
+    var isListening = false;
+    var lastFinalTranscript = '';
+    var userRequestedStop = false;
+
+    function sendTranscriptToApi(transcript) {
+        transcript = (transcript || '').trim();
+        if (!transcript) {
+            setStatus(getMsg('noSpeech'));
+            speak(getMsg('notHeard'), getRecognitionLang());
+            return;
+        }
+        if (successBox) successBox.style.display = 'none';
+        setStatus(getMsg('understood') + transcript + getMsg('checking'));
+        if (btn) btn.disabled = true;
+
+        fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            body: JSON.stringify({
+                transcript: transcript,
+                doctor_id: doctorId ? parseInt(doctorId, 10) : null,
+                doctor_name: doctorName || undefined,
+                lang: getRecognitionLang()
+            })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            var confirmation = data.confirmation_text || 'Votre demande a bien été prise en compte. Choisissez un créneau ci-dessous pour confirmer.';
+            var langCode = data.lang || getRecognitionLang();
+            speak(confirmation, langCode);
+            if (data.rdv_created && data.redirect_url) {
+                setStatus('');
+                var successMsg = getMsg('success');
+                if (successBox) {
+                    if (successText) successText.textContent = successMsg;
+                    successBox.style.display = 'flex';
+                } else {
+                    setStatus(successMsg);
+                }
+                setTimeout(function() { window.location.href = data.redirect_url; }, 2500);
+            } else {
+                if (successBox) successBox.style.display = 'none';
+                setStatus(confirmation);
+            }
+        })
+        .catch(function() {
+            setStatus(getMsg('errorConnection'));
+            speak(getMsg('error'), getRecognitionLang());
+        })
+        .finally(function() {
+            if (btn) btn.disabled = false;
+        });
+    }
+
+    if (btn) {
+        btn.addEventListener('click', function() {
+            if (isListening) {
+                userRequestedStop = true;
+                recognition.stop();
+                return;
+            }
+            lastFinalTranscript = '';
+            userRequestedStop = false;
+            recognition.lang = getRecognitionLang();
+            if (successBox) successBox.style.display = 'none';
+            setStatus(getMsg('listening'));
+            if (btnText) btnText.textContent = 'Arrêter';
+            isListening = true;
+            recognition.start();
+        });
+    }
+
+    recognition.onresult = function(e) {
+        var results = e.results;
+        if (!results || results.length === 0) return;
+        var lastIdx = results.length - 1;
+        var result = results[lastIdx];
+        if (!result) return;
+        if (result.isFinal === false) return;
+        var transcript = '';
+        var i, item, alt;
+        var n = typeof result.length === 'number' ? result.length : 0;
+        for (i = 0; i < n; i++) {
+            item = result.item ? result.item(i) : result[i];
+            alt = (item && typeof item.transcript === 'string' ? item.transcript : '').trim();
+            if (alt.length > transcript.length) transcript = alt;
+        }
+        if (!transcript && n > 0) {
+            item = result.item ? result.item(0) : result[0];
+            transcript = (item && typeof item.transcript === 'string' ? item.transcript : '').trim();
+        }
+        lastFinalTranscript = (transcript || '').trim();
+    };
+
+    recognition.onerror = function(e) {
+        isListening = false;
+        userRequestedStop = false;
+        if (btnText) btnText.textContent = 'Parler pour prendre RDV';
+        if (btn) btn.disabled = false;
+        if (e.error === 'no-speech') {
+            setStatus(getMsg('noSpeechShort'));
+        } else {
+            setStatus(getMsg('errorMic'));
+        }
+    };
+
+    recognition.onend = function() {
+        if (isListening) {
+            isListening = false;
+            if (btnText) btnText.textContent = 'Parler pour prendre RDV';
+            if (userRequestedStop && lastFinalTranscript) {
+                userRequestedStop = false;
+                sendTranscriptToApi(lastFinalTranscript);
+            }
+        }
+        userRequestedStop = false;
+    };
+})();
+</script>

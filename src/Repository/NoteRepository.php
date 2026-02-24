@@ -71,4 +71,27 @@ class NoteRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * Recherche dans les notes (contenu, nom/prénom patient) pour un médecin.
+     *
+     * @return list<Note>
+     */
+    public function searchByMedecin(Medcin $medecin, string $query, int $limit = 20): array
+    {
+        $term = '%' . addcslashes(trim($query), '%_') . '%';
+        if ($term === '%%') {
+            return [];
+        }
+        return $this->createQueryBuilder('n')
+            ->leftJoin('n.patient', 'p')
+            ->andWhere('n.medecin = :medecin')
+            ->andWhere('n.contenu LIKE :term OR p.nom LIKE :term OR p.prenom LIKE :term')
+            ->setParameter('medecin', $medecin)
+            ->setParameter('term', $term)
+            ->orderBy('n.dateCreation', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 }

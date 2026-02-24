@@ -148,10 +148,17 @@ final class ProfileType extends AbstractType
                     'attr' => self::ATTR + ['placeholder' => '01 23 45 67 89'],
                 ])
                 ->add('tarifConsultation', NumberType::class, [
-                    'label' => 'Tarif consultation (€)',
+                    'label' => 'Tarif consultation (DT)',
                     'required' => false,
-                    'constraints' => [new \Symfony\Component\Validator\Constraints\Range(['min' => 0, 'max' => 99999.99, 'notInRangeMessage' => 'Le tarif doit être entre {{ min }} et {{ max }} €.'])],
+                    'constraints' => [new \Symfony\Component\Validator\Constraints\Range(['min' => 0, 'max' => 99999.99, 'notInRangeMessage' => 'Le tarif doit être entre {{ min }} et {{ max }} DT.'])],
                     'attr' => self::ATTR + ['placeholder' => '80', 'step' => '0.01', 'min' => '0'],
+                ])
+                ->add('googleCalendarId', TextType::class, [
+                    'label' => 'ID du calendrier Google',
+                    'required' => false,
+                    'help' => 'Pour enregistrer les RDV confirmés dans votre calendrier. Ex: xxx@group.calendar.google.com — partagez votre calendrier avec l\'email du compte de service.',
+                    'constraints' => [new Length(['max' => 255])],
+                    'attr' => self::ATTR + ['placeholder' => 'xxx@group.calendar.google.com'],
                 ]);
         }
 

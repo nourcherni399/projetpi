@@ -1,0 +1,37 @@
+{# Messages flash — style professionnel (bannière verte/rouge, coins arrondis, icône) #}
+{% if app.flashes('success')|length > 0 or app.flashes('error')|length > 0 or app.flashes('warning')|length > 0 or app.flashes('info')|length > 0 %}
+<div class="flash-messages mb-4 space-y-3" aria-live="polite">
+    {% for message in app.flashes('success') %}
+    <div class="rounded-xl border border-[#86efac]/60 bg-[#dcfce7] dark:bg-emerald-950/40 dark:border-emerald-700/50 px-4 py-3.5 flex items-start gap-3 text-[#166534] dark:text-emerald-200 text-sm font-medium" role="alert">
+        <span class="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#22c55e] dark:bg-emerald-600 text-white" aria-hidden="true">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+        </span>
+        <span>{{ message }}</span>
+    </div>
+    {% endfor %}
+    {% for message in app.flashes('error') %}
+    <div class="rounded-xl border border-red-200/80 bg-[#fef2f2] dark:bg-red-950/40 dark:border-red-800/50 px-4 py-3.5 flex items-start gap-3 text-[#b91c1c] dark:text-red-200 text-sm font-medium" role="alert">
+        <span class="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-red-500 dark:bg-red-600 text-white" aria-hidden="true">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        </span>
+        <span>{{ message }}</span>
+    </div>
+    {% endfor %}
+    {% for message in app.flashes('warning') %}
+    <div class="rounded-xl border border-amber-200/80 bg-[#fffbeb] dark:bg-amber-950/40 dark:border-amber-700/50 px-4 py-3.5 flex items-start gap-3 text-[#b45309] dark:text-amber-200 text-sm font-medium" role="alert">
+        <span class="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-amber-500 dark:bg-amber-600 text-white" aria-hidden="true">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+        </span>
+        <span>{{ message }}</span>
+    </div>
+    {% endfor %}
+    {% for message in app.flashes('info') %}
+    <div class="rounded-xl border border-sky-200/80 bg-[#f0f9ff] dark:bg-sky-950/40 dark:border-sky-700/50 px-4 py-3.5 flex items-start gap-3 text-[#0369a1] dark:text-sky-200 text-sm font-medium" role="alert">
+        <span class="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-sky-500 dark:bg-sky-600 text-white" aria-hidden="true">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>
+        </span>
+        <span>{{ message }}</span>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}

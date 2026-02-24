@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gérer mon rendez-vous - AutiCare{% endblock %}
+
+{% block body %}
+<div class="min-h-screen flex items-center justify-center p-4 bg-pastel-bg">
+    <div class="w-full max-w-lg rounded-2xl bg-white shadow-lg border border-pastel-border p-8">
+        <div class="flex items-center gap-3 mb-6">
+            <a href="{{ path('home') }}" class="text-pastel-text hover:text-pastel-lavender focus:outline focus:ring-2 focus:ring-pastel-lavender rounded p-1" title="Accueil">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            </a>
+            <h1 class="text-xl font-bold text-pastel-text-strong">Gérer mon rendez-vous</h1>
+        </div>
+
+        <div class="bg-pastel-cream/60 rounded-xl p-5 mb-6 border border-pastel-border">
+            <p class="text-sm text-pastel-text mb-1">Médecin</p>
+            <p class="font-semibold text-pastel-text-strong">{{ rdv.medecin ? (rdv.medecin.prenom ~ ' ' ~ rdv.medecin.nom) : '—' }}</p>
+            {% if rdv.medecin and rdv.medecin.specialite %}
+                <p class="text-sm text-pastel-text mt-1">{{ rdv.medecin.specialite }}</p>
+            {% endif %}
+            <p class="text-sm text-pastel-text mt-3 mb-1">Date et heure</p>
+            <p class="font-semibold text-pastel-text-strong">
+                {% if rdv.dateRdv %}
+                    {{ rdv.dateRdv|date('l d/m/Y')|replace({'Monday':'Lundi','Tuesday':'Mardi','Wednesday':'Mercredi','Thursday':'Jeudi','Friday':'Vendredi','Saturday':'Samedi','Sunday':'Dimanche'}) }}
+                    {% if rdv.disponibilite %}
+                        — {{ rdv.disponibilite.heureDebut ? rdv.disponibilite.heureDebut|date('H:i') : '—' }} - {{ rdv.disponibilite.heureFin ? rdv.disponibilite.heureFin|date('H:i') : '—' }}
+                    {% endif %}
+                {% else %}
+                    —
+                {% endif %}
+            </p>
+        </div>
+
+        <p class="text-sm text-pastel-text mb-4">Vous pouvez annuler ce rendez-vous ou en choisir un autre créneau avec le même médecin.</p>
+
+        <div class="flex flex-col sm:flex-row gap-3">
+            <a href="{{ path('rdv_patient_annuler', { token: token }) }}" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border-2 border-red-200 text-red-700 font-medium hover:bg-red-50 focus:outline focus:ring-2 focus:ring-red-300 transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                Annuler le rendez-vous
+            </a>
+            <a href="{{ path('rdv_patient_reporter', { token: token }) }}" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-pastel-lavender text-white font-medium hover:opacity-90 focus:outline focus:ring-2 focus:ring-pastel-lavender transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                Reporter le rendez-vous
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

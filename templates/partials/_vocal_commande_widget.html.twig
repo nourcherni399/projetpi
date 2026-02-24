@@ -1,0 +1,130 @@
+{# Assistant vocal pour confirmer la commande automatiquement #}
+{% set _api_url = api_vocal_commande_url|default('') %}
+{% set _csrf = csrf_token('order_confirm') %}
+<div id="vocal-commande-wrap" class="p-4 rounded-2xl border-2 border-[#A7C7E7] bg-[#E8F4FC]/50" data-api-url="{{ _api_url }}" data-csrf="{{ _csrf }}">
+    <h3 class="font-bold text-[#1e3a5f] dark:text-[#93C5FD] text-sm mb-2 flex items-center gap-2">
+        <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v3m0 0V10m0 7V7a7 7 0 0114 0v3h-3zM12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" /></svg>
+        Confirmer ma commande à la voix
+    </h3>
+    <p class="text-[#6B7280] dark:text-gray-300 text-xs mb-3">Dites « Je confirme ma commande » (ou équivalent dans votre langue) pour valider.</p>
+    <div class="flex flex-wrap items-center gap-2 mb-3">
+        <span class="text-[#6B7280] dark:text-gray-400 text-xs">Langue :</span>
+        <select id="vocal-commande-lang" class="text-xs px-2 py-1.5 rounded-lg border border-[#E5E0D8] dark:border-gray-500 bg-white dark:bg-gray-700 text-[#4B5563] dark:text-gray-200 focus:ring-2 focus:ring-[#A7C7E7]">
+            <option value="fr-FR">Français</option>
+            <option value="en-US">English</option>
+            <option value="ar-TN">العربية</option>
+            <option value="es-ES">Español</option>
+        </select>
+    </div>
+    <div id="vocal-commande-unsupported" class="hidden text-amber-700 dark:text-amber-400 text-xs mb-2">Reconnaissance vocale non supportée (Chrome ou Edge).</div>
+    <button type="button" id="vocal-commande-btn" aria-label="Confirmer la commande à la voix"
+        class="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-[#A7C7E7] hover:bg-[#95b8dc] text-white font-medium text-sm focus:outline-none focus:ring-2 focus:ring-[#A7C7E7] focus:ring-offset-2 transition-colors disabled:opacity-50">
+        <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" /></svg>
+        <span id="vocal-commande-btn-text">Parler pour confirmer</span>
+    </button>
+    <p id="vocal-commande-status" class="mt-2 text-xs text-[#6B7280] dark:text-gray-400 min-h-[1.25rem]" aria-live="polite"></p>
+</div>
+<script>
+(function() {
+    var wrap = document.getElementById('vocal-commande-wrap');
+    if (!wrap) return;
+    var apiUrl = (wrap.getAttribute('data-api-url') || '').trim();
+    var csrf = (wrap.getAttribute('data-csrf') || '').trim();
+    if (!apiUrl) return;
+
+    var btn = document.getElementById('vocal-commande-btn');
+    var btnText = document.getElementById('vocal-commande-btn-text');
+    var statusEl = document.getElementById('vocal-commande-status');
+    var unsupportedEl = document.getElementById('vocal-commande-unsupported');
+    var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    var SpeechSynthesis = window.speechSynthesis;
+
+    if (!SpeechRecognition || !SpeechSynthesis) {
+        if (unsupportedEl) unsupportedEl.classList.remove('hidden');
+        if (btn) btn.disabled = true;
+        return;
+    }
+
+    var langSelect = document.getElementById('vocal-commande-lang');
+    function getLang() { return (langSelect && langSelect.value) ? langSelect.value : 'fr-FR'; }
+
+    var msgByLang = {
+        'fr-FR': { listening: 'Écoute… Dites « Je confirme ma commande ».', understood: 'Compris : « ', checking: ' ». Vérification…', errorStatus: 'Erreur. Réessayez.', errorSpeak: 'Erreur de connexion. Réessayez ou cliquez sur Procéder au paiement.', noSpeech: 'Aucune parole. Cliquez pour réessayer.' },
+        'en-US': { listening: 'Listening… Say "I confirm my order".', understood: 'Understood: « ', checking: ' ». Checking…', errorStatus: 'Error. Try again.', errorSpeak: 'Connection error. Try again or click Proceed to payment.', noSpeech: 'No speech. Click to try again.' },
+        'ar-TN': { listening: 'جاري الاستماع… قل « أؤكد طلبي ».', understood: 'تم الفهم: « ', checking: ' ». جاري التحقق…', errorStatus: 'خطأ. حاول مرة أخرى.', errorSpeak: 'خطأ في الاتصال. حاول مرة أخرى أو انقر على متابعة الدفع.', noSpeech: 'لم يتم اكتشاف كلام. انقر للمحاولة مرة أخرى.' },
+        'es-ES': { listening: 'Escuchando… Diga « Confirmo mi pedido ».', understood: 'Entendido: « ', checking: ' ». Comprobando…', errorStatus: 'Error. Inténtelo de nuevo.', errorSpeak: 'Error de conexión. Inténtelo de nuevo o haga clic en Proceder al pago.', noSpeech: 'Ninguna voz. Haga clic para intentar de nuevo.' }
+    };
+    function getMsg(key) {
+        var m = msgByLang[getLang()] || msgByLang['fr-FR'];
+        return m[key] || msgByLang['fr-FR'][key] || '';
+    }
+
+    var recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = getLang();
+    if (langSelect) langSelect.addEventListener('change', function() { recognition.lang = getLang(); });
+
+    function setStatus(t) { if (statusEl) statusEl.textContent = t || ''; }
+    function speak(text, lang) {
+        if (!SpeechSynthesis || !text) return;
+        var u = new SpeechSynthesisUtterance(text);
+        u.lang = (lang && lang.length >= 2) ? lang : getLang();
+        u.rate = 0.95;
+        SpeechSynthesis.cancel();
+        SpeechSynthesis.speak(u);
+    }
+
+    var isListening = false;
+    if (btn) {
+        btn.addEventListener('click', function() {
+            if (isListening) { recognition.stop(); return; }
+            recognition.lang = getLang();
+            setStatus(getMsg('listening'));
+            if (btnText) btnText.textContent = 'Arrêter';
+            isListening = true;
+            btn.disabled = true;
+            recognition.start();
+        });
+    }
+
+    recognition.onresult = function(e) {
+        var transcript = (e.results[0][0].transcript || '').trim();
+        isListening = false;
+        if (btnText) btnText.textContent = 'Parler pour confirmer';
+        if (btn) btn.disabled = true;
+        setStatus(getMsg('understood') + transcript + getMsg('checking'));
+
+        fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            body: JSON.stringify({ transcript: transcript, lang: getLang(), _token: csrf })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            setStatus('');
+            speak(data.message || (data.success ? 'Commande enregistrée.' : 'Réessayez.'), data.lang || getLang());
+            if (data.success && data.redirect_url) {
+                setTimeout(function() { window.location.href = data.redirect_url; }, 2500);
+            }
+        })
+        .catch(function() {
+            setStatus(getMsg('errorStatus'));
+            speak(getMsg('errorSpeak'), getLang());
+        })
+        .finally(function() { if (btn) btn.disabled = false; });
+    };
+
+    recognition.onerror = function(e) {
+        if (e && e.error === 'no-speech') setStatus(getMsg('noSpeech'));
+        isListening = false;
+        if (btnText) btnText.textContent = 'Parler pour confirmer';
+        if (btn) btn.disabled = false;
+    };
+    recognition.onend = function() {
+        isListening = false;
+        if (btnText) btnText.textContent = 'Parler pour confirmer';
+        if (btn) btn.disabled = false;
+    };
+})();
+</script>

@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Reporter le rendez-vous - AutiCare{% endblock %}
+
+{% block body %}
+<div class="min-h-screen flex items-center justify-center p-4 bg-pastel-bg">
+    <div class="w-full max-w-2xl rounded-2xl bg-white shadow-lg border border-pastel-border p-8">
+        <div class="flex items-center gap-3 mb-6">
+            <a href="{{ path('rdv_patient_page', { token: token }) }}" class="text-pastel-text hover:text-pastel-lavender focus:outline focus:ring-2 focus:ring-pastel-lavender rounded p-1" title="Retour">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            </a>
+            <h1 class="text-xl font-bold text-pastel-text-strong">Choisir un nouveau créneau</h1>
+        </div>
+
+        <p class="text-pastel-text mb-4">Médecin : <strong>{{ rdv.medecin ? (rdv.medecin.prenom ~ ' ' ~ rdv.medecin.nom) : '—' }}</strong>. Sélectionnez un créneau disponible ci-dessous.</p>
+
+        {% for flash in app.flashes('error') %}
+            <div class="mb-4 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-sm flex items-center gap-2" role="alert">
+                <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                {{ flash }}
+            </div>
+        {% endfor %}
+
+        {% set slots_available = slots|filter(s => s.available) %}
+        {% if slots_available is empty %}
+            <p class="text-pastel-text mb-4">Aucun créneau disponible pour les 4 prochaines semaines. Veuillez réessayer plus tard ou contacter le cabinet.</p>
+            <a href="{{ path('rdv_patient_page', { token: token }) }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border-2 border-pastel-border text-pastel-text font-medium hover:bg-pastel-cream">
+                Retour
+            </a>
+        {% else %}
+            <form id="rdv-reporter-form" method="post" action="{{ path('rdv_patient_reporter', { token: token }) }}" class="space-y-4">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('rdv_reporter') }}">
+                <input type="hidden" name="date_rdv" id="date_rdv_input" value="">
+                <div class="space-y-2 max-h-80 overflow-y-auto pr-2">
+                    {% for slot in slots %}
+                        {% if slot.available %}
+                            <label class="flex items-center gap-3 p-4 rounded-xl border-2 border-pastel-border hover:border-pastel-lavender hover:bg-pastel-lavender-soft/30 cursor-pointer transition-colors has-[:checked]:border-pastel-lavender has-[:checked]:bg-pastel-lavender-soft/30">
+                                <input type="radio" name="disponibilite_id" value="{{ slot.disponibilite_id }}" required
+                                       data-date-rdv="{{ slot.date_rdv }}"
+                                       class="rounded-full border-pastel-border text-pastel-lavender focus:ring-pastel-lavender">
+                                <span class="font-medium text-pastel-text-strong">{{ slot.label }}</span>
+                            </label>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="flex flex-wrap gap-3 pt-2">
+                    <button type="submit" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-pastel-lavender text-white font-medium hover:opacity-90 focus:outline focus:ring-2 focus:ring-pastel-lavender">
+                        Confirmer ce créneau
+                    </button>
+                    <a href="{{ path('rdv_patient_page', { token: token }) }}" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl border-2 border-pastel-border text-pastel-text font-medium hover:bg-pastel-cream">
+                        Retour
+                    </a>
+                </div>
+            </form>
+            <script>
+                document.getElementById('rdv-reporter-form').addEventListener('submit', function() {
+                    var radio = document.querySelector('input[name="disponibilite_id"]:checked');
+                    if (radio) {
+                        document.getElementById('date_rdv_input').value = radio.getAttribute('data-date-rdv');
+                    }
+                });
+                document.querySelectorAll('input[name="disponibilite_id"]').forEach(function(r) {
+                    r.addEventListener('change', function() {
+                        document.getElementById('date_rdv_input').value = this.getAttribute('data-date-rdv') || '';
+                    });
+                });
+            </script>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

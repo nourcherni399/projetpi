@@ -33,14 +33,58 @@ class NotificationRepository extends ServiceEntityRepository
     }
 
     /**
+     * Notifications de type commande (confirmée, livraison, reçu) pour un destinataire.
+     *
+     * @return list<Notification>
+     */
+    public function findCommandeForDestinataireOrderByCreatedDesc(User $user, int $limit = 15): array
+    {
+        return $this->createQueryBuilder('n')
+            ->andWhere('n.destinataire = :user')
+            ->andWhere('n.type IN (:types)')
+            ->setParameter('user', $user)
+            ->setParameter('types', [
+                Notification::TYPE_COMMANDE_CONFIRMEE,
+                Notification::TYPE_COMMANDE_LIVRAISON,
+                Notification::TYPE_COMMANDE_RECU,
+            ])
+            ->orderBy('n.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
      * @return list<Notification>
      */
     public function findByDestinataireOrderByCreatedDesc(User $user): array
     {
         return $this->createQueryBuilder('n')
+            ->leftJoin('n.rendezVous', 'r')
+            ->addSelect('r')
             ->andWhere('n.destinataire = :user')
             ->setParameter('user', $user)
             ->orderBy('n.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Notifications « annulation / report par le patient » pour le médecin.
+     *
+     * @return list<Notification>
+     */
+    public function findAnnuleReportePatientByDestinataireOrderByCreatedDesc(User $user, int $limit = 20): array
+    {
+        return $this->createQueryBuilder('n')
+            ->leftJoin('n.rendezVous', 'r')
+            ->addSelect('r')
+            ->andWhere('n.destinataire = :user')
+            ->andWhere('n.type IN (:types)')
+            ->setParameter('user', $user)
+            ->setParameter('types', [Notification::TYPE_RDV_ANNULE_PATIENT, Notification::TYPE_RDV_REPORTE_PATIENT])
+            ->orderBy('n.createdAt', 'DESC')
+            ->setMaxResults($limit)
             ->getQuery()
             ->getResult();
     }

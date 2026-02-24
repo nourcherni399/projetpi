@@ -12,6 +12,10 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+        # Page annuler/reporter par le patient (lien email) : accès sans connexion
+        rdv_patient:
+            pattern: ^/rdv
+            security: false
         main:
             lazy: true
             provider: app_user_provider
@@ -41,6 +45,10 @@ security:
     access_control:
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/medecin, roles: ROLE_MEDECIN }
+        - { path: ^/rdv/, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        # Liste des médecins/rendez-vous : accessible à tous ; soumission du RDV et notation : réservées aux connectés
+        - { path: ^/rendez-vous/prendre/[^/]+/confirmer, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/rendez-vous/medecin/[^/]+/noter, roles: IS_AUTHENTICATED_FULLY }
         # - { path: ^/profile, roles: ROLE_USER }
 
 when@test:

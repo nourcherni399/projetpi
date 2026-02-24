@@ -12,14 +12,6 @@
     </a>
 </div>
 
-{% for message in app.flashes('success') %}
-    <div class="mb-6 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">{{ message }}</div>
-{% endfor %}
-
-{% for message in app.flashes('error') %}
-    <div class="mb-6 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-800">{{ message }}</div>
-{% endfor %}
-
 <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8 mb-8">
     <header class="mb-8">
         <div class="flex items-center gap-4 mb-4">

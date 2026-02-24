@@ -11,13 +11,6 @@
         </a>
     </div>
 
-    {% for message in app.flashes('success') %}
-        <div class="mb-6 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">{{ message }}</div>
-    {% endfor %}
-    {% for message in app.flashes('error') %}
-        <div class="mb-6 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-800">{{ message }}</div>
-    {% endfor %}
-
     <div class="flex flex-col lg:flex-row gap-8 items-start">
     <!-- Colonne gauche : Contenu du module -->
     <div class="w-full lg:w-2/5 lg:min-w-0 lg:sticky lg:top-8 flex-shrink-0">

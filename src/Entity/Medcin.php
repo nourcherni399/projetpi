@@ -27,6 +27,10 @@ class Medcin extends User
     #[ORM\Column(type: 'float', precision: 10, scale: 2, nullable: true)]
     private ?float $tarifConsultation = null;
 
+    /** ID du calendrier Google du médecin (partagé avec le compte de service). Ex: xxx@group.calendar.google.com ou primary */
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $googleCalendarId = null;
+
     /** @var Collection<int, Disponibilite> */
     #[ORM\OneToMany(targetEntity: Disponibilite::class, mappedBy: 'medecin')]
     private Collection $disponibilites;
@@ -94,6 +98,17 @@ class Medcin extends User
     public function setTarifConsultation(?float $tarifConsultation): static
     {
         $this->tarifConsultation = $tarifConsultation;
+        return $this;
+    }
+
+    public function getGoogleCalendarId(): ?string
+    {
+        return $this->googleCalendarId;
+    }
+
+    public function setGoogleCalendarId(?string $googleCalendarId): static
+    {
+        $this->googleCalendarId = $googleCalendarId;
         return $this;
     }
 
