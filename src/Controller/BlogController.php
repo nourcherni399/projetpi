@@ -412,6 +412,13 @@ final class BlogController extends AbstractController
 
         $contenu = trim((string) $ressource->getContenu());
 
+        // YouTube et Vimeo : Cloudinary ne peut pas récupérer ces URLs (pas des fichiers directs).
+        // Tenter l'upload produit des ressources invalides (icônes génériques, pas de miniature).
+        if (preg_match('#(?:youtube\.com|youtu\.be|vimeo\.com)#i', $contenu)) {
+            $this->addFlash('warning', 'Les vidéos YouTube et Vimeo ne peuvent pas être transférées vers Cloudinary. Elles restent hébergées sur leur plateforme d\'origine et s\'affichent directement sur la page.');
+            return $this->redirectToRoute('user_blog_module', ['id' => $module->getId()]);
+        }
+
         try {
             if (str_starts_with($contenu, 'uploads/ressources/')) {
                 $projectDir = $this->getParameter('kernel.project_dir');

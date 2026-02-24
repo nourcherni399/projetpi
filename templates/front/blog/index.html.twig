@@ -12,11 +12,8 @@
     <p class="text-[#687280] max-w-2xl mx-auto leading-relaxed text-base">
         {{ 'Explorez nos modules d\'apprentissage par catégorie. Partagez vos expériences, découvrez des conseils pratiques et rejoignez notre communauté.'|blog_translate }}
     </p>
-    <div class="absolute left-6 md:left-8 bottom-0 top-0 w-36 md:w-44 lg:w-48 z-10 flex items-end">
-        <img src="{{ asset('images/famille-enfants.png') }}" alt="" class="w-full h-full object-contain object-left object-bottom" aria-hidden="true">
-    </div>
-    <div class="absolute right-0 bottom-0 w-48 h-48 md:w-64 md:h-64 lg:w-72 lg:h-72 flex items-end justify-end">
-        <img src="{{ asset('images/hero-enfants.png') }}" alt="" class="max-w-full max-h-full object-contain object-right-bottom" aria-hidden="true">
+    <div class="absolute right-0 bottom-0 w-48 h-48 md:w-64 md:h-64 lg:w-72 lg:h-72 flex flex-col justify-end items-end">
+        <img src="{{ asset('images/hero-enfants.png') }}" alt="" class="max-w-full max-h-full object-contain object-bottom object-right" aria-hidden="true">
     </div>
 </section>
 <div class="border-t border-[#E8DED5]"></div>
@@ -76,9 +73,9 @@
         </div>
     </div>
 
-    <aside class="lg:w-80 lg:max-w-xs shrink-0 space-y-6">
+    <aside class="lg:w-80 lg:max-w-xs shrink-0 space-y-2">
         <!-- Recherche de module -->
-        <div class="bg-[#D4E5D0] rounded-xl shadow-sm p-5 border-0">
+        <div class="rounded-xl p-4 pt-0">
             <form method="get" action="{{ path('user_blog') }}">
                 <div class="relative">
                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#687280]">
@@ -99,7 +96,7 @@
         <div class="h-px bg-[#E8DED5]"></div>
         <!-- Écrire un article -->
         <div id="ecrire-article" class="relative bg-[#FAEDE8] rounded-xl shadow-sm p-5 border border-[#E8DED5] overflow-hidden">
-            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full border-2 border-[#A7C7E7] bg-[#A7C7E7]/10 text-[#A7C7E7] mb-3">
+            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full border-2 border-[#A8BBA3] bg-[#A8BBA3]/10 text-[#A8BBA3] mb-3">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                 </svg>
@@ -107,10 +104,10 @@
             <h2 class="font-semibold text-[#1e3a5f] mb-2">{{ 'Partagez votre histoire'|blog_translate }}</h2>
             <p class="text-[#687280] text-sm mb-4">{{ 'Votre expérience peut aider d\'autres familles. Écrivez votre témoignage dans nos modules.'|blog_translate }}</p>
             {% if app.user %}
-                <a href="#" onclick="toggleForm()" class="inline-block px-4 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#95b8dc] focus:outline focus-visible:ring-2 focus-visible:ring-[#A7C7E7] focus-visible:ring-offset-2 transition-colors duration-300">{{ 'Écrire un article'|blog_translate }}</a>
+                <a href="#" onclick="toggleForm()" class="inline-block px-4 py-2.5 rounded-lg bg-[#A8BBA3] text-white font-medium hover:bg-[#95B89E] focus:outline focus-visible:ring-2 focus-visible:ring-[#A8BBA3] focus-visible:ring-offset-2 transition-colors duration-300">{{ 'Écrire un article'|blog_translate }}</a>
             {% else %}
-                <div class="bg-[#E8F4FC] border border-[#E8DED5] rounded-lg p-4">
-                    <p class="text-[#1e3a5f] mb-2">{{ 'Pour écrire un article, veuillez vous'|blog_translate }} <a href="{{ path('app_login') }}" class="text-[#A7C7E7] hover:text-[#95b8dc] underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A7C7E7] focus-visible:ring-offset-1 rounded transition-colors duration-300">{{ 'connecter'|blog_translate }}</a>.</p>
+                <div class="bg-[#E8F5E9] border border-[#E8DED5] rounded-lg p-4">
+                    <p class="text-[#1e3a5f] mb-2">{{ 'Pour écrire un article, veuillez vous'|blog_translate }} <a href="{{ path('app_login') }}" class="text-[#A8BBA3] hover:text-[#95B89E] underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A8BBA3] focus-visible:ring-offset-1 rounded transition-colors duration-300">{{ 'connecter'|blog_translate }}</a>.</p>
                 </div>
             {% endif %}
         </div>

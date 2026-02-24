@@ -100,15 +100,16 @@
                     {% for ressource in ressources %}
                         {% set contenuUrl = (ressource.contenu starts with 'http://') or (ressource.contenu starts with 'https://') ? ressource.contenu : asset(ressource.contenu) %}
                         {% set isRemoteResource = (ressource.contenu starts with 'http://') or (ressource.contenu starts with 'https://') %}
+                        {% set embedUrl = video_embed_url(contenuUrl) %}
                         <div class="rounded-lg border border-[#E8DED5] p-4 bg-[#FAEDE8]">
                             <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                                 <div class="flex items-center gap-2 min-w-0">
                                     <h3 class="font-medium text-[#4B5563] truncate">{{ ressource.titre|blog_translate }}</h3>
-                                    <a href="{{ path('ressource_download', { id: ressource.id }) }}"
-                                       {% if ressource.typeRessource == 'url' %}target="_blank" rel="noopener noreferrer"{% else %}download{% endif %}
+                                    <a href="{{ (ressource.typeRessource == 'url' or embedUrl) ? contenuUrl : path('ressource_download', { id: ressource.id }) }}"
+                                       {% if ressource.typeRessource == 'url' or embedUrl %}target="_blank" rel="noopener noreferrer"{% else %}download{% endif %}
                                        class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#E8F4FC] text-[#1e3a5f] hover:bg-[#D4E8F8] transition-colors shrink-0"
-                                       title="{{ 'Télécharger cette ressource'|blog_translate }}"
-                                       aria-label="{{ 'Télécharger'|blog_translate }} {{ ressource.titre|blog_translate }}">
+                                       title="{{ embedUrl ? ('Ouvrir la vidéo'|blog_translate) : ('Télécharger cette ressource'|blog_translate) }}"
+                                       aria-label="{{ embedUrl ? ('Ouvrir'|blog_translate) : ('Télécharger'|blog_translate) }} {{ ressource.titre|blog_translate }}">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0l4-4m-4 4l-4-4m-5 8h18" />
                                         </svg>
@@ -131,10 +132,16 @@
                                     </svg>
                                 </a>
                             {% elseif ressource.typeRessource == 'video' %}
-                                <video controls preload="metadata" class="w-full rounded-lg border border-[#E8DED5] bg-black/5">
-                                    <source src="{{ contenuUrl }}">
-                                    Votre navigateur ne supporte pas la lecture vidéo.
-                                </video>
+                                {% if embedUrl %}
+                                    <div class="aspect-video rounded-lg overflow-hidden border border-[#E8DED5] bg-black/5">
+                                        <iframe src="{{ embedUrl }}" class="w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy" title="{{ ressource.titre|blog_translate }}"></iframe>
+                                    </div>
+                                {% else %}
+                                    <video controls preload="metadata" class="w-full rounded-lg border border-[#E8DED5] bg-black/5">
+                                        <source src="{{ contenuUrl }}">
+                                        Votre navigateur ne supporte pas la lecture vidéo.
+                                    </video>
+                                {% endif %}
                             {% elseif ressource.typeRessource == 'audio' %}
                                 <audio controls preload="metadata" class="w-full">
                                     <source src="{{ contenuUrl }}">
@@ -165,7 +172,7 @@
                                 data-saved="{{ isModuleSaved is defined and isModuleSaved ? '1' : '0' }}"
                                 data-toggle-url="{{ path('favoris_module_toggle', {id: module.id}) }}"
                                 data-csrf="{{ csrf_token('toggle_module_favori_' ~ module.id) }}">
-                            <svg class="w-7 h-7" fill="{{ isModuleSaved is defined and isModuleSaved ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <svg class="w-8 h-8 shrink-0" fill="{{ isModuleSaved is defined and isModuleSaved ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                             </svg>
                         </button>
@@ -348,10 +355,10 @@
 
                         <div class="pr-32 min-w-0">
                             <div class="flex items-start gap-3 mb-3">
-                                <!-- Image de l'article en petit -->
+                                <!-- Image de l'article -->
                                 {% if article.image %}
                                     <div class="flex-shrink-0">
-                                        <img src="{{ asset(article.image) }}" alt="{{ article.titre|blog_translate }}" class="w-12 h-12 object-cover rounded-lg">
+                                        <img src="{{ asset(article.image) }}" alt="{{ article.titre|blog_translate }}" class="w-20 h-20 object-cover rounded-lg">
                                     </div>
                                 {% endif %}
                                 <div class="flex-1 min-w-0">
@@ -384,14 +391,14 @@
 
                             {% if app.user and not isOwnArticle %}
                                 <button type="button"
-                                        class="article-favorite-btn inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors {{ isArticleSaved ? 'bg-[#BE185D] text-white' : 'bg-[#FCE7F3] text-[#BE185D]' }} hover:bg-[#FBCFE8]"
+                                        class="article-favorite-btn inline-flex items-center justify-center w-12 h-12 rounded-full transition-colors {{ isArticleSaved ? 'bg-[#BE185D] text-white' : 'bg-[#FCE7F3] text-[#BE185D]' }} hover:bg-[#FBCFE8]"
                                         title="{{ isArticleSaved ? 'Retirer des favoris' : 'Ajouter aux favoris' }}"
                                         data-article-id="{{ article.id }}"
                                         data-saved="{{ isArticleSaved ? '1' : '0' }}"
                                         data-toggle-url="{{ path('favoris_article_toggle', {id: article.id}) }}"
                                         data-csrf="{{ csrf_token('toggle_article_favori_' ~ article.id) }}"
                                         data-login-url="{{ path('app_login') }}">
-                                    <svg class="w-4 h-4" fill="{{ isArticleSaved ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                    <svg class="w-7 h-7 shrink-0" fill="{{ isArticleSaved ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                                     </svg>
                                 </button>
@@ -467,7 +474,7 @@
                                     <div class="flex items-start gap-3 mb-3">
                                         {% if article.image %}
                                             <div class="flex-shrink-0">
-                                                <img src="{{ asset(article.image) }}" alt="{{ article.titre|blog_translate }}" class="w-12 h-12 object-cover rounded-lg">
+                                                <img src="{{ asset(article.image) }}" alt="{{ article.titre|blog_translate }}" class="w-20 h-20 object-cover rounded-lg">
                                             </div>
                                         {% endif %}
                                         <div class="flex-1 min-w-0">
