@@ -1,0 +1,424 @@
+{% extends 'layouts/user.html.twig' %}
+
+{% block title %}Créer votre produit - AutiCare{% endblock %}
+
+{% block user_content %}
+<div class="flex h-[calc(100vh-180px)] max-h-[700px] gap-4">
+    <!-- Sidebar gauche - Historique des conversations -->
+    <div class="w-64 shrink-0 bg-[#F5F1EB] rounded-xl border border-[#E5E0D8] flex flex-col overflow-hidden">
+        <div class="p-3 border-b border-[#E5E0D8]">
+            <button id="btn-new-chat" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                Nouveau chat
+            </button>
+        </div>
+        <div class="p-3 border-b border-[#E5E0D8]">
+            <h3 class="text-xs font-semibold text-[#6B7280] uppercase tracking-wide">Vos conversations</h3>
+        </div>
+        <div id="chat-list" class="flex-1 overflow-y-auto p-2 space-y-1">
+            <div id="no-chats-placeholder" class="text-center text-[#9CA3AF] text-sm py-8 px-2">
+                <svg class="w-10 h-10 mx-auto mb-2 text-[#D1D5DB]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                Aucune conversation
+            </div>
+        </div>
+    </div>
+
+    <!-- Zone principale - Chat -->
+    <div class="flex-1 flex flex-col bg-white rounded-xl border border-[#E5E0D8] shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-[#E5E0D8] bg-gradient-to-r from-[#A7C7E7]/10 to-transparent flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-[#A7C7E7] flex items-center justify-center text-white font-semibold">A</div>
+                <div>
+                    <h2 class="font-semibold text-[#4B5563]">Assistant AutiCare</h2>
+                    <p class="text-xs text-[#9CA3AF]">Création de produits avec recherche de prix</p>
+                </div>
+            </div>
+            <button id="btn-delete-chat" class="p-2 text-[#9CA3AF] hover:text-[#EF4444] hover:bg-red-50 rounded-lg transition-colors" title="Supprimer cette conversation">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                </svg>
+            </button>
+        </div>
+        
+        <div id="chat-messages" class="flex-1 p-4 space-y-3 overflow-y-auto bg-[#F9FAFB]">
+            <div class="flex gap-2 justify-start" data-welcome>
+                <span class="flex-shrink-0 w-8 h-8 rounded-full bg-[#A7C7E7] flex items-center justify-center text-white text-sm font-medium">A</span>
+                <div class="rounded-2xl rounded-bl-md px-4 py-2 bg-white border border-[#E5E0D8] text-[#4B5563] text-sm shadow-sm max-w-[85%]">
+                    Salut ! Je suis l'assistant AutiCare. Dis-moi quel produit tu veux créer et je chercherai les prix pour toi !
+                </div>
+            </div>
+        </div>
+
+        <div class="p-3 border-t border-[#E5E0D8] bg-white">
+            <form id="form-chat-besoin" class="flex gap-2">
+                <input type="text" name="message" id="input-chat-besoin" placeholder="Décrivez le produit que vous voulez créer..." class="flex-1 px-4 py-3 rounded-xl border border-[#E5E0D8] text-[#4B5563] placeholder-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#A7C7E7] focus:border-transparent" autocomplete="off">
+                <button type="submit" id="btn-send" class="px-6 py-3 rounded-xl bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline-none focus:ring-2 focus:ring-[#A7C7E7] shrink-0 flex items-center gap-2">
+                    <span>Envoyer</span>
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Zone droite - Produit créé -->
+    <div class="w-72 shrink-0 space-y-4">
+        <div class="bg-[#F5F1EB] rounded-xl p-4 border border-[#E5E0D8]">
+            <h3 class="font-semibold text-[#4B5563] mb-3 flex items-center gap-2">
+                <svg class="w-5 h-5 text-[#A7C7E7]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+                </svg>
+                Comment ça marche
+            </h3>
+            <ol class="text-sm text-[#6B7280] space-y-2">
+                <li class="flex items-start gap-2">
+                    <span class="flex-shrink-0 w-5 h-5 rounded-full bg-[#A7C7E7] text-white text-xs flex items-center justify-center">1</span>
+                    <span>Donnez le nom du produit</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="flex-shrink-0 w-5 h-5 rounded-full bg-[#A7C7E7] text-white text-xs flex items-center justify-center">2</span>
+                    <span>Décrivez-le brièvement</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="flex-shrink-0 w-5 h-5 rounded-full bg-[#A7C7E7] text-white text-xs flex items-center justify-center">3</span>
+                    <span>Je recherche les prix en ligne</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="flex-shrink-0 w-5 h-5 rounded-full bg-[#A7C7E7] text-white text-xs flex items-center justify-center">4</span>
+                    <span>Confirmez et c'est créé !</span>
+                </li>
+            </ol>
+        </div>
+
+        <div id="suggest-products" class="space-y-4">
+            <div id="suggest-placeholder" class="text-[#9CA3AF] text-sm bg-white rounded-xl p-6 text-center border-2 border-dashed border-[#E5E0D8]">
+                <svg class="w-10 h-10 mx-auto mb-2 text-[#E5E0D8]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                </svg>
+                <p class="font-medium text-[#6B7280]">Votre produit</p>
+                <p class="text-xs mt-1">apparaîtra ici</p>
+            </div>
+        </div>
+
+        <a href="{{ path('user_products_index') }}" class="flex items-center justify-center gap-2 text-[#A7C7E7] hover:text-[#4B5563] font-medium text-sm">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+            </svg>
+            Voir tous les produits
+        </a>
+    </div>
+</div>
+
+<script>
+(function() {
+    var form = document.getElementById('form-chat-besoin');
+    var input = document.getElementById('input-chat-besoin');
+    var messages = document.getElementById('chat-messages');
+    var container = document.getElementById('suggest-products');
+    var placeholder = document.getElementById('suggest-placeholder');
+    var btnNewChat = document.getElementById('btn-new-chat');
+    var btnDeleteChat = document.getElementById('btn-delete-chat');
+    var chatList = document.getElementById('chat-list');
+    var noChatsPlaceholder = document.getElementById('no-chats-placeholder');
+    var btnSend = document.getElementById('btn-send');
+    var chatApiUrl = '{{ path('user_products_chat_api')|e('js') }}';
+    var productShowPath = '{{ path('user_product_show', { id: 0 })|e('js') }}';
+    var assetBase = '{{ asset('')|e('js') }}';
+    
+    var CHATS_KEY = 'auticare_all_chats';
+    var CURRENT_CHAT_KEY = 'auticare_current_chat_id';
+    var PRICE_SEARCH_KEY = 'auticare_price_search';
+
+    function generateId() {
+        return 'chat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    function loadAllChats() {
+        try {
+            var saved = localStorage.getItem(CHATS_KEY);
+            return saved ? JSON.parse(saved) : {};
+        } catch (e) { return {}; }
+    }
+
+    function saveAllChats(chats) {
+        try {
+            localStorage.setItem(CHATS_KEY, JSON.stringify(chats));
+        } catch (e) {}
+    }
+
+    function getCurrentChatId() {
+        return localStorage.getItem(CURRENT_CHAT_KEY);
+    }
+
+    function setCurrentChatId(id) {
+        localStorage.setItem(CURRENT_CHAT_KEY, id);
+    }
+
+    function loadPriceSearch() {
+        try {
+            var saved = localStorage.getItem(PRICE_SEARCH_KEY);
+            return saved ? JSON.parse(saved) : null;
+        } catch (e) { return null; }
+    }
+
+    function savePriceSearch(priceSearch) {
+        try {
+            if (priceSearch) {
+                localStorage.setItem(PRICE_SEARCH_KEY, JSON.stringify(priceSearch));
+            } else {
+                localStorage.removeItem(PRICE_SEARCH_KEY);
+            }
+        } catch (e) {}
+    }
+
+    var allChats = loadAllChats();
+    var currentChatId = getCurrentChatId();
+    var currentPriceSearch = loadPriceSearch();
+
+    if (!currentChatId || !allChats[currentChatId]) {
+        currentChatId = generateId();
+        allChats[currentChatId] = { id: currentChatId, title: 'Nouvelle conversation', messages: [], createdAt: Date.now() };
+        saveAllChats(allChats);
+        setCurrentChatId(currentChatId);
+    }
+
+    function getChatHistory() {
+        return allChats[currentChatId] ? allChats[currentChatId].messages : [];
+    }
+
+    function saveChatHistory(history) {
+        if (allChats[currentChatId]) {
+            allChats[currentChatId].messages = history.slice(-50);
+            if (history.length > 0) {
+                var firstUserMsg = history.find(function(m) { return m.role === 'user'; });
+                if (firstUserMsg) {
+                    allChats[currentChatId].title = firstUserMsg.content.substring(0, 30) + (firstUserMsg.content.length > 30 ? '...' : '');
+                }
+            }
+            saveAllChats(allChats);
+        }
+    }
+
+    function renderChatList() {
+        chatList.innerHTML = '';
+        var chatIds = Object.keys(allChats).sort(function(a, b) {
+            return (allChats[b].createdAt || 0) - (allChats[a].createdAt || 0);
+        });
+
+        if (chatIds.length === 0) {
+            chatList.appendChild(noChatsPlaceholder);
+            return;
+        }
+
+        chatIds.forEach(function(id) {
+            var chat = allChats[id];
+            var item = document.createElement('button');
+            item.className = 'w-full text-left px-3 py-2 rounded-lg text-sm truncate transition-colors ' + 
+                (id === currentChatId ? 'bg-[#A7C7E7]/20 text-[#4B5563] font-medium' : 'text-[#6B7280] hover:bg-[#E5E0D8]/50');
+            item.innerHTML = '<div class="flex items-center gap-2"><svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg><span class="truncate">' + (chat.title || 'Conversation') + '</span></div>';
+            item.onclick = function() { switchToChat(id); };
+            chatList.appendChild(item);
+        });
+    }
+
+    function switchToChat(id) {
+        currentChatId = id;
+        setCurrentChatId(id);
+        currentPriceSearch = null;
+        savePriceSearch(null);
+        clearMessagesUI();
+        restoreMessages();
+        renderChatList();
+    }
+
+    function clearMessagesUI() {
+        var children = Array.from(messages.children);
+        children.forEach(function(el) {
+            if (!el.hasAttribute('data-welcome')) {
+                el.remove();
+            } else {
+                el.style.display = '';
+            }
+        });
+    }
+
+    function formatMessageWithMarkdown(text) {
+        text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        text = text.replace(/\n/g, '<br>');
+        return text;
+    }
+
+    function addMessage(text, isUser, save, isHtml) {
+        var wrap = document.createElement('div');
+        wrap.className = 'flex gap-2 ' + (isUser ? 'justify-end' : 'justify-start');
+        var bubble = document.createElement('div');
+        bubble.className = (isUser ? 'rounded-2xl rounded-br-md px-4 py-2 bg-[#A7C7E7] text-white text-sm shadow-sm max-w-[85%]' : 'rounded-2xl rounded-bl-md px-4 py-2 bg-white border border-[#E5E0D8] text-[#4B5563] text-sm shadow-sm max-w-[85%]');
+        
+        if (isHtml) {
+            bubble.innerHTML = text;
+        } else {
+            bubble.innerHTML = formatMessageWithMarkdown(text);
+        }
+
+        if (isUser) {
+            var avatar = document.createElement('span');
+            avatar.className = 'flex-shrink-0 w-8 h-8 rounded-full bg-[#A7C7E7]/50 flex items-center justify-center text-white text-xs font-medium';
+            avatar.textContent = 'Vous';
+            wrap.appendChild(bubble);
+            wrap.appendChild(avatar);
+        } else {
+            var avatarBot = document.createElement('span');
+            avatarBot.className = 'flex-shrink-0 w-8 h-8 rounded-full bg-[#A7C7E7] flex items-center justify-center text-white text-sm font-medium';
+            avatarBot.textContent = 'A';
+            wrap.appendChild(avatarBot);
+            wrap.appendChild(bubble);
+        }
+        
+        var welcome = messages.querySelector('[data-welcome]');
+        if (welcome) welcome.style.display = 'none';
+        
+        messages.appendChild(wrap);
+        messages.scrollTop = messages.scrollHeight;
+        return wrap;
+    }
+
+    function restoreMessages() {
+        var history = getChatHistory();
+        var welcome = messages.querySelector('[data-welcome]');
+        if (history.length > 0 && welcome) {
+            welcome.style.display = 'none';
+        }
+        history.forEach(function(msg) {
+            addMessage(msg.content, msg.role === 'user', false, false);
+        });
+    }
+
+    function createNewChat() {
+        currentChatId = generateId();
+        allChats[currentChatId] = { id: currentChatId, title: 'Nouvelle conversation', messages: [], createdAt: Date.now() };
+        saveAllChats(allChats);
+        setCurrentChatId(currentChatId);
+        currentPriceSearch = null;
+        savePriceSearch(null);
+        clearMessagesUI();
+        var welcome = messages.querySelector('[data-welcome]');
+        if (welcome) welcome.style.display = '';
+        container.innerHTML = '';
+        if (placeholder) {
+            placeholder.style.display = '';
+            container.appendChild(placeholder);
+        }
+        renderChatList();
+        input.focus();
+    }
+
+    function deleteCurrentChat() {
+        if (!confirm('Supprimer cette conversation ?')) return;
+        delete allChats[currentChatId];
+        saveAllChats(allChats);
+        var remainingIds = Object.keys(allChats);
+        if (remainingIds.length > 0) {
+            switchToChat(remainingIds[0]);
+        } else {
+            createNewChat();
+        }
+    }
+
+    function renderProducts(products) {
+        if (!products || products.length === 0) return;
+        if (placeholder) placeholder.style.display = 'none';
+        products.forEach(function(p) {
+            var card = document.createElement('article');
+            card.className = 'bg-white rounded-xl shadow-sm border ' + (p.en_attente ? 'border-amber-300' : 'border-[#E5E0D8]') + ' overflow-hidden';
+            var imgSrc = (p.image_url && p.image_url.indexOf('http') === 0) ? p.image_url : (p.image ? (assetBase + p.image) : '');
+            var pendingBadge = p.en_attente ? '<div class="bg-amber-50 border-b border-amber-200 px-3 py-2 text-center"><span class="inline-flex items-center gap-1.5 text-xs font-medium text-amber-700"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>En attente de validation admin</span></div>' : '';
+            card.innerHTML =
+                pendingBadge +
+                '<div class="aspect-square bg-[#F5F1EB] flex items-center justify-center overflow-hidden">' +
+                (imgSrc ? '<img src="' + imgSrc + '" alt="" class="w-full h-full object-cover" referrerpolicy="no-referrer">' : '<span class="text-[#6B7280] text-sm">Image</span>') +
+                '</div>' +
+                '<div class="p-3">' +
+                '<span class="inline-block px-2 py-0.5 rounded text-xs font-medium text-white bg-[#A7C7E7] mb-1">' + (p.categorie || '—') + '</span>' +
+                '<h3 class="font-semibold text-[#4B5563] text-sm">' + (p.nom || '') + '</h3>' +
+                '<p class="font-bold text-[#A7C7E7] mt-1">' + (typeof p.prix === 'number' ? p.prix.toFixed(2) : p.prix) + ' DT</p>' +
+                (p.en_attente ? '<p class="text-xs text-amber-600 mt-2">Ce produit sera visible apres validation par un admin.</p>' : '<a href="' + productShowPath.replace('/0', '/' + p.id) + '" class="mt-2 block text-center px-3 py-1.5 rounded-lg bg-[#A7C7E7] text-white text-xs font-medium hover:bg-[#B8D4ED]">Voir details</a>') +
+                '</div>';
+            container.appendChild(card);
+        });
+    }
+
+    function sendRequest(message) {
+        addMessage(message, true, true, false);
+        if (input) input.value = '';
+        if (btnSend) btnSend.disabled = true;
+        if (input) input.disabled = true;
+
+        var history = getChatHistory();
+        var body = new FormData();
+        body.append('message', message);
+        body.append('history', JSON.stringify(history));
+        if (currentPriceSearch) {
+            body.append('price_search', JSON.stringify(currentPriceSearch));
+        }
+
+        fetch(chatApiUrl, { method: 'POST', body: body })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                history.push({ role: 'user', content: message });
+                var reply = data.reply || 'Voici ma réponse.';
+                history.push({ role: 'assistant', content: reply });
+                saveChatHistory(history);
+                renderChatList();
+                
+                if (data.price_search && data.price_search.found) {
+                    currentPriceSearch = data.price_search;
+                    savePriceSearch(currentPriceSearch);
+                } else if (data.products && data.products.length > 0) {
+                    currentPriceSearch = null;
+                    savePriceSearch(null);
+                }
+                
+                addMessage(reply, false, true, false);
+                if (data.products && data.products.length > 0) {
+                    renderProducts(data.products);
+                }
+            })
+            .catch(function() {
+                addMessage('Désolé, une erreur est survenue. Réessayez.', false, false, false);
+            })
+            .finally(function() {
+                if (btnSend) btnSend.disabled = false;
+                if (input) {
+                    input.disabled = false;
+                    input.focus();
+                }
+            });
+    }
+
+    renderChatList();
+    restoreMessages();
+
+    if (form && input) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var msg = (input.value || '').trim();
+            if (!msg) return;
+            sendRequest(msg);
+        });
+    }
+
+    if (btnNewChat) {
+        btnNewChat.addEventListener('click', createNewChat);
+    }
+
+    if (btnDeleteChat) {
+        btnDeleteChat.addEventListener('click', deleteCurrentChat);
+    }
+})();
+</script>
+{% endblock %}

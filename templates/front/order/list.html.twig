@@ -38,7 +38,7 @@
                 <tr class="border-b border-[#E5E0D8] hover:bg-[#F5F1EB]">
                     <td class="px-6 py-4 font-medium text-[#4B5563]">#{{ commande.id }}</td>
                     <td class="px-6 py-4 text-[#6B7280]">{{ commande.dateCreation|date('d/m/Y H:i') }}</td>
-                    <td class="px-6 py-4 text-right font-semibold text-[#4B5563]">{{ commande.total|number_format(2, ',', ' ') }} د.ت</td>
+                    <td class="px-6 py-4 text-right font-semibold text-[#4B5563]">{{ commande.total|number_format(2, ',', ' ') }} dt</td>
                     <td class="px-6 py-4 text-center">
                         {% set s = commande.statut %}
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium

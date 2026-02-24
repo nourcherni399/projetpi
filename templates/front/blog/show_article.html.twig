@@ -174,6 +174,48 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
+    /* Vérification profanité en temps réel */
+    (function initProfanityCheck() {
+        var debounceTimers = {};
+        document.querySelectorAll('.comment-form-profanity-check').forEach(function (form) {
+            var ta = form.querySelector('textarea');
+            if (!ta) return;
+            var articleId = form.getAttribute('data-article-id');
+            var checkUrl = form.getAttribute('data-check-profanity-url');
+            if (!articleId || !checkUrl) return;
+            var warningEl = document.getElementById('profanity-warning-' + articleId);
+            if (!warningEl) return;
+
+            function checkProfanity() {
+                var text = (ta.value || '').trim();
+                if (text === '') {
+                    warningEl.classList.add('hidden');
+                    return;
+                }
+                fetch(checkUrl, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify({ text: text })
+                })
+                .then(function (r) { return r.ok ? r.json() : { hasBadWords: false }; })
+                .then(function (data) {
+                    if (data.hasBadWords) {
+                        warningEl.classList.remove('hidden');
+                    } else {
+                        warningEl.classList.add('hidden');
+                    }
+                })
+                .catch(function () { warningEl.classList.add('hidden'); });
+            }
+
+            ta.addEventListener('input', function () {
+                clearTimeout(debounceTimers[articleId]);
+                debounceTimers[articleId] = setTimeout(checkProfanity, 400);
+            });
+        });
+    })();
+
     var REACTION_EMOJIS = {like:'⭐', love:'❤️', haha:'😂', wow:'😮', sad:'😢', angry:'😡'};
     var REACTION_LABELS = {like:"J'aime", love:"J'adore", haha:'Haha', wow:'Wow', sad:'Quoi ?', angry:'Solidaire'};
     var REACTION_COLORS = {like:'#1877F2', love:'#F33E58', haha:'#F7B928', wow:'#F7B928', sad:'#F7B928', angry:'#E9710F'};

@@ -11,20 +11,22 @@ use App\Entity\Medcin;
 use App\Entity\Notification;
 use App\Entity\Patient;
 use App\Entity\MessageEvenement;
+use App\Entity\Produit;
 use App\Entity\RendezVous;
 use App\Entity\User;
 use App\Enum\Motif;
 use App\Enum\StatusRendezVous;
 use App\Enum\UserRole;
 use App\Form\MessageEvenementType;
+use App\Repository\AvisProduitRepository;
 use App\Repository\DisponibiliteRepository;
 use App\Repository\EvenementRepository;
 use App\Repository\InscritEventsRepository;
 use App\Repository\MedcinRepository;
 use App\Repository\MessageEvenementRepository;
 use App\Repository\NotificationRepository;
-use App\Repository\RendezVousRepository;
 use App\Repository\ProduitRepository;
+use App\Repository\RendezVousRepository;
 use App\Repository\ThematiqueRepository;
 use App\Service\RecommendationService;
 use App\Service\UserBehaviorTrackerService;
@@ -39,6 +41,7 @@ final class HomeController extends AbstractController
 {
     public function __construct(
         private readonly ProduitRepository $produitRepository,
+        private readonly AvisProduitRepository $avisProduitRepository,
         private readonly ThematiqueRepository $thematiqueRepository,
         private readonly EvenementRepository $evenementRepository,
         private readonly InscritEventsRepository $inscritEventsRepository,
@@ -48,8 +51,8 @@ final class HomeController extends AbstractController
         private readonly RendezVousRepository $rendezVousRepository,
         private readonly NotificationRepository $notificationRepository,
         private readonly EntityManagerInterface $entityManager,
-        private readonly RecommendationService $recommendationService,
-        private readonly UserBehaviorTrackerService $userBehaviorTrackerService,
+        private readonly ?RecommendationService $recommendationService = null,
+        private readonly ?UserBehaviorTrackerService $userBehaviorTrackerService = null,
     ) {
     }
 
@@ -58,6 +61,7 @@ final class HomeController extends AbstractController
     {
         $user = $this->getUser();
         $suggestions = null;
+        
         if ($user !== null && method_exists($user, 'getRole')) {
             $role = $user->getRole();
             if ($role === UserRole::ADMIN) {
@@ -66,12 +70,19 @@ final class HomeController extends AbstractController
             if ($role === UserRole::MEDECIN) {
                 return $this->redirectToRoute('doctor_dashboard');
             }
-            if ($user instanceof User) {
+            
+            // Get recommendations for logged-in users (if service available)
+            if ($user instanceof User && $this->recommendationService !== null) {
                 $suggestions = $this->recommendationService->getSuggestions($user);
             }
         }
+        
+        // Get AI-generated products for all users
+        $produitsIaValides = $this->produitRepository->findGenereParIaEtValides(8);
+
         return $this->render('front/home/index.html.twig', [
             'suggestions' => $suggestions,
+            'produits_ia_valides' => $produitsIaValides,
         ]);
     }
 
@@ -79,6 +90,12 @@ final class HomeController extends AbstractController
     public function about(): Response
     {
         return $this->render('front/about/index.html.twig');
+    }
+
+    #[Route('/contact', name: 'contact', methods: ['GET'])]
+    public function contact(): Response
+    {
+        return $this->render('front/contact/index.html.twig');
     }
 
     #[Route('/notifications', name: 'user_notifications', methods: ['GET'])]
@@ -94,14 +111,27 @@ final class HomeController extends AbstractController
     public function productShow(int $id): Response
     {
         $produit = $this->produitRepository->find($id);
-        if ($produit === null) {
+        if ($produit === null || !$produit instanceof Produit) {
             throw $this->createNotFoundException('Produit introuvable.');
         }
+        
         $user = $this->getUser();
-        if ($user instanceof User) {
+        
+        // Track product view (if service available)
+        if ($user instanceof User && $this->userBehaviorTrackerService !== null) {
             $this->userBehaviorTrackerService->trackProductView($user, $produit);
         }
-        return $this->render('front/products/show.html.twig', ['produit' => $produit]);
+        
+        // Get user's review for this product
+        $userAvis = null;
+        if ($user !== null) {
+            $userAvis = $this->avisProduitRepository->findOneByProduitAndUser($produit, $user);
+        }
+        
+        return $this->render('front/products/show.html.twig', [
+            'produit' => $produit,
+            'userAvis' => $userAvis,
+        ]);
     }
 
     /** @return array<int, array{name: string, category: string, category_class: string, rating: string, reviews: int, description: string, price: int, description_long: string, characteristics: list<string>, benefits: list<string>}> */
@@ -281,7 +311,6 @@ final class HomeController extends AbstractController
 
         $messages = [];
         $messageForm = null;
-        $unreadCount = 0;
         if ($user !== null) {
             $messages = $this->messageEvenementRepository->findByEvenementAndUserOrderByDate($evenement, $user);
             $this->messageEvenementRepository->markAdminMessagesAsReadByEvenementAndUser($evenement, $user);
@@ -289,7 +318,9 @@ final class HomeController extends AbstractController
             $newMessage->setEvenement($evenement);
             $newMessage->setUser($user);
             $messageForm = $this->createForm(MessageEvenementType::class, $newMessage);
-            if ($user instanceof User) {
+            
+            // Track event view (if service available)
+            if ($user instanceof User && $this->userBehaviorTrackerService !== null) {
                 $this->userBehaviorTrackerService->trackEventView($user, $evenement);
             }
         }
@@ -348,7 +379,9 @@ final class HomeController extends AbstractController
         $inscrit->setStatut('en_attente');
         $this->entityManager->persist($inscrit);
         $this->entityManager->flush();
-        if ($user instanceof User) {
+        
+        // Track event registration (if service available)
+        if ($user instanceof User && $this->userBehaviorTrackerService !== null) {
             $signals = [];
             if ($evenement->getThematique()?->getId() !== null) {
                 $signals[] = 'event_theme:' . (string) $evenement->getThematique()->getId();
@@ -475,10 +508,13 @@ final class HomeController extends AbstractController
         if ($medecin === null || !$medecin instanceof Medcin) {
             throw $this->createNotFoundException('Praticien introuvable.');
         }
+        
+        // Track doctor view (if service available)
         $currentUser = $this->getUser();
-        if ($currentUser instanceof User) {
+        if ($currentUser instanceof User && $this->userBehaviorTrackerService !== null) {
             $this->userBehaviorTrackerService->trackDoctorView($currentUser, $medecin);
         }
+        
         $doctor = $this->medecinToDoctorArray($medecin);
         $step = (int) $request->query->get('etape', 1);
         $step = max(1, min(4, $step));
@@ -794,8 +830,10 @@ final class HomeController extends AbstractController
 
         $this->entityManager->persist($rdv);
         $this->entityManager->flush();
+        
+        // Track appointment creation (if service available)
         $currentUser = $this->getUser();
-        if ($currentUser instanceof User) {
+        if ($currentUser instanceof User && $this->userBehaviorTrackerService !== null) {
             $signals = [];
             if ($medecin->getSpecialite() !== null && trim($medecin->getSpecialite()) !== '') {
                 $signals[] = 'doctor_speciality:' . mb_strtolower(trim($medecin->getSpecialite()));

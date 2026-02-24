@@ -1,0 +1,197 @@
+<?php
+
+declare(strict_types=1);
+
+namespace DoctrineMigrations;
+
+use Doctrine\DBAL\Schema\Schema;
+use Doctrine\Migrations\AbstractMigration;
+
+/**
+ * Auto-generated Migration: Please modify to your needs!
+ */
+final class Version20260224142519 extends AbstractMigration
+{
+    public function getDescription(): string
+    {
+        return '';
+    }
+
+    public function up(Schema $schema): void
+    {
+        // this up() migration is auto-generated, please modify it to your needs
+        $this->addSql('CREATE TABLE action_history (id INT AUTO_INCREMENT NOT NULL, date_heure DATETIME NOT NULL, utilisateur VARCHAR(255) NOT NULL, action VARCHAR(255) NOT NULL, module VARCHAR(255) DEFAULT NULL, details LONGTEXT DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE avis_produit (id INT AUTO_INCREMENT NOT NULL, note INT NOT NULL, created_at DATETIME NOT NULL, produit_id INT NOT NULL, user_id INT NOT NULL, INDEX IDX_2A67C21F347EFB (produit_id), INDEX IDX_2A67C21A76ED395 (user_id), UNIQUE INDEX avis_produit_user_unique (produit_id, user_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE blog (id INT AUTO_INCREMENT NOT NULL, titre VARCHAR(255) NOT NULL, type ENUM(\'recommandation\', \'plainte\', \'question\', \'experience\') NOT NULL, is_published TINYINT(1) NOT NULL, image VARCHAR(255) NOT NULL, is_urgent TINYINT(1) DEFAULT NULL, is_visible TINYINT(1) NOT NULL, date_creation DATETIME NOT NULL, date_modif DATETIME NOT NULL, contenu LONGTEXT DEFAULT NULL, module_id INT NOT NULL, user_id INT DEFAULT NULL, INDEX IDX_C0155143AFC2B591 (module_id), INDEX IDX_C0155143A76ED395 (user_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE cart (id INT AUTO_INCREMENT NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, user_id INT NOT NULL, INDEX IDX_BA388B7A76ED395 (user_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE cart_item (id INT AUTO_INCREMENT NOT NULL, quantite INT NOT NULL, prix DOUBLE PRECISION NOT NULL, cart_id INT NOT NULL, produit_id INT NOT NULL, INDEX IDX_F0FE25271AD5CDBF (cart_id), INDEX IDX_F0FE2527F347EFB (produit_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE commande (id INT AUTO_INCREMENT NOT NULL, nom VARCHAR(255) NOT NULL, email VARCHAR(255) NOT NULL, telephone VARCHAR(20) NOT NULL, adresse VARCHAR(255) NOT NULL, code_postal VARCHAR(20) NOT NULL, ville VARCHAR(100) NOT NULL, total DOUBLE PRECISION NOT NULL, statut VARCHAR(50) NOT NULL, mode_payment VARCHAR(50) NOT NULL, date_creation DATETIME NOT NULL, stripe_session_id VARCHAR(255) DEFAULT NULL, stripe_payment_intent VARCHAR(255) DEFAULT NULL, user_id INT DEFAULT NULL, INDEX IDX_6EEAA67DA76ED395 (user_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE commentaire (id INT AUTO_INCREMENT NOT NULL, contenu LONGTEXT NOT NULL, media VARCHAR(255) DEFAULT NULL, is_published TINYINT(1) NOT NULL, date_creation DATETIME NOT NULL, date_modif DATETIME DEFAULT NULL, user_id INT DEFAULT NULL, blog_id INT NOT NULL, INDEX IDX_67F068BCA76ED395 (user_id), INDEX IDX_67F068BCDAE07E97 (blog_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE commentaire_reaction (id INT AUTO_INCREMENT NOT NULL, type VARCHAR(20) NOT NULL, created_at DATETIME NOT NULL, user_id INT NOT NULL, commentaire_id INT NOT NULL, INDEX IDX_56C6CF2BA76ED395 (user_id), INDEX IDX_56C6CF2BBA9CD190 (commentaire_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE demande_produit (id INT AUTO_INCREMENT NOT NULL, demande_client LONGTEXT NOT NULL, nom VARCHAR(255) NOT NULL, description LONGTEXT DEFAULT NULL, categorie VARCHAR(255) NOT NULL, prix_estime DOUBLE PRECISION NOT NULL, budget_client DOUBLE PRECISION DEFAULT NULL, caracteristiques LONGTEXT DEFAULT NULL, donnees_externes JSON DEFAULT NULL, statut VARCHAR(20) NOT NULL, created_at DATETIME NOT NULL, validated_at DATETIME DEFAULT NULL, demandeur_id INT DEFAULT NULL, validated_by_id INT DEFAULT NULL, produit_id INT DEFAULT NULL, INDEX IDX_1952578895A6EE59 (demandeur_id), INDEX IDX_19525788C69DE5E5 (validated_by_id), UNIQUE INDEX UNIQ_19525788F347EFB (produit_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE disponibilite (id INT AUTO_INCREMENT NOT NULL, heure_debut TIME NOT NULL, heure_fin TIME NOT NULL, jour ENUM(\'lundi\', \'mardi\', \'mercredi\', \'jeudi\', \'vendredi\', \'samedi\', \'dimanche\'), duree INT DEFAULT 0 NOT NULL, est_dispo TINYINT(1) DEFAULT 1 NOT NULL, medecin_id INT DEFAULT NULL, INDEX IDX_2CBACE2F4F31A84 (medecin_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE evenement (id INT AUTO_INCREMENT NOT NULL, title VARCHAR(255) NOT NULL, description LONGTEXT DEFAULT NULL, date_event DATE NOT NULL, heure_debut TIME NOT NULL, heure_fin TIME NOT NULL, lieu VARCHAR(255) DEFAULT NULL, location_url VARCHAR(500) DEFAULT NULL, latitude DOUBLE PRECISION DEFAULT NULL, longitude DOUBLE PRECISION DEFAULT NULL, mode VARCHAR(20) DEFAULT \'presentiel\' NOT NULL, meeting_url VARCHAR(500) DEFAULT NULL, thematique_id INT DEFAULT NULL, INDEX IDX_B26681E476556AF (thematique_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE favoris (id INT AUTO_INCREMENT NOT NULL, created_at DATETIME NOT NULL, user_id INT NOT NULL, produit_id INT NOT NULL, INDEX IDX_8933C432A76ED395 (user_id), INDEX IDX_8933C432F347EFB (produit_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE favoris_article (id INT AUTO_INCREMENT NOT NULL, created_at DATETIME NOT NULL, user_id INT NOT NULL, blog_id INT NOT NULL, INDEX IDX_B7D0A763A76ED395 (user_id), INDEX IDX_B7D0A763DAE07E97 (blog_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE favoris_module (id INT AUTO_INCREMENT NOT NULL, created_at DATETIME NOT NULL, user_id INT NOT NULL, module_id INT NOT NULL, INDEX IDX_36421295A76ED395 (user_id), INDEX IDX_36421295AFC2B591 (module_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE inscrit_events (id INT AUTO_INCREMENT NOT NULL, date_inscrit DATE NOT NULL, est_inscrit TINYINT(1) DEFAULT 1 NOT NULL, statut VARCHAR(20) DEFAULT \'en_attente\' NOT NULL, user_id INT NOT NULL, evenement_id INT NOT NULL, INDEX IDX_8079EEFAA76ED395 (user_id), INDEX IDX_8079EEFAFD02F13 (evenement_id), UNIQUE INDEX UNIQ_USER_EVENT (user_id, evenement_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE ligne_commande (id INT AUTO_INCREMENT NOT NULL, quantite INT NOT NULL, prix DOUBLE PRECISION NOT NULL, sous_total DOUBLE PRECISION NOT NULL, commande_id INT NOT NULL, produit_id INT NOT NULL, INDEX IDX_3170B74B82EA2E54 (commande_id), INDEX IDX_3170B74BF347EFB (produit_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE message_evenement (id INT AUTO_INCREMENT NOT NULL, contenu LONGTEXT NOT NULL, date_envoi DATETIME NOT NULL, envoye_par VARCHAR(10) NOT NULL, lu TINYINT(1) DEFAULT 0 NOT NULL, evenement_id INT NOT NULL, user_id INT NOT NULL, INDEX IDX_619F6E28FD02F13 (evenement_id), INDEX IDX_619F6E28A76ED395 (user_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE module (id INT AUTO_INCREMENT NOT NULL, titre VARCHAR(255) NOT NULL, description VARCHAR(255) NOT NULL, contenu LONGTEXT DEFAULT NULL, niveau ENUM(\'difficile\', \'moyen\', \'facile\') NOT NULL, image VARCHAR(255) NOT NULL, is_published TINYINT(1) NOT NULL, date_creation DATETIME NOT NULL, date_modif DATETIME NOT NULL, categorie ENUM(\'\', \'COMPRENDRE_TSA\', \'AUTONOMIE\', \'COMMUNICATION\', \'EMOTIONS\', \'VIE_QUOTIDIENNE\', \'ACCOMPAGNEMENT\') NOT NULL, admin_id INT DEFAULT NULL, INDEX IDX_C242628642B8210 (admin_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE note (id INT AUTO_INCREMENT NOT NULL, contenu LONGTEXT NOT NULL, date_creation DATETIME NOT NULL, medecin_id INT NOT NULL, patient_id INT NOT NULL, INDEX IDX_CFBDFA144F31A84 (medecin_id), INDEX IDX_CFBDFA146B899279 (patient_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE notification (id INT AUTO_INCREMENT NOT NULL, type VARCHAR(50) NOT NULL, lu TINYINT(1) DEFAULT 0 NOT NULL, created_at DATETIME NOT NULL, destinataire_id INT NOT NULL, rendez_vous_id INT DEFAULT NULL, commande_id INT DEFAULT NULL, demande_produit_id INT DEFAULT NULL, produit_id INT DEFAULT NULL, INDEX IDX_BF5476CAA4F84F6E (destinataire_id), INDEX IDX_BF5476CA91EF7EAA (rendez_vous_id), INDEX IDX_BF5476CA82EA2E54 (commande_id), INDEX IDX_BF5476CAF9F8745A (demande_produit_id), INDEX IDX_BF5476CAF347EFB (produit_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE `order` (id INT AUTO_INCREMENT NOT NULL, total_price DOUBLE PRECISION NOT NULL, status VARCHAR(50) NOT NULL, payment_method VARCHAR(50) NOT NULL, card_type VARCHAR(50) DEFAULT NULL, first_name VARCHAR(255) NOT NULL, last_name VARCHAR(255) NOT NULL, email VARCHAR(255) NOT NULL, phone VARCHAR(255) NOT NULL, address VARCHAR(255) NOT NULL, city VARCHAR(255) NOT NULL, postal_code VARCHAR(10) NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, user_id INT NOT NULL, INDEX IDX_F5299398A76ED395 (user_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE order_item (id INT AUTO_INCREMENT NOT NULL, quantite INT NOT NULL, prix DOUBLE PRECISION NOT NULL, order_id INT NOT NULL, produit_id INT NOT NULL, INDEX IDX_52EA1F098D9F6D38 (order_id), INDEX IDX_52EA1F09F347EFB (produit_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE produit (id INT AUTO_INCREMENT NOT NULL, nom VARCHAR(255) NOT NULL, description LONGTEXT DEFAULT NULL, categorie ENUM(\'sensoriels\', \'bruit_et_environnement\', \'education_apprentissage\', \'communication_langage\', \'jeux_therapeutiques_developpement\', \'bien_etre_relaxation\', \'vie_quotidienne\'), prix DOUBLE PRECISION NOT NULL, disponibilite TINYINT(1) DEFAULT 1 NOT NULL, image VARCHAR(500) DEFAULT NULL, sku VARCHAR(255) DEFAULT NULL, statut_publication VARCHAR(20) DEFAULT \'brouillon\' NOT NULL, note_moyenne DOUBLE PRECISION DEFAULT 0 NOT NULL, nb_avis INT DEFAULT 0 NOT NULL, seuil_alerte INT DEFAULT NULL, quantite INT DEFAULT 1 NOT NULL, genere_par_ia TINYINT(1) DEFAULT 0 NOT NULL, valide TINYINT(1) DEFAULT 1 NOT NULL, user_id INT DEFAULT NULL, stock_id INT DEFAULT NULL, UNIQUE INDEX UNIQ_29A5EC27F9038C4 (sku), INDEX IDX_29A5EC27A76ED395 (user_id), INDEX IDX_29A5EC27DCD6110 (stock_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE produit_historique (id INT AUTO_INCREMENT NOT NULL, champ VARCHAR(255) NOT NULL, ancienne_valeur VARCHAR(500) DEFAULT NULL, nouvelle_valeur VARCHAR(500) DEFAULT NULL, created_at DATETIME NOT NULL, produit_id INT NOT NULL, user_id INT NOT NULL, INDEX IDX_4487ECE1F347EFB (produit_id), INDEX IDX_4487ECE1A76ED395 (user_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE produit_image (id INT AUTO_INCREMENT NOT NULL, chemin VARCHAR(500) NOT NULL, ordre INT NOT NULL, produit_id INT NOT NULL, INDEX IDX_F5A163CBF347EFB (produit_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE rendez_vous (id INT AUTO_INCREMENT NOT NULL, date_rdv DATE DEFAULT NULL, nom VARCHAR(255) NOT NULL, prenom VARCHAR(255) NOT NULL, adresse VARCHAR(500) DEFAULT NULL, date_naissance DATE DEFAULT NULL, telephone VARCHAR(30) DEFAULT NULL, note_patient LONGTEXT DEFAULT \'vide\', status ENUM(\'en_attente\', \'confirmer\', \'annuler\'), motif ENUM(\'urgence\', \'suivie\', \'normal\'), medecin_id INT NOT NULL, disponibilite_id INT DEFAULT NULL, patient_id INT DEFAULT NULL, INDEX IDX_65E8AA0A4F31A84 (medecin_id), INDEX IDX_65E8AA0A2B9D6493 (disponibilite_id), INDEX IDX_65E8AA0A6B899279 (patient_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE ressource (id INT AUTO_INCREMENT NOT NULL, titre VARCHAR(255) NOT NULL, type_ressource VARCHAR(20) NOT NULL, contenu LONGTEXT NOT NULL, date_creation DATETIME NOT NULL, datemodif DATETIME NOT NULL, ordre INT DEFAULT NULL, is_active TINYINT(1) NOT NULL, module_id INT NOT NULL, INDEX IDX_939F4544AFC2B591 (module_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE stock (id INT AUTO_INCREMENT NOT NULL, nom VARCHAR(100) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE thematique (id INT AUTO_INCREMENT NOT NULL, nom_thematique VARCHAR(255) NOT NULL, code_thematique VARCHAR(50) NOT NULL, description LONGTEXT DEFAULT NULL, couleur VARCHAR(20) DEFAULT NULL, image VARCHAR(500) DEFAULT NULL, sous_titre VARCHAR(255) DEFAULT NULL, ordre SMALLINT DEFAULT NULL, actif TINYINT(1) DEFAULT 1 NOT NULL, public_cible ENUM(\'Enfant\', \'Parent\', \'Médecin\', \'Éducateur\', \'Aidant\', \'Autre\'), niveau_difficulte ENUM(\'Débutant\', \'Intermédiaire\', \'Avancé\'), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE user (id INT AUTO_INCREMENT NOT NULL, nom VARCHAR(255) NOT NULL, prenom VARCHAR(255) NOT NULL, email VARCHAR(180) NOT NULL, telephone INT NOT NULL, password VARCHAR(255) NOT NULL, is_active TINYINT(1) NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, role ENUM(\'ROLE_ADMIN\', \'ROLE_PARENT\', \'ROLE_PATIENT\', \'ROLE_MEDECIN\', \'ROLE_USER\'), image VARCHAR(255) DEFAULT NULL, reset_pin VARCHAR(6) DEFAULT NULL, reset_pin_expires_at DATETIME DEFAULT NULL, email_verification_token VARCHAR(64) DEFAULT NULL, email_verification_expires_at DATETIME DEFAULT NULL, email_verified_at DATETIME DEFAULT NULL, google_id VARCHAR(255) DEFAULT NULL, data_face_api LONGTEXT DEFAULT NULL, type VARCHAR(255) NOT NULL, date_naissance DATE DEFAULT NULL, adresse VARCHAR(500) DEFAULT NULL, sexe VARCHAR(20) DEFAULT NULL, relation_avec_patient VARCHAR(100) DEFAULT NULL, specialite VARCHAR(255) DEFAULT NULL, nom_cabinet VARCHAR(255) DEFAULT NULL, adresse_cabinet VARCHAR(500) DEFAULT NULL, telephone_cabinet VARCHAR(30) DEFAULT NULL, tarif_consultation DOUBLE PRECISION DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE user_history (id INT AUTO_INCREMENT NOT NULL, action VARCHAR(30) NOT NULL, item_type VARCHAR(30) NOT NULL, item_id INT DEFAULT NULL, metadata JSON DEFAULT NULL, created_at DATETIME NOT NULL, user_id INT NOT NULL, INDEX IDX_7FB76E41A76ED395 (user_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE user_preference (id INT AUTO_INCREMENT NOT NULL, category VARCHAR(120) NOT NULL, weight INT NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, user_id INT NOT NULL, INDEX IDX_FA0E76BFA76ED395 (user_id), UNIQUE INDEX uniq_user_preference_user_category (user_id, category), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE messenger_messages (id BIGINT AUTO_INCREMENT NOT NULL, body LONGTEXT NOT NULL, headers LONGTEXT NOT NULL, queue_name VARCHAR(190) NOT NULL, created_at DATETIME NOT NULL, available_at DATETIME NOT NULL, delivered_at DATETIME DEFAULT NULL, INDEX IDX_75EA56E0FB7336F0E3BD61CE16BA31DBBF396750 (queue_name, available_at, delivered_at, id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('ALTER TABLE avis_produit ADD CONSTRAINT FK_2A67C21F347EFB FOREIGN KEY (produit_id) REFERENCES produit (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE avis_produit ADD CONSTRAINT FK_2A67C21A76ED395 FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE blog ADD CONSTRAINT FK_C0155143AFC2B591 FOREIGN KEY (module_id) REFERENCES module (id)');
+        $this->addSql('ALTER TABLE blog ADD CONSTRAINT FK_C0155143A76ED395 FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE SET NULL');
+        $this->addSql('ALTER TABLE cart ADD CONSTRAINT FK_BA388B7A76ED395 FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE cart_item ADD CONSTRAINT FK_F0FE25271AD5CDBF FOREIGN KEY (cart_id) REFERENCES cart (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE cart_item ADD CONSTRAINT FK_F0FE2527F347EFB FOREIGN KEY (produit_id) REFERENCES produit (id)');
+        $this->addSql('ALTER TABLE commande ADD CONSTRAINT FK_6EEAA67DA76ED395 FOREIGN KEY (user_id) REFERENCES user (id)');
+        $this->addSql('ALTER TABLE commentaire ADD CONSTRAINT FK_67F068BCA76ED395 FOREIGN KEY (user_id) REFERENCES user (id)');
+        $this->addSql('ALTER TABLE commentaire ADD CONSTRAINT FK_67F068BCDAE07E97 FOREIGN KEY (blog_id) REFERENCES blog (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE commentaire_reaction ADD CONSTRAINT FK_56C6CF2BA76ED395 FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE commentaire_reaction ADD CONSTRAINT FK_56C6CF2BBA9CD190 FOREIGN KEY (commentaire_id) REFERENCES commentaire (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE demande_produit ADD CONSTRAINT FK_1952578895A6EE59 FOREIGN KEY (demandeur_id) REFERENCES user (id) ON DELETE SET NULL');
+        $this->addSql('ALTER TABLE demande_produit ADD CONSTRAINT FK_19525788C69DE5E5 FOREIGN KEY (validated_by_id) REFERENCES user (id) ON DELETE SET NULL');
+        $this->addSql('ALTER TABLE demande_produit ADD CONSTRAINT FK_19525788F347EFB FOREIGN KEY (produit_id) REFERENCES produit (id) ON DELETE SET NULL');
+        $this->addSql('ALTER TABLE disponibilite ADD CONSTRAINT FK_2CBACE2F4F31A84 FOREIGN KEY (medecin_id) REFERENCES user (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE evenement ADD CONSTRAINT FK_B26681E476556AF FOREIGN KEY (thematique_id) REFERENCES thematique (id) ON DELETE SET NULL');
+        $this->addSql('ALTER TABLE favoris ADD CONSTRAINT FK_8933C432A76ED395 FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE favoris ADD CONSTRAINT FK_8933C432F347EFB FOREIGN KEY (produit_id) REFERENCES produit (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE favoris_article ADD CONSTRAINT FK_B7D0A763A76ED395 FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE favoris_article ADD CONSTRAINT FK_B7D0A763DAE07E97 FOREIGN KEY (blog_id) REFERENCES blog (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE favoris_module ADD CONSTRAINT FK_36421295A76ED395 FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE favoris_module ADD CONSTRAINT FK_36421295AFC2B591 FOREIGN KEY (module_id) REFERENCES module (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE inscrit_events ADD CONSTRAINT FK_8079EEFAA76ED395 FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE inscrit_events ADD CONSTRAINT FK_8079EEFAFD02F13 FOREIGN KEY (evenement_id) REFERENCES evenement (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE ligne_commande ADD CONSTRAINT FK_3170B74B82EA2E54 FOREIGN KEY (commande_id) REFERENCES commande (id)');
+        $this->addSql('ALTER TABLE ligne_commande ADD CONSTRAINT FK_3170B74BF347EFB FOREIGN KEY (produit_id) REFERENCES produit (id)');
+        $this->addSql('ALTER TABLE message_evenement ADD CONSTRAINT FK_619F6E28FD02F13 FOREIGN KEY (evenement_id) REFERENCES evenement (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE message_evenement ADD CONSTRAINT FK_619F6E28A76ED395 FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE module ADD CONSTRAINT FK_C242628642B8210 FOREIGN KEY (admin_id) REFERENCES user (id) ON DELETE SET NULL');
+        $this->addSql('ALTER TABLE note ADD CONSTRAINT FK_CFBDFA144F31A84 FOREIGN KEY (medecin_id) REFERENCES user (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE note ADD CONSTRAINT FK_CFBDFA146B899279 FOREIGN KEY (patient_id) REFERENCES user (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE notification ADD CONSTRAINT FK_BF5476CAA4F84F6E FOREIGN KEY (destinataire_id) REFERENCES user (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE notification ADD CONSTRAINT FK_BF5476CA91EF7EAA FOREIGN KEY (rendez_vous_id) REFERENCES rendez_vous (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE notification ADD CONSTRAINT FK_BF5476CA82EA2E54 FOREIGN KEY (commande_id) REFERENCES commande (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE notification ADD CONSTRAINT FK_BF5476CAF9F8745A FOREIGN KEY (demande_produit_id) REFERENCES demande_produit (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE notification ADD CONSTRAINT FK_BF5476CAF347EFB FOREIGN KEY (produit_id) REFERENCES produit (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE `order` ADD CONSTRAINT FK_F5299398A76ED395 FOREIGN KEY (user_id) REFERENCES user (id)');
+        $this->addSql('ALTER TABLE order_item ADD CONSTRAINT FK_52EA1F098D9F6D38 FOREIGN KEY (order_id) REFERENCES `order` (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE order_item ADD CONSTRAINT FK_52EA1F09F347EFB FOREIGN KEY (produit_id) REFERENCES produit (id)');
+        $this->addSql('ALTER TABLE produit ADD CONSTRAINT FK_29A5EC27A76ED395 FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE SET NULL');
+        $this->addSql('ALTER TABLE produit ADD CONSTRAINT FK_29A5EC27DCD6110 FOREIGN KEY (stock_id) REFERENCES stock (id) ON DELETE SET NULL');
+        $this->addSql('ALTER TABLE produit_historique ADD CONSTRAINT FK_4487ECE1F347EFB FOREIGN KEY (produit_id) REFERENCES produit (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE produit_historique ADD CONSTRAINT FK_4487ECE1A76ED395 FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE produit_image ADD CONSTRAINT FK_F5A163CBF347EFB FOREIGN KEY (produit_id) REFERENCES produit (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE rendez_vous ADD CONSTRAINT FK_65E8AA0A4F31A84 FOREIGN KEY (medecin_id) REFERENCES user (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE rendez_vous ADD CONSTRAINT FK_65E8AA0A2B9D6493 FOREIGN KEY (disponibilite_id) REFERENCES disponibilite (id) ON DELETE SET NULL');
+        $this->addSql('ALTER TABLE rendez_vous ADD CONSTRAINT FK_65E8AA0A6B899279 FOREIGN KEY (patient_id) REFERENCES user (id) ON DELETE SET NULL');
+        $this->addSql('ALTER TABLE ressource ADD CONSTRAINT FK_939F4544AFC2B591 FOREIGN KEY (module_id) REFERENCES module (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE user_history ADD CONSTRAINT FK_7FB76E41A76ED395 FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE user_preference ADD CONSTRAINT FK_FA0E76BFA76ED395 FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE');
+    }
+
+    public function down(Schema $schema): void
+    {
+        // this down() migration is auto-generated, please modify it to your needs
+        $this->addSql('ALTER TABLE avis_produit DROP FOREIGN KEY FK_2A67C21F347EFB');
+        $this->addSql('ALTER TABLE avis_produit DROP FOREIGN KEY FK_2A67C21A76ED395');
+        $this->addSql('ALTER TABLE blog DROP FOREIGN KEY FK_C0155143AFC2B591');
+        $this->addSql('ALTER TABLE blog DROP FOREIGN KEY FK_C0155143A76ED395');
+        $this->addSql('ALTER TABLE cart DROP FOREIGN KEY FK_BA388B7A76ED395');
+        $this->addSql('ALTER TABLE cart_item DROP FOREIGN KEY FK_F0FE25271AD5CDBF');
+        $this->addSql('ALTER TABLE cart_item DROP FOREIGN KEY FK_F0FE2527F347EFB');
+        $this->addSql('ALTER TABLE commande DROP FOREIGN KEY FK_6EEAA67DA76ED395');
+        $this->addSql('ALTER TABLE commentaire DROP FOREIGN KEY FK_67F068BCA76ED395');
+        $this->addSql('ALTER TABLE commentaire DROP FOREIGN KEY FK_67F068BCDAE07E97');
+        $this->addSql('ALTER TABLE commentaire_reaction DROP FOREIGN KEY FK_56C6CF2BA76ED395');
+        $this->addSql('ALTER TABLE commentaire_reaction DROP FOREIGN KEY FK_56C6CF2BBA9CD190');
+        $this->addSql('ALTER TABLE demande_produit DROP FOREIGN KEY FK_1952578895A6EE59');
+        $this->addSql('ALTER TABLE demande_produit DROP FOREIGN KEY FK_19525788C69DE5E5');
+        $this->addSql('ALTER TABLE demande_produit DROP FOREIGN KEY FK_19525788F347EFB');
+        $this->addSql('ALTER TABLE disponibilite DROP FOREIGN KEY FK_2CBACE2F4F31A84');
+        $this->addSql('ALTER TABLE evenement DROP FOREIGN KEY FK_B26681E476556AF');
+        $this->addSql('ALTER TABLE favoris DROP FOREIGN KEY FK_8933C432A76ED395');
+        $this->addSql('ALTER TABLE favoris DROP FOREIGN KEY FK_8933C432F347EFB');
+        $this->addSql('ALTER TABLE favoris_article DROP FOREIGN KEY FK_B7D0A763A76ED395');
+        $this->addSql('ALTER TABLE favoris_article DROP FOREIGN KEY FK_B7D0A763DAE07E97');
+        $this->addSql('ALTER TABLE favoris_module DROP FOREIGN KEY FK_36421295A76ED395');
+        $this->addSql('ALTER TABLE favoris_module DROP FOREIGN KEY FK_36421295AFC2B591');
+        $this->addSql('ALTER TABLE inscrit_events DROP FOREIGN KEY FK_8079EEFAA76ED395');
+        $this->addSql('ALTER TABLE inscrit_events DROP FOREIGN KEY FK_8079EEFAFD02F13');
+        $this->addSql('ALTER TABLE ligne_commande DROP FOREIGN KEY FK_3170B74B82EA2E54');
+        $this->addSql('ALTER TABLE ligne_commande DROP FOREIGN KEY FK_3170B74BF347EFB');
+        $this->addSql('ALTER TABLE message_evenement DROP FOREIGN KEY FK_619F6E28FD02F13');
+        $this->addSql('ALTER TABLE message_evenement DROP FOREIGN KEY FK_619F6E28A76ED395');
+        $this->addSql('ALTER TABLE module DROP FOREIGN KEY FK_C242628642B8210');
+        $this->addSql('ALTER TABLE note DROP FOREIGN KEY FK_CFBDFA144F31A84');
+        $this->addSql('ALTER TABLE note DROP FOREIGN KEY FK_CFBDFA146B899279');
+        $this->addSql('ALTER TABLE notification DROP FOREIGN KEY FK_BF5476CAA4F84F6E');
+        $this->addSql('ALTER TABLE notification DROP FOREIGN KEY FK_BF5476CA91EF7EAA');
+        $this->addSql('ALTER TABLE notification DROP FOREIGN KEY FK_BF5476CA82EA2E54');
+        $this->addSql('ALTER TABLE notification DROP FOREIGN KEY FK_BF5476CAF9F8745A');
+        $this->addSql('ALTER TABLE notification DROP FOREIGN KEY FK_BF5476CAF347EFB');
+        $this->addSql('ALTER TABLE `order` DROP FOREIGN KEY FK_F5299398A76ED395');
+        $this->addSql('ALTER TABLE order_item DROP FOREIGN KEY FK_52EA1F098D9F6D38');
+        $this->addSql('ALTER TABLE order_item DROP FOREIGN KEY FK_52EA1F09F347EFB');
+        $this->addSql('ALTER TABLE produit DROP FOREIGN KEY FK_29A5EC27A76ED395');
+        $this->addSql('ALTER TABLE produit DROP FOREIGN KEY FK_29A5EC27DCD6110');
+        $this->addSql('ALTER TABLE produit_historique DROP FOREIGN KEY FK_4487ECE1F347EFB');
+        $this->addSql('ALTER TABLE produit_historique DROP FOREIGN KEY FK_4487ECE1A76ED395');
+        $this->addSql('ALTER TABLE produit_image DROP FOREIGN KEY FK_F5A163CBF347EFB');
+        $this->addSql('ALTER TABLE rendez_vous DROP FOREIGN KEY FK_65E8AA0A4F31A84');
+        $this->addSql('ALTER TABLE rendez_vous DROP FOREIGN KEY FK_65E8AA0A2B9D6493');
+        $this->addSql('ALTER TABLE rendez_vous DROP FOREIGN KEY FK_65E8AA0A6B899279');
+        $this->addSql('ALTER TABLE ressource DROP FOREIGN KEY FK_939F4544AFC2B591');
+        $this->addSql('ALTER TABLE user_history DROP FOREIGN KEY FK_7FB76E41A76ED395');
+        $this->addSql('ALTER TABLE user_preference DROP FOREIGN KEY FK_FA0E76BFA76ED395');
+        $this->addSql('DROP TABLE action_history');
+        $this->addSql('DROP TABLE avis_produit');
+        $this->addSql('DROP TABLE blog');
+        $this->addSql('DROP TABLE cart');
+        $this->addSql('DROP TABLE cart_item');
+        $this->addSql('DROP TABLE commande');
+        $this->addSql('DROP TABLE commentaire');
+        $this->addSql('DROP TABLE commentaire_reaction');
+        $this->addSql('DROP TABLE demande_produit');
+        $this->addSql('DROP TABLE disponibilite');
+        $this->addSql('DROP TABLE evenement');
+        $this->addSql('DROP TABLE favoris');
+        $this->addSql('DROP TABLE favoris_article');
+        $this->addSql('DROP TABLE favoris_module');
+        $this->addSql('DROP TABLE inscrit_events');
+        $this->addSql('DROP TABLE ligne_commande');
+        $this->addSql('DROP TABLE message_evenement');
+        $this->addSql('DROP TABLE module');
+        $this->addSql('DROP TABLE note');
+        $this->addSql('DROP TABLE notification');
+        $this->addSql('DROP TABLE `order`');
+        $this->addSql('DROP TABLE order_item');
+        $this->addSql('DROP TABLE produit');
+        $this->addSql('DROP TABLE produit_historique');
+        $this->addSql('DROP TABLE produit_image');
+        $this->addSql('DROP TABLE rendez_vous');
+        $this->addSql('DROP TABLE ressource');
+        $this->addSql('DROP TABLE stock');
+        $this->addSql('DROP TABLE thematique');
+        $this->addSql('DROP TABLE user');
+        $this->addSql('DROP TABLE user_history');
+        $this->addSql('DROP TABLE user_preference');
+        $this->addSql('DROP TABLE messenger_messages');
+    }
+}

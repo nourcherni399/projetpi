@@ -4,26 +4,53 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Controller\Traits\FuzzyProductSearchTrait;
 use App\Entity\Produit;
+use App\Enum\StatutPublication;
 use App\Form\ProduitType;
+use App\Repository\CartItemRepository;
 use App\Repository\LigneCommandeRepository;
+use App\Repository\OrderItemRepository;
+use App\Repository\ProduitHistoriqueRepository;
 use App\Repository\ProduitRepository;
+use App\Service\AIPredictionService;
+use App\Service\ProduitHistoriqueService;
+use App\Service\ProductDescriptionSuggestionService;
+use App\Service\ProductPriceSearchService;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Conditional;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/admin/produits')]
 final class ProduitController extends AbstractController
 {
+    use FuzzyProductSearchTrait;
+
     public function __construct(
         private readonly ProduitRepository $produitRepository,
         private readonly LigneCommandeRepository $ligneCommandeRepository,
+        private readonly OrderItemRepository $orderItemRepository,
+        private readonly CartItemRepository $cartItemRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly SluggerInterface $slugger,
+        private readonly AIPredictionService $aiPredictionService,
+        private readonly ProductPriceSearchService $priceSearchService,
+        private readonly ProduitHistoriqueService $produitHistoriqueService,
+        private readonly ProduitHistoriqueRepository $produitHistoriqueRepository,
+        private readonly ProductDescriptionSuggestionService $descriptionSuggestionService,
     ) {
     }
 
@@ -34,29 +61,18 @@ final class ProduitController extends AbstractController
         $sortBy = $request->query->get('sortBy', 'nom');
         $sortOrder = $request->query->get('sortOrder', 'asc');
 
-        $orderBy = [];
-        if ($sortBy === 'prix') {
-            $orderBy['prix'] = $sortOrder === 'desc' ? 'DESC' : 'ASC';
-        } else {
-            $orderBy['nom'] = $sortOrder === 'desc' ? 'DESC' : 'ASC';
-        }
-
-        $produits = $this->produitRepository->findBy([], $orderBy);
+        $produits = $this->produitRepository->findBy([], ['id' => 'ASC']);
 
         if ($search !== null && $search !== '') {
-            $searchTerm = strtolower(trim($search));
+            $searchTerm = trim($search);
             $produits = array_filter($produits, function ($produit) use ($searchTerm) {
-                $nomMatch = strpos(strtolower($produit->getNom() ?? ''), $searchTerm) !== false;
-                $descriptionMatch = $produit->getDescription() && strpos(strtolower($produit->getDescription()), $searchTerm) !== false;
-                $categorieMatch = $produit->getCategorie() && strpos(strtolower($produit->getCategorie()->label()), $searchTerm) !== false;
-                $prixMatch = strpos((string) $produit->getPrix(), $searchTerm) !== false;
-
-                return $nomMatch || $descriptionMatch || $categorieMatch || $prixMatch;
+                return $this->fuzzySearchMatch($searchTerm, $produit);
             });
         }
 
+        $produits = $this->applySort($produits, $sortBy, $sortOrder);
+
         $stats = $this->getProduitStats();
-        $produitIdsAvecCommandes = $this->ligneCommandeRepository->getProduitIdsAvecCommandes();
 
         return $this->render('admin/produit/index.html.twig', [
             'produits' => $produits,
@@ -64,7 +80,44 @@ final class ProduitController extends AbstractController
             'sortBy' => $sortBy,
             'sortOrder' => $sortOrder,
             'stats' => $stats,
-            'produitIdsAvecCommandes' => $produitIdsAvecCommandes,
+        ]);
+    }
+
+    /**
+     * Applique le tri simple sur les produits.
+     *
+     * @param Produit[] $produits
+     * @return Produit[]
+     */
+    private function applySort(array $produits, string $sortBy, string $sortOrder): array
+    {
+        $order = $sortOrder === 'desc' ? -1 : 1;
+        usort($produits, function (Produit $a, Produit $b) use ($sortBy, $order): int {
+            $cmp = match ($sortBy) {
+                'prix' => ((float) ($a->getPrix() ?? 0)) <=> ((float) ($b->getPrix() ?? 0)),
+                default => strcasecmp($a->getNom() ?? '', $b->getNom() ?? ''),
+            };
+            return $cmp * $order;
+        });
+        return $produits;
+    }
+
+    #[Route('/prediction', name: 'admin_produit_prediction', methods: ['GET'])]
+    public function prediction(): Response
+    {
+        $report = $this->aiPredictionService->fullReport();
+        $predictions = $report['predictions'];
+        $needStock = array_values(array_filter($predictions, fn ($r) => ($r['stock_to_order'] ?? 0) > 0));
+
+        return $this->render('admin/produit/prediction.html.twig', [
+            'predictions' => $predictions,
+            'byLabel' => $report['byLabel'],
+            'byStrategic' => $report['byStrategic'],
+            'ca_estime_annee' => $report['ca_estime_annee'],
+            'annee_cible' => $report['annee_cible'],
+            'total_ventes_prevu_mois' => $report['total_ventes_prevu_mois'],
+            'mois_cible' => $report['mois_cible'],
+            'needStock' => $needStock,
         ]);
     }
 
@@ -72,11 +125,17 @@ final class ProduitController extends AbstractController
     public function exportExcel(): Response
     {
         $produits = $this->produitRepository->findBy([], ['nom' => 'ASC']);
-        $filename = 'export_produits_' . (new \DateTimeImmutable())->format('Y-m-d_His') . '.csv';
+        $filename = 'export_produits_' . (new \DateTimeImmutable())->format('Y-m-d_His') . '.xlsx';
 
-        $response = new Response($this->buildCsvContent($produits));
-        $response->headers->set('Content-Type', 'text/csv; charset=UTF-8');
+        $spreadsheet = $this->buildExcelSpreadsheet($produits);
+
+        $response = new StreamedResponse(static function () use ($spreadsheet): void {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        });
+        $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
+        $response->headers->set('Cache-Control', 'max-age=0');
 
         return $response;
     }
@@ -84,27 +143,96 @@ final class ProduitController extends AbstractController
     /**
      * @param list<Produit> $produits
      */
-    private function buildCsvContent(array $produits): string
+    private function buildExcelSpreadsheet(array $produits): Spreadsheet
     {
-        $out = fopen('php://temp', 'r+');
-        fprintf($out, "\xEF\xBB\xBF"); // BOM UTF-8 for Excel
-        fputcsv($out, ['ID', 'Nom', 'Description', 'Catégorie', 'Prix (د.ت)', 'Disponible'], ';');
-        foreach ($produits as $p) {
-            fputcsv($out, [
-                $p->getId(),
-                $p->getNom() ?? '',
-                $p->getDescription() ?? '',
-                $p->getCategorie() ? $p->getCategorie()->label() : '',
-                $p->getPrix() !== null ? number_format((float) $p->getPrix(), 2, ',', ' ') : '',
-                $p->isDisponibilite() ? 'Oui' : 'Non',
-            ], ';');
-        }
-        fputcsv($out, ['Total', count($produits) . ' produit(s) exporté(s)', '', '', '', ''], ';');
-        rewind($out);
-        $content = stream_get_contents($out);
-        fclose($out);
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Produits');
 
-        return $content;
+        $headers = ['ID', 'Nom', 'Description', 'Catégorie', 'Prix (DT)', 'Stock', 'Quantité', 'Valeur totale du stock', 'Disponible'];
+        $col = 'A';
+        foreach ($headers as $header) {
+            $sheet->setCellValue($col . '1', $header);
+            $col++;
+        }
+
+        $sheet->getStyle('A1:I1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:I1')->getFill()
+            ->setFillType(Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('A7C7E7');
+        $sheet->getStyle('A1:I1')->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A1:I1')->getBorders()->getAllBorders()
+            ->setBorderStyle(Border::BORDER_THIN);
+
+        $row = 2;
+        foreach ($produits as $p) {
+            $stock = $p->getStock();
+            $sheet->setCellValue('A' . $row, $p->getId());
+            $sheet->setCellValue('B' . $row, $p->getNom() ?? '');
+            $sheet->setCellValue('C' . $row, $p->getDescription() ?? '');
+            $sheet->setCellValue('D' . $row, $p->getCategorie() ? $p->getCategorie()->label() : '');
+            $sheet->setCellValue('E' . $row, $p->getPrix() !== null ? (float) $p->getPrix() : '');
+            $sheet->setCellValue('F' . $row, $stock ? $stock->getNom() : '');
+            $sheet->setCellValue('G' . $row, $p->getQuantite());
+            $sheet->setCellValue('I' . $row, $p->isDisponibilite() ? 'Oui' : 'Non');
+            $sheet->setCellValue('H' . $row, '=E' . $row . '*G' . $row);
+            $row++;
+        }
+
+        $dataLastRow = $row - 1;
+        $sheet->getStyle('E2:E' . $dataLastRow)->getNumberFormat()
+            ->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+        $sheet->getStyle('H2:H' . $dataLastRow)->getNumberFormat()
+            ->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+
+        $condRouge = new Conditional();
+        $condRouge->setConditionType(Conditional::CONDITION_CELLIS);
+        $condRouge->setOperatorType(Conditional::OPERATOR_EQUAL);
+        $condRouge->addCondition(0);
+        $condRouge->getStyle()->getFill()
+            ->setFillType(Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('FFCCCB');
+        $condRouge->setPriority(1);
+
+        $condOrange = new Conditional();
+        $condOrange->setConditionType(Conditional::CONDITION_CELLIS);
+        $condOrange->setOperatorType(Conditional::OPERATOR_LESSTHAN);
+        $condOrange->addCondition(5);
+        $condOrange->getStyle()->getFill()
+            ->setFillType(Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('FFA500');
+        $condOrange->setPriority(2);
+
+        $condVert = new Conditional();
+        $condVert->setConditionType(Conditional::CONDITION_CELLIS);
+        $condVert->setOperatorType(Conditional::OPERATOR_GREATERTHANOREQUAL);
+        $condVert->addCondition(5);
+        $condVert->getStyle()->getFill()
+            ->setFillType(Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('90EE90');
+        $condVert->setPriority(3);
+
+        $sheet->getStyle('G2:G' . $dataLastRow)->setConditionalStyles([$condRouge, $condOrange, $condVert]);
+
+        $lastRow = $row;
+        $sheet->setCellValue('A' . $lastRow, 'Total');
+        $sheet->setCellValue('B' . $lastRow, count($produits) . ' produit(s) exporté(s)');
+        $sheet->setCellValue('H' . $lastRow, '=SUM(H2:H' . $dataLastRow . ')');
+        $sheet->getStyle('A' . $lastRow . ':I' . $lastRow)->getFont()->setBold(true);
+        $sheet->getStyle('A' . $lastRow . ':I' . $lastRow)->getFill()
+            ->setFillType(Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('F5F1EB');
+        $sheet->getStyle('H' . $lastRow)->getNumberFormat()
+            ->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+
+        foreach (range('A', 'I') as $columnID) {
+            $sheet->getColumnDimension($columnID)->setAutoSize(true);
+        }
+        $sheet->freezePane('A2');
+
+        return $spreadsheet;
     }
 
     /**
@@ -141,7 +269,8 @@ final class ProduitController extends AbstractController
     public function new(Request $request): Response
     {
         $produit = new Produit();
-        $form = $this->createForm(ProduitType::class, $produit);
+        $produit->setStatutPublication(StatutPublication::PUBLIE);
+        $form = $this->createForm(ProduitType::class, $produit, ['show_statut_publication' => false]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
@@ -166,10 +295,12 @@ final class ProduitController extends AbstractController
                         ]);
                     }
                 }
-
+                $produit->setValide(true);
                 $this->entityManager->persist($produit);
                 $this->entityManager->flush();
-                $this->addFlash('success', 'Le produit a été créé avec succès.');
+                $produit->setSku('PRD-' . str_pad((string) $produit->getId(), 6, '0', STR_PAD_LEFT));
+                $this->entityManager->flush();
+                $this->addFlash('success', 'Ajouté avec succès.');
                 return $this->redirectToRoute('admin_produit_index');
             }
         }
@@ -183,15 +314,23 @@ final class ProduitController extends AbstractController
     #[Route('/{id}', name: 'admin_produit_show', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function show(Produit $produit): Response
     {
+        $historique = $this->produitHistoriqueRepository->findByProduitOrderByCreatedDesc($produit);
         return $this->render('admin/produit/show.html.twig', [
             'produit' => $produit,
+            'historique' => $historique,
         ]);
     }
 
     #[Route('/{id}/edit', name: 'admin_produit_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
     public function edit(Request $request, Produit $produit): Response
     {
-        $form = $this->createForm(ProduitType::class, $produit);
+        $user = $this->getUser();
+        $oldPrix = $produit->getPrix();
+        $oldQuantite = $produit->getQuantite();
+        $oldStatut = $produit->getStatutPublication();
+        $oldDispo = $produit->isDisponibilite();
+
+        $form = $this->createForm(ProduitType::class, $produit, ['show_statut_publication' => false]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
@@ -206,6 +345,20 @@ final class ProduitController extends AbstractController
             }
 
             if ($form->isValid()) {
+                if ($user instanceof \App\Entity\User) {
+                    if ((string) $oldPrix !== (string) $produit->getPrix()) {
+                        $this->produitHistoriqueService->log($produit, $user, 'prix', (string) $oldPrix, (string) $produit->getPrix());
+                    }
+                    if ($oldQuantite !== $produit->getQuantite()) {
+                        $this->produitHistoriqueService->log($produit, $user, 'quantite', (string) $oldQuantite, (string) $produit->getQuantite());
+                    }
+                    if ($oldStatut !== $produit->getStatutPublication()) {
+                        $this->produitHistoriqueService->log($produit, $user, 'statutPublication', $oldStatut->label(), $produit->getStatutPublication()->label());
+                    }
+                    if ($oldDispo !== $produit->isDisponibilite()) {
+                        $this->produitHistoriqueService->log($produit, $user, 'disponibilite', $oldDispo ? 'Oui' : 'Non', $produit->isDisponibilite() ? 'Oui' : 'Non');
+                    }
+                }
                 $imageFile = $form->get('image')->getData();
                 if ($imageFile) {
                     $saved = $this->handleImageUpload($imageFile, $produit);
@@ -216,7 +369,6 @@ final class ProduitController extends AbstractController
                         ]);
                     }
                 }
-
                 $this->entityManager->flush();
                 $this->addFlash('success', 'Le produit a été modifié avec succès.');
                 return $this->redirectToRoute('admin_produit_show', ['id' => $produit->getId()]);
@@ -227,6 +379,191 @@ final class ProduitController extends AbstractController
             'produit' => $produit,
             'form' => $form,
         ]);
+    }
+
+    #[Route('/suggerer-description', name: 'admin_produit_suggerer_description', methods: ['POST'])]
+    public function suggererDescription(Request $request): JsonResponse
+    {
+        $nom = trim((string) ($request->request->get('nom') ?? ''));
+        if ($nom === '') {
+            return new JsonResponse(['error' => 'Veuillez saisir le nom du produit'], 400);
+        }
+
+        if (!$this->descriptionSuggestionService->isConfigured()) {
+            return new JsonResponse(['error' => 'CHAT_API_KEY non configurée'], 503);
+        }
+
+        $description = $this->descriptionSuggestionService->suggestDescription($nom);
+        if ($description === null) {
+            return new JsonResponse(['error' => 'Impossible de générer une suggestion'], 500);
+        }
+
+        return new JsonResponse(['description' => $description]);
+    }
+
+    #[Route('/search-images-global', name: 'admin_produit_search_images_global', methods: ['POST'])]
+    public function searchImagesGlobal(Request $request): JsonResponse
+    {
+        $query = $request->request->get('query', '');
+        
+        if (empty($query)) {
+            return new JsonResponse(['error' => 'Requête vide'], 400);
+        }
+        
+        try {
+            $searchResults = $this->priceSearchService->searchProduct($query);
+            
+            $images = [];
+            if (!empty($searchResults['results'])) {
+                foreach ($searchResults['results'] as $result) {
+                    if (!empty($result['image_url'])) {
+                        $images[] = [
+                            'url' => $result['image_url'],
+                            'source' => $result['source'] ?? 'Web',
+                            'title' => $result['name'] ?? $query,
+                        ];
+                    }
+                }
+            }
+            
+            $uniqueImages = [];
+            $seenUrls = [];
+            foreach ($images as $img) {
+                if (!in_array($img['url'], $seenUrls)) {
+                    $seenUrls[] = $img['url'];
+                    $uniqueImages[] = $img;
+                }
+            }
+            
+            return new JsonResponse([
+                'success' => true,
+                'images' => array_slice($uniqueImages, 0, 8),
+                'query' => $query,
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'error' => 'Erreur lors de la recherche: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    #[Route('/{id}/search-images', name: 'admin_produit_search_images', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function searchImages(Request $request, Produit $produit): JsonResponse
+    {
+        $query = $request->request->get('query', $produit->getNom());
+        
+        if (empty($query)) {
+            return new JsonResponse(['error' => 'Requête vide'], 400);
+        }
+        
+        try {
+            $searchResults = $this->priceSearchService->searchProduct($query);
+            
+            $images = [];
+            if (!empty($searchResults['results'])) {
+                foreach ($searchResults['results'] as $result) {
+                    if (!empty($result['image_url'])) {
+                        $priceDisplay = isset($result['price_tnd']) 
+                            ? number_format($result['price_tnd'], 2, ',', ' ') . ' DT'
+                            : null;
+                        
+                        $images[] = [
+                            'url' => $result['image_url'],
+                            'source' => $result['source'] ?? 'Web',
+                            'price' => $priceDisplay,
+                            'title' => $result['name'] ?? $query,
+                        ];
+                    }
+                }
+            }
+            
+            $uniqueImages = [];
+            $seenUrls = [];
+            foreach ($images as $img) {
+                if (!in_array($img['url'], $seenUrls)) {
+                    $seenUrls[] = $img['url'];
+                    $uniqueImages[] = $img;
+                }
+            }
+            
+            return new JsonResponse([
+                'success' => true,
+                'images' => array_slice($uniqueImages, 0, 8),
+                'query' => $query,
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'error' => 'Erreur lors de la recherche: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    #[Route('/{id}/apply-external-image', name: 'admin_produit_apply_external_image', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function applyExternalImage(Request $request, Produit $produit): JsonResponse
+    {
+        $imageUrl = $request->request->get('image_url');
+        
+        if (empty($imageUrl)) {
+            return new JsonResponse(['error' => 'URL d\'image requise'], 400);
+        }
+        
+        try {
+            $imageContent = @file_get_contents($imageUrl);
+            if ($imageContent === false) {
+                return new JsonResponse(['error' => 'Impossible de télécharger l\'image'], 400);
+            }
+            
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+            $mimeType = $finfo->buffer($imageContent);
+            
+            $extension = match ($mimeType) {
+                'image/jpeg' => 'jpg',
+                'image/png' => 'png',
+                'image/gif' => 'gif',
+                'image/webp' => 'webp',
+                default => 'jpg',
+            };
+            
+            $safeFilename = $this->slugger->slug($produit->getNom());
+            $newFilename = $safeFilename . '-' . uniqid() . '.' . $extension;
+            $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/produits';
+            
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+            
+            $filePath = $uploadDir . '/' . $newFilename;
+            file_put_contents($filePath, $imageContent);
+            
+            $produit->setImage('uploads/produits/' . $newFilename);
+            $this->entityManager->flush();
+            
+            return new JsonResponse([
+                'success' => true,
+                'image_path' => 'uploads/produits/' . $newFilename,
+                'message' => 'Image appliquée avec succès',
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'error' => 'Erreur: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    #[Route('/{id}/valider', name: 'admin_produit_valider', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function valider(Request $request, Produit $produit): Response
+    {
+        if (!$this->isCsrfTokenValid('valider' . $produit->getId(), $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token CSRF invalide.');
+            return $this->redirectToRoute('admin_produit_edit', ['id' => $produit->getId()]);
+        }
+        
+        $produit->setValide(true);
+        $produit->setStatutPublication(StatutPublication::PUBLIE);
+        $this->entityManager->flush();
+        
+        $this->addFlash('success', 'Le produit "' . $produit->getNom() . '" a été validé et est maintenant visible.');
+        return $this->redirectToRoute('admin_produit_index');
     }
 
     #[Route('/{id}/confirm-delete', name: 'admin_produit_confirm_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
@@ -243,13 +580,12 @@ final class ProduitController extends AbstractController
         if (!$this->isCsrfTokenValid('delete' . $produit->getId(), $request->request->get('_token'))) {
             return $this->redirectToRoute('admin_produit_index');
         }
-        if ($this->ligneCommandeRepository->countByProduit($produit) > 0) {
-            $this->addFlash('error', 'Ce produit ne peut pas être supprimé car il est présent dans une ou plusieurs commandes.');
-            return $this->redirectToRoute('admin_produit_index');
-        }
+        $this->removeProduitFromCommandes($produit);
+        $this->removeProduitFromOrders($produit);
+        $this->removeProduitFromCartItems($produit);
         $this->entityManager->remove($produit);
         $this->entityManager->flush();
-        $this->addFlash('success', 'Le produit a été supprimé avec succès.');
+        $this->addFlash('success', 'Le produit a été retiré des commandes, paniers et supprimé avec succès.');
         return $this->redirectToRoute('admin_produit_index');
     }
 
@@ -263,23 +599,64 @@ final class ProduitController extends AbstractController
         }
         $produits = $this->produitRepository->findBy(['id' => $ids]);
         $deleted = 0;
-        $blocked = [];
         foreach ($produits as $produit) {
-            if ($this->ligneCommandeRepository->countByProduit($produit) > 0) {
-                $blocked[] = $produit->getNom();
-                continue;
-            }
+            $this->removeProduitFromCommandes($produit);
+            $this->removeProduitFromOrders($produit);
+            $this->removeProduitFromCartItems($produit);
             $this->entityManager->remove($produit);
             $deleted++;
         }
         $this->entityManager->flush();
         if ($deleted > 0) {
-            $this->addFlash('success', $deleted . ' produit(s) supprimé(s) avec succès.');
-        }
-        if ($blocked !== []) {
-            $this->addFlash('error', 'Produit(s) non supprimé(s) (présents dans des commandes) : ' . implode(', ', $blocked) . '.');
+            $this->addFlash('success', $deleted . ' produit(s) retiré(s) des commandes, paniers et supprimé(s) avec succès.');
         }
         return $this->redirectToRoute('admin_produit_index');
+    }
+
+    private function removeProduitFromCommandes(Produit $produit): void
+    {
+        $lignes = $this->ligneCommandeRepository->findByProduit($produit);
+        foreach ($lignes as $ligne) {
+            $commande = $ligne->getCommande();
+            if ($commande) {
+                $commande->removeLigne($ligne);
+                $newTotal = 0.0;
+                foreach ($commande->getLignes() as $l) {
+                    $newTotal += (float) ($l->getSousTotal() ?? 0);
+                }
+                $commande->setTotal($newTotal);
+            }
+            $this->entityManager->remove($ligne);
+        }
+    }
+
+    private function removeProduitFromOrders(Produit $produit): void
+    {
+        $items = $this->orderItemRepository->findByProduit($produit);
+        foreach ($items as $item) {
+            $order = $item->getOrder();
+            if ($order) {
+                $order->removeItem($item);
+                $newTotal = 0.0;
+                foreach ($order->getItems() as $i) {
+                    $newTotal += $i->getTotalPrice();
+                }
+                $order->setTotalPrice($newTotal);
+            }
+            $this->entityManager->remove($item);
+        }
+    }
+
+    private function removeProduitFromCartItems(Produit $produit): void
+    {
+        $items = $this->cartItemRepository->findByProduit($produit);
+        foreach ($items as $item) {
+            $cart = $item->getCart();
+            if ($cart) {
+                $cart->removeItem($item);
+            }
+            $this->entityManager->remove($item);
+        }
     }
 
     /**
@@ -405,4 +782,41 @@ final class ProduitController extends AbstractController
             return false;
         }
     }
+
+    private function downloadExternalImage(string $imageUrl, string $productName): ?string
+    {
+        try {
+            $imageContent = @file_get_contents($imageUrl);
+            if ($imageContent === false) {
+                return null;
+            }
+            
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+            $mimeType = $finfo->buffer($imageContent);
+            
+            $extension = match ($mimeType) {
+                'image/jpeg' => 'jpg',
+                'image/png' => 'png',
+                'image/gif' => 'gif',
+                'image/webp' => 'webp',
+                default => 'jpg',
+            };
+            
+            $safeFilename = $this->slugger->slug($productName);
+            $newFilename = $safeFilename . '-' . uniqid() . '.' . $extension;
+            $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/produits';
+            
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+            
+            $filePath = $uploadDir . '/' . $newFilename;
+            file_put_contents($filePath, $imageContent);
+            
+            return 'uploads/produits/' . $newFilename;
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
 }

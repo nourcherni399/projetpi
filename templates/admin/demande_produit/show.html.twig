@@ -1,0 +1,167 @@
+{% extends 'layouts/admin.html.twig' %}
+
+{% block title %}Demande #{{ demande.id }} - AutiCare Admin{% endblock %}
+
+{% block admin_content %}
+<div class="max-w-4xl">
+    <div class="mb-6 flex items-center gap-4">
+        <a href="{{ path('admin_demande_produit_index') }}" class="inline-flex items-center gap-2 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded-lg">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            Retour aux demandes
+        </a>
+    </div>
+
+    <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8">
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <h1 class="text-2xl font-semibold text-[#4B5563]">{{ demande.nom }}</h1>
+            {% if demande.statut == 'en_attente' %}
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium bg-sky-50 text-sky-700 border border-sky-200">En attente</span>
+            {% elseif demande.statut == 'approuve' %}
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">Approuvé</span>
+            {% elseif demande.statut == 'rejete' %}
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium bg-red-50 text-red-700 border border-red-200">Rejeté</span>
+            {% endif %}
+        </div>
+
+        <div class="space-y-6">
+            <div>
+                <h2 class="text-sm font-medium text-[#4B5563] mb-1">Demande client (chatbot)</h2>
+                <p class="text-[#6B7280] whitespace-pre-wrap">{{ demande.demandeClient }}</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <p class="text-sm font-medium text-[#4B5563] mb-1">Catégorie</p>
+                    <p class="text-[#6B7280]">{{ demande.categorie ? demande.categorie.label : '—' }}</p>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-[#4B5563] mb-1">Prix estimé</p>
+                    <p class="text-xl font-semibold text-[#A7C7E7]">{{ demande.prixEstime|number_format(2, ',', ' ') }} dt</p>
+                </div>
+                {% if demande.budgetClient %}
+                <div>
+                    <p class="text-sm font-medium text-[#4B5563] mb-1">Budget client</p>
+                    <p class="text-[#6B7280]">{{ demande.budgetClient|number_format(2, ',', ' ') }} dt</p>
+                </div>
+                {% endif %}
+                <div>
+                    <p class="text-sm font-medium text-[#4B5563] mb-1">Date création</p>
+                    <p class="text-[#6B7280]">{{ demande.createdAt ? demande.createdAt|date('d/m/Y H:i') : '—' }}</p>
+                </div>
+            </div>
+
+            {% if demande.description %}
+            <div>
+                <h2 class="text-sm font-medium text-[#4B5563] mb-1">Description</h2>
+                <p class="text-[#6B7280] whitespace-pre-wrap">{{ demande.description }}</p>
+            </div>
+            {% endif %}
+
+            {% if demande.caracteristiques %}
+            <div>
+                <h2 class="text-sm font-medium text-[#4B5563] mb-1">Caractéristiques</h2>
+                <p class="text-[#6B7280] whitespace-pre-wrap">{{ demande.caracteristiques }}</p>
+            </div>
+            {% endif %}
+
+            {# Section: Images proposées par l'IA #}
+            {% set donneesExternes = demande.donneesExternes %}
+            {% set imageOptions = donneesExternes.image_options ?? [] %}
+            
+            {# Fallback: si image_options n'existe pas, utiliser results #}
+            {% if imageOptions|length == 0 and donneesExternes.results is defined %}
+                {% set imageOptions = [] %}
+                {% for result in donneesExternes.results %}
+                    {% if result.image_url %}
+                        {% set imageOptions = imageOptions|merge([{
+                            'url': result.image_url,
+                            'source': result.source ?? 'Google',
+                            'price': result.price_tnd ?? null
+                        }]) %}
+                    {% endif %}
+                {% endfor %}
+                {% if donneesExternes.image_path %}
+                    {% set imageOptions = imageOptions|merge([{
+                        'url': donneesExternes.image_path,
+                        'source': 'Téléchargée',
+                        'price': null,
+                        'local': true
+                    }]) %}
+                {% endif %}
+            {% endif %}
+            
+            {% if imageOptions|length > 0 %}
+            <div class="pt-4 border-t border-[#E5E0D8]">
+                <h2 class="text-sm font-medium text-[#4B5563] mb-3 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-violet-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                    </svg>
+                    Images proposées par l'IA ({{ imageOptions|length }})
+                </h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                    {% for idx, option in imageOptions %}
+                        <div class="group relative">
+                            <div class="aspect-square rounded-lg border-2 border-[#E5E0D8] overflow-hidden bg-[#F5F1EB] hover:border-[#A7C7E7] transition-all">
+                                <img src="{{ option.local is defined and option.local ? asset(option.url) : option.url }}" 
+                                     alt="Option {{ idx + 1 }}" 
+                                     class="w-full h-full object-cover"
+                                     referrerpolicy="no-referrer"
+                                     onerror="this.parentElement.innerHTML='<div class=\'flex items-center justify-center h-full text-gray-400 text-xs\'>Erreur</div>'">
+                            </div>
+                            <p class="text-xs text-center text-[#6B7280] mt-1 truncate">{{ option.source ?? 'Source' }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+                <p class="text-xs text-[#9CA3AF] mt-3">Cliquez sur "Créer produit" pour sélectionner l'image finale.</p>
+            </div>
+            {% endif %}
+
+            {% if demande.demandeur %}
+            <div>
+                <p class="text-sm font-medium text-[#4B5563] mb-1">Demandeur</p>
+                <p class="text-[#6B7280]">{{ demande.demandeur.prenom }} {{ demande.demandeur.nom }} ({{ demande.demandeur.email }})</p>
+            </div>
+            {% endif %}
+
+            {% if demande.validatedBy %}
+            <div>
+                <p class="text-sm font-medium text-[#4B5563] mb-1">Traité par</p>
+                <p class="text-[#6B7280]">{{ demande.validatedBy.prenom }} {{ demande.validatedBy.nom }} le {{ demande.validatedAt ? demande.validatedAt|date('d/m/Y H:i') : '—' }}</p>
+            </div>
+            {% endif %}
+
+            {% if demande.produit %}
+            <div class="pt-4 border-t border-[#E5E0D8]">
+                <p class="text-sm font-medium text-[#4B5563] mb-2">Produit créé</p>
+                <a href="{{ path('admin_produit_show', {id: demande.produit.id}) }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-violet-100 text-violet-700 hover:bg-violet-200 font-medium">
+                    {{ demande.produit.nom }}
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="flex flex-wrap gap-3 pt-6 mt-6 border-t border-[#E5E0D8]">
+            <a href="{{ path('admin_demande_produit_export_pdf_fiche', {id: demande.id}) }}" class="px-5 py-2.5 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB]">
+                Exporter PDF
+            </a>
+            {% if demande.statut == 'en_attente' %}
+                <a href="{{ path('admin_demande_produit_creer_produit', {id: demande.id}) }}" class="px-5 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED]">
+                    Créer produit
+                </a>
+                <form method="post" action="{{ path('admin_demande_produit_approuver', {id: demande.id}) }}" class="inline">
+                    <input type="hidden" name="_token" value="{{ csrf_token('approuver_demande_' ~ demande.id) }}">
+                    <button type="submit" class="px-5 py-2.5 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700">Approuver</button>
+                </form>
+                <form method="post" action="{{ path('admin_demande_produit_rejeter', {id: demande.id}) }}" class="inline" onsubmit="return confirm('Rejeter cette demande ?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('rejeter_demande_' ~ demande.id) }}">
+                    <button type="submit" class="px-5 py-2.5 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700">Rejeter</button>
+                </form>
+            {% endif %}
+            <a href="{{ path('admin_demande_produit_index') }}" class="px-5 py-2.5 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB]">
+                Retour
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

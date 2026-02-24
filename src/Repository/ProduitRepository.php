@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\Produit;
 use App\Enum\Categorie;
+use App\Enum\StatutPublication;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -113,6 +114,28 @@ class ProduitRepository extends ServiceEntityRepository
             ->setParameter('dispo', true)
             ->orderBy('p.nom', 'ASC')
             ->setMaxResults(12)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Produits créés par l'IA et validés par l'admin, affichés sur la page d'accueil.
+     *
+     * @return Produit[]
+     */
+    public function findGenereParIaEtValides(int $limit = 8): array
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.genereParIa = :genere')
+            ->andWhere('p.valide = :valide')
+            ->andWhere('p.statutPublication = :statut')
+            ->andWhere('p.disponibilite = :dispo')
+            ->setParameter('genere', true)
+            ->setParameter('valide', true)
+            ->setParameter('statut', StatutPublication::PUBLIE)
+            ->setParameter('dispo', true)
+            ->orderBy('p.nom', 'ASC')
+            ->setMaxResults($limit)
             ->getQuery()
             ->getResult();
     }

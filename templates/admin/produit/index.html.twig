@@ -25,17 +25,35 @@
             {% endif %}
         </form>
         <div class="flex flex-wrap items-center gap-2">
+            <details class="relative group/trier">
+                <summary class="list-none cursor-pointer px-4 py-2.5 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB] inline-flex items-center gap-2 focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" /></svg>
+                    Trier
+                    <svg class="w-4 h-4 transition group-open/trier:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                </summary>
+                <div class="absolute right-0 mt-1 py-2 w-64 rounded-xl bg-white shadow-lg border border-[#E5E0D8] z-50">
+                    <a href="{{ path('admin_produit_index', {search: search|default(''), sortBy: 'nom', sortOrder: 'asc'}) }}" class="block px-4 py-2.5 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if sortBy|default('nom') == 'nom' and sortOrder|default('asc') == 'asc' %}bg-[#A7C7E7]/15 text-[#A7C7E7] font-medium{% endif %}">Par nom A-Z</a>
+                    <a href="{{ path('admin_produit_index', {search: search|default(''), sortBy: 'nom', sortOrder: 'desc'}) }}" class="block px-4 py-2.5 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if sortBy|default('nom') == 'nom' and sortOrder|default('asc') == 'desc' %}bg-[#A7C7E7]/15 text-[#A7C7E7] font-medium{% endif %}">Par nom Z-A</a>
+                    <a href="{{ path('admin_produit_index', {search: search|default(''), sortBy: 'prix', sortOrder: 'asc'}) }}" class="block px-4 py-2.5 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if (sortBy|default('nom')) == 'prix' and (sortOrder|default('asc')) == 'asc' %}bg-[#A7C7E7]/15 text-[#A7C7E7] font-medium{% endif %}">Par prix croissant</a>
+                    <a href="{{ path('admin_produit_index', {search: search|default(''), sortBy: 'prix', sortOrder: 'desc'}) }}" class="block px-4 py-2.5 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if (sortBy|default('nom')) == 'prix' and (sortOrder|default('asc')) == 'desc' %}bg-[#A7C7E7]/15 text-[#A7C7E7] font-medium{% endif %}">Par prix décroissant</a>
+                </div>
+            </details>
             <a href="{{ path('admin_stats_index') }}" class="px-4 py-2.5 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB] inline-flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 00-2-2h-2a2 2 0 00-2 2v14a2 2 0 002 2h2a2 2 0 002-2z" /></svg>
                 Stats
+            </a>
+            <a href="{{ path('admin_demande_produit_index') }}" class="px-4 py-2.5 rounded-lg border border-violet-200 bg-violet-50 text-violet-700 font-medium hover:bg-violet-100 inline-flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" /></svg>
+                Demandes produits
+            </a>
+            <a href="{{ path('admin_produit_prediction') }}" class="px-4 py-2.5 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB] inline-flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                Prédiction
             </a>
             <a href="{{ path('admin_produit_export_excel') }}" class="px-4 py-2.5 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB] inline-flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                 Exporter Excel
             </a>
-            <button id="deleteSelectedBtn" type="button" class="px-4 py-2.5 rounded-lg bg-red-500 text-white font-medium hover:bg-red-600 hidden">
-                Supprimer la sélection
-            </button>
             <a href="{{ path('admin_produit_new') }}" class="px-4 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] inline-flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
                 Nouveau produit
@@ -44,18 +62,15 @@
     </div>
 
     <div class="overflow-x-auto">
-        <form id="deleteForm" method="POST" action="{{ path('admin_produit_bulk_delete') }}">
-            <input type="hidden" name="_token" value="{{ csrf_token('bulk_delete') }}">
-            <table class="w-full text-left">
-                <thead class="bg-[#F5F1EB] border-b border-[#E5E0D8]">
-                    <tr>
-                        <th class="px-6 py-4 font-semibold text-[#4B5563] text-xs uppercase tracking-wider w-10"></th>
-                        <th class="px-6 py-4 font-semibold text-[#4B5563] text-xs uppercase tracking-wider">
-                            <a href="{{ path('admin_produit_index', {search: search|default(''), sortBy: 'nom', sortOrder: sortBy == 'nom' and sortOrder == 'asc' ? 'desc' : 'asc'}) }}" class="hover:text-[#A7C7E7]">Produit</a>
+        <table class="w-full text-left">
+            <thead class="bg-[#F5F1EB] border-b border-[#E5E0D8]">
+                <tr>
+                    <th class="px-6 py-4 font-semibold text-[#4B5563] text-xs uppercase tracking-wider">
+                            <a href="{{ path('admin_produit_index', {search: search|default(''), sortBy: 'nom', sortOrder: sortBy|default('nom') == 'nom' and sortOrder|default('asc') == 'asc' ? 'desc' : 'asc'}) }}" class="hover:text-[#A7C7E7]">Produit</a>
                         </th>
                         <th class="px-6 py-4 font-semibold text-[#4B5563] text-xs uppercase tracking-wider">Catégorie</th>
                         <th class="px-6 py-4 font-semibold text-[#4B5563] text-xs uppercase tracking-wider">
-                            <a href="{{ path('admin_produit_index', {search: search|default(''), sortBy: 'prix', sortOrder: sortBy == 'prix' and sortOrder == 'asc' ? 'desc' : 'asc'}) }}" class="hover:text-[#A7C7E7]">Prix</a>
+                            <a href="{{ path('admin_produit_index', {search: search|default(''), sortBy: 'prix', sortOrder: sortBy|default('nom') == 'prix' and sortOrder|default('asc') == 'asc' ? 'desc' : 'asc'}) }}" class="hover:text-[#A7C7E7]">Prix</a>
                         </th>
                         <th class="px-6 py-4 font-semibold text-[#4B5563] text-xs uppercase tracking-wider">Statut</th>
                         <th class="px-6 py-4 font-semibold text-[#4B5563] text-xs uppercase tracking-wider text-right">Actions</th>
@@ -64,10 +79,6 @@
                 <tbody class="divide-y divide-[#E5E0D8] bg-white" id="produitTableBody">
                     {% for produit in produits %}
                     <tr class="hover:bg-[#F9FAFB] produit-row" data-nom="{{ produit.nom|lower }}" data-categorie="{{ produit.categorie ? produit.categorie.label|lower : '' }}" data-description="{{ produit.description|lower }}" data-prix="{{ produit.prix }}" data-disponibilite="{{ produit.disponibilite ? 'oui' : 'non' }}" data-user-id="{{ produit.user ? produit.user.id : '' }}">
-                        <td class="px-6 py-4">
-                            {% set cannotDelete = produit.id in produitIdsAvecCommandes|default([]) %}
-                            <input type="checkbox" name="ids[]" value="{{ produit.id }}" class="selectItem rounded border-[#E5E0D8] text-[#A7C7E7] focus:ring-[#A7C7E7]" {% if cannotDelete %}disabled title="Ce produit ne peut pas être supprimé (présent dans des commandes)"{% endif %}>
-                        </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
                                 <a href="{{ path('admin_produit_show', {id: produit.id}) }}" class="shrink-0 hover:opacity-90">
@@ -79,6 +90,12 @@
                                 </a>
                                 <div>
                                     <a href="{{ path('admin_produit_show', {id: produit.id}) }}" class="font-medium text-[#4B5563] hover:text-[#A7C7E7]">{{ produit.nom }}</a>
+                                    {% if produit.genereParIa %}
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-violet-50 text-violet-700 border border-violet-200" title="Créé via le chatbot IA">IA</span>
+                                    {% endif %}
+                                    {% if not produit.valide %}
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200" title="En attente de validation">En attente</span>
+                                    {% endif %}
                                     {% if produit.description %}
                                         <p class="text-[#6B7280] text-sm mt-0.5 line-clamp-1 max-w-xs">{{ produit.description }}</p>
                                     {% endif %}
@@ -86,7 +103,7 @@
                             </div>
                         </td>
                         <td class="px-6 py-4 text-[#6B7280]">{{ produit.categorie ? produit.categorie.label() : '—' }}</td>
-                        <td class="px-6 py-4 font-medium text-[#4B5563]">{{ produit.prix|number_format(2, ',', ' ') }} د.ت</td>
+                        <td class="px-6 py-4 font-medium text-[#4B5563]">{{ produit.prix|number_format(2, ',', ' ') }} dt</td>
                         <td class="px-6 py-4">
                             {% if produit.disponibilite %}
                                 <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">Disponible</span>
@@ -108,12 +125,11 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="6" class="px-6 py-12 text-center text-[#6B7280]">Aucun produit.</td>
+                        <td colspan="5" class="px-6 py-12 text-center text-[#6B7280]">Aucun produit.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
-        </form>
     </div>
 </section>
 
@@ -151,19 +167,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (searchInput) {
         searchInput.addEventListener('search', function() {
             if (this.value.trim() === '') window.location.href = indexUrl;
-        });
-    }
-    var deleteBtn = document.getElementById('deleteSelectedBtn');
-    var checkboxes = document.querySelectorAll('.selectItem:not([disabled])');
-    var deleteForm = document.getElementById('deleteForm');
-    if (deleteBtn && checkboxes.length) {
-        function toggleDeleteBtn() {
-            var checked = document.querySelectorAll('.selectItem:not([disabled]):checked');
-            deleteBtn.classList.toggle('hidden', checked.length === 0);
-        }
-        checkboxes.forEach(function(cb) { cb.addEventListener('change', toggleDeleteBtn); });
-        deleteBtn.addEventListener('click', function() {
-            if (confirm('Supprimer les produits sélectionnés ?')) deleteForm.submit();
         });
     }
 });

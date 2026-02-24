@@ -1,0 +1,148 @@
+{% extends 'layouts/user.html.twig' %}
+
+{% block title %}Contact - AutiCare{% endblock %}
+
+{% block user_content %}
+<section class="py-12">
+    <div class="max-w-4xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <h1 class="text-3xl md:text-4xl font-bold text-[#4B5563] mb-4">
+                Contactez-nous
+            </h1>
+            <p class="text-lg text-[#6B7280] max-w-2xl mx-auto">
+                Une question ? Une suggestion ? Notre équipe est là pour vous accompagner.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <!-- Informations de contact -->
+            <div>
+                <h2 class="text-xl font-semibold text-[#4B5563] mb-6">Nos coordonnées</h2>
+                
+                <div class="space-y-6">
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-full bg-[#A7C7E7]/20 text-[#A7C7E7] flex items-center justify-center flex-shrink-0">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25H6.75a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.375c0 .621-.504 1.125-1.125 1.125h-15c-.621 0-1.125-.504-1.125-1.125V6.75M19.5 12h-15" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-medium text-[#4B5563] mb-1">Email</h3>
+                            <p class="text-[#6B7280]">contact@auticare.fr</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-full bg-[#A7C7E7]/20 text-[#A7C7E7] flex items-center justify-center flex-shrink-0">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 1.036.84 1.875 1.875 1.875h15c1.036 0 1.875-.84 1.875-1.875V6.75M19.5 12l-2.25 2.25m0 0l-2.25-2.25m2.25 2.25V6.75m0 0c0 1.036.84 1.875 1.875 1.875h15c1.036 0 1.875-.84 1.875-1.875V6.75" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-medium text-[#4B5563] mb-1">Téléphone</h3>
+                            <p class="text-[#6B7280]">01 23 45 67 89</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-full bg-[#A7C7E7]/20 text-[#A7C7E7] flex items-center justify-center flex-shrink-0">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h9m-9 0H3m9 0a9 9 0 0118 0 9 9 0 01-18 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-medium text-[#4B5563] mb-1">Horaires</h3>
+                            <p class="text-[#6B7280]">Lundi - Vendredi : 9h - 18h</p>
+                            <p class="text-[#6B7280]">Samedi : 9h - 12h</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulaire de contact -->
+            <div>
+                <h2 class="text-xl font-semibold text-[#4B5563] mb-6">Envoyez-nous un message</h2>
+                
+                <form class="space-y-6">
+                    <div>
+                        <label for="nom" class="block text-sm font-medium text-[#4B5563] mb-2">Nom complet</label>
+                        <input type="text" id="nom" name="nom" required
+                               class="w-full px-4 py-3 border border-[#E5E7EB] rounded-lg focus:ring-2 focus:ring-[#A7C7E7] focus:border-transparent">
+                    </div>
+
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-[#4B5563] mb-2">Email</label>
+                        <input type="email" id="email" name="email" required
+                               class="w-full px-4 py-3 border border-[#E5E7EB] rounded-lg focus:ring-2 focus:ring-[#A7C7E7] focus:border-transparent">
+                    </div>
+
+                    <div>
+                        <label for="sujet" class="block text-sm font-medium text-[#4B5563] mb-2">Sujet</label>
+                        <select id="sujet" name="sujet" required
+                                class="w-full px-4 py-3 border border-[#E5E7EB] rounded-lg focus:ring-2 focus:ring-[#A7C7E7] focus:border-transparent">
+                            <option value="">Choisissez un sujet</option>
+                            <option value="information">Demande d'information</option>
+                            <option value="produit">Question sur un produit</option>
+                            <option value="evenement">Question sur un événement</option>
+                            <option value="compte">Problème de compte</option>
+                            <option value="suggestion">Suggestion</option>
+                            <option value="autre">Autre</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="message" class="block text-sm font-medium text-[#4B5563] mb-2">Message</label>
+                        <textarea id="message" name="message" rows="6" required
+                                  class="w-full px-4 py-3 border border-[#E5E7EB] rounded-lg focus:ring-2 focus:ring-[#A7C7E7] focus:border-transparent"
+                                  placeholder="Décrivez votre demande..."></textarea>
+                    </div>
+
+                    <button type="submit"
+                            class="w-full px-6 py-3 bg-[#A7C7E7] text-white font-medium rounded-lg hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7] transition-colors">
+                        Envoyer le message
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Liens rapides -->
+        <div class="mt-16 pt-8 border-t border-[#E5E0D8]">
+            <h3 class="text-lg font-semibold text-[#4B5563] text-center mb-8">Besoin d'aide rapidement ?</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <a href="{{ path('user_products_index') }}" 
+                   class="block p-6 bg-white rounded-lg border border-[#E5E0D8] hover:shadow-md transition-shadow text-center">
+                    <div class="w-12 h-12 rounded-full bg-[#A7C7E7]/20 text-[#A7C7E7] flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                        </svg>
+                    </div>
+                    <h4 class="font-medium text-[#4B5563] mb-2">Produits</h4>
+                    <p class="text-sm text-[#6B7280]">Découvrez nos produits adaptés</p>
+                </a>
+
+                <a href="{{ path('user_events') }}" 
+                   class="block p-6 bg-white rounded-lg border border-[#E5E0D8] hover:shadow-md transition-shadow text-center">
+                    <div class="w-12 h-12 rounded-full bg-[#A7C7E7]/20 text-[#A7C7E7] flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                        </svg>
+                    </div>
+                    <h4 class="font-medium text-[#4B5563] mb-2">Événements</h4>
+                    <p class="text-sm text-[#6B7280]">Consultez notre calendrier</p>
+                </a>
+
+                <a href="{{ path('about') }}" 
+                   class="block p-6 bg-white rounded-lg border border-[#E5E0D8] hover:shadow-md transition-shadow text-center">
+                    <div class="w-12 h-12 rounded-full bg-[#A7C7E7]/20 text-[#A7C7E7] flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.041.021M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.041.021m0 0a7.5 7.5 0 00-7.5 7.5v4.5m7.5-7.5h-7.5m7.5 7.5v-4.5m0 4.5h-7.5" />
+                        </svg>
+                    </div>
+                    <h4 class="font-medium text-[#4B5563] mb-2">À propos</h4>
+                    <p class="text-sm text-[#6B7280]">En savoir plus sur AutiCare</p>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

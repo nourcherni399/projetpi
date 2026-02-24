@@ -19,8 +19,8 @@
     {% endfor %}
 
     <div class="flex flex-col lg:flex-row gap-8 items-start">
-    <!-- Colonne gauche : Contenu du module -->
-    <div class="w-full lg:w-2/5 lg:min-w-0 lg:sticky lg:top-8 flex-shrink-0">
+    <!-- Colonne gauche : Contenu du module (cadre) -->
+    <div class="w-full lg:w-2/5 lg:min-w-0 lg:sticky lg:top-8 flex-shrink-0 order-1 lg:order-1">
     <div class="bg-[#FDF8F5] rounded-xl border border-[#E8DED5] p-6 md:p-8 shadow-sm">
         <header class="mb-8">
             <div class="flex items-start justify-between gap-4 mb-3">
@@ -100,15 +100,16 @@
                     {% for ressource in ressources %}
                         {% set contenuUrl = (ressource.contenu starts with 'http://') or (ressource.contenu starts with 'https://') ? ressource.contenu : asset(ressource.contenu) %}
                         {% set isRemoteResource = (ressource.contenu starts with 'http://') or (ressource.contenu starts with 'https://') %}
+                        {% set embedUrl = video_embed_url(contenuUrl) %}
                         <div class="rounded-lg border border-[#E8DED5] p-4 bg-[#FAEDE8]">
                             <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                                 <div class="flex items-center gap-2 min-w-0">
                                     <h3 class="font-medium text-[#4B5563] truncate">{{ ressource.titre|blog_translate }}</h3>
-                                    <a href="{{ path('ressource_download', { id: ressource.id }) }}"
-                                       {% if ressource.typeRessource == 'url' %}target="_blank" rel="noopener noreferrer"{% else %}download{% endif %}
+                                    <a href="{{ (ressource.typeRessource == 'url' or embedUrl) ? contenuUrl : path('ressource_download', { id: ressource.id }) }}"
+                                       {% if ressource.typeRessource == 'url' or embedUrl %}target="_blank" rel="noopener noreferrer"{% else %}download{% endif %}
                                        class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#E8F4FC] text-[#1e3a5f] hover:bg-[#D4E8F8] transition-colors shrink-0"
-                                       title="{{ 'Télécharger cette ressource'|blog_translate }}"
-                                       aria-label="{{ 'Télécharger'|blog_translate }} {{ ressource.titre|blog_translate }}">
+                                       title="{{ embedUrl ? ('Ouvrir la vidéo'|blog_translate) : ('Télécharger cette ressource'|blog_translate) }}"
+                                       aria-label="{{ embedUrl ? ('Ouvrir'|blog_translate) : ('Télécharger'|blog_translate) }} {{ ressource.titre|blog_translate }}">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0l4-4m-4 4l-4-4m-5 8h18" />
                                         </svg>
@@ -131,10 +132,16 @@
                                     </svg>
                                 </a>
                             {% elseif ressource.typeRessource == 'video' %}
-                                <video controls preload="metadata" class="w-full rounded-lg border border-[#E8DED5] bg-black/5">
-                                    <source src="{{ contenuUrl }}">
-                                    Votre navigateur ne supporte pas la lecture vidéo.
-                                </video>
+                                {% if embedUrl %}
+                                    <div class="aspect-video rounded-lg overflow-hidden border border-[#E8DED5] bg-black/5">
+                                        <iframe src="{{ embedUrl }}" class="w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy" title="{{ ressource.titre|blog_translate }}"></iframe>
+                                    </div>
+                                {% else %}
+                                    <video controls preload="metadata" class="w-full rounded-lg border border-[#E8DED5] bg-black/5">
+                                        <source src="{{ contenuUrl }}">
+                                        Votre navigateur ne supporte pas la lecture vidéo.
+                                    </video>
+                                {% endif %}
                             {% elseif ressource.typeRessource == 'audio' %}
                                 <audio controls preload="metadata" class="w-full">
                                     <source src="{{ contenuUrl }}">
@@ -165,7 +172,7 @@
                                 data-saved="{{ isModuleSaved is defined and isModuleSaved ? '1' : '0' }}"
                                 data-toggle-url="{{ path('favoris_module_toggle', {id: module.id}) }}"
                                 data-csrf="{{ csrf_token('toggle_module_favori_' ~ module.id) }}">
-                            <svg class="w-7 h-7" fill="{{ isModuleSaved is defined and isModuleSaved ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <svg class="w-8 h-8 shrink-0" fill="{{ isModuleSaved is defined and isModuleSaved ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                             </svg>
                         </button>
@@ -258,8 +265,8 @@
     </div>
     </div>
 
-    <!-- Colonne droite : Articles du module -->
-    <div class="w-full lg:flex-1 lg:min-w-0">
+    <!-- Colonne droite : Articles publiés pour ce module (cadre de l'article) -->
+    <div class="w-full lg:flex-1 lg:min-w-0 order-2 lg:order-2">
     {# Articles publiés #}
     {% set allBlogs = module.blogs %}
     {% set articles = allBlogs|filter(blog => blog.isPublished) %}
@@ -310,35 +317,35 @@
                 {% for article in articles|sort((a, b) => b.dateCreation <=> a.dateCreation) %}
                     <div class="bg-[#FAE8E3] rounded-xl border border-[#E8DED5] p-6 hover:shadow-md transition-shadow relative">
                         <!-- Icônes d'action fixes dans le coin supérieur droit -->
-                        <div class="absolute top-4 right-4 flex gap-2">
+                        <div class="absolute top-4 right-4 flex gap-1.5 shrink-0">
                             <a href="{{ path('user_blog_article_download', {'id': article.id}) }}"
-                               class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#D4E5D0] text-[#4B5563] hover:bg-[#C4DFBF] transition-colors focus:outline focus:ring-2 focus:ring-[#A8BBA3]"
+                               class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#D4E5D0] text-[#4B5563] hover:bg-[#C4DFBF] transition-colors focus:outline focus:ring-2 focus:ring-[#A8BBA3]"
                                title="{{ 'Télécharger l\'article'|blog_translate }}">
-                                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M8 12l4 4m0 0l4-4m-4 4V4" />
                                 </svg>
                             </a>
                             {% if app.user and (article.user and article.user.id == app.user.id or is_granted('ROLE_ADMIN')) %}
                                 <button type="button"
-                                        class="article-spell-check-btn inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#D4E5D0] text-[#4B5563] hover:bg-[#C4DFBF] transition-colors focus:outline focus:ring-2 focus:ring-[#A8BBA3]"
+                                        class="article-spell-check-btn inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#D4E5D0] text-[#4B5563] hover:bg-[#C4DFBF] transition-colors focus:outline focus:ring-2 focus:ring-[#A8BBA3]"
                                         title="{{ 'Vérifier l\'orthographe'|blog_translate }}"
                                         data-article-id="{{ article.id }}"
                                         data-article-csrf="{{ csrf_token('apply_spell_check_' ~ article.id) }}"
                                         data-article-titre="{{ article.titre|e('html_attr') }}"
                                         data-article-contenu="{{ article.contenu|e('html_attr') }}">
-                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                     </svg>
                                 </button>
-                                <a href="{{ path('user_blog_edit_article', {'id': article.id, 'moduleId': module.id}) }}" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#E8F4FC] text-[#1e3a5f] hover:bg-[#D4E8F8] transition-colors focus:outline focus:ring-2 focus:ring-[#93C5FD]" title="{{ 'Modifier l\'article'|blog_translate }}">
-                                    <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <a href="{{ path('user_blog_edit_article', {'id': article.id, 'moduleId': module.id}) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#E8F4FC] text-[#1e3a5f] hover:bg-[#D4E8F8] transition-colors focus:outline focus:ring-2 focus:ring-[#93C5FD]" title="{{ 'Modifier l\'article'|blog_translate }}">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                     </svg>
                                 </a>
                                 <form method="post" action="{{ path('user_blog_delete_article', {'id': article.id, 'moduleId': module.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet article ?');" class="inline">
                                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ article.id) }}">
-                                    <button type="submit" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#FEE2E2] text-[#DC2626] hover:bg-[#FECACA] transition-colors focus:outline focus:ring-2 focus:ring-[#FCA5A5]" title="{{ 'Supprimer l\'article'|blog_translate }}">
-                                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                    <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#FEE2E2] text-[#DC2626] hover:bg-[#FECACA] transition-colors focus:outline focus:ring-2 focus:ring-[#FCA5A5]" title="{{ 'Supprimer l\'article'|blog_translate }}">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                         </svg>
                                     </button>
@@ -346,16 +353,16 @@
                             {% endif %}
                         </div>
 
-                        <div class="pr-16">
+                        <div class="pr-32 min-w-0">
                             <div class="flex items-start gap-3 mb-3">
-                                <!-- Image de l'article en petit -->
+                                <!-- Image de l'article -->
                                 {% if article.image %}
                                     <div class="flex-shrink-0">
-                                        <img src="{{ asset(article.image) }}" alt="{{ article.titre|blog_translate }}" class="w-12 h-12 object-cover rounded-lg">
+                                        <img src="{{ asset(article.image) }}" alt="{{ article.titre|blog_translate }}" class="w-20 h-20 object-cover rounded-lg">
                                     </div>
                                 {% endif %}
-                                <div class="flex-1">
-                                    <h3 class="text-lg font-semibold text-[#4B5563] mb-2">{{ article.titre|blog_translate }}</h3>
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="text-lg font-semibold text-[#4B5563] mb-2 break-words">{{ article.titre|blog_translate }}</h3>
                                     <div class="flex items-center gap-4 text-sm text-[#687280] mb-3">
                                         <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
                                             {% if article.type == 'recommandation' %}bg-[#E8F4FC] text-[#1e3a5f]
@@ -384,14 +391,14 @@
 
                             {% if app.user and not isOwnArticle %}
                                 <button type="button"
-                                        class="article-favorite-btn inline-flex items-center justify-center w-10 h-10 rounded-full transition-colors {{ isArticleSaved ? 'bg-[#BE185D] text-white' : 'bg-[#FCE7F3] text-[#BE185D]' }} hover:bg-[#FBCFE8]"
+                                        class="article-favorite-btn inline-flex items-center justify-center w-12 h-12 rounded-full transition-colors {{ isArticleSaved ? 'bg-[#BE185D] text-white' : 'bg-[#FCE7F3] text-[#BE185D]' }} hover:bg-[#FBCFE8]"
                                         title="{{ isArticleSaved ? 'Retirer des favoris' : 'Ajouter aux favoris' }}"
                                         data-article-id="{{ article.id }}"
                                         data-saved="{{ isArticleSaved ? '1' : '0' }}"
                                         data-toggle-url="{{ path('favoris_article_toggle', {id: article.id}) }}"
                                         data-csrf="{{ csrf_token('toggle_article_favori_' ~ article.id) }}"
                                         data-login-url="{{ path('app_login') }}">
-                                    <svg class="w-7 h-7" fill="{{ isArticleSaved ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                    <svg class="w-7 h-7 shrink-0" fill="{{ isArticleSaved ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                                     </svg>
                                 </button>
@@ -402,23 +409,23 @@
                                     class="comment-toggle-btn inline-flex items-center gap-2 text-[#0369A1] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded-full"
                                     data-article-id="{{ article.id }}"
                                     title="Voir les commentaires">
-                                <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#E8F4FC] text-[#1e3a5f] hover:bg-[#D4E8F8] transition-colors">
-                                    <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <span class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#E8F4FC] text-[#1e3a5f] hover:bg-[#D4E8F8] transition-colors">
+                                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM21 12c0 4.97-4.03 9-9 9a9.863 9.863 0 01-4.255-.949L3 21l1.395-3.72A8.971 8.971 0 013 12c0-4.97 4.03-9 9-9s9 4.03 9 9z" />
                                     </svg>
                                 </span>
                             </button>
 
                             {# Repost article #}
-                            <button type="button" class="article-repost-btn inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#E0F2FE] text-[#0369A1] hover:bg-[#BAE6FD] transition-colors" data-url="{{ url('user_blog_show_article', {id: article.id}) }}">
-                                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <button type="button" class="article-repost-btn inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#E0F2FE] text-[#0369A1] hover:bg-[#BAE6FD] transition-colors" data-url="{{ url('user_blog_show_article', {id: article.id}) }}">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M17 1l4 4-4 4M3 11V9a4 4 0 014-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 01-4 4H3" />
                                 </svg>
                             </button>
 
                             {# Partage article #}
-                            <button type="button" class="article-share-btn inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#DCFCE7] text-[#15803D] hover:bg-[#BBF7D0] transition-colors" data-url="{{ url('user_blog_show_article', {id: article.id}) }}" data-title="{{ article.titre|blog_translate }}">
-                                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <button type="button" class="article-share-btn inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#DCFCE7] text-[#15803D] hover:bg-[#BBF7D0] transition-colors" data-url="{{ url('user_blog_show_article', {id: article.id}) }}" data-title="{{ article.titre|blog_translate }}">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 8.25L19.5 12m0 0L15 15.75M19.5 12H9.75c-2.9 0-5.25 2.35-5.25 5.25" />
                                 </svg>
                             </button>
@@ -444,34 +451,34 @@
                     <div class="space-y-4">
                         {% for article in drafts|sort((a, b) => b.dateCreation <=> a.dateCreation) %}
                             <div class="bg-[#FAE8E3] rounded-xl border border-dashed border-[#E8DED5] p-6 hover:shadow-sm transition-shadow relative">
-                                <div class="absolute top-4 right-4 flex gap-2">
+                                <div class="absolute top-4 right-4 flex gap-1.5 shrink-0">
                                     <span class="inline-flex items-center justify-center px-2 py-1 rounded-full bg-yellow-50 text-yellow-700 text-xs font-medium">
                                         {{ 'Brouillon'|blog_translate }}
                                     </span>
-                                    <a href="{{ path('user_blog_edit_article', {'id': article.id, 'moduleId': module.id}) }}" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#E8F4FC] text-[#1e3a5f] hover:bg-[#D4E8F8] transition-colors focus:outline focus:ring-2 focus:ring-[#93C5FD]" title="{{ 'Modifier le brouillon'|blog_translate }}">
-                                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                    <a href="{{ path('user_blog_edit_article', {'id': article.id, 'moduleId': module.id}) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#E8F4FC] text-[#1e3a5f] hover:bg-[#D4E8F8] transition-colors focus:outline focus:ring-2 focus:ring-[#93C5FD]" title="{{ 'Modifier le brouillon'|blog_translate }}">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                         </svg>
                                     </a>
                                     <form method="post" action="{{ path('user_blog_delete_article', {'id': article.id, 'moduleId': module.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce brouillon ?');" class="inline">
                                         <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ article.id) }}">
-                                        <button type="submit" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#FEE2E2] text-[#DC2626] hover:bg-[#FECACA] transition-colors focus:outline focus:ring-2 focus:ring-[#FCA5A5]" title="{{ 'Supprimer le brouillon'|blog_translate }}">
-                                            <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                        <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#FEE2E2] text-[#DC2626] hover:bg-[#FECACA] transition-colors focus:outline focus:ring-2 focus:ring-[#FCA5A5]" title="{{ 'Supprimer le brouillon'|blog_translate }}">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                             </svg>
                                         </button>
                                     </form>
                                 </div>
 
-                                <div class="pr-16">
+                                <div class="pr-28 min-w-0">
                                     <div class="flex items-start gap-3 mb-3">
                                         {% if article.image %}
                                             <div class="flex-shrink-0">
-                                                <img src="{{ asset(article.image) }}" alt="{{ article.titre|blog_translate }}" class="w-12 h-12 object-cover rounded-lg">
+                                                <img src="{{ asset(article.image) }}" alt="{{ article.titre|blog_translate }}" class="w-20 h-20 object-cover rounded-lg">
                                             </div>
                                         {% endif %}
-                                        <div class="flex-1">
-                                            <h4 class="text-lg font-semibold text-[#4B5563] mb-1">{{ article.titre|blog_translate }}</h4>
+                                        <div class="flex-1 min-w-0">
+                                            <h4 class="text-lg font-semibold text-[#4B5563] mb-1 break-words">{{ article.titre|blog_translate }}</h4>
                                             <p class="text-sm text-[#687280] mb-2">{{ 'Créé le'|blog_translate }} {{ article.dateCreation|date('d/m/Y à H:i') }}</p>
                                         </div>
                                     </div>
@@ -653,6 +660,26 @@
                         </div>
                         {{ form_widget(articleForm.pexels_image_url) }}
                     </div>
+                    {# Section Génération hashtags #}
+                    <div class="p-3 rounded-xl border border-violet-200 bg-violet-50/50 space-y-2">
+                        <h4 class="text-sm font-semibold text-violet-800">{{ 'Générer des hashtags'|blog_translate }}</h4>
+                        <p class="text-xs text-[#6B7280]">{{ 'Génère des hashtags à partir du titre. Ils seront ajoutés à la fin du contenu.'|blog_translate }}</p>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button type="button" id="article-form-generate-hashtags-btn"
+                                    class="px-3 py-2 rounded-lg bg-violet-600 text-white text-sm font-medium hover:bg-violet-700 focus:outline focus:ring-2 focus:ring-violet-500">
+                                {{ 'Générer des hashtags'|blog_translate }}
+                            </button>
+                        </div>
+                        <div id="article-form-hashtags-zone" class="hidden mt-2 p-2 rounded-lg bg-white border border-violet-200">
+                            <p class="text-xs text-[#4B5563] mb-1">{{ 'Hashtags générés :'|blog_translate }}</p>
+                            <p id="article-form-hashtags-result" class="text-sm text-[#4B5563] font-medium break-words mb-1"></p>
+                            <button type="button" id="article-form-hashtags-insert-btn"
+                                    class="px-2 py-1 rounded-lg bg-violet-600 text-white text-xs font-medium hover:bg-violet-700">
+                                {{ 'Insérer à la fin du contenu'|blog_translate }}
+                            </button>
+                        </div>
+                        <p id="article-form-hashtags-error" class="text-xs text-red-600 hidden"></p>
+                    </div>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div class="flex items-center gap-2">{{ form_widget(articleForm.isPublished) }}{{ form_label(articleForm.isPublished) }}</div>
                         <div class="flex items-center gap-2">{{ form_widget(articleForm.isUrgent) }}{{ form_label(articleForm.isUrgent) }}</div>
@@ -730,7 +757,7 @@
                             </button>
                             <span class="text-sm text-[#687280]">{{ 'Écouter le résumé'|blog_translate }}</span>
                         </div>
-                        <p id="module-summary-text" class="text-[#4B5563] text-sm leading-relaxed break-words min-w-0"></p>
+                        <p id="module-summary-text" class="text-[#4B5563] text-sm font-semibold leading-relaxed break-words min-w-0"></p>
                     </div>
                 </div>
             </div>
@@ -860,6 +887,80 @@ document.addEventListener('DOMContentLoaded', function () {
                     articleAiGenerateBtn.disabled = false;
                     articleAiGenerateBtn.textContent = '{{ "Générer titre et contenu"|blog_translate|e("js") }}';
                 });
+            });
+        }
+
+        var articleHashtagsBtn = document.getElementById('article-form-generate-hashtags-btn');
+        var articleHashtagsZone = document.getElementById('article-form-hashtags-zone');
+        var articleHashtagsResult = document.getElementById('article-form-hashtags-result');
+        var articleHashtagsInsertBtn = document.getElementById('article-form-hashtags-insert-btn');
+        var articleHashtagsError = document.getElementById('article-form-hashtags-error');
+        var articleHashtagsUrl = '{{ path("user_blog_generate_hashtags") }}';
+
+        if (articleHashtagsBtn && articleTitreInput) {
+            articleHashtagsBtn.addEventListener('click', function() {
+                var titre = articleTitreInput.value.trim();
+                if (!titre) {
+                    if (articleHashtagsError) {
+                        articleHashtagsError.textContent = "Veuillez d'abord saisir un titre.";
+                        articleHashtagsError.classList.remove('hidden');
+                    }
+                    return;
+                }
+                if (articleHashtagsError) articleHashtagsError.classList.add('hidden');
+                articleHashtagsBtn.disabled = true;
+                articleHashtagsBtn.textContent = 'Génération...';
+
+                var formData = new FormData();
+                formData.append('titre', titre);
+                fetch(articleHashtagsUrl, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    articleHashtagsBtn.disabled = false;
+                    articleHashtagsBtn.textContent = 'Générer des hashtags';
+                    if (data.error) {
+                        articleHashtagsError.textContent = data.error;
+                        articleHashtagsError.classList.remove('hidden');
+                        if (articleHashtagsZone) articleHashtagsZone.classList.add('hidden');
+                    } else if (data.hashtags) {
+                        articleHashtagsResult.textContent = data.hashtags;
+                        articleHashtagsZone.classList.remove('hidden');
+                        articleHashtagsZone.dataset.hashtags = data.hashtags;
+                    }
+                })
+                .catch(function() {
+                    articleHashtagsBtn.disabled = false;
+                    articleHashtagsBtn.textContent = 'Générer des hashtags';
+                    articleHashtagsError.textContent = 'Erreur lors de la génération.';
+                    articleHashtagsError.classList.remove('hidden');
+                });
+            });
+        }
+
+        if (articleHashtagsInsertBtn && articleContenuInput && articleHashtagsZone) {
+            articleHashtagsInsertBtn.addEventListener('click', function() {
+                var hashtags = articleHashtagsZone.dataset.hashtags || articleHashtagsResult.textContent;
+                if (hashtags) {
+                    var contenu = articleContenuInput.value;
+                    articleContenuInput.value = contenu + (contenu ? '\n\n' : '') + hashtags;
+                }
+            });
+        }
+
+        var articleFormEl = document.getElementById('article-form');
+        if (articleFormEl && articleContenuInput && articleHashtagsZone) {
+            articleFormEl.addEventListener('submit', function() {
+                var hashtags = articleHashtagsZone.dataset.hashtags;
+                if (hashtags && !articleHashtagsZone.classList.contains('hidden')) {
+                    var contenu = articleContenuInput.value;
+                    if (!contenu.endsWith(hashtags.trim())) {
+                        articleContenuInput.value = contenu + (contenu ? '\n\n' : '') + hashtags;
+                    }
+                }
             });
         }
 
@@ -1274,6 +1375,48 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+
+    /* ====== Vérification profanité en temps réel ====== */
+    (function initProfanityCheck() {
+        var debounceTimers = {};
+        document.querySelectorAll('.comment-form-profanity-check').forEach(function (form) {
+            var ta = form.querySelector('textarea');
+            if (!ta) return;
+            var articleId = form.getAttribute('data-article-id');
+            var checkUrl = form.getAttribute('data-check-profanity-url');
+            if (!articleId || !checkUrl) return;
+            var warningEl = document.getElementById('profanity-warning-' + articleId);
+            if (!warningEl) return;
+
+            function checkProfanity() {
+                var text = (ta.value || '').trim();
+                if (text === '') {
+                    warningEl.classList.add('hidden');
+                    return;
+                }
+                fetch(checkUrl, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify({ text: text })
+                })
+                .then(function (r) { return r.ok ? r.json() : { hasBadWords: false }; })
+                .then(function (data) {
+                    if (data.hasBadWords) {
+                        warningEl.classList.remove('hidden');
+                    } else {
+                        warningEl.classList.add('hidden');
+                    }
+                })
+                .catch(function () { warningEl.classList.add('hidden'); });
+            }
+
+            ta.addEventListener('input', function () {
+                clearTimeout(debounceTimers[articleId]);
+                debounceTimers[articleId] = setTimeout(checkProfanity, 400);
+            });
+        });
+    })();
 
     /* ====== Envoyer le commentaire avec Entrée (sans bouton) ====== */
     document.querySelectorAll('.comment-form-inline textarea').forEach(function (ta) {
@@ -1700,4 +1843,3 @@ document.addEventListener('DOMContentLoaded', function () {
 .summary-tts-active .summary-tts-icon-pause { display: block !important; }
 </style>
 {% endblock %}
-

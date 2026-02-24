@@ -10,8 +10,10 @@ use App\Entity\Module;
 use App\Entity\Ressource;
 use App\Service\CloudinaryUploadService;
 use App\Service\GroqBlogGeneratorService;
+use App\Service\GroqHashtagGeneratorService;
 use App\Service\GroqSpellCheckService;
 use App\Service\GroqSummaryService;
+use App\Service\LibreTranslateService;
 use App\Service\PexelsService;
 use App\Service\WikipediaService;
 use App\Form\BlogType;
@@ -111,6 +113,21 @@ final class BlogController extends AbstractController
             return $this->json($result, 400);
         }
 
+        return $this->json($result);
+    }
+
+    #[Route('/generate-hashtags', name: 'user_blog_generate_hashtags', methods: ['POST'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function generateHashtags(Request $request, GroqHashtagGeneratorService $hashtagService): JsonResponse
+    {
+        $titre = trim((string) $request->request->get('titre', ''));
+        if ($titre === '') {
+            return $this->json(['error' => 'Veuillez saisir un titre.'], 400);
+        }
+        $result = $hashtagService->generateFromTitle($titre);
+        if (isset($result['error'])) {
+            return $this->json($result, 400);
+        }
         return $this->json($result);
     }
 
@@ -345,7 +362,7 @@ final class BlogController extends AbstractController
     }
 
     #[Route('/module/{id}/summary', name: 'module_summary', requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function moduleSummary(Module $module, GroqSummaryService $groqService): JsonResponse
+    public function moduleSummary(Module $module, Request $request, GroqSummaryService $groqService, LibreTranslateService $libreTranslate): JsonResponse
     {
         if (!$module->isPublished()) {
             throw $this->createNotFoundException('Module introuvable.');
@@ -353,7 +370,7 @@ final class BlogController extends AbstractController
 
         if (!$groqService->isConfigured()) {
             return $this->json([
-                'summary' => 'Clé API non configurée. Ajoutez GROQ_API_KEY dans .env.local',
+                'summary' => 'Clé API non configurée. Ajoutez CHAT_API_KEY dans .env',
                 'success' => false,
             ]);
         }
@@ -368,6 +385,13 @@ final class BlogController extends AbstractController
 
         $summary = $result['summary'];
         $error = $result['error'];
+
+        if ($summary !== null) {
+            $locale = $request->getSession()->get('blog_locale', 'fr');
+            if ($locale !== 'fr') {
+                $summary = $libreTranslate->translate($summary, 'fr', $locale);
+            }
+        }
 
         return $this->json([
             'summary' => $summary ?? ($error ?? 'Impossible de générer le résumé.'),
@@ -387,6 +411,13 @@ final class BlogController extends AbstractController
         }
 
         $contenu = trim((string) $ressource->getContenu());
+
+        // YouTube et Vimeo : Cloudinary ne peut pas récupérer ces URLs (pas des fichiers directs).
+        // Tenter l'upload produit des ressources invalides (icônes génériques, pas de miniature).
+        if (preg_match('#(?:youtube\.com|youtu\.be|vimeo\.com)#i', $contenu)) {
+            $this->addFlash('warning', 'Les vidéos YouTube et Vimeo ne peuvent pas être transférées vers Cloudinary. Elles restent hébergées sur leur plateforme d\'origine et s\'affichent directement sur la page.');
+            return $this->redirectToRoute('user_blog_module', ['id' => $module->getId()]);
+        }
 
         try {
             if (str_starts_with($contenu, 'uploads/ressources/')) {
@@ -703,7 +734,4 @@ final class BlogController extends AbstractController
             return false;
         }
     }
-
-
-
 }

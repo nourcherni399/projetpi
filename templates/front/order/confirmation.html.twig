@@ -1,19 +1,43 @@
 {% extends 'layouts/user.html.twig' %}
 
-{% block title %}Commande Confirmée - AutiCare{% endblock %}
+{% block title %}{% if commande.statut == 'en_attente' %}Commande en attente{% elseif commande.statut == 'annulée' %}Commande annulée{% else %}Commande confirmée{% endif %} - AutiCare{% endblock %}
 
 {% block user_content %}
 <section class="text-center mb-10">
-    <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-100 text-green-600 mb-4">
-        <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-        </svg>
-    </div>
-    <h1 class="text-3xl font-bold text-[#4B5563] mb-3">{% if commande.statut == 'annulée' %}Commande annulée{% else %}Commande Confirmée!{% endif %}</h1>
-    <p class="text-[#6B7280]">{% if commande.statut == 'annulée' %}Cette commande a été annulée.{% else %}Merci pour votre achat. Votre commande a été reçue avec succès.{% endif %}</p>
+    {% if commande.statut == 'en_attente' %}
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-amber-100 text-amber-600 mb-4">
+            <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </div>
+        <h1 class="text-3xl font-bold text-[#4B5563] mb-3">Commande en attente</h1>
+        <p class="text-[#6B7280]">Votre commande a bien été enregistrée. Elle reste sur cette page jusqu'à ce que l'administrateur accepte votre demande.</p>
+        <p class="text-sm text-[#6B7280] mt-2">Vous pouvez revenir sur ce lien à tout moment pour suivre le statut.</p>
+    {% elseif commande.statut == 'annulée' %}
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-red-100 text-red-600 mb-4">
+            <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </div>
+        <h1 class="text-3xl font-bold text-[#4B5563] mb-3">Commande annulée</h1>
+        <p class="text-[#6B7280]">Cette commande a été annulée.</p>
+    {% else %}
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-100 text-green-600 mb-4">
+            <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+        </div>
+        <h1 class="text-3xl font-bold text-[#4B5563] mb-3">Commande acceptée</h1>
+        <p class="text-[#6B7280]">L'administrateur a accepté votre commande. Merci pour votre achat.</p>
+    {% endif %}
 </section>
 {% if commande.statut == 'annulée' %}
 <div class="mb-8 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800">Cette commande n'est plus active.</div>
+{% endif %}
+{% if commande.statut == 'en_attente' %}
+<div class="mb-8 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800">
+    <strong>En attente de validation.</strong> Votre commande reste ici jusqu'à ce que l'admin accepte la demande. Aucune action requise de votre part.
+</div>
 {% endif %}
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -52,14 +76,14 @@
                         <p class="font-medium text-[#4B5563]">{{ ligne.produit.nom }}</p>
                         <p class="text-sm text-[#6B7280]">Quantité: {{ ligne.quantite }}</p>
                     </div>
-                    <p class="font-semibold text-[#A7C7E7]">{{ ligne.sousTotal|number_format(2, ',', ' ') }} د.ت</p>
+                    <p class="font-semibold text-[#A7C7E7]">{{ ligne.sousTotal|number_format(2, ',', ' ') }} dt</p>
                 </div>
                 {% endfor %}
             </div>
 
             <div class="flex justify-between text-lg font-bold text-[#4B5563]">
                 <span>Montant Total:</span>
-                <span class="text-[#A7C7E7]">{{ commande.total|number_format(2, ',', ' ') }} د.ت</span>
+                <span class="text-[#A7C7E7]">{{ commande.total|number_format(2, ',', ' ') }} dt</span>
             </div>
         </div>
 
@@ -130,8 +154,10 @@
             </div>
 
             <div class="mt-6 space-y-3">
-                <a href="{{ path('user_products_index') }}" class="block w-full px-4 py-3 bg-[#A7C7E7] text-white rounded-lg font-semibold text-center hover:bg-[#B8D4ED] transition">
-                    Continuer les achats
+                {% set isPaiementEnLigne = commande.modePayment == 'carte_bancaire' or (commande.modePayment ?? '') starts with 'carte_' or commande.stripePaymentIntent %}
+                <a href="{{ path('order_receipt', { id: commande.id }) }}" class="flex items-center justify-center gap-2 w-full px-4 py-3 border border-emerald-500 text-emerald-600 rounded-lg font-semibold hover:bg-emerald-50 transition" target="_blank" rel="noopener">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    {% if isPaiementEnLigne %}Télécharger le bon à présenter au livreur (PDF){% else %}Télécharger le bon de commande (PDF){% endif %}
                 </a>
                 <a href="{{ path('home') }}" class="block w-full px-4 py-3 border border-[#A7C7E7] text-[#A7C7E7] rounded-lg font-semibold text-center hover:bg-[#F5F1EB] transition">
                     Retour à l'accueil

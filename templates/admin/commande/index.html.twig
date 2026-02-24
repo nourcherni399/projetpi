@@ -8,13 +8,6 @@
     <p class="text-[#6B7280] mt-1">Consultez et confirmez les commandes des clients</p>
 </div>
 
-<div class="mb-4 flex flex-wrap items-center gap-2">
-    <a href="{{ path('admin_commande_creer_demo') }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED]">
-        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
-        Créer une commande démo (comme si le formulaire était envoyé)
-    </a>
-</div>
-
 {% for message in app.flashes('success') %}
     <div class="mb-4 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">{{ message }}</div>
 {% endfor %}
@@ -49,7 +42,7 @@
                         <div class="text-[#6B7280] text-sm">{{ commande.telephone }}</div>
                     </td>
                     <td class="px-6 py-4 text-[#6B7280]">{{ commande.dateCreation ? commande.dateCreation|date('d/m/Y H:i') : '—' }}</td>
-                    <td class="px-6 py-4 font-medium text-[#4B5563]">{{ commande.total|number_format(2, ',', ' ') }} د.ت</td>
+                    <td class="px-6 py-4 font-medium text-[#4B5563]">{{ commande.total|number_format(2, ',', ' ') }} dt</td>
                     <td class="px-6 py-4">
                         {% if commande.statut == 'en_attente' %}
                             <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-sky-50 text-sky-700 border border-sky-200">En attente</span>

@@ -78,4 +78,40 @@ class NotificationRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult();
     }
+
+    /**
+     * Notifications de type demande produit (produit créé par l'admin) pour un destinataire.
+     *
+     * @return list<Notification>
+     */
+    public function findDemandeProduitForDestinataireOrderByCreatedDesc(User $user, int $limit = 15): array
+    {
+        return $this->createQueryBuilder('n')
+            ->andWhere('n.destinataire = :user')
+            ->andWhere('n.type = :type')
+            ->setParameter('user', $user)
+            ->setParameter('type', Notification::TYPE_DEMANDE_PRODUIT_IA)
+            ->orderBy('n.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Notifications d'alerte stock pour un admin (destinataire).
+     *
+     * @return list<Notification>
+     */
+    public function findAlerteStockForAdmin(User $admin, int $limit = 15): array
+    {
+        return $this->createQueryBuilder('n')
+            ->andWhere('n.destinataire = :admin')
+            ->andWhere('n.type = :type')
+            ->setParameter('admin', $admin)
+            ->setParameter('type', Notification::TYPE_ALERTE_STOCK)
+            ->orderBy('n.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 }

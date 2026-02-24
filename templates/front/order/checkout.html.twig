@@ -10,10 +10,11 @@
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
     <div class="lg:col-span-2">
-        {{ form_start(form, { attr: { class: 'space-y-6', novalidate: 'novalidate' } }) }}
+        {{ form_start(form, { attr: { class: 'space-y-6', novalidate: 'novalidate', id: 'checkout-form' } }) }}
+            <div id="checkout-validation-errors" class="hidden mb-4 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-sm"></div>
             <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
                 <h2 class="text-xl font-semibold text-[#4B5563] mb-4">Informations personnelles</h2>
-                <p class="text-sm text-[#6B7280] mb-4">Ces champs sont renseignés depuis votre compte et ne peuvent pas être modifiés ici.</p>
+                <p class="text-sm text-[#6B7280] mb-4">Ces champs sont pré-remplis depuis votre compte. L’adresse email indiquée ici recevra le mail de confirmation de paiement (vous pouvez la modifier si la commande est pour quelqu’un d’autre).</p>
                 <div class="space-y-4">
                     {{ form_row(form.nom) }}
                     {{ form_row(form.email) }}
@@ -33,29 +34,28 @@
             </div>
 
             <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
-                <h2 class="text-xl font-semibold text-[#4B5563] mb-4">Mode de Paiement *</h2>
-                <div class="space-y-4" id="mode-payment-choices">
-                    {% for choice in form.modePayment.vars.choices %}
-                    <label class="flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition {{ form.modePayment.vars.value == choice.value ? 'border-[#A7C7E7] bg-[#A7C7E7]/5' : 'border-[#E5E0D8] hover:border-[#E5E0D8] hover:bg-[#F9FAFB]' }}">
-                        <input type="radio" name="{{ form.modePayment.vars.full_name }}" value="{{ choice.value }}" {{ form.modePayment.vars.value == choice.value ? 'checked' : '' }} class="mt-1 w-4 h-4 text-[#A7C7E7] focus:ring-[#A7C7E7]">
-                        <div>
-                            <span class="font-medium text-[#4B5563]">{{ choice.label }}</span>
-                            {% if choice.value == 'a_la_livraison' %}
-                            <p class="text-sm text-[#6B7280] mt-1">Payez à la réception de votre commande</p>
-                            {% else %}
-                            <p class="text-sm text-[#6B7280] mt-1">Visa, Mastercard, American Express</p>
-                            {% endif %}
-                        </div>
-                    </label>
-                    {% endfor %}
-                </div>
-                {{ form_errors(form.modePayment) }}
-                <div id="card-fields" class="mt-6 space-y-4 hidden">
-                    <div>{{ form_row(form.numeroCarte, { label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }, attr: { class: 'w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] focus:ring-2 focus:ring-[#A7C7E7] focus:border-[#A7C7E7]' } }) }}</div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>{{ form_row(form.dateExpiration, { label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }, attr: { class: 'w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] focus:ring-2 focus:ring-[#A7C7E7] focus:border-[#A7C7E7]' } }) }}</div>
-                        <div>{{ form_row(form.cvv, { label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }, attr: { class: 'w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] focus:ring-2 focus:ring-[#A7C7E7] focus:border-[#A7C7E7]' } }) }}</div>
+                <h2 class="text-xl font-semibold text-[#4B5563] mb-4">Mode de paiement</h2>
+                <div class="mode-payment-wrap space-y-2">
+                    {{ form_label(form.modePayment) }}
+                    {{ form_widget(form.modePayment) }}
+                    {{ form_errors(form.modePayment) }}
+                    <!-- Formulaire carte - affiché par CSS quand Carte Bancaire est sélectionné (aucun JavaScript) -->
+                    <div id="card-payment" class="mt-6 bg-[#F5F1EB] rounded-lg p-6 border border-[#E5E0D8] card-payment-toggle">
+                    <input type="hidden" name="stripe_payment_method_id" id="stripe_payment_method_id" value="">
+                    <h3 class="font-semibold text-[#4B5563] mb-2">Détails de la carte bancaire</h3>
+                    <p class="text-sm text-[#6B7280] mb-4">Complétez ces champs uniquement si vous avez choisi le paiement par carte bancaire ci-dessus.</p>
+                    {% if stripePublishableKey %}
+                    <p class="text-sm text-[#6B7280] mb-4">Paiement sécurisé par Stripe. Vos données bancaires ne transitent jamais par nos serveurs.</p>
+                    <div id="card-element-wrapper" class="card-input-wrapper p-4 rounded-lg border border-[#E5E0D8] bg-white">
+                        <div id="card-element"></div>
                     </div>
+                    <p id="card-element-error" class="hidden mt-2 text-sm text-red-600">Veuillez corriger les erreurs ci-dessus.</p>
+                    {% else %}
+                    <div class="space-y-4" id="card-fallback-form">
+                        {{ form_row(form.cardNumber, { row_attr: { class: 'form-group mb-4' }, label_attr: { class: 'block text-sm font-medium text-[#4B5563] mb-2' } }) }}
+                        {{ form_row(form.cardExpiry, { row_attr: { class: 'form-group mb-4' }, label_attr: { class: 'block text-sm font-medium text-[#4B5563] mb-2' } }) }}
+                    </div>
+                    {% endif %}
                 </div>
             </div>
 
@@ -77,7 +77,7 @@
                 {% for item in cart.items %}
                 <div class="flex justify-between text-sm text-[#6B7280]">
                     <span>{{ item.produit.nom }} x {{ item.quantite }}</span>
-                    <span>{{ item.totalPrice|number_format(2, ',', ' ') }} د.ت</span>
+                    <span>{{ item.totalPrice|number_format(2, ',', ' ') }} dt</span>
                 </div>
                 {% endfor %}
                 <div class="flex justify-between text-[#6B7280] text-sm pt-2">
@@ -87,7 +87,7 @@
             </div>
             <div class="flex justify-between text-lg font-bold text-[#4B5563] mb-6">
                 <span>Total :</span>
-                <span class="text-[#A7C7E7]">{{ totalPrice|number_format(2, ',', ' ') }} د.ت</span>
+                <span class="text-[#A7C7E7]">{{ totalPrice|number_format(2, ',', ' ') }} dt</span>
             </div>
             <div class="bg-[#F5F1EB] rounded-lg p-4 text-sm text-[#6B7280]">
                 <p><strong>Livraison gratuite</strong> partout en Tunisie.</p>
@@ -97,17 +97,103 @@
     </div>
 </div>
 
+<style>
+/* Affichage formulaire carte : CSS pur, aucun JavaScript nécessaire */
+.card-payment-toggle { display: none !important; }
+.mode-payment-wrap:has(input[value="carte_bancaire"]:checked) .card-payment-toggle { display: block !important; }
+</style>
+{% if stripePublishableKey %}
+<script src="https://js.stripe.com/v3/"></script>
+{% endif %}
 <script>
 (function() {
-    var cardFields = document.getElementById('card-fields');
-    var radios = document.querySelectorAll('input[name="{{ form.modePayment.vars.full_name|e('js') }}"]');
-    function toggleCardFields() {
-        var isCard = false;
-        radios.forEach(function(r) { if (r.checked && r.value === 'carte_bancaire') isCard = true; });
-        if (cardFields) cardFields.classList.toggle('hidden', !isCard);
+    function runCheckoutCardScript() {
+        var stripePk = {{ stripePublishableKey|default(null)|json_encode|raw }};
+        var form = document.getElementById('checkout-form');
+        if (!form) return;
+
+        var stripe = null, cardElement = null;
+
+        if (stripePk && document.getElementById('card-element') && typeof Stripe !== 'undefined') {
+            stripe = Stripe(stripePk);
+            var elements = stripe.elements();
+            cardElement = elements.create('card', { style: { base: { fontSize: '16px', color: '#4B5563' } } });
+            cardElement.mount('#card-element');
+            cardElement.on('change', function(ev) { setCardElementError(!!ev.error); });
+        }
+
+    function clearCardErrors() {
+        var w = document.getElementById('card-element-wrapper'); if (w) w.classList.remove('border-red-500', 'bg-red-50');
+        var e = document.getElementById('card-element-error'); if (e) e.classList.add('hidden');
+        document.querySelectorAll('#card-payment .form-group').forEach(function(w){
+            w.classList.remove('bg-red-50'); w.querySelectorAll('input').forEach(function(i){ i.classList.remove('border-red-500'); });
+            var err = w.querySelector('.text-red-600'); if (err) err.textContent = '';
+        });
     }
-    radios.forEach(function(r) { r.addEventListener('change', toggleCardFields); });
-    toggleCardFields();
+
+    function setCardElementError(show) {
+        var w = document.getElementById('card-element-wrapper'); if (!w) return;
+        if (show) { w.classList.add('border-red-500', 'bg-red-50'); } else { w.classList.remove('border-red-500', 'bg-red-50'); }
+        var e = document.getElementById('card-element-error'); if (e) e.classList.toggle('hidden', !show);
+    }
+
+    function luhnCheck(num) {
+        var n = (num || '').replace(/\D/g,'');
+        if (n.length < 13 || n.length > 19) return false;
+        var sum = 0, alt = false;
+        for (var i = n.length - 1; i >= 0; i--) {
+            var d = parseInt(n[i],10); if (alt) d *= 2; if (d > 9) d -= 9; sum += d; alt = !alt;
+        }
+        return sum % 10 === 0;
+    }
+
+    function validateExpiry(val) {
+        var m = /^(\d{2})\/(\d{2})$/.exec((val || '').trim());
+        if (!m) return false;
+        var mm = parseInt(m[1],10), yy = parseInt(m[2],10) + 2000;
+        if (mm < 1 || mm > 12) return false;
+        var now = new Date(); var y = now.getFullYear(), mnow = now.getMonth() + 1;
+        return yy > y || (yy === y && mm >= mnow);
+    }
+
+    function validateFallbackCard() {
+        var cardNum = document.querySelector('[name*="[cardNumber]"]');
+        var cardExp = document.querySelector('[name*="[cardExpiry]"]');
+        if (!cardNum || !cardExp) return true;
+        var ok = true;
+        document.querySelectorAll('#card-payment .form-group').forEach(function(w){ w.classList.remove('bg-red-50'); w.querySelectorAll('input').forEach(function(i){ i.classList.remove('border-red-500'); }); var err = w.querySelector('.text-red-600'); if (err) err.textContent = ''; });
+        if (!luhnCheck(cardNum.value)) { var row = cardNum.closest('.form-group'); if (row) row.classList.add('bg-red-50'); cardNum.classList.add('border-red-500'); var err = cardNum.closest('.form-group')?.querySelector('.text-red-600'); if (err) { err.textContent = 'Numéro de carte invalide'; err.style.display = ''; } ok = false; }
+        if (!validateExpiry(cardExp.value)) { var row = cardExp.closest('.form-group'); if (row) row.classList.add('bg-red-50'); cardExp.classList.add('border-red-500'); var err = cardExp.closest('.form-group')?.querySelector('.text-red-600'); if (err) { err.textContent = 'Format invalide (MM/YY requis)'; err.style.display = ''; } ok = false; }
+        return ok;
+    }
+
+    var submittingStripe = false;
+    form.addEventListener('submit', function(e) {
+        if (submittingStripe) return;
+        var checked = document.querySelector('input[name*="modePayment"]:checked');
+        var isCard = checked && checked.value === 'carte_bancaire';
+        if (!isCard) { document.getElementById('stripe_payment_method_id').value = ''; return; }
+
+        if (stripePk && cardElement) {
+            e.preventDefault();
+            setCardElementError(false);
+            stripe.createPaymentMethod({ type: 'card', card: cardElement }).then(function(r) {
+                if (r.error) { setCardElementError(true); return; }
+                document.getElementById('stripe_payment_method_id').value = r.paymentMethod.id;
+                submittingStripe = true;
+                form.submit();
+            });
+        } else {
+            if (!validateFallbackCard()) e.preventDefault();
+        }
+    });
+
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', runCheckoutCardScript);
+    } else {
+        runCheckoutCardScript();
+    }
 })();
 </script>
 {% endblock %}

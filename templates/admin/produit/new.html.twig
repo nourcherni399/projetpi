@@ -14,12 +14,24 @@
 
     <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8">
         {{ form_start(form, {
-            attr: { class: 'space-y-6', novalidate: 'novalidate' },
+            attr: { class: 'space-y-6', novalidate: 'novalidate', 'data-turbo': 'false' },
             label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }
         }) }}
         <div class="grid grid-cols-1 gap-6">
             {{ form_row(form.nom) }}
-            {{ form_row(form.description) }}
+            <div class="space-y-1">
+                {{ form_label(form.description) }}
+                <div class="flex gap-2 items-center mb-1">
+                    <button type="button" id="suggest-description-btn"
+                            class="px-3 py-1.5 text-sm rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:ring-2 focus:ring-[#A7C7E7] flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        Suggérer une description
+                    </button>
+                    <span id="suggest-description-loading" class="hidden text-sm text-[#6B7280]">Génération…</span>
+                </div>
+                {{ form_widget(form.description) }}
+                {{ form_errors(form.description) }}
+            </div>
             {{ form_row(form.categorie) }}
             {{ form_row(form.prix) }}
             <div class="flex items-center gap-2">
@@ -27,6 +39,8 @@
                 {{ form_label(form.disponibilite) }}
                 {{ form_errors(form.disponibilite) }}
             </div>
+            {{ form_row(form.stock) }}
+            {{ form_row(form.quantite) }}
             {{ form_row(form.image) }}
         </div>
         <div class="flex flex-wrap gap-3 pt-4">
@@ -40,4 +54,27 @@
         {{ form_end(form) }}
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const btn = document.getElementById('suggest-description-btn');
+    const nomInput = document.getElementById('produit_nom');
+    const descInput = document.getElementById('produit_description');
+    const loading = document.getElementById('suggest-description-loading');
+    if (!btn || !nomInput || !descInput) return;
+    btn.addEventListener('click', async function() {
+        const nom = nomInput.value.trim();
+        if (!nom) { alert('Saisissez d\'abord le nom du produit.'); return; }
+        btn.disabled = true;
+        loading.classList.remove('hidden');
+        try {
+            const fd = new FormData();
+            fd.append('nom', nom);
+            const r = await fetch('{{ path("admin_produit_suggerer_description") }}', { method: 'POST', body: fd, headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } });
+            const d = await r.json();
+            if (d.description) descInput.value = d.description;
+            else alert(d.error || 'Erreur lors de la suggestion');
+        } catch (e) { alert('Erreur réseau'); } finally { btn.disabled = false; loading.classList.add('hidden'); }
+    });
+});
+</script>
 {% endblock %}

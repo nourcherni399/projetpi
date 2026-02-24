@@ -2,6 +2,12 @@
 
 {% block title %}Statistiques Produits - AutiCare Admin{% endblock %}
 
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts-gl@2.0.9/dist/echarts-gl.min.js"></script>
+{% endblock %}
+
 {% block admin_content %}
 <div class="space-y-6">
     <div class="flex items-center justify-between">
@@ -76,42 +82,94 @@
         </div>
     </div>
 
-    {% if produitsParCategorie is not empty %}
+    <!-- Graphiques 3D -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Graphique des produits par catégorie -->
+        <!-- 3D - Quantité de produits par catégorie -->
+        {% if produitsParCategorie is not empty %}
         <div class="bg-white rounded-xl border border-[#E5E0D8] p-6">
-            <h2 class="text-lg font-semibold text-[#4B5563] mb-4">Répartition des Produits par Catégorie</h2>
-            <div class="space-y-3">
-                {% for item in produitsParCategorie %}
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3 flex-1">
-                        <span class="text-sm font-medium text-[#4B5563] w-24">{{ item.categorie }}</span>
-                        <div class="flex-1 bg-gray-200 rounded-full h-2">
-                            <div class="bg-[#A7C7E7] h-2 rounded-full" style="width: {{ totalProduits > 0 ? (item.nombre / totalProduits * 100)|number_format(0) : 0 }}%"></div>
-                        </div>
-                    </div>
-                    <span class="text-sm font-semibold text-[#6B280] ml-3">{{ item.nombre }}</span>
-                </div>
-                {% endfor %}
-            </div>
+            <h2 class="text-lg font-semibold text-[#4B5563] mb-2 flex items-center gap-2">
+                <svg class="w-5 h-5 text-[#A7C7E7]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                Quantité de produits par catégorie
+            </h2>
+            <p class="text-xs text-[#6B7280] mb-3">Glissez avec la souris pour faire pivoter le graphique 3D</p>
+            <div id="chart-3d-produits" style="width:100%; height:350px;"></div>
+            <script type="application/json" id="data-produits-categorie">{{ produitsParCategorie|json_encode|raw }}</script>
         </div>
+        {% endif %}
 
-        <!-- Prix moyens par catégorie -->
+        <!-- 3D - Prix moyen par catégorie -->
         {% if prixMoyensParCategorie is not empty %}
         <div class="bg-white rounded-xl border border-[#E5E0D8] p-6">
-            <h2 class="text-lg font-semibold text-[#4B5563] mb-4">Prix Moyen par Catégorie</h2>
-            <div class="space-y-3">
-                {% for item in prixMoyensParCategorie %}
-                <div class="flex items-center justify-between p-3 bg-[#F5F1EB] rounded-lg">
-                    <span class="text-sm font-medium text-[#4B5563]">{{ item.categorie }}</span>
-                    <span class="text-sm font-semibold text-[#A7C7E7]">{{ item.prixMoyen|number_format(2, ',', ' ') }} د.ت</span>
-                </div>
-                {% endfor %}
-            </div>
+            <h2 class="text-lg font-semibold text-[#4B5563] mb-2 flex items-center gap-2">
+                <svg class="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                Prix moyen (dt) par catégorie
+            </h2>
+            <p class="text-xs text-[#6B7280] mb-3">Glissez avec la souris pour faire pivoter le graphique 3D</p>
+            <div id="chart-3d-prix" style="width:100%; height:350px;"></div>
+            <script type="application/json" id="data-prix-categorie">{{ prixMoyensParCategorie|json_encode|raw }}</script>
         </div>
         {% endif %}
     </div>
-    {% endif %}
+
+    <script>
+    function initStats3DCharts() {
+        if (typeof echarts === 'undefined') return;
+
+        var dataProduits = [];
+        try {
+            var el1 = document.getElementById('data-produits-categorie');
+            if (el1) dataProduits = JSON.parse(el1.textContent);
+        } catch (e) {}
+        var dataPrix = [];
+        try {
+            var el2 = document.getElementById('data-prix-categorie');
+            if (el2) dataPrix = JSON.parse(el2.textContent);
+        } catch (e) {}
+
+        var colors = ['#A7C7E7', '#95d7b5', '#F39C12', '#9B59B6', '#E74C3C', '#1ABC9C', '#3498DB', '#e74c8c'];
+
+        if (dataProduits.length > 0) {
+            var elChart1 = document.getElementById('chart-3d-produits');
+            if (elChart1) {
+            var chart1 = echarts.init(elChart1);
+            var cats = dataProduits.map(function(p) { return p.categorie; });
+            var data1 = dataProduits.map(function(p, i) { return [i, 0, p.nombre]; });
+            chart1.setOption({
+                tooltip: { formatter: function(params) { var d = dataProduits[params.value[0]]; return (d ? d.categorie : '') + ': ' + (params.value[2] || 0) + ' produit(s)'; } },
+                visualMap: { show: false, min: 0, max: Math.max.apply(null, dataProduits.map(function(p) { return p.nombre; })) || 1, inRange: { color: ['#A7C7E7', '#1a5fb4'] } },
+                xAxis3D: { type: 'category', data: cats, axisLabel: { interval: 0, rotate: 30 } },
+                yAxis3D: { type: 'category', data: [''] },
+                zAxis3D: { type: 'value' },
+                grid3D: { boxWidth: 150, boxDepth: 50, viewControl: { projection: 'perspective', autoRotate: false } },
+                series: [{ type: 'bar3D', data: data1, shading: 'lambert', itemStyle: { opacity: 0.9 }, emphasis: { label: { fontSize: 14 } } }]
+            });
+            window.addEventListener('resize', function() { chart1.resize(); });
+            }
+        }
+
+        if (dataPrix.length > 0) {
+            var elChart2 = document.getElementById('chart-3d-prix');
+            if (elChart2) {
+            var chart2 = echarts.init(elChart2);
+            var cats2 = dataPrix.map(function(p) { return p.categorie; });
+            var data2 = dataPrix.map(function(p, i) { return [i, 0, p.prixMoyen]; });
+            var maxPrix = Math.max.apply(null, dataPrix.map(function(p) { return p.prixMoyen; })) || 1;
+            chart2.setOption({
+                tooltip: { formatter: function(params) { var d = dataPrix[params.value[0]]; return (d ? d.categorie : '') + ': ' + (params.value[2] ? params.value[2].toFixed(2) : '') + ' dt'; } },
+                visualMap: { show: false, min: 0, max: maxPrix, inRange: { color: ['#95d7b5', '#0d8050'] } },
+                xAxis3D: { type: 'category', data: cats2, axisLabel: { interval: 0, rotate: 30 } },
+                yAxis3D: { type: 'category', data: [''] },
+                zAxis3D: { type: 'value' },
+                grid3D: { boxWidth: 150, boxDepth: 50, viewControl: { projection: 'perspective', autoRotate: false } },
+                series: [{ type: 'bar3D', data: data2, shading: 'lambert', itemStyle: { opacity: 0.9 }, emphasis: { label: { fontSize: 14 } } }]
+            });
+            window.addEventListener('resize', function() { chart2.resize(); });
+            }
+        }
+    }
+    document.addEventListener('DOMContentLoaded', initStats3DCharts);
+    document.addEventListener('turbo:load', initStats3DCharts);
+    </script>
 
     {% if produitsPlusChers is not empty or produitsMoinsChers is not empty or produitsPlusAjoutes is not empty %}
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -131,7 +189,7 @@
                         <p class="text-sm font-medium text-[#4B5563] truncate">{{ produit.nom }}</p>
                         <p class="text-xs text-[#6B280]">{{ produit.categorie ? produit.categorie.label : 'N/A' }}</p>
                     </div>
-                    <span class="text-sm font-bold text-red-600">{{ produit.prix|number_format(2, ',', ' ') }} د.ت</span>
+                    <span class="text-sm font-bold text-red-600">{{ produit.prix|number_format(2, ',', ' ') }} dt</span>
                 </div>
                 {% endfor %}
             </div>
@@ -154,7 +212,7 @@
                         <p class="text-sm font-medium text-[#4B5563] truncate">{{ produit.nom }}</p>
                         <p class="text-xs text-[#6B280]">{{ produit.categorie ? produit.categorie.label : 'N/A' }}</p>
                     </div>
-                    <span class="text-sm font-bold text-green-600">{{ produit.prix|number_format(2, ',', ' ') }} د.ت</span>
+                    <span class="text-sm font-bold text-green-600">{{ produit.prix|number_format(2, ',', ' ') }} dt</span>
                 </div>
                 {% endfor %}
             </div>
@@ -175,7 +233,7 @@
                 <div class="flex items-center justify-between p-2 border border-[#E5E0D8] rounded-lg">
                     <div class="flex-1">
                         <p class="text-sm font-medium text-[#4B5563] truncate">{{ item.nom }}</p>
-                        <p class="text-xs text-[#6B280]">{{ item.prix|number_format(2, ',', ' ') }} د.ت</p>
+                        <p class="text-xs text-[#6B280]">{{ item.prix|number_format(2, ',', ' ') }} dt</p>
                     </div>
                     <div class="text-right">
                         <span class="text-sm font-bold text-[#A7C7E7]">{{ item.totalQuantite }}</span>
@@ -207,7 +265,7 @@
             </div>
             <div class="text-center p-4 bg-[#F5F1EB] rounded-lg">
                 <p class="text-sm font-medium text-[#6B280]">Valeur Totale</p>
-                <p class="text-xl font-bold text-green-600 mt-1">{{ valeurTotalePaniers|number_format(2, ',', ' ') }} د.ت</p>
+                <p class="text-xl font-bold text-green-600 mt-1">{{ valeurTotalePaniers|number_format(2, ',', ' ') }} dt</p>
             </div>
         </div>
     </div>

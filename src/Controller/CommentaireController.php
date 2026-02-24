@@ -5,9 +5,11 @@ namespace App\Controller;
 use App\Entity\Blog;
 use App\Entity\Commentaire;
 use App\Form\CommentaireType;
+use App\Service\ProfanityFilterService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -20,7 +22,20 @@ final class CommentaireController extends AbstractController
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly SluggerInterface $slugger,
+        private readonly ProfanityFilterService $profanityFilter,
     ) {
+    }
+
+    #[Route('/check-profanity', name: 'commentaire_check_profanity', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function checkProfanity(Request $request): JsonResponse
+    {
+        $data = json_decode((string) $request->getContent(), true) ?: [];
+        $text = trim((string) ($data['text'] ?? $request->request->get('text') ?? ''));
+
+        $hasBadWords = $text !== '' && $this->profanityFilter->containsBadWords($text);
+
+        return new JsonResponse(['hasBadWords' => $hasBadWords]);
     }
 
     #[Route('/ajouter/{blogId}', name: 'commentaire_ajouter', requirements: ['blogId' => '\d+'], methods: ['POST'])]
@@ -36,13 +51,24 @@ final class CommentaireController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $contenu = trim((string) ($commentaire->getContenu() ?? ''));
+            if ($contenu !== '' && $this->profanityFilter->containsBadWords($contenu)) {
+                $this->addFlash('warning', 'Votre commentaire contient des termes inappropriés. Veuillez le reformuler.');
+                $redirect = $request->request->get('_redirect');
+                if ($redirect && filter_var($redirect, FILTER_VALIDATE_URL)) {
+                    return $this->redirect($redirect);
+                }
+                return $this->redirectToRoute('user_blog_show_article', ['id' => $blogId]);
+            }
+
             $user = $this->getUser();
             $mediaFile = $form->get('mediaFile')->getData();
 
             if ($mediaFile instanceof UploadedFile && !$this->handleMediaUpload($mediaFile, $commentaire)) {
                 $this->addFlash('error', "Erreur lors de l'upload.");
             } else {
-                    $commentaire->setUser($user);
+                $commentaire->setBlog($blog);
+                $commentaire->setUser($user);
                 $commentaire->setIsPublished(true);
                 $this->entityManager->persist($commentaire);
                 $this->entityManager->flush();
@@ -75,6 +101,16 @@ final class CommentaireController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $contenu = trim((string) ($commentaire->getContenu() ?? ''));
+            if ($contenu !== '' && $this->profanityFilter->containsBadWords($contenu)) {
+                $this->addFlash('warning', 'Votre commentaire contient des termes inappropriés. Veuillez le reformuler.');
+                $redirect = $request->request->get('_redirect');
+                if ($redirect && filter_var($redirect, FILTER_VALIDATE_URL)) {
+                    return $this->redirect($redirect);
+                }
+                return $this->redirectToRoute('user_blog_show_article', ['id' => $blog->getId()]);
+            }
+
             $user = $this->getUser();
             $mediaFile = $form->get('mediaFile')->getData();
 

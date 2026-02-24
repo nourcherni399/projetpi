@@ -30,6 +30,18 @@ class CloudinaryUploadService
         return $result['secure_url'];
     }
 
+    /**
+     * Options d'upload incluant folder + asset_folder pour compatibilité
+     * mode fixe (legacy) et mode dynamique Cloudinary.
+     */
+    private function getFolderOptions(string $folder): array
+    {
+        return [
+            'folder' => $folder,
+            'asset_folder' => $folder,
+        ];
+    }
+
     public function uploadFromPath(string $localPath, string $folder = 'ressources'): string
     {
         $uploadApi = new UploadApi();
@@ -38,10 +50,11 @@ class CloudinaryUploadService
             ? (in_array($extension, ['mp4', 'webm', 'mov']) ? 'video' : 'audio')
             : 'auto';
 
-        $result = $uploadApi->upload($localPath, [
+        $options = array_merge([
             'resource_type' => $resourceType,
-            'folder' => $folder,
-        ]);
+        ], $this->getFolderOptions($folder));
+
+        $result = $uploadApi->upload($localPath, $options);
 
         return $result['secure_url'];
     }
@@ -49,15 +62,17 @@ class CloudinaryUploadService
     public function uploadFromUrl(string $fileUrl, string $folder = 'Telechargement'): string
     {
         $uploadApi = new UploadApi();
-        $extension = strtolower(pathinfo(parse_url($fileUrl, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION));
+        $path = parse_url($fileUrl, PHP_URL_PATH);
+        $extension = strtolower(pathinfo($path ?? '', PATHINFO_EXTENSION));
         $resourceType = in_array($extension, ['mp4', 'webm', 'mov', 'mp3', 'wav', 'ogg', 'm4a'])
             ? (in_array($extension, ['mp4', 'webm', 'mov']) ? 'video' : 'audio')
             : 'auto';
 
-        $result = $uploadApi->upload($fileUrl, [
+        $options = array_merge([
             'resource_type' => $resourceType,
-            'folder' => $folder,
-        ]);
+        ], $this->getFolderOptions($folder));
+
+        $result = $uploadApi->upload($fileUrl, $options);
 
         return $result['secure_url'];
     }

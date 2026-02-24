@@ -8,6 +8,7 @@ use App\Entity\Cart;
 use App\Entity\CartItem;
 use App\Entity\Produit;
 use App\Repository\CartRepository;
+use App\Repository\CommandeRepository;
 use App\Repository\ProduitRepository;
 use App\Service\CartSessionService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -22,6 +23,7 @@ final class CartController extends AbstractController
 {
     public function __construct(
         private readonly CartRepository $cartRepository,
+        private readonly CommandeRepository $commandeRepository,
         private readonly ProduitRepository $produitRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly CartSessionService $cartSessionService,
@@ -32,6 +34,11 @@ final class CartController extends AbstractController
     public function index(Request $request): Response
     {
         $user = $this->getUser();
+        $commandes = [];
+        $errorProductId = $request->getSession()->get('cart_error_product_id');
+        if ($errorProductId !== null) {
+            $request->getSession()->remove('cart_error_product_id');
+        }
         if ($user) {
             $cart = $this->cartRepository->findOneBy(['user' => $user]);
             if (!$cart) {
@@ -40,10 +47,11 @@ final class CartController extends AbstractController
                 $this->entityManager->persist($cart);
                 $this->entityManager->flush();
             }
-            return $this->render('front/cart/index.html.twig', ['cart' => $cart]);
+            $commandes = $this->commandeRepository->findByUserOrderedByDate($user);
+            return $this->render('front/cart/index.html.twig', ['cart' => $cart, 'commandes' => $commandes, 'error_product_id' => $errorProductId]);
         }
         $cart = $this->cartSessionService->getCartView();
-        return $this->render('front/cart/index.html.twig', ['cart' => $cart]);
+        return $this->render('front/cart/index.html.twig', ['cart' => $cart, 'commandes' => $commandes, 'error_product_id' => $errorProductId]);
     }
 
     #[Route('/ajouter/{id}', name: 'add', methods: ['POST'])]
@@ -102,8 +110,7 @@ final class CartController extends AbstractController
 
     private function getStockQuantity(Produit $produit): int
     {
-        $stock = $produit->getStock();
-        return $stock !== null ? $stock->getQuantite() : 0;
+        return $produit->getQuantite();
     }
 
     private function redirectToProductOrCart(Request $request, int $produitId): RedirectResponse
@@ -145,6 +152,7 @@ final class CartController extends AbstractController
         $quantity = (int) $request->request->get('quantite', 1);
         if ($quantity < 1) {
             $this->addFlash('error', 'La quantité doit être au moins 1.');
+            $request->getSession()->set('cart_error_product_id', $id);
             return $this->redirectToRoute('cart_index');
         }
 

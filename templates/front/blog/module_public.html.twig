@@ -77,11 +77,12 @@
                 {% for ressource in ressources %}
                 {% set contenuUrl = (ressource.contenu starts with 'http://') or (ressource.contenu starts with 'https://') ? ressource.contenu : asset(ressource.contenu) %}
                 {% set isRemoteResource = (ressource.contenu starts with 'http://') or (ressource.contenu starts with 'https://') %}
+                {% set embedUrl = video_embed_url(contenuUrl) %}
                 <div class="rounded-lg border border-[#E5E0D8] p-4 bg-[#F9FAFB]">
                     <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                         <div class="flex items-center gap-2 min-w-0">
                             <h3 class="font-medium text-[#4B5563] truncate">{{ ressource.titre|blog_translate }}</h3>
-                            <a href="{{ path('ressource_download', { id: ressource.id }) }}" {% if ressource.typeRessource == 'url' %}target="_blank" rel="noopener noreferrer"{% else %}download{% endif %} class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#E7EDF8] text-[#2563EB] hover:bg-[#DCE7FA] transition-colors shrink-0" title="{{ 'Télécharger'|blog_translate }} {{ ressource.titre|blog_translate }}">
+                            <a href="{{ (ressource.typeRessource == 'url' or embedUrl) ? contenuUrl : path('ressource_download', { id: ressource.id }) }}" {% if ressource.typeRessource == 'url' or embedUrl %}target="_blank" rel="noopener noreferrer"{% else %}download{% endif %} class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#E7EDF8] text-[#2563EB] hover:bg-[#DCE7FA] transition-colors shrink-0" title="{{ embedUrl ? ('Ouvrir la vidéo'|blog_translate) : ('Télécharger'|blog_translate) }} {{ ressource.titre|blog_translate }}">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0l4-4m-4 4l-4-4m-5 8h18" /></svg>
                             </a>
                         </div>
@@ -92,7 +93,13 @@
                         {{ 'Ouvrir la ressource'|blog_translate }} <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H18m0 0v4.5M18 6l-7.5 7.5M6 10.5V18h7.5" /></svg>
                     </a>
                     {% elseif ressource.typeRessource == 'video' %}
+                    {% if embedUrl %}
+                    <div class="aspect-video rounded-lg overflow-hidden border border-[#E5E0D8] bg-black/5">
+                        <iframe src="{{ embedUrl }}" class="w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy" title="{{ ressource.titre|blog_translate }}"></iframe>
+                    </div>
+                    {% else %}
                     <video controls preload="metadata" class="w-full rounded-lg border border-[#E5E0D8] bg-black/5"><source src="{{ contenuUrl }}">Votre navigateur ne supporte pas la lecture vidéo.</video>
+                    {% endif %}
                     {% elseif ressource.typeRessource == 'audio' %}
                     <audio controls preload="metadata" class="w-full"><source src="{{ contenuUrl }}">Votre navigateur ne supporte pas la lecture audio.</audio>
                     {% endif %}
@@ -129,7 +136,7 @@
             <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 hover:shadow-md transition-shadow">
                 <div class="flex items-start gap-3 mb-3">
                     {% if article.image %}
-                    <div class="flex-shrink-0"><img src="{{ asset(article.image) }}" alt="{{ article.titre }}" class="w-12 h-12 object-cover rounded-lg"></div>
+                    <div class="flex-shrink-0"><img src="{{ asset(article.image) }}" alt="{{ article.titre }}" class="w-20 h-20 object-cover rounded-lg"></div>
                     {% endif %}
                     <div class="flex-1">
                         <h3 class="text-lg font-semibold text-[#4B5563] mb-2">{{ article.titre|blog_translate }}</h3>

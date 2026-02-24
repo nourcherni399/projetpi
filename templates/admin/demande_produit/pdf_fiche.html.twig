@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Fiche demande produit #{{ demande.id }} - AutiCare</title>
+    <style>
+        body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #333; line-height: 1.4; }
+        h1 { font-size: 16px; margin-bottom: 12px; color: #4B5563; }
+        h2 { font-size: 12px; margin-top: 16px; margin-bottom: 6px; color: #4B5563; }
+        .meta { margin-bottom: 16px; color: #6B7280; font-size: 10px; }
+        .block { margin-bottom: 12px; }
+        .label { font-weight: bold; color: #4B5563; }
+        .value { margin-left: 8px; }
+        .footer { margin-top: 24px; padding-top: 12px; border-top: 1px solid #E5E0D8; font-size: 10px; color: #6B7280; }
+    </style>
+</head>
+<body>
+    <h1>Demande produit #{{ demande.id }} - {{ demande.nom }}</h1>
+    <div class="meta">
+        Export du {{ "now"|date("d/m/Y H:i") }} | Statut : {{ demande.statut == 'en_attente' ? 'En attente' : (demande.statut == 'approuve' ? 'Approuvé' : 'Rejeté') }}
+    </div>
+
+    <div class="block">
+        <span class="label">Demande client (chatbot) :</span>
+        <div class="value" style="margin-top: 4px;">{{ demande.demandeClient|nl2br }}</div>
+    </div>
+
+    <div class="block">
+        <span class="label">Nom proposé :</span>
+        <span class="value">{{ demande.nom }}</span>
+    </div>
+
+    <div class="block">
+        <span class="label">Catégorie :</span>
+        <span class="value">{{ demande.categorie ? demande.categorie.label : '—' }}</span>
+    </div>
+
+    <div class="block">
+        <span class="label">Prix estimé :</span>
+        <span class="value">{{ demande.prixEstime|number_format(2, ',', ' ') }} dt</span>
+    </div>
+
+    {% if demande.budgetClient %}
+    <div class="block">
+        <span class="label">Budget client :</span>
+        <span class="value">{{ demande.budgetClient|number_format(2, ',', ' ') }} dt</span>
+    </div>
+    {% endif %}
+
+    <div class="block">
+        <span class="label">Date création :</span>
+        <span class="value">{{ demande.createdAt ? demande.createdAt|date('d/m/Y H:i') : '—' }}</span>
+    </div>
+
+    {% if demande.description %}
+    <h2>Description</h2>
+    <div class="block">{{ demande.description|nl2br }}</div>
+    {% endif %}
+
+    {% if demande.caracteristiques %}
+    <h2>Caractéristiques</h2>
+    <div class="block">{{ demande.caracteristiques|nl2br }}</div>
+    {% endif %}
+
+    {% if demande.demandeur %}
+    <div class="block">
+        <span class="label">Demandeur :</span>
+        <span class="value">{{ demande.demandeur.prenom }} {{ demande.demandeur.nom }} ({{ demande.demandeur.email }})</span>
+    </div>
+    {% endif %}
+
+    {% if demande.validatedBy %}
+    <div class="block">
+        <span class="label">Traité par :</span>
+        <span class="value">{{ demande.validatedBy.prenom }} {{ demande.validatedBy.nom }} le {{ demande.validatedAt ? demande.validatedAt|date('d/m/Y H:i') : '—' }}</span>
+    </div>
+    {% endif %}
+
+    {% if demande.produit %}
+    <div class="block">
+        <span class="label">Produit créé :</span>
+        <span class="value">{{ demande.produit.nom }} (ID {{ demande.produit.id }})</span>
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        AutiCare Admin - Fiche demande produit #{{ demande.id }}
+    </div>
+</body>
+</html>

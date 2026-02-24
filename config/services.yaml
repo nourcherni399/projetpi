@@ -2,19 +2,27 @@
 # Ce fichier configure les services et paramètres pour toute l'application
 
 parameters:
+    # Paramètres par défaut
+    mailer_from_email_default: 'noreply@auticare.fr'
+    openai_chat_model_default: 'gpt-4o'
+    chat_model_default: 'gpt-4o'
+    chat_api_url_default: ''
+    chat_api_base_url_default: ~
+    app_url_default: ''
+    brevo_from_name_default: 'AutiCare'
+    stripe_secret_key_default: ''
+    libretranslate_api_key_default: ''
+    groq_api_key_default: ''
+
     # Répertoires d'uploads
     uploads_directory: '%kernel.project_dir%/public/uploads/produits'
+    uploads_produits_directory: '%kernel.project_dir%/public/uploads/produits'
     uploads_modules_directory: '%kernel.project_dir%/public/uploads/modules'
     uploads_blogs_directory: '%kernel.project_dir%/public/uploads/blog'
     uploads_ressources_directory: '%kernel.project_dir%/public/uploads/ressources'
     uploads_users_directory: '%kernel.project_dir%/public/uploads/users'
     uploads_commentaires_directory: '%kernel.project_dir%/public/uploads/commentaires'
     uploads_thematiques_directory: '%kernel.project_dir%/public/uploads/thematiques'
-
-    # Paramètres divers
-    app_url_default: ''
-    libretranslate_api_key_default: ''
-    groq_api_key_default: ''
 
 services:
     # Configuration par défaut pour tous les services
@@ -40,7 +48,70 @@ services:
         arguments:
             $appUrl: '%env(default:app_url_default:APP_URL)%'
 
-    # Services externes et AI
+    # Services externes et API
+    App\Service\ZoomApiService:
+        arguments:
+            $accountId: '%env(default::ZOOM_ACCOUNT_ID)%'
+            $clientId: '%env(default::ZOOM_CLIENT_ID)%'
+            $clientSecret: '%env(default::ZOOM_CLIENT_SECRET)%'
+
+    App\Service\EmailApiService:
+        arguments:
+            $apiKey: '%env(default::BREVO_API_KEY)%'
+            $fromEmail: '%env(default::BREVO_FROM_EMAIL)%'
+            $fromName: '%env(default:brevo_from_name_default:BREVO_FROM_NAME)%'
+
+    App\Service\StripeService:
+        arguments:
+            $secretKey: '%env(default:stripe_secret_key_default:STRIPE_SECRET_KEY)%'
+
+    App\Service\DemandeProduitEnrichmentService:
+        arguments:
+            $openaiApiKey: '%env(default::OPENAI_API_KEY)%'
+
+    App\Service\ProductExternalApiService:
+        arguments:
+            $rapidApiKey: '%env(default::RAPIDAPI_KEY)%'
+            $pexelsApiKey: '%env(default::PEXELS_API_KEY)%'
+            $uploadsDirectory: '%uploads_directory%'
+
+    App\Service\ProductAutoCreateService:
+        arguments:
+            $uploadsDirectory: '%uploads_directory%'
+
+    App\Service\ProductConversationService:
+        arguments:
+            $apiKey: '%env(default::OPENAI_API_KEY)%'
+            $model: 'gpt-4o-mini'
+            $apiBaseUrl: '%env(default:chat_api_base_url_default:CHAT_API_BASE_URL)%'
+
+    App\Service\ChatApiService:
+        arguments:
+            $groqApiKey: '%env(default::CHAT_API_KEY)%'
+
+    App\Service\ProductPriceSearchService:
+        arguments:
+            $serpApiKey: '%env(default::SERP_API_KEY)%'
+            $rapidApiKey: '%env(default::RAPIDAPI_KEY)%'
+            $pexelsApiKey: '%env(default::PEXELS_API_KEY)%'
+            $groqApiKey: '%env(default::CHAT_API_KEY)%'
+            $uploadsDirectory: '%uploads_directory%'
+
+    App\Service\ImageAnalysisService:
+        arguments:
+            $groqApiKey: '%env(CHAT_API_KEY)%'
+            $openaiApiKey: '%env(default::OPENAI_API_KEY)%'
+            $geminiApiKey: '%env(default::GEMINI_API_KEY)%'
+
+    App\Service\ProductDescriptionSuggestionService:
+        arguments:
+            $groqApiKey: '%env(CHAT_API_KEY)%'
+
+    App\Service\AIPredictionService:
+        arguments:
+            $groqApiKey: '%env(CHAT_API_KEY)%'
+
+    # Nouveaux services du second fichier
     App\Service\LibreTranslateService:
         arguments:
             $cache: '@cache.app'
@@ -54,25 +125,23 @@ services:
 
     App\Service\GroqSummaryService:
         arguments:
-            $apiKey: '%env(default:groq_api_key_default:GROQ_API_KEY)%'
+            $apiKey: '%env(default:groq_api_key_default:CHAT_API_KEY)%'
 
     App\Service\GroqModuleGeneratorService:
         arguments:
-            $apiKey: '%env(default:groq_api_key_default:GROQ_API_KEY)%'
+            $apiKey: '%env(default:groq_api_key_default:CHAT_API_KEY)%'
 
     App\Service\GroqBlogGeneratorService:
         arguments:
-            $apiKey: '%env(default:groq_api_key_default:GROQ_API_KEY)%'
+            $apiKey: '%env(default:groq_api_key_default:CHAT_API_KEY)%'
 
     App\Service\GroqSpellCheckService:
         arguments:
-            $apiKey: '%env(default:groq_api_key_default:GROQ_API_KEY)%'
+            $apiKey: '%env(default:groq_api_key_default:CHAT_API_KEY)%'
 
-    App\Service\ZoomApiService:
+    App\Service\GroqHashtagGeneratorService:
         arguments:
-            $accountId: '%env(default::ZOOM_ACCOUNT_ID)%'
-            $clientId: '%env(default::ZOOM_CLIENT_ID)%'
-            $clientSecret: '%env(default::ZOOM_CLIENT_SECRET)%'
+            $apiKey: '%env(default:groq_api_key_default:CHAT_API_KEY)%'
 
     App\Service\ExternalAiRecommendationService:
         arguments:
@@ -80,3 +149,19 @@ services:
             $apiKey: '%env(default::AI_RECOMMENDER_API_KEY)%'
             $model: '%env(default::AI_RECOMMENDER_MODEL)%'
             $baseUrl: '%env(default::AI_RECOMMENDER_BASE_URL)%'
+
+    App\Service\ProfanityFilterService:
+        arguments:
+            $badWordsFile: '%kernel.project_dir%/config/bad_words.txt'
+    # Controllers avec arguments spécifiques
+    App\Controller\OrderController:
+        arguments:
+            $mailerFromEmail: '%env(default:mailer_from_email_default:MAILER_FROM_EMAIL)%'
+
+    App\Controller\Admin\DemandeProduitController:
+        arguments:
+            $uploadsDirectory: '%uploads_directory%'
+
+    App\Controller\ProductController:
+        arguments:
+            $uploadsDirectory: '%kernel.project_dir%/public/uploads'

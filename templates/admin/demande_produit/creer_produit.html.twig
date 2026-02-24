@@ -1,0 +1,165 @@
+{% extends 'layouts/admin.html.twig' %}
+
+{% block title %}Créer produit depuis la demande #{{ demande.id }} - AutiCare Admin{% endblock %}
+
+{% block admin_content %}
+<div class="max-w-4xl">
+    <div class="mb-6 flex items-center gap-4">
+        <a href="{{ path('admin_demande_produit_index') }}" class="inline-flex items-center gap-2 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded-lg">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            Retour aux demandes
+        </a>
+    </div>
+
+    <h1 class="text-2xl font-semibold text-[#4B5563] mb-2">Créer un produit</h1>
+    <p class="text-[#6B7280] mb-6">Demande #{{ demande.id }} : {{ demande.demandeClient|slice(0, 80) }}{% if demande.demandeClient|length > 80 %}...{% endif %}</p>
+
+    <form method="post" action="{{ path('admin_demande_produit_creer_produit', {id: demande.id}) }}" class="space-y-6">
+        <input type="hidden" name="_token" value="{{ csrf_token('creer_produit_' ~ demande.id) }}">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {# Colonne gauche: Infos produit #}
+            <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 space-y-4">
+                <h2 class="text-lg font-semibold text-[#4B5563] flex items-center gap-2">
+                    <svg class="w-5 h-5 text-violet-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                    </svg>
+                    Données enrichies par l'IA
+                </h2>
+                
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium text-[#4B5563] mb-1">Nom du produit</label>
+                        <div class="px-4 py-2.5 rounded-lg bg-[#F5F1EB] border border-[#E5E0D8] text-[#4B5563]">
+                            {{ enriched.nom }}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-[#4B5563] mb-1">Description</label>
+                        <div class="px-4 py-2.5 rounded-lg bg-[#F5F1EB] border border-[#E5E0D8] text-[#6B7280] text-sm max-h-32 overflow-y-auto">
+                            {{ enriched.description|default('Aucune description') }}
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-[#4B5563] mb-1">Catégorie</label>
+                            <div class="px-4 py-2.5 rounded-lg bg-[#F5F1EB] border border-[#E5E0D8] text-[#4B5563]">
+                                {{ enriched.categorie }}
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-[#4B5563] mb-1">Prix</label>
+                            <div class="px-4 py-2.5 rounded-lg bg-[#F5F1EB] border border-[#E5E0D8] text-[#A7C7E7] font-semibold">
+                                {{ enriched.prix|number_format(2, ',', ' ') }} DT
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="stock_id" class="block text-sm font-medium text-[#4B5563] mb-1">Stock *</label>
+                        <select name="stock_id" id="stock_id" required class="w-full rounded-lg border border-[#E5E0D8] bg-white px-4 py-2.5 text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                            {% for stock in stocks %}
+                                <option value="{{ stock.id }}" {% if loop.first %}selected{% endif %}>{{ stock.nom }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            {# Colonne droite: Sélection d'image #}
+            <div class="bg-white rounded-xl border border-[#E5E0D8] p-6">
+                <h2 class="text-lg font-semibold text-[#4B5563] mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                    </svg>
+                    Choisir une image
+                </h2>
+                
+                {% set donneesExternes = demande.donneesExternes %}
+                {% set imageOptions = donneesExternes.image_options ?? [] %}
+                
+                {# Fallback: si image_options n'existe pas, utiliser results #}
+                {% if imageOptions|length == 0 and donneesExternes.results is defined %}
+                    {% set imageOptions = [] %}
+                    {% for result in donneesExternes.results %}
+                        {% if result.image_url %}
+                            {% set imageOptions = imageOptions|merge([{
+                                'url': result.image_url,
+                                'source': result.source ?? 'Google',
+                                'price': result.price_tnd ?? null
+                            }]) %}
+                        {% endif %}
+                    {% endfor %}
+                    {% if donneesExternes.image_path %}
+                        {% set imageOptions = imageOptions|merge([{
+                            'url': donneesExternes.image_path,
+                            'source': 'Téléchargée',
+                            'price': null,
+                            'local': true
+                        }]) %}
+                    {% endif %}
+                {% endif %}
+                
+                {% if imageOptions|length > 0 %}
+                    <p class="text-sm text-[#6B7280] mb-4">L'IA a trouvé {{ imageOptions|length }} image(s) correspondant à la description. Sélectionnez celle qui convient le mieux :</p>
+                    
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {% for idx, option in imageOptions %}
+                            <label class="relative cursor-pointer group">
+                                <input type="radio" name="selected_image" value="{{ option.url }}" 
+                                       class="sr-only peer" 
+                                       {% if idx == 0 %}checked{% endif %}>
+                                <div class="aspect-square rounded-lg border-2 border-[#E5E0D8] overflow-hidden 
+                                            peer-checked:border-emerald-500 peer-checked:ring-2 peer-checked:ring-emerald-200
+                                            hover:border-[#A7C7E7] transition-all">
+                                    <img src="{{ option.local is defined and option.local ? asset(option.url) : option.url }}" 
+                                         alt="Option {{ idx + 1 }}" 
+                                         class="w-full h-full object-cover"
+                                         referrerpolicy="no-referrer"
+                                         onerror="this.parentElement.innerHTML='<div class=\'flex items-center justify-center h-full bg-gray-100 text-gray-400 text-xs\'>Erreur</div>'">
+                                </div>
+                                <div class="absolute top-1 right-1 w-5 h-5 rounded-full bg-white border-2 border-[#E5E0D8] 
+                                            peer-checked:bg-emerald-500 peer-checked:border-emerald-500 flex items-center justify-center">
+                                    <svg class="w-3 h-3 text-white hidden peer-checked:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                    </svg>
+                                </div>
+                                <p class="text-xs text-center text-[#6B7280] mt-1 truncate">{{ option.source }}</p>
+                            </label>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-8 text-[#9CA3AF]">
+                        <svg class="w-12 h-12 mx-auto mb-2 text-[#E5E0D8]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                        </svg>
+                        <p>Aucune image trouvée par l'IA</p>
+                        <p class="text-xs mt-1">Vous pourrez ajouter une image après la création</p>
+                    </div>
+                {% endif %}
+                
+                <div class="mt-4 pt-4 border-t border-[#E5E0D8]">
+                    <label class="flex items-center gap-2 text-sm text-[#6B7280]">
+                        <input type="radio" name="selected_image" value="" class="rounded border-[#E5E0D8]">
+                        <span>Créer sans image (ajouter manuellement plus tard)</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex flex-wrap gap-3 pt-2">
+            <button type="submit" class="px-6 py-3 rounded-lg bg-emerald-500 text-white font-medium hover:bg-emerald-600 inline-flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                Créer le produit
+            </button>
+            <a href="{{ path('admin_demande_produit_index') }}" class="px-6 py-3 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB]">
+                Annuler
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

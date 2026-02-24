@@ -32,8 +32,8 @@ final class BlogTranslateExtension extends AbstractExtension
             return '';
         }
 
-        $locale = $targetLocale ?? $this->requestStack->getCurrentRequest()?->getSession()?->get('blog_locale', 'fr');
-        if ($locale === 'fr') {
+        $locale = trim((string) ($targetLocale ?? $this->requestStack->getCurrentRequest()?->getSession()?->get('blog_locale', 'fr') ?? 'fr'));
+        if ($locale === '' || $locale === 'fr') {
             return $text;
         }
 

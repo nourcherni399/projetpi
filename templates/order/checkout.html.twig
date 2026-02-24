@@ -85,7 +85,7 @@
                     {% set total = total + sousTotal %}
                     <div class="flex justify-between text-sm">
                         <span class="text-[#6B7280]">{{ item.nom }} x {{ item.quantite }}</span>
-                        <span class="font-medium text-[#4B5563]">{{ sousTotal|number_format(2, ',', ' ') }} د.ت</span>
+                        <span class="font-medium text-[#4B5563]">{{ sousTotal|number_format(2, ',', ' ') }} dt</span>
                     </div>
                 {% endfor %}
             </div>
@@ -93,7 +93,7 @@
             <div class="space-y-3">
                 <div class="flex justify-between text-sm text-[#6B7280]">
                     <span>Sous-total</span>
-                    <span>{{ total|number_format(2, ',', ' ') }} د.ت</span>
+                    <span>{{ total|number_format(2, ',', ' ') }} dt</span>
                 </div>
                 <div class="flex justify-between text-sm text-[#6B7280]">
                     <span>Livraison</span>
@@ -101,7 +101,7 @@
                 </div>
                 <div class="flex justify-between font-bold text-lg text-[#A7C7E7] pt-3 border-t border-[#E5E0D8]">
                     <span>Total</span>
-                    <span>{{ total|number_format(2, ',', ' ') }} د.ت</span>
+                    <span>{{ total|number_format(2, ',', ' ') }} dt</span>
                 </div>
             </div>
         </div>
