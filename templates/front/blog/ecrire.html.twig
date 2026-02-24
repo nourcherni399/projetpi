@@ -7,12 +7,12 @@
     <div class="mb-6">
         <a href="{{ path('user_blog_module', { id: module.id }) }}" class="inline-flex items-center gap-2 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded-lg text-sm font-medium">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-            Retour au module
+            {{ 'Retour au module'|blog_translate }}
         </a>
     </div>
 
-    <h1 class="text-2xl font-bold text-[#4B5563] mb-2">Écrire un article</h1>
-    <p class="text-[#6B7280] text-sm mb-6">Module : {{ module.titre }}</p>
+    <h1 class="text-2xl font-bold text-[#4B5563] mb-2">{{ 'Écrire un article'|blog_translate }}</h1>
+    <p class="text-[#6B7280] text-sm mb-6">{{ 'Module'|blog_translate }} : {{ module.titre|blog_translate }}</p>
 
     {% for message in app.flashes('success') %}
         <div class="mb-4 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">{{ message }}</div>
@@ -32,9 +32,69 @@
         }) }}
         {{ form_errors(form) }}
 
+        <div class="p-4 rounded-xl border border-violet-200 bg-violet-50/50 space-y-4">
+            <h3 class="text-lg font-semibold text-violet-800">{{ 'Générer avec l\'IA'|blog_translate }}</h3>
+            <p class="text-sm text-[#6B7280]">{{ 'Saisissez un prompt et sélectionnez un type pour que l\'IA génère le titre et le contenu.'|blog_translate }}</p>
+            <div>
+                <label for="blog-ai-prompt" class="block text-[#4B5563] font-medium mb-1">{{ 'Prompt / Sujet'|blog_translate }}</label>
+                <div class="relative mt-1">
+                    <textarea id="blog-ai-prompt" rows="3" placeholder="{{ 'Ex. Témoignage sur les progrès de mon enfant avec les pictogrammes...'|blog_translate }}"
+                              class="block w-full rounded-lg border border-[#E5E0D8] bg-white px-4 py-2.5 pr-12 text-[#4B5563] focus:outline focus:ring-2 focus:ring-violet-500"></textarea>
+                    <button type="button"
+                            class="dictation-btn absolute right-3 top-3 w-10 h-10 flex items-center justify-center rounded-lg
+                                   bg-[#F3F4F6] text-[#6B7280] hover:bg-[#E5E7EB] focus:outline focus:ring-2 focus:ring-violet-500
+                                   transition-colors"
+                            data-target="blog-ai-prompt"
+                            title="{{ 'Dictée vocale'|blog_translate }}"
+                            aria-label="{{ 'Dictée vocale pour le prompt'|blog_translate }}">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+                        </svg>
+                    </button>
+                </div>
+                <p class="dictation-status mt-1 text-sm text-[#6B7280] hidden" data-for="blog-ai-prompt"></p>
+            </div>
+            <div>
+                <label for="blog-ai-type" class="block text-[#4B5563] font-medium mb-1">{{ 'Type d\'article'|blog_translate }}</label>
+                <select id="blog-ai-type" class="mt-1 block w-full rounded-lg border border-[#E5E0D8] bg-white px-4 py-2.5 text-[#4B5563] focus:outline focus:ring-2 focus:ring-violet-500">
+                    <option value="">-- {{ 'Choisir'|blog_translate }} --</option>
+                    <option value="recommandation">Recommandation</option>
+                    <option value="plainte">Plainte</option>
+                    <option value="question">Question</option>
+                    <option value="experience">Expérience</option>
+                </select>
+            </div>
+            <button type="button" id="blog-ai-generate-btn"
+                    class="px-4 py-2.5 rounded-lg bg-violet-600 text-white font-medium hover:bg-violet-700 focus:outline focus:ring-2 focus:ring-violet-500">
+                {{ 'Générer titre et contenu'|blog_translate }}
+            </button>
+            <p id="blog-ai-error-msg" class="text-sm text-red-600 hidden"></p>
+        </div>
+
         <div>
-            {{ form_label(form.titre) }}
-            {{ form_widget(form.titre) }}
+            <div class="flex items-center justify-between gap-2 mb-1">
+                {{ form_label(form.titre) }}
+                <button type="button" class="spell-check-btn text-sm text-violet-600 hover:text-violet-700 font-medium"
+                        data-target="blog_titre" title="{{ 'Vérifier l\'orthographe'|blog_translate }}">
+                    {{ 'Vérifier l\'orthographe'|blog_translate }}
+                </button>
+            </div>
+            <div class="relative mt-1">
+                {{ form_widget(form.titre) }}
+                <button type="button"
+                        class="dictation-btn absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-lg
+                               bg-[#F3F4F6] text-[#6B7280] hover:bg-[#E5E7EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7]
+                               transition-colors"
+                        data-target="blog_titre"
+                        title="Dictée vocale"
+                        aria-label="Dictée vocale pour le titre">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+                    </svg>
+                </button>
+            </div>
+            <p class="dictation-status mt-1 text-sm text-[#6B7280] hidden" data-for="blog_titre"></p>
+            <div class="spell-check-result mt-2 hidden" data-for="blog_titre"></div>
             {{ form_errors(form.titre) }}
         </div>
 
@@ -45,15 +105,63 @@
         </div>
 
         <div>
-            {{ form_label(form.contenu) }}
-            {{ form_widget(form.contenu) }}
+            <div class="flex items-center justify-between gap-2 mb-1">
+                {{ form_label(form.contenu) }}
+                <button type="button" class="spell-check-btn text-sm text-violet-600 hover:text-violet-700 font-medium"
+                        data-target="blog_contenu" title="{{ 'Vérifier l\'orthographe'|blog_translate }}">
+                    {{ 'Vérifier l\'orthographe'|blog_translate }}
+                </button>
+            </div>
+            <div class="relative mt-1">
+                {{ form_widget(form.contenu) }}
+                <button type="button"
+                        class="dictation-btn absolute right-3 top-3 w-10 h-10 flex items-center justify-center rounded-lg
+                               bg-[#F3F4F6] text-[#6B7280] hover:bg-[#E5E7EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7]
+                               transition-colors"
+                        data-target="blog_contenu"
+                        title="Dictée vocale"
+                        aria-label="Dictée vocale pour le contenu">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+                    </svg>
+                </button>
+            </div>
+            <p class="dictation-status mt-1 text-sm text-[#6B7280] hidden" data-for="blog_contenu"></p>
+            <div class="spell-check-result mt-2 hidden" data-for="blog_contenu"></div>
             {{ form_errors(form.contenu) }}
         </div>
 
-        <div>
-            {{ form_label(form.image) }}
-            {{ form_widget(form.image) }}
-            {{ form_errors(form.image) }}
+        <div class="space-y-4">
+            <label class="block text-[#4B5563] font-medium mb-2">{{ 'Image de l\'article'|blog_translate }}</label>
+            <div class="flex gap-4 mb-3">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="blog_image_source" value="upload" checked
+                           class="rounded border-[#E5E0D8] text-[#A7C7E7] focus:ring-[#A7C7E7]">
+                    <span class="text-[#4B5563]">{{ 'Uploader un fichier'|blog_translate }}</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="blog_image_source" value="pexels"
+                           class="rounded border-[#E5E0D8] text-[#A7C7E7] focus:ring-[#A7C7E7]">
+                    <span class="text-[#4B5563]">{{ 'Rechercher sur Pexels'|blog_translate }}</span>
+                </label>
+            </div>
+            <div id="blog-image-upload-zone" class="p-4 rounded-lg border border-[#E5E0D8] bg-white">
+                {{ form_widget(form.image) }}
+                {{ form_errors(form.image) }}
+            </div>
+            <div id="blog-pexels-zone" class="hidden space-y-4 p-4 rounded-lg border border-[#E5E0D8] bg-[#FAFAF9]">
+                <div class="flex gap-2">
+                    <input type="text" id="blog-pexels-query" placeholder="{{ 'Ex. autisme, famille, éducation...'|blog_translate }}"
+                           class="flex-1 rounded-lg border border-[#E5E0D8] px-4 py-2.5 text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                    <button type="button" id="blog-pexels-search-btn"
+                            class="px-4 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED]">
+                        {{ 'Rechercher'|blog_translate }}
+                    </button>
+                </div>
+                <div id="blog-pexels-results" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
+                <p id="blog-pexels-selected-msg" class="text-sm text-emerald-600 hidden"></p>
+            </div>
+            {{ form_widget(form.pexels_image_url) }}
         </div>
 
         <div class="flex flex-wrap gap-6">
@@ -76,13 +184,288 @@
 
         <div class="flex flex-wrap gap-3 pt-4">
             <button type="submit" class="px-5 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
-                Enregistrer l'article
+                {{ 'Enregistrer l\'article'|blog_translate }}
             </button>
             <a href="{{ path('user_blog_module', { id: module.id }) }}" class="px-5 py-2.5 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
-                Annuler
+                {{ 'Annuler'|blog_translate }}
             </a>
         </div>
         {{ form_end(form) }}
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        document.querySelectorAll('.dictation-btn').forEach(function (btn) {
+            btn.disabled = true;
+            btn.title = 'Dictée non supportée (Chrome, Edge, Safari)';
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+        });
+        return;
+    }
+    var recognition = new SpeechRecognition();
+    recognition.lang = 'fr-FR';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    var activeBtn = null;
+    var activeTarget = null;
+    var dictationStart = 0;
+    var dictationLength = 0;
+    recognition.onresult = function (event) {
+        if (!activeTarget) return;
+        var transcript = '';
+        for (var i = event.resultIndex; i < event.results.length; i++) {
+            if (event.results[i].isFinal) {
+                transcript = event.results[i][0].transcript;
+            }
+        }
+        if (!transcript) return;
+        var field = document.getElementById(activeTarget);
+        if (!field) return;
+        var before = field.value.substring(0, dictationStart);
+        var after = field.value.substring(dictationStart + dictationLength);
+        field.value = before + transcript + after;
+        dictationLength = transcript.length;
+        field.selectionStart = field.selectionEnd = dictationStart + dictationLength;
+    };
+    recognition.onerror = function (event) {
+        if (event.error !== 'aborted') {
+            var msg = event.error === 'not-allowed' ? 'Micro non autorisé' : event.error;
+            var status = document.querySelector('.dictation-status[data-for="' + activeTarget + '"]');
+            if (status) { status.textContent = 'Erreur : ' + msg; status.classList.remove('hidden'); }
+        }
+        stopDictation();
+    };
+    recognition.onend = function () {
+        if (activeBtn) {
+            try { recognition.start(); } catch (e) {}
+        } else {
+            document.querySelectorAll('.dictation-status').forEach(function (s) {
+                s.classList.add('hidden');
+            });
+        }
+    };
+    function stopDictation() {
+        recognition.stop();
+        activeBtn = null;
+        activeTarget = null;
+        dictationStart = 0;
+        dictationLength = 0;
+        document.querySelectorAll('.dictation-btn').forEach(function (b) {
+            b.classList.remove('bg-red-100', 'text-red-600');
+            b.classList.add('bg-[#F3F4F6]', 'text-[#6B7280]');
+        });
+        document.querySelectorAll('.dictation-status').forEach(function (s) {
+            s.classList.add('hidden');
+        });
+    }
+    document.querySelectorAll('.dictation-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var targetId = this.getAttribute('data-target');
+            var statusEl = document.querySelector('.dictation-status[data-for="' + targetId + '"]');
+            if (activeBtn === this) {
+                stopDictation();
+                this.title = 'Dictée vocale';
+                return;
+            }
+            if (activeBtn) stopDictation();
+            try {
+                activeBtn = this;
+                activeTarget = targetId;
+                var field = document.getElementById(targetId);
+                dictationStart = field ? (field.selectionStart || field.value.length) : 0;
+                dictationLength = 0;
+                recognition.start();
+                this.classList.remove('bg-[#F3F4F6]', 'text-[#6B7280]');
+                this.classList.add('bg-red-100', 'text-red-600');
+                this.title = 'Arrêter la dictée';
+                if (statusEl) {
+                    statusEl.textContent = 'Écoute en cours... Parlez.';
+                    statusEl.classList.remove('hidden');
+                }
+            } catch (e) {
+                if (statusEl) {
+                    statusEl.textContent = 'Impossible de démarrer.';
+                    statusEl.classList.remove('hidden');
+                }
+            }
+        });
+    });
+    (function() {
+        var uploadRadio = document.querySelector('input[name="blog_image_source"][value="upload"]');
+        var pexelsRadio = document.querySelector('input[name="blog_image_source"][value="pexels"]');
+        var uploadZone = document.getElementById('blog-image-upload-zone');
+        var pexelsZone = document.getElementById('blog-pexels-zone');
+        var imageInput = document.querySelector('#blog-image-upload-zone input[type="file"]');
+        var pexelsUrlInput = document.querySelector('input[name*="[pexels_image_url]"]');
+        var pexelsQuery = document.getElementById('blog-pexels-query');
+        var pexelsSearchBtn = document.getElementById('blog-pexels-search-btn');
+        var pexelsResults = document.getElementById('blog-pexels-results');
+        var pexelsSelectedMsg = document.getElementById('blog-pexels-selected-msg');
+        var         pexelsSearchUrl = '{{ path("pexels_search") }}';
+
+        var blogAiPrompt = document.getElementById('blog-ai-prompt');
+        var blogAiType = document.getElementById('blog-ai-type');
+        var blogAiGenerateBtn = document.getElementById('blog-ai-generate-btn');
+        var blogAiErrorMsg = document.getElementById('blog-ai-error-msg');
+        var blogTitreInput = document.getElementById('blog_titre');
+        var blogTypeSelect = document.querySelector('select[name*="[type]"]');
+        var blogContenuInput = document.getElementById('blog_contenu');
+        var blogGenerateUrl = '{{ path("user_blog_generate") }}';
+
+        if (blogAiGenerateBtn && blogTitreInput && blogContenuInput) {
+            blogAiGenerateBtn.addEventListener('click', function() {
+                var prompt = blogAiPrompt ? blogAiPrompt.value.trim() : '';
+                var type = blogAiType ? blogAiType.value : '';
+                if (!prompt) {
+                    if (blogAiErrorMsg) {
+                        blogAiErrorMsg.textContent = 'Veuillez saisir un prompt.';
+                        blogAiErrorMsg.classList.remove('hidden');
+                    }
+                    return;
+                }
+                if (blogAiErrorMsg) blogAiErrorMsg.classList.add('hidden');
+                blogAiGenerateBtn.disabled = true;
+                blogAiGenerateBtn.textContent = 'Génération...';
+                var formData = new FormData();
+                formData.append('prompt', prompt);
+                formData.append('type', type || '');
+                fetch(blogGenerateUrl, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.error) {
+                        if (blogAiErrorMsg) {
+                            blogAiErrorMsg.textContent = data.error;
+                            blogAiErrorMsg.classList.remove('hidden');
+                        }
+                    } else {
+                        if (data.titre) blogTitreInput.value = data.titre;
+                        if (data.contenu) blogContenuInput.value = data.contenu;
+                        if (type && blogTypeSelect) blogTypeSelect.value = type;
+                    }
+                })
+                .catch(function() {
+                    if (blogAiErrorMsg) {
+                        blogAiErrorMsg.textContent = 'Erreur lors de la génération.';
+                        blogAiErrorMsg.classList.remove('hidden');
+                    }
+                })
+                .finally(function() {
+                    blogAiGenerateBtn.disabled = false;
+                    blogAiGenerateBtn.textContent = "Générer titre et contenu";
+                });
+            });
+        }
+
+        var spellCheckUrl = '{{ path("user_blog_spell_check") }}';
+        document.querySelectorAll('.spell-check-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var targetId = this.getAttribute('data-target');
+                var field = document.getElementById(targetId);
+                var resultEl = document.querySelector('.spell-check-result[data-for="' + targetId + '"]');
+                if (!field || !resultEl) return;
+                var text = field.value.trim();
+                if (!text) {
+                    resultEl.innerHTML = '<p class="text-amber-600 text-sm">Veuillez saisir du texte.</p>';
+                    resultEl.classList.remove('hidden');
+                    return;
+                }
+                btn.disabled = true;
+                resultEl.innerHTML = '<p class="text-[#6B7280] text-sm">Vérification en cours...</p>';
+                resultEl.classList.remove('hidden');
+                var formData = new FormData();
+                formData.append('text', text);
+                fetch(spellCheckUrl, { method: 'POST', body: formData, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    btn.disabled = false;
+                    if (data.error) {
+                        resultEl.innerHTML = '<p class="text-red-600 text-sm">' + data.error + '</p>';
+                    } else if (data.corrections && data.corrections.length > 0) {
+                        var correctedText = data.corrected_text || '';
+                        var html = '<div class="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm"><p class="font-medium text-amber-800 mb-2">Corrections proposées :</p><ul class="space-y-1 mb-3">';
+                        data.corrections.forEach(function(c) {
+                            html += '<li><span class="text-red-600">' + (c.original || '').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span> → <span class="text-emerald-600">' + (c.suggestion || '').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span></li>';
+                        });
+                        html += '</ul><button type="button" class="apply-spell-check px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700">Appliquer les corrections</button></div>';
+                        resultEl.innerHTML = html;
+                        resultEl.querySelector('.apply-spell-check')?.addEventListener('click', function() {
+                            var f = document.getElementById(targetId);
+                            if (f && correctedText) { f.value = correctedText; resultEl.classList.add('hidden'); }
+                        });
+                    } else {
+                        resultEl.innerHTML = '<p class="text-emerald-600 text-sm">Aucune faute détectée.</p>';
+                    }
+                })
+                .catch(function() {
+                    btn.disabled = false;
+                    resultEl.innerHTML = '<p class="text-red-600 text-sm">Erreur lors de la vérification.</p>';
+                });
+            });
+        });
+
+        function switchSource() {
+            if (uploadRadio.checked) {
+                uploadZone.classList.remove('hidden');
+                pexelsZone.classList.add('hidden');
+                if (pexelsUrlInput) pexelsUrlInput.value = '';
+                if (pexelsSelectedMsg) pexelsSelectedMsg.classList.add('hidden');
+            } else {
+                uploadZone.classList.add('hidden');
+                pexelsZone.classList.remove('hidden');
+                if (imageInput) imageInput.value = '';
+            }
+        }
+        uploadRadio.addEventListener('change', switchSource);
+        pexelsRadio.addEventListener('change', switchSource);
+        pexelsSearchBtn.addEventListener('click', function() {
+            var query = (pexelsQuery.value || '').trim();
+            if (query.length < 2) {
+                pexelsResults.innerHTML = '<p class="text-red-600 col-span-full">Champs obligatoire</p>';
+                return;
+            }
+            pexelsSearchBtn.disabled = true;
+            pexelsResults.innerHTML = '<p class="text-[#6B7280] col-span-full">Recherche en cours...</p>';
+            fetch(pexelsSearchUrl + '?q=' + encodeURIComponent(query))
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    pexelsSearchBtn.disabled = false;
+                    if (data.error) {
+                        pexelsResults.innerHTML = '<p class="text-red-600 col-span-full">Erreur : ' + (data.error || 'Inconnue') + '</p>';
+                        return;
+                    }
+                    if (!data.photos || data.photos.length === 0) {
+                        pexelsResults.innerHTML = '<p class="text-[#6B7280] col-span-full">Aucune image trouvée.</p>';
+                        return;
+                    }
+                    pexelsResults.innerHTML = data.photos.map(function(p) {
+                        var src = (p.src_large || p.src_medium || '').replace(/"/g, '&quot;');
+                        var photographer = (p.photographer || '').replace(/"/g, '&quot;');
+                        return '<div class="aspect-square rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-[#A7C7E7] blog-pexels-photo" data-src="' + src + '" data-photographer="' + photographer + '"><img src="' + (p.src_medium || '').replace(/"/g, '&quot;') + '" alt="" class="w-full h-full object-cover"></div>';
+                    }).join('');
+                    pexelsResults.querySelectorAll('.blog-pexels-photo').forEach(function(el) {
+                        el.addEventListener('click', function() {
+                            pexelsResults.querySelectorAll('.blog-pexels-photo').forEach(function(e) { e.classList.remove('border-[#A7C7E7]'); });
+                            this.classList.add('border-[#A7C7E7]');
+                            if (pexelsUrlInput) pexelsUrlInput.value = this.getAttribute('data-src') || '';
+                            if (pexelsSelectedMsg) {
+                                pexelsSelectedMsg.textContent = 'Image sélectionnée : Photo by ' + (this.getAttribute('data-photographer') || '');
+                                pexelsSelectedMsg.classList.remove('hidden');
+                            }
+                        });
+                    });
+                })
+                .catch(function() {
+                    pexelsSearchBtn.disabled = false;
+                    pexelsResults.innerHTML = '<p class="text-red-600 col-span-full">Erreur réseau.</p>';
+                });
+        });
+    })();
+});
+</script>
 {% endblock %}

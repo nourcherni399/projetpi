@@ -1,24 +1,28 @@
-# This file is the entry point to configure your own services.
-# Files in the packages/ subdirectory configure your dependencies.
+# config/services.yaml
+# Ce fichier configure les services et paramètres pour toute l'application
 
-# Put parameters here that don't need to change on each machine where the app is deployed
-# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    # Répertoires d'uploads
     uploads_directory: '%kernel.project_dir%/public/uploads/produits'
     uploads_modules_directory: '%kernel.project_dir%/public/uploads/modules'
     uploads_blogs_directory: '%kernel.project_dir%/public/uploads/blog'
+    uploads_ressources_directory: '%kernel.project_dir%/public/uploads/ressources'
     uploads_users_directory: '%kernel.project_dir%/public/uploads/users'
+    uploads_commentaires_directory: '%kernel.project_dir%/public/uploads/commentaires'
     uploads_thematiques_directory: '%kernel.project_dir%/public/uploads/thematiques'
+
+    # Paramètres divers
     app_url_default: ''
+    libretranslate_api_key_default: ''
+    groq_api_key_default: ''
 
 services:
-    # default configuration for services in *this* file
+    # Configuration par défaut pour tous les services
     _defaults:
-        autowire: true      # Automatically injects dependencies in your services.
-        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        autowire: true      # injection automatique des dépendances
+        autoconfigure: true # enregistrement automatique comme commande, subscriber, etc.
 
-    # makes classes in src/ available to be used as services
-    # this creates a service per class whose id is the fully-qualified class name
+    # Makes classes in src/ available as services
     App\:
         resource: '../src/'
         exclude:
@@ -26,16 +30,43 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
-    # Repository Notification : valeur explicite pour $entityClass (évite l'erreur d'autowiring)
+    # Repositories avec autowiring explicite
     App\Repository\NotificationRepository:
         arguments:
             $entityClass: App\Entity\Notification
 
-    # Force l'URI de redirection OAuth (Google) pour éviter redirect_uri_mismatch si APP_URL est défini
+    # Subscriber OAuth
     App\EventSubscriber\OAuthRedirectUriContextSubscriber:
         arguments:
-            $appUrl: '%env(APP_URL)%'
+            $appUrl: '%env(default:app_url_default:APP_URL)%'
 
+    # Services externes et AI
+    App\Service\LibreTranslateService:
+        arguments:
+            $cache: '@cache.app'
+            $apiUrl: '%env(LIBRETRANSLATE_URL)%'
+            $cacheTtl: '%env(int:LIBRETRANSLATE_CACHE_TTL)%'
+            $apiKey: '%env(default:libretranslate_api_key_default:LIBRETRANSLATE_API_KEY)%'
+
+    App\Service\PexelsService:
+        arguments:
+            $pexelsApiKey: '%env(PEXELS_API_KEY)%'
+
+    App\Service\GroqSummaryService:
+        arguments:
+            $apiKey: '%env(default:groq_api_key_default:GROQ_API_KEY)%'
+
+    App\Service\GroqModuleGeneratorService:
+        arguments:
+            $apiKey: '%env(default:groq_api_key_default:GROQ_API_KEY)%'
+
+    App\Service\GroqBlogGeneratorService:
+        arguments:
+            $apiKey: '%env(default:groq_api_key_default:GROQ_API_KEY)%'
+
+    App\Service\GroqSpellCheckService:
+        arguments:
+            $apiKey: '%env(default:groq_api_key_default:GROQ_API_KEY)%'
 
     App\Service\ZoomApiService:
         arguments:
@@ -49,7 +80,3 @@ services:
             $apiKey: '%env(default::AI_RECOMMENDER_API_KEY)%'
             $model: '%env(default::AI_RECOMMENDER_MODEL)%'
             $baseUrl: '%env(default::AI_RECOMMENDER_BASE_URL)%'
-
-    # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
-

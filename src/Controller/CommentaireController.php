@@ -7,16 +7,19 @@ use App\Entity\Commentaire;
 use App\Form\CommentaireType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/commentaire')]
 final class CommentaireController extends AbstractController
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
+        private readonly SluggerInterface $slugger,
     ) {
     }
 
@@ -34,24 +37,27 @@ final class CommentaireController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $user = $this->getUser();
-            
-            // Associer le commentaire au blog et à l'utilisateur
-            $commentaire->setBlog($blog);
-            $commentaire->setUser($user);
-            $commentaire->setIsPublished(true); // Auto-publier pour l'instant
-            
-            $this->entityManager->persist($commentaire);
-            $this->entityManager->flush();
+            $mediaFile = $form->get('mediaFile')->getData();
 
-            $this->addFlash('success', 'Votre commentaire a été ajouté avec succès !');
+            if ($mediaFile instanceof UploadedFile && !$this->handleMediaUpload($mediaFile, $commentaire)) {
+                $this->addFlash('error', "Erreur lors de l'upload.");
+            } else {
+                    $commentaire->setUser($user);
+                $commentaire->setIsPublished(true);
+                $this->entityManager->persist($commentaire);
+                $this->entityManager->flush();
+                $this->addFlash('success', 'Votre commentaire a été ajouté avec succès !');
+            }
         } else {
-            // Si le formulaire n'est pas valide, ajouter un message d'erreur
             foreach ($form->getErrors(true) as $error) {
                 $this->addFlash('error', $error->getMessage());
             }
         }
 
-        // Rediriger vers la page de l'article ou du module
+        $redirect = $request->request->get('_redirect');
+        if ($redirect && filter_var($redirect, FILTER_VALIDATE_URL)) {
+            return $this->redirect($redirect);
+        }
         return $this->redirectToRoute('user_blog_show_article', ['id' => $blogId]);
     }
 
@@ -70,24 +76,28 @@ final class CommentaireController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $user = $this->getUser();
-            
-            // Associer le commentaire à l'article trouvé
-            $commentaire->setBlog($blog);
-            $commentaire->setUser($user);
-            $commentaire->setIsPublished(true); // Auto-publier pour l'instant
-            
-            $this->entityManager->persist($commentaire);
-            $this->entityManager->flush();
+            $mediaFile = $form->get('mediaFile')->getData();
 
-            $this->addFlash('success', 'Votre commentaire a été ajouté avec succès !');
+            if ($mediaFile instanceof UploadedFile && !$this->handleMediaUpload($mediaFile, $commentaire)) {
+                $this->addFlash('error', "Erreur lors de l'upload.");
+            } else {
+                $commentaire->setBlog($blog);
+                $commentaire->setUser($user);
+                $commentaire->setIsPublished(true);
+                $this->entityManager->persist($commentaire);
+                $this->entityManager->flush();
+                $this->addFlash('success', 'Votre commentaire a été ajouté avec succès !');
+            }
         } else {
-            // Si le formulaire n'est pas valide, ajouter un message d'erreur
             foreach ($form->getErrors(true) as $error) {
                 $this->addFlash('error', $error->getMessage());
             }
         }
 
-        // Rediriger vers la page de l'article
+        $redirect = $request->request->get('_redirect');
+        if ($redirect && filter_var($redirect, FILTER_VALIDATE_URL)) {
+            return $this->redirect($redirect);
+        }
         return $this->redirectToRoute('user_blog_show_article', ['id' => $blog->getId()]);
     }
 
@@ -110,6 +120,30 @@ final class CommentaireController extends AbstractController
             $this->addFlash('success', 'Le commentaire a été supprimé avec succès');
         }
 
+        $redirect = $request->request->get('_redirect');
+        if ($redirect && filter_var($redirect, FILTER_VALIDATE_URL)) {
+            return $this->redirect($redirect);
+        }
         return $this->redirectToRoute('user_blog_show_article', ['id' => $blogId]);
+    }
+
+    private function handleMediaUpload(UploadedFile $mediaFile, Commentaire $commentaire): bool
+    {
+        $originalFilename = pathinfo($mediaFile->getClientOriginalName(), PATHINFO_FILENAME);
+        $safeFilename = $this->slugger->slug($originalFilename);
+        $extension = $mediaFile->guessExtension() ?: $mediaFile->getClientOriginalExtension();
+        $newFilename = $safeFilename . '-' . uniqid() . '.' . $extension;
+
+        try {
+            $dir = $this->getParameter('uploads_commentaires_directory');
+            if (!is_dir($dir)) {
+                mkdir($dir, 0755, true);
+            }
+            $mediaFile->move($dir, $newFilename);
+            $commentaire->setMedia('uploads/commentaires/' . $newFilename);
+            return true;
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 }

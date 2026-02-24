@@ -8,11 +8,17 @@ use App\Entity\Module;
 use App\Form\ModuleType;
 use App\Repository\ModuleRepository;
 use App\Repository\ActionHistoryRepository;
+use App\Repository\RessourceRepository;
+use App\Enum\CategorieModule;
+use App\Service\GroqModuleGeneratorService;
+use App\Service\PexelsService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
@@ -21,17 +27,24 @@ final class ModuleController extends AbstractController
 {
     public function __construct(
         private readonly ModuleRepository $moduleRepository,
+        private readonly RessourceRepository $ressourceRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly ActionHistoryRepository $actionHistoryRepository,
         private readonly SluggerInterface $slugger,
+        private readonly PexelsService $pexelsService,
     ) {
     }
 
     #[Route('', name: 'admin_dashboard', methods: ['GET'])]
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $modules = $this->moduleRepository->findBy([], ['dateCreation' => 'DESC']);
         $actionHistory = $this->actionHistoryRepository->findLatestActions(5);
+        $resourceModuleId = $request->query->getInt('resourceModule', 0);
+        $selectedResourceModule = $resourceModuleId > 0 ? $this->moduleRepository->find($resourceModuleId) : null;
+        $ressources = $selectedResourceModule instanceof Module
+            ? $this->ressourceRepository->findByModuleOrdered($selectedResourceModule)
+            : $this->ressourceRepository->findAllOrdered();
 
         $statsByType = [
             'recommandation' => 0,
@@ -61,6 +74,8 @@ final class ModuleController extends AbstractController
 
         return $this->render('admin/module/index.html.twig', [
             'modules' => $modules,
+            'ressources' => $ressources,
+            'selectedResourceModule' => $selectedResourceModule,
             'actionHistory' => $actionHistory,
             'statsByType' => $statsByType,
             'statsByModule' => $statsByModule,
@@ -76,6 +91,8 @@ final class ModuleController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $imageFile = $form->get('image')->getData();
+            $pexelsUrl = trim((string) $form->get('pexels_image_url')->getData());
+
             if ($imageFile) {
                 $saved = $this->handleImageUpload($imageFile, $module);
                 if (!$saved) {
@@ -84,7 +101,20 @@ final class ModuleController extends AbstractController
                         'form' => $form,
                     ]);
                 }
+            } elseif ($pexelsUrl !== '' && filter_var($pexelsUrl, FILTER_VALIDATE_URL)) {
+                $targetDir = $this->getParameter('uploads_modules_directory');
+                $filename = $this->pexelsService->downloadAndSave($pexelsUrl, $targetDir);
+                if ($filename !== null) {
+                    $module->setImage('uploads/modules/' . $filename);
+                } else {
+                    $this->addFlash('error', 'Impossible de télécharger l\'image depuis Pexels.');
+                    return $this->render('admin/module/new.html.twig', [
+                        'module' => $module,
+                        'form' => $form,
+                    ]);
+                }
             }
+
             $now = new \DateTime();
             $module->setDateCreation($now);
             $module->setDateModif($now);
@@ -113,6 +143,32 @@ final class ModuleController extends AbstractController
         ]);
     }
 
+    #[Route('/generate', name: 'admin_module_generate', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function generate(Request $request, GroqModuleGeneratorService $generator): JsonResponse
+    {
+        $prompt = trim((string) $request->request->get('prompt', ''));
+        $categorie = trim((string) $request->request->get('categorie', ''));
+
+        if ($prompt === '') {
+            return $this->json(['titre' => '', 'description' => '', 'contenu' => '', 'error' => 'Veuillez saisir un prompt.'], 400);
+        }
+
+        $categorieLabel = $categorie;
+        if ($categorie !== '' && $categorie !== 'Général') {
+            try {
+                $enum = CategorieModule::tryFrom($categorie) ?? CategorieModule::EMPTY;
+                $categorieLabel = $enum->label() ?: $categorie;
+            } catch (\Throwable) {
+                $categorieLabel = $categorie;
+            }
+        }
+
+        $result = $generator->generate($prompt, $categorieLabel);
+
+        return $this->json($result);
+    }
+
     #[Route('/{id}/edit', name: 'admin_module_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Module $module): Response
     {
@@ -121,6 +177,8 @@ final class ModuleController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $imageFile = $form->get('image')->getData();
+            $pexelsUrl = trim((string) $form->get('pexels_image_url')->getData());
+
             if ($imageFile) {
                 $saved = $this->handleImageUpload($imageFile, $module);
                 if (!$saved) {
@@ -129,7 +187,20 @@ final class ModuleController extends AbstractController
                         'form' => $form,
                     ]);
                 }
+            } elseif ($pexelsUrl !== '' && filter_var($pexelsUrl, FILTER_VALIDATE_URL)) {
+                $targetDir = $this->getParameter('uploads_modules_directory');
+                $filename = $this->pexelsService->downloadAndSave($pexelsUrl, $targetDir);
+                if ($filename !== null) {
+                    $module->setImage('uploads/modules/' . $filename);
+                } else {
+                    $this->addFlash('error', 'Impossible de télécharger l\'image depuis Pexels.');
+                    return $this->render('admin/module/edit.html.twig', [
+                        'module' => $module,
+                        'form' => $form,
+                    ]);
+                }
             }
+
             $module->setDateModif(new \DateTime());
             if ($module->getImage() === null) {
                 $module->setImage('');

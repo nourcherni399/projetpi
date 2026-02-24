@@ -22,7 +22,7 @@ class Module
     #[ORM\Column(length: 255)]
     private ?string $description = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $contenu = null;
 
     #[ORM\Column(

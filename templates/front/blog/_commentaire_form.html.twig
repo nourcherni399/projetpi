@@ -21,6 +21,16 @@
             }) }}
             {{ form_errors(commentaireForm.contenu) }}
         </div>
+        <div class="flex items-center gap-2">
+            <label class="cursor-pointer inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-[#E5E0D8] bg-[#F9FAFB] text-[#6B7280] hover:bg-[#DBEAFE] hover:text-[#1D4ED8] transition-colors text-sm" title="Ajouter une image ou une vidéo">
+                {{ form_widget(commentaireForm.mediaFile) }}
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span>Image ou vidéo</span>
+            </label>
+            {{ form_errors(commentaireForm.mediaFile) }}
+        </div>
         
         <div class="flex items-center justify-between">
             <div class="text-sm text-[#6B7280]">

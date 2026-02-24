@@ -1,0 +1,147 @@
+{# Dictionnaire : sélection ou double-clic sur un mot pour voir sa définition (FR/EN) #}
+<script>
+(function() {
+    var DICT_BASE_URL = '{{ path("api_dictionary", { word: "WORDPLACEHOLDER" })|e("js") }}'.replace(/WORDPLACEHOLDER\/?$/, '');
+    var LABELS = { fr: 'Voir la définition', en: 'See definition' };
+
+    function getSelectedWord() {
+        var sel = window.getSelection();
+        if (!sel || sel.isCollapsed) return null;
+        var text = sel.toString().trim();
+        if (!text) return null;
+        var match = text.match(/[\p{L}\p{N}\-']+/u);
+        var word = match ? match[0] : text.split(/\s+/)[0];
+        if (!word) return null;
+        word = word.replace(/^["'\(\[\{-]+|[\)\]\}\-\.\,\:\;\!\?"']+$/g, '');
+        return word.length >= 2 ? word : null;
+    }
+
+    function hideDictButton() {
+        var btn = document.getElementById('dict-lookup-btn');
+        if (btn) btn.remove();
+    }
+
+    function showDictButton(container, word, lang, rect) {
+        hideDictButton();
+        if (!word) return;
+
+        var btn = document.createElement('button');
+        btn.id = 'dict-lookup-btn';
+        btn.type = 'button';
+        btn.className = 'fixed z-[90] px-3 py-2 rounded-lg text-sm font-medium bg-[#A7C7E7] text-white hover:bg-[#95b8dc] focus:outline focus:ring-2 focus:ring-[#A7C7E7] shadow-lg border border-[#95b8dc] transition-colors';
+        btn.textContent = LABELS[lang] || LABELS.fr;
+        btn.style.left = Math.min(rect.left, window.innerWidth - 160) + 'px';
+        btn.style.top = (rect.bottom + 8) + 'px';
+
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            hideDictButton();
+            window.getSelection().removeAllRanges();
+
+            var apiBase = (container && container.dataset.dictUrl) || DICT_BASE_URL || '/api/dictionary';
+            var url = apiBase.replace(/\/$/, '') + '/' + encodeURIComponent(word) + '?lang=' + (lang || 'fr');
+
+            fetch(url, { credentials: 'same-origin' })
+                .then(function(r) {
+                    if (!r.ok && r.status !== 404) throw new Error('HTTP ' + r.status);
+                    return r.json();
+                })
+                .then(function(data) {
+                    if (!data || data.error) {
+                        alert((lang === 'en' ? 'Definition not found for "' : 'Définition non trouvée pour "') + word + '"');
+                        return;
+                    }
+                    showTooltip(rect.left, rect.bottom + 40, data);
+                })
+                .catch(function(err) {
+                    console.error('Dictionary API error:', err);
+                    alert(lang === 'en' ? 'Error fetching definition.' : 'Erreur lors de la récupération de la définition.');
+                });
+        });
+
+        document.body.appendChild(btn);
+
+        document.addEventListener('click', function onDocClick(ev) {
+            if (!btn.contains(ev.target)) {
+                hideDictButton();
+                document.removeEventListener('click', onDocClick);
+            }
+        });
+    }
+
+    function showTooltip(x, y, data) {
+        var existing = document.getElementById('dict-tooltip');
+        if (existing) existing.remove();
+
+        function esc(s) { if (!s) return ''; var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+        var tt = document.createElement('div');
+        tt.id = 'dict-tooltip';
+        tt.className = 'fixed z-[100] max-w-sm p-4 rounded-xl shadow-lg border border-[#E5E0D8] bg-white text-[#4B5563] text-sm';
+        tt.style.left = Math.min(x, window.innerWidth - 320) + 'px';
+        tt.style.top = y + 'px';
+
+        var html = '<div class="font-semibold text-[#1e3a5f] mb-2">' + esc(data.word) + '</div>';
+        if (data.phonetic) html += '<div class="text-[#6B7280] text-xs mb-2">' + esc(data.phonetic) + '</div>';
+        html += '<p class="leading-relaxed">' + esc(data.definition) + '</p>';
+        if (data.example) html += '<p class="mt-2 text-[#6B7280] italic text-xs">' + esc(data.example) + '</p>';
+        html += '<p class="mt-2 text-[#9CA3AF] text-xs">Source: ' + (data.source === 'free-dictionary' ? 'Free Dictionary' : 'Wiktionary') + '</p>';
+        tt.innerHTML = html;
+
+        document.body.appendChild(tt);
+
+        function closeTooltip() {
+            var t = document.getElementById('dict-tooltip');
+            if (t) t.remove();
+            document.removeEventListener('click', closeTooltip);
+        }
+        setTimeout(function() { document.addEventListener('click', closeTooltip); }, 100);
+    }
+
+    function initDictionary() {
+        document.querySelectorAll('.dict-content').forEach(function(container) {
+            if (container._dictInit) return;
+            container._dictInit = true;
+
+            var lang = container.dataset.dictLang || 'fr';
+
+            function onSelect() {
+                var word = getSelectedWord();
+                var sel = window.getSelection();
+                if (!word || !sel.rangeCount) {
+                    hideDictButton();
+                    return;
+                }
+                var anc = sel.anchorNode, foc = sel.focusNode;
+                if (!anc || !foc) { hideDictButton(); return; }
+                if (!container.contains(anc) && !container.contains(foc)) {
+                    hideDictButton();
+                    return;
+                }
+                try {
+                    var range = sel.getRangeAt(0);
+                    var rect = range.getBoundingClientRect();
+                    if (rect.width > 0 || rect.height > 0) {
+                        showDictButton(container, word, lang, rect);
+                    }
+                } catch (e) {
+                    hideDictButton();
+                }
+            }
+
+            container.addEventListener('mouseup', function() {
+                setTimeout(onSelect, 10);
+            });
+            container.addEventListener('dblclick', function() {
+                setTimeout(onSelect, 50);
+            });
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initDictionary);
+    } else {
+        initDictionary();
+    }
+})();
+</script>

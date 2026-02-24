@@ -3,12 +3,13 @@
 {% block body %}
 <div class="min-h-screen flex flex-col">
     <header class="bg-white shadow-sm shrink-0">
-        <div class="max-w-6xl mx-auto pl-2 pr-4 py-4 flex flex-nowrap items-center gap-6">
-            <a href="{{ path('home') }}" class="flex items-center gap-3 text-[#4B5563] font-semibold text-lg shrink-0 mr-8" title="AutiCare - Accueil" aria-label="AutiCare - Accueil">
-                <img src="{{ asset('images/logo.png') }}" alt="AutiCare - École, Aide, Accompagnement" class="h-16 w-auto object-contain" />
+        <div class="w-full px-4 py-4 flex flex-nowrap items-center gap-3">
+            <a href="{{ path('home') }}" class="flex items-center gap-3 text-[#4B5563] font-semibold text-lg shrink-0 order-first" title="AutiCare - Accueil">
+                <img src="{{ asset('images/logo.png') }}" alt="AutiCare" class="h-16 w-auto object-contain shrink-0" />
+                <span class="hidden md:inline whitespace-nowrap text-[#4B5563]">AutiCare</span>
             </a>
-            <div class="flex flex-nowrap items-center gap-4 md:gap-5 flex-1 min-w-0 justify-end">
-            <nav class="flex flex-nowrap items-center gap-2 md:gap-4 shrink-0 pl-4 border-l border-[#E5E0D8]" aria-label="Navigation principale">
+            <div class="flex flex-nowrap items-center gap-2 md:gap-3 flex-1 min-w-0 justify-end">
+            <nav class="flex flex-nowrap items-center gap-2 md:gap-3 shrink-0 pl-2 pr-2" aria-label="Navigation principale">
                 <a href="{{ path('home') }}" class="flex items-center gap-1.5 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded px-2 py-1 whitespace-nowrap">
                     <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>
                     <span class="hidden sm:inline">Accueil</span>
@@ -29,20 +30,17 @@
                     <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.256A8.967 8.967 0 016 18c2.295 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.256A8.967 8.967 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
                     <span class="hidden sm:inline">Blog</span>
                 </a>
-                {% if app.user %}
-                <a href="{{ path('order_my_orders') }}" class="flex items-center gap-1.5 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded px-2 py-1 whitespace-nowrap" title="Consulter le suivi de mes commandes">
-                    <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z" /></svg>
-                    <span class="hidden sm:inline">Mes commandes</span>
-                </a>
-                {% endif %}
             </nav>
-            <div class="flex flex-nowrap items-center gap-2 md:gap-3 shrink-0 pl-4 border-l border-[#E5E0D8]">
+            <div class="flex flex-nowrap items-center gap-2 md:gap-3 shrink-0 pl-2">
                 {% if app.user %}
-                    {% set _event_msg_notifs = user_event_message_notifications|default([]) %}
-                    {% set _commande_notifs_header = user_commande_notifications|default([]) %}
-                    {% set _notif_count = (user_inscription_notifications|default([])|length) + (user_rdv_notifications|default([])|length) + (_event_msg_notifs|length) + (_commande_notifs_header|length) %}
+                    {% set _notif_count = (user_inscription_notifications|default([])|length) + (user_rdv_notifications|default([])|length) %}
                     {% set _event_notifs_header = user_inscription_notifications|default([]) %}
                     {% set _rdv_notifs_header = user_rdv_notifications|default([]) %}
+                    <a href="{{ path('favoris_index') }}" class="relative p-2 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded-full" title="Mes favoris" aria-label="Mes favoris">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.256A8.967 8.967 0 016 18c2.295 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.256A8.967 8.967 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                        </svg>
+                    </a>
                     <a href="{{ path('cart_index') }}" class="relative p-2 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded-full" title="Mon panier" aria-label="Panier{% if app_cart_count|default(0) > 0 %} ({{ app_cart_count }} article(s)){% endif %}">
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
                         {% if app_cart_count|default(0) > 0 %}
@@ -61,18 +59,10 @@
                                 <h2 class="font-semibold text-[#4B5563] text-base">Notifications</h2>
                             </div>
                             <div class="max-h-[min(70vh,420px)] overflow-y-auto">
-                                {% if _event_notifs_header is empty and _rdv_notifs_header is empty and _event_msg_notifs is empty and _commande_notifs_header is empty %}
+                                {% if _event_notifs_header is empty and _rdv_notifs_header is empty %}
                                 <div class="p-6 text-center text-[#6B7280] text-sm">Aucune notification.</div>
                                 {% else %}
                                 <div class="p-2 space-y-1">
-                                    {% for notif in _event_msg_notifs %}
-                                    <a href="{{ path('user_event_show', { id: notif.eventId }) }}#discussion" class="block rounded-lg focus:outline focus:ring-2 focus:ring-[#A7C7E7] focus:ring-inset notif-dropdown-link">
-                                        <div class="p-3 rounded-lg bg-violet-50 border border-violet-200 text-violet-800 text-sm font-medium flex items-center gap-3">
-                                            <span class="shrink-0 flex items-center justify-center w-9 h-9 rounded-full bg-violet-100 text-violet-600"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 003.83-.498c1.085-.163 2.037-.369 2.707-.622a3.578 3.578 0 001.67-1.618 3.575 3.575 0 00.281-1.236V6.26c0-1.6-1.123-2.994-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg></span>
-                                            <span class="min-w-0">{{ notif.message }}</span>
-                                        </div>
-                                    </a>
-                                    {% endfor %}
                                     {% for notif in _event_notifs_header %}
                                     <a href="{{ path('user_event_show', { id: notif.eventId }) }}" class="block rounded-lg focus:outline focus:ring-2 focus:ring-[#A7C7E7] focus:ring-inset notif-dropdown-link">
                                         {% if notif.type == 'acceptee' %}
@@ -103,14 +93,6 @@
                                         <span class="min-w-0">{{ notif.message }}</span>
                                     </div>
                                     {% endfor %}
-                                    {% for notif in _commande_notifs_header %}
-                                    <a href="{{ path('order_confirmation', { id: notif.commandeId }) }}" class="block rounded-lg focus:outline focus:ring-2 focus:ring-[#A7C7E7] focus:ring-inset notif-dropdown-link">
-                                        <div class="p-3 rounded-lg bg-sky-50 border border-sky-200 text-sky-800 text-sm font-medium flex items-center gap-3">
-                                            <span class="shrink-0 flex items-center justify-center w-9 h-9 rounded-full bg-sky-100 text-sky-600"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z" /></svg></span>
-                                            <span class="min-w-0">{{ notif.message }}</span>
-                                        </div>
-                                    </a>
-                                    {% endfor %}
                                 </div>
                                 {% endif %}
                             </div>
@@ -140,6 +122,39 @@
                             <a href="{{ path('app_logout') }}" class="text-[#9CA3AF] hover:text-[#6B7280] text-sm focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded whitespace-nowrap mt-0.5" title="Se déconnecter">Se déconnecter</a>
                         </div>
                     </div>
+                    {% set _blog_locale = app.session.get('blog_locale', 'fr') %}
+                    <div class="relative shrink-0 ml-auto" id="lang-selector-wrap">
+                        <button type="button" id="lang-selector-btn" class="flex items-center gap-1.5 px-2 py-1 rounded-lg text-[#6B7280] hover:bg-[#F5F1EB] hover:text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]" title="Choisir la langue du blog" aria-haspopup="true" aria-expanded="false">
+                            <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 01-3.827-5.802" /></svg>
+                            <span class="text-sm font-medium">{{ _blog_locale|upper }}</span>
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                        </button>
+                        <div id="lang-dropdown" class="hidden absolute right-0 top-full mt-1 w-44 bg-white rounded-xl shadow-lg border border-[#E5E0D8] py-1 z-50 max-h-64 overflow-y-auto">
+                            <a href="{{ path('blog_set_locale', {locale: 'fr'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale == 'fr' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">Français</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'en'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale == 'en' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">English</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'es'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale == 'es' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">Español</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'ar'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale == 'ar' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">العربية</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'de'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale == 'de' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">Deutsch</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'it'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale == 'it' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">Italiano</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'pt'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale == 'pt' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">Português</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'ru'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale == 'ru' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">Русский</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'zh'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale == 'zh' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">中文</a>
+                        </div>
+                    </div>
+                    <script>
+                    (function() {
+                        var wrap = document.getElementById('lang-selector-wrap');
+                        var btn = document.getElementById('lang-selector-btn');
+                        var panel = document.getElementById('lang-dropdown');
+                        if (!wrap || !btn || !panel) return;
+                        function open() { panel.classList.remove('hidden'); btn.setAttribute('aria-expanded', 'true'); }
+                        function close() { panel.classList.add('hidden'); btn.setAttribute('aria-expanded', 'false'); }
+                        function toggle() { panel.classList.contains('hidden') ? open() : close(); }
+                        btn.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); toggle(); });
+                        document.addEventListener('click', function(e) { if (wrap.contains(e.target)) return; close(); });
+                        panel.querySelectorAll('a').forEach(function(el) { el.addEventListener('click', close); });
+                    })();
+                    </script>
                 {% else %}
                     <a href="{{ path('app_login') }}" class="text-[#4B5563] hover:text-[#A7C7E7] font-medium focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded whitespace-nowrap">Connexion</a>
                     <a href="{{ path('register') }}" class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7] whitespace-nowrap">
@@ -148,6 +163,39 @@
                         </svg>
                         S'inscrire
                     </a>
+                    {% set _blog_locale_guest = app.session.get('blog_locale', 'fr') %}
+                    <div class="relative shrink-0 ml-auto" id="lang-selector-wrap-guest">
+                        <button type="button" id="lang-selector-btn-guest" class="flex items-center gap-1.5 px-2 py-1 rounded-lg text-[#6B7280] hover:bg-[#F5F1EB] hover:text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]" title="Choisir la langue du blog" aria-haspopup="true" aria-expanded="false">
+                            <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 01-3.827-5.802" /></svg>
+                            <span class="text-sm font-medium">{{ _blog_locale_guest|upper }}</span>
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                        </button>
+                        <div id="lang-dropdown-guest" class="hidden absolute right-0 top-full mt-1 w-44 bg-white rounded-xl shadow-lg border border-[#E5E0D8] py-1 z-50 max-h-64 overflow-y-auto">
+                            <a href="{{ path('blog_set_locale', {locale: 'fr'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale_guest == 'fr' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">Français</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'en'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale_guest == 'en' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">English</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'es'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale_guest == 'es' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">Español</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'ar'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale_guest == 'ar' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">العربية</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'de'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale_guest == 'de' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">Deutsch</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'it'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale_guest == 'it' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">Italiano</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'pt'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale_guest == 'pt' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">Português</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'ru'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale_guest == 'ru' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">Русский</a>
+                            <a href="{{ path('blog_set_locale', {locale: 'zh'}) }}" class="block px-4 py-2 text-sm text-[#4B5563] hover:bg-[#F5F1EB] {% if _blog_locale_guest == 'zh' %}bg-[#EFF6FF] font-medium text-[#1D4ED8]{% endif %}">中文</a>
+                        </div>
+                    </div>
+                    <script>
+                    (function() {
+                        var wrap = document.getElementById('lang-selector-wrap-guest');
+                        var btn = document.getElementById('lang-selector-btn-guest');
+                        var panel = document.getElementById('lang-dropdown-guest');
+                        if (!wrap || !btn || !panel) return;
+                        function open() { panel.classList.remove('hidden'); btn.setAttribute('aria-expanded', 'true'); }
+                        function close() { panel.classList.add('hidden'); btn.setAttribute('aria-expanded', 'false'); }
+                        function toggle() { panel.classList.contains('hidden') ? open() : close(); }
+                        btn.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); toggle(); });
+                        document.addEventListener('click', function(e) { if (wrap.contains(e.target)) return; close(); });
+                        panel.querySelectorAll('a').forEach(function(el) { el.addEventListener('click', close); });
+                    })();
+                    </script>
                 {% endif %}
             </div>
             </div>
@@ -203,4 +251,8 @@
     </footer>
     {% endblock %}
 </div>
+{% endblock %}
+{% block javascripts %}
+{{ parent() }}
+{{ include('front/blog/_dictionary_script.html.twig') }}
 {% endblock %}
