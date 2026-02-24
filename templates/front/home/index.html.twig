@@ -55,6 +55,57 @@
     </div>
 </section>
 
+{# Produits suggérés par l'IA (validés par l'admin) #}
+{% if produits_ia_valides|default([])|length > 0 %}
+<section class="py-12 border-t border-[#E5E0D8]">
+    <div class="max-w-6xl mx-auto px-4">
+        <div class="text-center mb-8">
+            <h2 class="text-2xl font-bold text-[#4B5563] mb-2">Produits suggérés par l'IA</h2>
+            <p class="text-[#6B7280]">Des produits créés grâce à notre assistant et validés pour vous.</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {% for produit in produits_ia_valides %}
+            <article class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] overflow-hidden flex flex-col hover:shadow-md transition-shadow">
+                <a href="{{ path('user_product_show', { id: produit.id }) }}" class="block">
+                    <div class="aspect-square bg-[#F5F1EB] flex items-center justify-center overflow-hidden">
+                        {% if produit.image %}
+                            {% if produit.image starts with 'http' %}
+                                <img src="{{ produit.image }}" alt="{{ produit.nom }}" class="w-full h-full object-cover">
+                            {% else %}
+                                <img src="{{ asset(produit.image) }}" alt="{{ produit.nom }}" class="w-full h-full object-cover">
+                            {% endif %}
+                        {% else %}
+                            <span class="text-[#6B7280] text-sm">Image</span>
+                        {% endif %}
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col">
+                        {% if produit.categorie %}
+                        <span class="inline-flex self-start px-2 py-0.5 rounded text-xs font-medium text-white bg-[#A7C7E7] mb-2">{{ produit.categorie.label() }}</span>
+                        {% endif %}
+                        <h3 class="font-semibold text-[#4B5563]">{{ produit.nom }}</h3>
+                        {% if produit.description %}
+                        <p class="text-[#6B7280] text-sm mt-1 line-clamp-2">{{ produit.description }}</p>
+                        {% endif %}
+                        <p class="font-semibold text-[#A7C7E7] mt-3">{{ produit.prix|number_format(2, ',', ' ') }} dt</p>
+                        <span class="inline-flex items-center gap-1 mt-3 text-[#A7C7E7] text-sm font-medium">
+                            Voir détails
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                        </span>
+                    </div>
+                </a>
+            </article>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-8">
+            <a href="{{ path('user_products_index') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:ring-2 focus:ring-[#A7C7E7]">
+                Voir tous les produits
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
 {# Tout ce dont vous avez besoin #}
 <section class="py-12 border-t border-[#E5E0D8]">
     <div class="max-w-5xl mx-auto px-4 text-center">

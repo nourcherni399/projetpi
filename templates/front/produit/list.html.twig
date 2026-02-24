@@ -53,7 +53,7 @@
                         {% endif %}
 
                         <div class="flex justify-between items-center">
-                            <p class="text-2xl font-bold text-[#A7C7E7]">{{ produit.prix|number_format(2, ',', ' ') }} د.ت</p>
+                            <p class="text-2xl font-bold text-[#A7C7E7]">{{ produit.prix|number_format(2, ',', ' ') }} dt</p>
                             <span class="px-3 py-1 rounded-full {% if produit.disponibilite %}bg-emerald-100 text-emerald-800{% else %}bg-red-100 text-red-800{% endif %} text-xs font-medium">
                                 {{ produit.disponibilite ? 'Disponible' : 'Indisponible' }}
                             </span>

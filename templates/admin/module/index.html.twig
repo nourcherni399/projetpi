@@ -2,7 +2,88 @@
 
 {% block title %}Modules - AutiCare Admin{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .admin-modules-page { font-family: 'Roboto', sans-serif; }
+        .admin-modules-page h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #3c4043;
+            letter-spacing: -0.02em;
+            margin-bottom: 1.5rem;
+        }
+        .admin-modules-page .rounded-xl {
+            border-radius: 16px;
+            box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.06), 0 2px 6px 2px rgba(60, 64, 67, 0.04);
+            border: 1px solid #dadce0;
+        }
+        .admin-modules-page .border-\[#E5E0D8\],
+        .admin-modules-page [class*="border-[#E5E0D8]"] { border-color: #dadce0 !important; }
+        .admin-modules-page .bg-\[#F5F1EB\],
+        .admin-modules-page [class*="bg-[#F5F1EB]"] { background-color: #f8f9fa !important; }
+        .admin-modules-page thead { background-color: #f8f9fa !important; }
+        .admin-modules-page tbody tr:hover { background-color: rgba(248, 249, 250, 0.8) !important; }
+        .admin-modules-page th {
+            font-weight: 600;
+            color: #3c4043;
+            padding: 1rem 1.5rem;
+            font-size: 0.875rem;
+        }
+        .admin-modules-page td {
+            padding: 1rem 1.5rem;
+            color: #5f6368;
+            vertical-align: middle;
+        }
+        .admin-modules-page td.font-medium,
+        .admin-modules-page .text-\[#4B5563\] { color: #3c4043 !important; }
+        .admin-modules-page .text-\[#6B7280\] { color: #5f6368 !important; }
+        .admin-modules-page input[type="search"] {
+            border-radius: 12px;
+            border: 1px solid #dadce0;
+            background: #fff;
+        }
+        .admin-modules-page input[type="search"]:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.25);
+        }
+        .admin-modules-page a[href*="admin_module_new"],
+        .admin-modules-page .bg-\[#A7C7E7\] {
+            background-color: #1a73e8 !important;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        .admin-modules-page a[href*="admin_module_new"]:hover,
+        .admin-modules-page .bg-\[#A7C7E7\]:hover { background-color: #1557b0 !important; }
+        .admin-modules-page .bg-\[#E5E0D8\] { background-color: #e8eaed !important; }
+        .admin-modules-page .text-\[#A7C7E7\],
+        .admin-modules-page .hover\:text-\[\#B8D4ED\]:hover { color: #1a73e8 !important; }
+        .admin-modules-page button.text-sm.text-\[#A7C7E7\]:hover { color: #1557b0 !important; }
+        .admin-modules-page .text-lg.font-semibold,
+        .admin-modules-page h3 { color: #3c4043 !important; font-weight: 600; }
+        .admin-modules-page .text-\[#A7C7E7\].w-5 { color: #1a73e8 !important; }
+        .admin-modules-page .divide-y > * + * { border-color: #dadce0 !important; }
+        .admin-modules-page .bg-white { background-color: #ffffff !important; }
+        .admin-modules-page .bg-emerald-50 { background-color: #e6f4ea !important; }
+        .admin-modules-page .border-emerald-200 { border-color: #81c995 !important; }
+        .admin-modules-page .text-emerald-800 { color: #137333 !important; }
+        .admin-modules-page button.bg-purple-600,
+        .admin-modules-page .bg-purple-600 { background-color: #5e35b1 !important; border-radius: 12px; }
+        .admin-modules-page button.bg-purple-600:hover,
+        .admin-modules-page .bg-purple-700 { background-color: #4a2c91 !important; }
+        .admin-modules-page button.bg-red-600,
+        .admin-modules-page .bg-red-600 { background-color: #d93025 !important; border-radius: 12px; }
+        .admin-modules-page button.bg-red-600:hover,
+        .admin-modules-page .bg-red-700 { background-color: #b3261e !important; }
+        .admin-modules-page .grid > div.rounded-xl {
+            border-radius: 16px;
+            box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.06), 0 2px 6px 2px rgba(60, 64, 67, 0.04);
+        }
+    </style>
+{% endblock %}
+
 {% block admin_content %}
+<div class="admin-modules-page">
 <h1 class="text-2xl font-semibold text-[#4B5563] mb-6">Gestion des modules</h1>
 {% for message in app.flashes('success') %}
     <div class="mb-4 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">{{ message }}</div>
@@ -657,4 +738,5 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!-- Inclusion de Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</div>
 {% endblock %}

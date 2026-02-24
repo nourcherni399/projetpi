@@ -4,11 +4,19 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    mailer_from_email_default: 'noreply@auticare.fr'
+    openai_chat_model_default: 'gpt-4o'
+    chat_model_default: 'gpt-4o'
+    chat_api_url_default: ''
+    chat_api_base_url_default: ~
     uploads_directory: '%kernel.project_dir%/public/uploads/produits'
     uploads_modules_directory: '%kernel.project_dir%/public/uploads/modules'
     uploads_blogs_directory: '%kernel.project_dir%/public/uploads/blog'
     uploads_users_directory: '%kernel.project_dir%/public/uploads/users'
+    uploads_thematiques_directory: '%kernel.project_dir%/public/uploads/thematiques'
     app_url_default: ''
+    brevo_from_name_default: 'AutiCare'
+    stripe_secret_key_default: ''
 
 services:
     # default configuration for services in *this* file
@@ -33,7 +41,82 @@ services:
     # Force l'URI de redirection OAuth (Google) pour éviter redirect_uri_mismatch si APP_URL est défini
     App\EventSubscriber\OAuthRedirectUriContextSubscriber:
         arguments:
-            $appUrl: '%env(default:app_url_default:APP_URL)%'
+            $appUrl: '%env(APP_URL)%'
+
+
+    App\Service\ZoomApiService:
+        arguments:
+            $accountId: '%env(default::ZOOM_ACCOUNT_ID)%'
+            $clientId: '%env(default::ZOOM_CLIENT_ID)%'
+            $clientSecret: '%env(default::ZOOM_CLIENT_SECRET)%'
+
+    App\Service\EmailApiService:
+        arguments:
+            $apiKey: '%env(default::BREVO_API_KEY)%'
+            $fromEmail: '%env(default::BREVO_FROM_EMAIL)%'
+            $fromName: '%env(default:brevo_from_name_default:BREVO_FROM_NAME)%'
+
+    App\Controller\OrderController:
+        arguments:
+            $mailerFromEmail: '%env(default:mailer_from_email_default:MAILER_FROM_EMAIL)%'
+
+    App\Service\StripeService:
+        arguments:
+            $secretKey: '%env(default:stripe_secret_key_default:STRIPE_SECRET_KEY)%'
+
+    App\Service\DemandeProduitEnrichmentService:
+        arguments:
+            $openaiApiKey: '%env(default::OPENAI_API_KEY)%'
+
+    App\Service\ProductExternalApiService:
+        arguments:
+            $rapidApiKey: '%env(default::RAPIDAPI_KEY)%'
+            $pexelsApiKey: '%env(default::PEXELS_API_KEY)%'
+            $uploadsDirectory: '%uploads_directory%'
+
+    App\Service\ProductAutoCreateService:
+        arguments:
+            $uploadsDirectory: '%uploads_directory%'
+
+    App\Service\ProductConversationService:
+        arguments:
+            $apiKey: '%env(default::OPENAI_API_KEY)%'
+            $model: 'gpt-4o-mini'
+            $apiBaseUrl: '%env(default:chat_api_base_url_default:CHAT_API_BASE_URL)%'
+
+    App\Controller\Admin\DemandeProduitController:
+        arguments:
+            $uploadsDirectory: '%uploads_directory%'
+
+    App\Service\ChatApiService:
+        arguments:
+            $groqApiKey: '%env(default::CHAT_API_KEY)%'
+
+    App\Service\ProductPriceSearchService:
+        arguments:
+            $serpApiKey: '%env(default::SERP_API_KEY)%'
+            $rapidApiKey: '%env(default::RAPIDAPI_KEY)%'
+            $pexelsApiKey: '%env(default::PEXELS_API_KEY)%'
+            $groqApiKey: '%env(default::CHAT_API_KEY)%'
+            $uploadsDirectory: '%uploads_directory%'
+
+    App\Service\ImageAnalysisService:
+        arguments:
+            $groqApiKey: '%env(CHAT_API_KEY)%'
+            $openaiApiKey: '%env(default::OPENAI_API_KEY)%'
+            $geminiApiKey: '%env(default::GEMINI_API_KEY)%'
+
+    App\Controller\ProductController:
+        arguments:
+            $uploadsDirectory: '%kernel.project_dir%/public/uploads'
+
+    App\Service\ProductDescriptionSuggestionService:
+        arguments:
+            $groqApiKey: '%env(CHAT_API_KEY)%'
+
+    App\Service\AIPredictionService:
+        arguments:
+            $groqApiKey: '%env(CHAT_API_KEY)%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

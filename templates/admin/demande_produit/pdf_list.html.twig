@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Liste des demandes produit - AutiCare</title>
+    <style>
+        body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #333; }
+        h1 { font-size: 18px; margin-bottom: 16px; color: #4B5563; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th, td { border: 1px solid #E5E0D8; padding: 8px; text-align: left; }
+        th { background: #F5F1EB; font-weight: bold; }
+        tr:nth-child(even) { background: #F9FAFB; }
+        .statut { font-size: 9px; padding: 2px 6px; border-radius: 4px; }
+        .en_attente { background: #DBEAFE; color: #1D4ED8; }
+        .approuve { background: #D1FAE5; color: #047857; }
+        .rejete { background: #FEE2E2; color: #B91C1C; }
+        .footer { margin-top: 24px; font-size: 10px; color: #6B7280; }
+    </style>
+</head>
+<body>
+    <h1>Liste des demandes produit - AutiCare</h1>
+    <p>Export du {{ "now"|date("d/m/Y H:i") }}</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Demande client</th>
+                <th>Nom</th>
+                <th>Catégorie</th>
+                <th>Prix estimé (DT)</th>
+                <th>Statut</th>
+                <th>Date création</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for demande in demandes %}
+            <tr>
+                <td>{{ demande.id }}</td>
+                <td>{{ demande.demandeClient|slice(0, 120) }}{% if demande.demandeClient|length > 120 %}…{% endif %}</td>
+                <td>{{ demande.nom }}</td>
+                <td>{{ demande.categorie ? demande.categorie.label : '—' }}</td>
+                <td>{{ demande.prixEstime|number_format(2, ',', ' ') }}</td>
+                <td>
+                    <span class="statut {% if demande.statut == 'en_attente' %}en_attente{% elseif demande.statut == 'approuve' %}approuve{% else %}rejete{% endif %}">
+                        {{ demande.statut == 'en_attente' ? 'En attente' : (demande.statut == 'approuve' ? 'Approuvé' : 'Rejeté') }}
+                    </span>
+                </td>
+                <td>{{ demande.createdAt ? demande.createdAt|date('d/m/Y H:i') : '—' }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7">Aucune demande.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <p>{{ demandes|length }} demande(s) | AutiCare Admin</p>
+    </div>
+</body>
+</html>

@@ -10,16 +10,21 @@ use App\Entity\InscritEvents;
 use App\Entity\Medcin;
 use App\Entity\Notification;
 use App\Entity\Patient;
+use App\Entity\MessageEvenement;
 use App\Entity\RendezVous;
 use App\Enum\Motif;
 use App\Enum\StatusRendezVous;
 use App\Enum\UserRole;
+use App\Form\MessageEvenementType;
 use App\Repository\DisponibiliteRepository;
 use App\Repository\EvenementRepository;
 use App\Repository\InscritEventsRepository;
 use App\Repository\MedcinRepository;
+use App\Repository\MessageEvenementRepository;
 use App\Repository\NotificationRepository;
 use App\Repository\RendezVousRepository;
+use App\Entity\Produit;
+use App\Repository\AvisProduitRepository;
 use App\Repository\ProduitRepository;
 use App\Repository\ThematiqueRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -33,9 +38,11 @@ final class HomeController extends AbstractController
 {
     public function __construct(
         private readonly ProduitRepository $produitRepository,
+        private readonly AvisProduitRepository $avisProduitRepository,
         private readonly ThematiqueRepository $thematiqueRepository,
         private readonly EvenementRepository $evenementRepository,
         private readonly InscritEventsRepository $inscritEventsRepository,
+        private readonly MessageEvenementRepository $messageEvenementRepository,
         private readonly MedcinRepository $medecinRepository,
         private readonly DisponibiliteRepository $disponibiliteRepository,
         private readonly RendezVousRepository $rendezVousRepository,
@@ -57,7 +64,11 @@ final class HomeController extends AbstractController
                 return $this->redirectToRoute('doctor_dashboard');
             }
         }
-        return $this->render('front/home/index.html.twig');
+        $produitsIaValides = $this->produitRepository->findGenereParIaEtValides(8);
+
+        return $this->render('front/home/index.html.twig', [
+            'produits_ia_valides' => $produitsIaValides,
+        ]);
     }
 
     #[Route('/a-propos', name: 'about', methods: ['GET'])]
@@ -79,10 +90,18 @@ final class HomeController extends AbstractController
     public function productShow(int $id): Response
     {
         $produit = $this->produitRepository->find($id);
-        if ($produit === null) {
+        if ($produit === null || !$produit instanceof Produit) {
             throw $this->createNotFoundException('Produit introuvable.');
         }
-        return $this->render('front/products/show.html.twig', ['produit' => $produit]);
+        $userAvis = null;
+        $user = $this->getUser();
+        if ($user !== null) {
+            $userAvis = $this->avisProduitRepository->findOneByProduitAndUser($produit, $user);
+        }
+        return $this->render('front/products/show.html.twig', [
+            'produit' => $produit,
+            'userAvis' => $userAvis,
+        ]);
     }
 
     /** @return array<int, array{name: string, category: string, category_class: string, rating: string, reviews: int, description: string, price: int, description_long: string, characteristics: list<string>, benefits: list<string>}> */
@@ -221,6 +240,32 @@ final class HomeController extends AbstractController
         ]);
     }
 
+    #[Route('/evenements/carte', name: 'user_events_map', methods: ['GET'])]
+    public function eventsMap(): Response
+    {
+        $dateFrom = new \DateTimeImmutable('today');
+        $all = $this->evenementRepository->findFilteredForFront($dateFrom, null, null, null);
+        $eventsForMap = [];
+        foreach ($all as $evenement) {
+            $coords = $evenement->getCoordinates();
+            if ($coords !== null) {
+                $eventsForMap[] = [
+                    'id' => $evenement->getId(),
+                    'title' => $evenement->getTitle(),
+                    'lat' => $coords[0],
+                    'lng' => $coords[1],
+                    'lieu' => $evenement->getLieu(),
+                    'date' => $evenement->getDateEvent() ? $evenement->getDateEvent()->format('d/m/Y') : '',
+                    'url' => $this->generateUrl('user_event_show', ['id' => $evenement->getId()]),
+                ];
+            }
+        }
+
+        return $this->render('front/events/map.html.twig', [
+            'eventsForMap' => $eventsForMap,
+        ]);
+    }
+
     #[Route('/evenements/{id}', name: 'user_event_show', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function eventShow(int $id): Response
     {
@@ -234,10 +279,24 @@ final class HomeController extends AbstractController
             : null;
         $userInscrit = $inscription !== null && $inscription->getStatut() === 'accepte';
 
+        $messages = [];
+        $messageForm = null;
+        $unreadCount = 0;
+        if ($user !== null) {
+            $messages = $this->messageEvenementRepository->findByEvenementAndUserOrderByDate($evenement, $user);
+            $this->messageEvenementRepository->markAdminMessagesAsReadByEvenementAndUser($evenement, $user);
+            $newMessage = new MessageEvenement();
+            $newMessage->setEvenement($evenement);
+            $newMessage->setUser($user);
+            $messageForm = $this->createForm(MessageEvenementType::class, $newMessage);
+        }
+
         return $this->render('front/events/show.html.twig', [
             'evenement' => $evenement,
             'userInscrit' => $userInscrit,
             'inscription' => $inscription,
+            'messages' => $messages,
+            'messageForm' => $messageForm,
         ]);
     }
 
@@ -318,6 +377,44 @@ final class HomeController extends AbstractController
             $this->addFlash('success', 'Vous avez été désinscrit de l\'événement.');
         } else {
             $this->addFlash('info', 'Vous n\'étiez pas inscrit à cet événement.');
+        }
+
+        return $this->redirectToRoute('user_event_show', ['id' => $id]);
+    }
+
+    #[Route('/evenements/{id}/message', name: 'user_event_message', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function eventMessage(int $id, Request $request): Response
+    {
+        $user = $this->getUser();
+        if ($user === null) {
+            $this->addFlash('error', 'Connectez-vous pour envoyer un message.');
+            return $this->redirectToRoute('app_login', ['_target_path' => $this->generateUrl('user_event_show', ['id' => $id])]);
+        }
+
+        $evenement = $this->evenementRepository->find($id);
+        if ($evenement === null) {
+            throw $this->createNotFoundException('Événement introuvable.');
+        }
+
+        if (!$this->isCsrfTokenValid('event_message_' . $id, (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton de sécurité invalide.');
+            return $this->redirectToRoute('user_event_show', ['id' => $id]);
+        }
+
+        $message = new MessageEvenement();
+        $message->setEvenement($evenement);
+        $message->setUser($user);
+        $message->setEnvoyePar(MessageEvenement::ENVOYE_PAR_USER);
+        $message->setDateEnvoi(new \DateTimeImmutable());
+        $form = $this->createForm(MessageEvenementType::class, $message);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->entityManager->persist($message);
+            $this->entityManager->flush();
+            $this->addFlash('success', 'Votre message a été envoyé. L\'équipe vous répondra sous peu.');
+        } else {
+            $this->addFlash('error', 'Le message ne peut pas être vide.');
         }
 
         return $this->redirectToRoute('user_event_show', ['id' => $id]);

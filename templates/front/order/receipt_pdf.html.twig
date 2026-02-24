@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Confirmation de commande #{{ commande.id }} - AutiCare</title>
+    <style>
+        body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #333; line-height: 1.4; }
+        h1 { font-size: 16px; margin-bottom: 8px; color: #4B5563; }
+        .header { text-align: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #E5E0D8; }
+        .label { font-weight: bold; color: #4B5563; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th, td { padding: 6px 8px; text-align: left; border-bottom: 1px solid #E5E0D8; }
+        th { background: #F5F1EB; font-size: 10px; }
+        .total-row { font-weight: bold; font-size: 12px; }
+        .block { margin: 10px 0; }
+        .confirmation-box { background: #F5F1EB; padding: 12px; margin: 16px 0; border: 1px solid #E5E0D8; text-align: center; font-weight: bold; }
+        .signature-zone { margin-top: 30px; padding-top: 20px; border-top: 1px solid #E5E0D8; }
+        .signature-line { border-bottom: 1px solid #333; width: 250px; height: 40px; margin: 8px 0 4px 0; }
+        .footer { margin-top: 24px; padding-top: 12px; border-top: 1px solid #E5E0D8; font-size: 10px; color: #6B7280; text-align: center; }
+    </style>
+</head>
+<body>
+    {% set isPaiementEnLigne = commande.modePayment == 'carte_bancaire' or (commande.modePayment ?? '') starts with 'carte_' or commande.stripePaymentIntent %}
+    <div class="header">
+        <h1>Confirmation de commande - AutiCare</h1>
+        <div><strong>{% if isPaiementEnLigne %}Bon de livraison — Paiement déjà effectué (à présenter au livreur){% else %}Bon de livraison{% endif %}</strong> - Commande n°{{ commande.id }} | Date : {{ commande.dateCreation ? commande.dateCreation|date('d/m/Y H:i') : '—' }}</div>
+    </div>
+
+    <div class="confirmation-box">
+        {% if isPaiementEnLigne %}
+        Ce document atteste que le client a payé sa commande n°{{ commande.id }} en ligne. À présenter au livreur pour la remise du colis.
+        {% else %}
+        Ce document atteste que le client a bien passé la commande n°{{ commande.id }} auprès d'AutiCare. Paiement à la livraison.
+        {% endif %}
+    </div>
+
+    <div class="block">
+        <span class="label">Client :</span>
+        {{ commande.nom }}<br>
+        {{ commande.email }}<br>
+        {{ commande.telephone }}
+    </div>
+
+    <div class="block">
+        <span class="label">Mode de paiement :</span>
+        {% if isPaiementEnLigne %}Carte bancaire / Paiement en ligne (déjà réglé){% else %}À la livraison{% endif %}
+    </div>
+
+    <div class="block">
+        <span class="label">Adresse de livraison :</span>
+        {{ commande.adresse }}, {{ commande.codePostal }} {{ commande.ville }}
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Produit</th>
+                <th>Qté</th>
+                <th>Prix unit.</th>
+                <th>Sous-total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ligne in commande.lignes %}
+            <tr>
+                <td>{{ ligne.produit ? ligne.produit.nom : 'Produit' }}</td>
+                <td>{{ ligne.quantite }}</td>
+                <td>{{ ligne.prix|number_format(2, ',', ' ') }} DT</td>
+                <td>{{ ligne.sousTotal|number_format(2, ',', ' ') }} DT</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr class="total-row">
+                <td colspan="3">Total</td>
+                <td>{{ commande.total|number_format(2, ',', ' ') }} DT</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="signature-zone">
+        <div class="label">{% if isPaiementEnLigne %}Remise de la commande — Paiement déjà effectué{% else %}Paiement à la livraison{% endif %}</div>
+        <p class="text-sm" style="font-size: 9px; color: #6B7280;">{% if isPaiementEnLigne %}Le client a payé en ligne. Le livreur remet la commande au client et signe ci-dessous. Aucun paiement à percevoir.{% else %}Le livreur remet la commande, perçoit le paiement et signe ci-dessous.{% endif %}</p>
+        {% if not isPaiementEnLigne %}
+        <div style="margin: 12px 0;">
+            <span class="label">Montant perçu :</span>
+            <span style="display: inline-block; width: 80px; border-bottom: 1px solid #333; margin-left: 8px; vertical-align: middle;"></span>
+            <span style="margin-left: 8px;">DT</span>
+        </div>
+        {% endif %}
+        <div class="label">Signature du livreur / Client</div>
+        <div class="signature-line"></div>
+        <div style="font-size: 9px; color: #6B7280;">Nom du livreur</div>
+    </div>
+
+    <div class="footer">
+        Merci pour votre confiance. Ce bon atteste de la commande n°{{ commande.id }}.<br>
+        AutiCare - Document généré le {{ "now"|date("d/m/Y à H:i") }}
+    </div>
+</body>
+</html>

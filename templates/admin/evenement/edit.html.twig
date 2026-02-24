@@ -25,7 +25,28 @@
                 {{ form_row(form.heureDebut) }}
                 {{ form_row(form.heureFin) }}
             </div>
+            {{ form_row(form.mode) }}
             {{ form_row(form.lieu) }}
+            {{ form_row(form.locationUrl) }}
+            <div class="flex flex-wrap items-end gap-4 zoom-meeting-row" data-visible-mode="en_ligne,hybride">
+                <div class="flex-1 min-w-[200px]">{{ form_row(form.meetingUrl) }}</div>
+                <div>
+                    <label class="block text-[#4B5563] font-medium mb-1">&nbsp;</label>
+                    <button type="button" id="btn-generer-zoom" class="px-4 py-2.5 rounded-lg border border-[#A7C7E7] bg-[#A7C7E7]/20 text-[#4B5563] font-medium hover:bg-[#A7C7E7]/30 focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                        Générer le lien Zoom
+                    </button>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-end gap-4">
+                <div class="flex-1 min-w-[140px]">{{ form_row(form.latitude) }}</div>
+                <div class="flex-1 min-w-[140px]">{{ form_row(form.longitude) }}</div>
+                <div>
+                    <label class="block text-[#4B5563] font-medium mb-1">&nbsp;</label>
+                    <button type="button" id="btn-geocode" class="px-4 py-2.5 rounded-lg border border-[#A7C7E7] bg-[#A7C7E7]/20 text-[#4B5563] font-medium hover:bg-[#A7C7E7]/30 focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                        Récupérer les coordonnées (lieu)
+                    </button>
+                </div>
+            </div>
             {{ form_row(form.thematique) }}
         </div>
         <div class="flex flex-wrap gap-3 pt-4">
@@ -39,4 +60,63 @@
         {{ form_end(form) }}
     </div>
 </div>
+<script>
+(function() {
+    var btn = document.getElementById('btn-geocode');
+    var lieuInput = document.querySelector('input[name="{{ form.lieu.vars.full_name }}"]');
+    var latInput = document.querySelector('input[name="{{ form.latitude.vars.full_name }}"]');
+    var lngInput = document.querySelector('input[name="{{ form.longitude.vars.full_name }}"]');
+    if (!btn || !lieuInput || !latInput || !lngInput) return;
+    var url = '{{ path('admin_evenement_geocode')|e('js') }}';
+    btn.addEventListener('click', function() {
+        var address = lieuInput.value.trim();
+        if (!address) { alert('Renseignez d\'abord le lieu / adresse.'); return; }
+        btn.disabled = true;
+        btn.textContent = 'Recherche…';
+        fetch(url + '?address=' + encodeURIComponent(address))
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.lat != null && data.lng != null) {
+                    latInput.value = data.lat;
+                    lngInput.value = data.lng;
+                } else {
+                    alert(data.error || 'Adresse introuvable.');
+                }
+            })
+            .catch(function() { alert('Erreur réseau.'); })
+            .finally(function() { btn.disabled = false; btn.textContent = 'Récupérer les coordonnées (lieu)'; });
+    });
+
+    var zoomRow = document.querySelector('.zoom-meeting-row');
+    var modeSelect = document.querySelector('select[name="{{ form.mode.vars.full_name }}"]');
+    var meetingUrlInput = document.querySelector('input[name="{{ form.meetingUrl.vars.full_name }}"]');
+    var btnZoom = document.getElementById('btn-generer-zoom');
+    var genererZoomUrl = '{{ path('admin_evenement_generer_zoom', { id: evenement.id })|e('js') }}';
+    var zoomToken = '{{ csrf_token('admin_evenement_generer_zoom_' ~ evenement.id)|e('js') }}';
+    function toggleZoomRow() {
+        var mode = modeSelect ? modeSelect.value : '';
+        if (zoomRow) zoomRow.style.display = (mode === 'en_ligne' || mode === 'hybride') ? '' : 'none';
+    }
+    if (modeSelect) { modeSelect.addEventListener('change', toggleZoomRow); toggleZoomRow(); }
+    if (btnZoom && meetingUrlInput) {
+        btnZoom.addEventListener('click', function() {
+            btnZoom.disabled = true;
+            btnZoom.textContent = 'Génération…';
+            var body = new FormData();
+            body.append('_token', zoomToken);
+            fetch(genererZoomUrl, { method: 'POST', body: body })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.join_url) {
+                        meetingUrlInput.value = data.join_url;
+                    } else {
+                        alert(data.error || 'Impossible de créer la réunion Zoom.');
+                    }
+                })
+                .catch(function() { alert('Erreur réseau.'); })
+                .finally(function() { btnZoom.disabled = false; btnZoom.textContent = 'Générer le lien Zoom'; });
+        });
+    }
+})();
+</script>
 {% endblock %}

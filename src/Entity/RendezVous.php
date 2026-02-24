@@ -33,7 +33,7 @@ class RendezVous
     #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
     private ?\DateTimeInterface $dateRdv = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(inversedBy: 'rendezVous')]
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?Patient $patient = null;
 

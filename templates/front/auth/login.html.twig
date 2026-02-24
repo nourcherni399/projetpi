@@ -54,7 +54,7 @@
             <div>
                 <div class="flex items-center justify-between mb-1">
                     <label for="password" class="block text-[#4B5563] font-medium">Mot de passe</label>
-                    <a href="#" class="text-sm text-[#A7C7E7] hover:underline">Mot de passe oublié ?</a>
+                    <a href="{{ path('app_forgot_password_request') }}" class="text-sm text-[#A7C7E7] hover:underline">Mot de passe oublié ?</a>
                 </div>
                 <div class="relative">
                     <input
@@ -109,7 +109,7 @@
             </a>
         </form>
         <p class="mt-6 text-center text-[#6B7280] text-sm">
-            Pas encore de compte ? <a href="#" class="text-[#A7C7E7] hover:underline font-medium">Créer un compte</a>
+            Pas encore de compte ? <a href="{{ path('register') }}" class="text-[#A7C7E7] hover:underline font-medium">Créer un compte</a>
         </p>
     </div>
 </div>

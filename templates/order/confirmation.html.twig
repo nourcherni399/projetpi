@@ -83,9 +83,9 @@
                             <span class="font-medium text-[#4B5563]">{{ ligne.produit.nom }}</span>
                         </div>
                     </td>
-                    <td class="px-6 py-4 text-center text-[#6B7280]">{{ ligne.prix|number_format(2, ',', ' ') }} د.ت</td>
+                    <td class="px-6 py-4 text-center text-[#6B7280]">{{ ligne.prix|number_format(2, ',', ' ') }} dt</td>
                     <td class="px-6 py-4 text-center text-[#6B7280]">{{ ligne.quantite }}</td>
-                    <td class="px-6 py-4 text-right font-semibold text-[#A7C7E7]">{{ ligne.sousTotal|number_format(2, ',', ' ') }} د.ت</td>
+                    <td class="px-6 py-4 text-right font-semibold text-[#A7C7E7]">{{ ligne.sousTotal|number_format(2, ',', ' ') }} dt</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -93,7 +93,7 @@
 
         <div class="bg-[#F5F1EB] px-6 py-4 flex justify-between items-center">
             <span class="font-bold text-[#4B5563]">Total</span>
-            <span class="text-2xl font-bold text-[#A7C7E7]">{{ commande.total|number_format(2, ',', ' ') }} د.ت</span>
+            <span class="text-2xl font-bold text-[#A7C7E7]">{{ commande.total|number_format(2, ',', ' ') }} dt</span>
         </div>
     </div>
 
@@ -108,14 +108,14 @@
     <div class="mt-8 bg-orange-50 border border-orange-200 rounded-lg p-6">
         <h3 class="font-bold text-orange-600 mb-2">⚠️ Paiement à la livraison</h3>
         <p class="text-orange-700 text-sm">
-            Vous avez choisi le paiement à la livraison. Vous devrez payer le montant total ({{ commande.total|number_format(2, ',', ' ') }} د.ت) lors de la réception de votre colis.
+            Vous avez choisi le paiement à la livraison. Vous devrez payer le montant total ({{ commande.total|number_format(2, ',', ' ') }} dt) lors de la réception de votre colis.
         </p>
     </div>
     {% else %}
     <div class="mt-8 bg-green-50 border border-green-200 rounded-lg p-6">
         <h3 class="font-bold text-green-600 mb-2">✓ Paiement reçu</h3>
         <p class="text-green-700 text-sm">
-            Votre paiement de {{ commande.total|number_format(2, ',', ' ') }} د.ت a été traité avec succès. Vous recevrez un email de confirmation à {{ commande.email }}.
+            Votre paiement de {{ commande.total|number_format(2, ',', ' ') }} dt a été traité avec succès. Vous recevrez un email de confirmation à {{ commande.email }}.
         </p>
     </div>
     {% endif %}

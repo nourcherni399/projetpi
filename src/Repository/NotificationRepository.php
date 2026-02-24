@@ -33,6 +33,28 @@ class NotificationRepository extends ServiceEntityRepository
     }
 
     /**
+     * Notifications de type commande (confirmée, livraison, reçu) pour un destinataire.
+     *
+     * @return list<Notification>
+     */
+    public function findCommandeForDestinataireOrderByCreatedDesc(User $user, int $limit = 15): array
+    {
+        return $this->createQueryBuilder('n')
+            ->andWhere('n.destinataire = :user')
+            ->andWhere('n.type IN (:types)')
+            ->setParameter('user', $user)
+            ->setParameter('types', [
+                Notification::TYPE_COMMANDE_CONFIRMEE,
+                Notification::TYPE_COMMANDE_LIVRAISON,
+                Notification::TYPE_COMMANDE_RECU,
+            ])
+            ->orderBy('n.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
      * @return list<Notification>
      */
     public function findByDestinataireOrderByCreatedDesc(User $user): array
@@ -55,5 +77,41 @@ class NotificationRepository extends ServiceEntityRepository
             ->setParameter('lu', false)
             ->getQuery()
             ->getSingleScalarResult();
+    }
+
+    /**
+     * Notifications de type demande produit (produit créé par l'admin) pour un destinataire.
+     *
+     * @return list<Notification>
+     */
+    public function findDemandeProduitForDestinataireOrderByCreatedDesc(User $user, int $limit = 15): array
+    {
+        return $this->createQueryBuilder('n')
+            ->andWhere('n.destinataire = :user')
+            ->andWhere('n.type = :type')
+            ->setParameter('user', $user)
+            ->setParameter('type', Notification::TYPE_DEMANDE_PRODUIT_IA)
+            ->orderBy('n.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Notifications d'alerte stock pour un admin (destinataire).
+     *
+     * @return list<Notification>
+     */
+    public function findAlerteStockForAdmin(User $admin, int $limit = 15): array
+    {
+        return $this->createQueryBuilder('n')
+            ->andWhere('n.destinataire = :admin')
+            ->andWhere('n.type = :type')
+            ->setParameter('admin', $admin)
+            ->setParameter('type', Notification::TYPE_ALERTE_STOCK)
+            ->orderBy('n.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
     }
 }

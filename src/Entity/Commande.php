@@ -53,7 +53,7 @@ class Commande
     private ?float $total = null;
 
     #[ORM\Column(length: 50)]
-    private ?string $statut = 'en_attente'; // en_attente, payée, livrée, annulée
+    private ?string $statut = 'en_attente'; // en_attente → confirmer (admin) → livraison → recu ; annulée
 
     #[ORM\Column(length: 50)]
     #[Assert\NotBlank]
@@ -64,6 +64,12 @@ class Commande
 
     #[ORM\Column(type: 'datetime')]
     private ?\DateTimeInterface $dateCreation = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $stripeSessionId = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $stripePaymentIntent = null;
 
     public function __construct()
     {
@@ -92,9 +98,9 @@ class Commande
         return $this->nom;
     }
 
-    public function setNom(string $nom): self
+    public function setNom(?string $nom): self
     {
-        $this->nom = $nom;
+        $this->nom = $nom ?? '';
         return $this;
     }
 
@@ -103,9 +109,9 @@ class Commande
         return $this->email;
     }
 
-    public function setEmail(string $email): self
+    public function setEmail(?string $email): self
     {
-        $this->email = $email;
+        $this->email = $email ?? '';
         return $this;
     }
 
@@ -114,9 +120,9 @@ class Commande
         return $this->telephone;
     }
 
-    public function setTelephone(string $telephone): self
+    public function setTelephone(?string $telephone): self
     {
-        $this->telephone = $telephone;
+        $this->telephone = $telephone ?? '';
         return $this;
     }
 
@@ -218,6 +224,28 @@ class Commande
     public function setDateCreation(\DateTimeInterface $dateCreation): self
     {
         $this->dateCreation = $dateCreation;
+        return $this;
+    }
+
+    public function getStripeSessionId(): ?string
+    {
+        return $this->stripeSessionId;
+    }
+
+    public function setStripeSessionId(?string $stripeSessionId): self
+    {
+        $this->stripeSessionId = $stripeSessionId;
+        return $this;
+    }
+
+    public function getStripePaymentIntent(): ?string
+    {
+        return $this->stripePaymentIntent;
+    }
+
+    public function setStripePaymentIntent(?string $stripePaymentIntent): self
+    {
+        $this->stripePaymentIntent = $stripePaymentIntent;
         return $this;
     }
 }

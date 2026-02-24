@@ -1,17 +1,44 @@
 {% extends 'layouts/user.html.twig' %}
 
-{% block title %}Commande Confirmée - AutiCare{% endblock %}
+{% block title %}{% if commande.statut == 'en_attente' %}Commande en attente{% elseif commande.statut == 'annulée' %}Commande annulée{% else %}Commande confirmée{% endif %} - AutiCare{% endblock %}
 
 {% block user_content %}
 <section class="text-center mb-10">
-    <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-100 text-green-600 mb-4">
-        <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-        </svg>
-    </div>
-    <h1 class="text-3xl font-bold text-[#4B5563] mb-3">Commande Confirmée!</h1>
-    <p class="text-[#6B7280]">Merci pour votre achat. Votre commande a été reçue avec succès.</p>
+    {% if commande.statut == 'en_attente' %}
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-amber-100 text-amber-600 mb-4">
+            <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </div>
+        <h1 class="text-3xl font-bold text-[#4B5563] mb-3">Commande en attente</h1>
+        <p class="text-[#6B7280]">Votre commande a bien été enregistrée. Elle reste sur cette page jusqu'à ce que l'administrateur accepte votre demande.</p>
+        <p class="text-sm text-[#6B7280] mt-2">Vous pouvez revenir sur ce lien à tout moment pour suivre le statut.</p>
+    {% elseif commande.statut == 'annulée' %}
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-red-100 text-red-600 mb-4">
+            <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </div>
+        <h1 class="text-3xl font-bold text-[#4B5563] mb-3">Commande annulée</h1>
+        <p class="text-[#6B7280]">Cette commande a été annulée.</p>
+    {% else %}
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-100 text-green-600 mb-4">
+            <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+        </div>
+        <h1 class="text-3xl font-bold text-[#4B5563] mb-3">Commande acceptée</h1>
+        <p class="text-[#6B7280]">L'administrateur a accepté votre commande. Merci pour votre achat.</p>
+    {% endif %}
 </section>
+{% if commande.statut == 'annulée' %}
+<div class="mb-8 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800">Cette commande n'est plus active.</div>
+{% endif %}
+{% if commande.statut == 'en_attente' %}
+<div class="mb-8 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800">
+    <strong>En attente de validation.</strong> Votre commande reste ici jusqu'à ce que l'admin accepte la demande. Aucune action requise de votre part.
+</div>
+{% endif %}
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
     <div class="lg:col-span-2">
@@ -30,13 +57,13 @@
                 </div>
                 <div>
                     <p class="text-sm text-[#6B7280] mb-1">Statut</p>
-                    <p class="text-lg font-semibold {% if commande.statut == 'en_attente' %}text-amber-600{% elseif commande.statut == 'recu' %}text-emerald-600{% else %}text-[#4B5563]{% endif %}">
-                        {% if commande.statut == 'en_attente' %}En attente (validation admin){% elseif commande.statut == 'recu' %}Reçu{% elseif commande.statut == 'payée' %}Payée{% elseif commande.statut == 'livrée' %}Livrée{% elseif commande.statut == 'annulée' %}Annulée{% else %}{{ commande.statut }}{% endif %}
+                    <p class="text-lg font-semibold {% if commande.statut == 'en_attente' %}text-amber-600{% elseif commande.statut == 'recu' or commande.statut == 'confirmer' or commande.statut == 'livraison' %}text-emerald-600{% elseif commande.statut == 'annulée' %}text-red-600{% else %}text-[#4B5563]{% endif %}">
+                        {% if commande.statut == 'en_attente' %}En attente{% elseif commande.statut == 'confirmer' %}Préparation{% elseif commande.statut == 'livraison' %}En livraison{% elseif commande.statut == 'recu' %}Reçu{% elseif commande.statut == 'annulée' %}Annulée{% elseif commande.statut == 'payée' %}Payée{% elseif commande.statut == 'livrée' %}Livrée{% else %}{{ commande.statut }}{% endif %}
                     </p>
                 </div>
                 <div>
                     <p class="text-sm text-[#6B7280] mb-1">Mode de Paiement</p>
-                    <p class="text-lg font-semibold text-[#4B5563]">{% if commande.modePayment == 'delivery' %}Livraison{% else %}Carte Bancaire{% endif %}</p>
+                    <p class="text-lg font-semibold text-[#4B5563]">{% if commande.modePayment == 'a_la_livraison' or commande.modePayment == 'delivery' %}À la livraison{% elseif commande.modePayment starts with 'carte_' %}Carte Bancaire{% else %}Livraison{% endif %}</p>
                 </div>
             </div>
 
@@ -49,14 +76,14 @@
                         <p class="font-medium text-[#4B5563]">{{ ligne.produit.nom }}</p>
                         <p class="text-sm text-[#6B7280]">Quantité: {{ ligne.quantite }}</p>
                     </div>
-                    <p class="font-semibold text-[#A7C7E7]">{{ ligne.sousTotal|number_format(2, ',', ' ') }} د.ت</p>
+                    <p class="font-semibold text-[#A7C7E7]">{{ ligne.sousTotal|number_format(2, ',', ' ') }} dt</p>
                 </div>
                 {% endfor %}
             </div>
 
             <div class="flex justify-between text-lg font-bold text-[#4B5563]">
                 <span>Montant Total:</span>
-                <span class="text-[#A7C7E7]">{{ commande.total|number_format(2, ',', ' ') }} د.ت</span>
+                <span class="text-[#A7C7E7]">{{ commande.total|number_format(2, ',', ' ') }} dt</span>
             </div>
         </div>
 
@@ -74,42 +101,45 @@
         </div>
     </div>
 
-    <!-- Prochaines étapes (étape 1 = en_attente, étape 2 = recu) -->
+    <!-- Prochaines étapes : en attente jusqu'à ce que l'admin accepte, puis passage à l'étape suivante -->
     <div>
         <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6 sticky top-20">
-            <h3 class="text-lg font-semibold text-[#4B5563] mb-4">Suivi de la commande</h3>
-            {% set etape1_ok = true %}
-            {% set etape2_ok = commande.statut == 'recu' or commande.statut == 'payée' or commande.statut == 'livrée' %}
-            <div class="space-y-3">
+            <h3 class="text-lg font-semibold text-[#4B5563] mb-4">Prochaines Étapes</h3>
+            {% set s = commande.statut %}
+            {% set step1_done = true %}
+            {% set step2_done = s != 'en_attente' and s != 'annulée' %}
+            {% set step3_done = s == 'livraison' or s == 'recu' or s == 'payée' or s == 'livrée' %}
+            {% set step4_done = s == 'recu' or s == 'livrée' %}
+            <div class="space-y-4">
                 <div class="flex gap-3">
                     <div class="w-8 h-8 rounded-full bg-[#A7C7E7] text-white flex items-center justify-center flex-shrink-0 font-semibold">✓</div>
                     <div>
-                        <p class="font-semibold text-[#4B5563]">Étape 1 – Commande enregistrée</p>
-                        <p class="text-sm text-[#6B7280]">Votre commande a bien été reçue</p>
+                        <p class="font-semibold text-[#4B5563]">1. Commande Reçue</p>
+                        <p class="text-sm text-[#6B7280]">Votre commande a été validée</p>
                     </div>
                 </div>
 
                 <div class="flex gap-3">
-                    <div class="w-8 h-8 rounded-full {{ etape2_ok ? 'bg-[#A7C7E7] text-white' : 'bg-[#E5E0D8] text-[#6B7280]' }} flex items-center justify-center flex-shrink-0 font-semibold">{{ etape2_ok ? '✓' : '2' }}</div>
+                    <div class="w-8 h-8 rounded-full {{ step2_done ? 'bg-[#A7C7E7] text-white' : 'bg-[#E5E0D8] text-[#6B7280]' }} flex items-center justify-center flex-shrink-0 font-semibold">{{ step2_done ? '✓' : '2' }}</div>
                     <div>
-                        <p class="font-semibold text-[#4B5563]">Étape 2 – Payé</p>
-                        <p class="text-sm text-[#6B7280]">{% if etape2_ok %}Paiement effectué{% else %}Paiement en attente{% endif %}</p>
+                        <p class="font-semibold text-[#4B5563]">2. Vérification du stock</p>
+                        <p class="text-sm text-[#6B7280]">{% if step2_done %}Stock vérifié, commande acceptée par l'admin{% else %}En attente de validation par l'admin{% endif %}</p>
                     </div>
                 </div>
 
                 <div class="flex gap-3">
-                    <div class="w-8 h-8 rounded-full bg-[#E5E0D8] text-[#6B7280] flex items-center justify-center flex-shrink-0 font-semibold">3</div>
+                    <div class="w-8 h-8 rounded-full {{ step3_done ? 'bg-[#A7C7E7] text-white' : 'bg-[#E5E0D8] text-[#6B7280]' }} flex items-center justify-center flex-shrink-0 font-semibold">{{ step3_done ? '✓' : '3' }}</div>
                     <div>
-                        <p class="font-semibold text-[#4B5563]">Livraison</p>
-                        <p class="text-sm text-[#6B7280]">Votre colis en route</p>
+                        <p class="font-semibold text-[#4B5563]">3. Suivi du produit</p>
+                        <p class="text-sm text-[#6B7280]">{% if s == 'recu' or s == 'livrée' %}Livré{% elseif step3_done %}Colis a quitté le magasin — En route{% else %}Colis a quitté le magasin → En route → Livré{% endif %}</p>
                     </div>
                 </div>
 
                 <div class="flex gap-3">
-                    <div class="w-8 h-8 rounded-full bg-[#E5E0D8] text-[#6B7280] flex items-center justify-center flex-shrink-0 font-semibold">4</div>
+                    <div class="w-8 h-8 rounded-full {{ step4_done ? 'bg-[#A7C7E7] text-white' : 'bg-[#E5E0D8] text-[#6B7280]' }} flex items-center justify-center flex-shrink-0 font-semibold">{{ step4_done ? '✓' : '4' }}</div>
                     <div>
-                        <p class="font-semibold text-[#4B5563]">Livré</p>
-                        <p class="text-sm text-[#6B7280]">Commande livrée</p>
+                        <p class="font-semibold text-[#4B5563]">4. Reçu</p>
+                        <p class="text-sm text-[#6B7280]">Votre commande livrée</p>
                     </div>
                 </div>
             </div>
@@ -124,8 +154,10 @@
             </div>
 
             <div class="mt-6 space-y-3">
-                <a href="{{ path('user_products_index') }}" class="block w-full px-4 py-3 bg-[#A7C7E7] text-white rounded-lg font-semibold text-center hover:bg-[#B8D4ED] transition">
-                    Continuer les achats
+                {% set isPaiementEnLigne = commande.modePayment == 'carte_bancaire' or (commande.modePayment ?? '') starts with 'carte_' or commande.stripePaymentIntent %}
+                <a href="{{ path('order_receipt', { id: commande.id }) }}" class="flex items-center justify-center gap-2 w-full px-4 py-3 border border-emerald-500 text-emerald-600 rounded-lg font-semibold hover:bg-emerald-50 transition" target="_blank" rel="noopener">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    {% if isPaiementEnLigne %}Télécharger le bon à présenter au livreur (PDF){% else %}Télécharger le bon de commande (PDF){% endif %}
                 </a>
                 <a href="{{ path('home') }}" class="block w-full px-4 py-3 border border-[#A7C7E7] text-[#A7C7E7] rounded-lg font-semibold text-center hover:bg-[#F5F1EB] transition">
                     Retour à l'accueil

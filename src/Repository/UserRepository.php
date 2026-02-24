@@ -80,4 +80,28 @@ class UserRepository extends ServiceEntityRepository
             'actifs' => $actifs,
         ];
     }
+
+    /**
+     * @return User[]
+     */
+    public function findByRole(string $role): array
+    {
+        $roleEnum = match ($role) {
+            'ROLE_ADMIN' => UserRole::ADMIN,
+            'ROLE_MEDECIN' => UserRole::MEDECIN,
+            'ROLE_PATIENT' => UserRole::PATIENT,
+            'ROLE_PARENT' => UserRole::PARENT,
+            default => null,
+        };
+
+        if ($roleEnum === null) {
+            return [];
+        }
+
+        return $this->createQueryBuilder('u')
+            ->where('u.role = :role')
+            ->setParameter('role', $roleEnum)
+            ->getQuery()
+            ->getResult();
+    }
 }
