@@ -34,6 +34,7 @@ final class CartController extends AbstractController
     public function index(Request $request): Response
     {
         $user = $this->getUser();
+<<<<<<< HEAD
         $commandes = [];
         $errorProductId = $request->getSession()->get('cart_error_product_id');
         if ($errorProductId !== null) {
@@ -52,6 +53,20 @@ final class CartController extends AbstractController
         }
         $cart = $this->cartSessionService->getCartView();
         return $this->render('front/cart/index.html.twig', ['cart' => $cart, 'commandes' => $commandes, 'error_product_id' => $errorProductId]);
+=======
+        if ($user) {
+            $cart = $this->cartRepository->findOneBy(['user' => $user]);
+            if (!$cart) {
+                $cart = new Cart();
+                $cart->setUser($user);
+                $this->entityManager->persist($cart);
+                $this->entityManager->flush();
+            }
+            return $this->render('front/cart/index.html.twig', ['cart' => $cart]);
+        }
+        $cart = $this->cartSessionService->getCartView();
+        return $this->render('front/cart/index.html.twig', ['cart' => $cart]);
+>>>>>>> 454cf3534cd44ab862139630471999260fa62858
     }
 
     #[Route('/ajouter/{id}', name: 'add', methods: ['POST'])]
@@ -110,7 +125,12 @@ final class CartController extends AbstractController
 
     private function getStockQuantity(Produit $produit): int
     {
+<<<<<<< HEAD
         return $produit->getQuantite();
+=======
+        $stock = $produit->getStock();
+        return $stock !== null ? $stock->getQuantite() : 0;
+>>>>>>> 454cf3534cd44ab862139630471999260fa62858
     }
 
     private function redirectToProductOrCart(Request $request, int $produitId): RedirectResponse
@@ -152,7 +172,10 @@ final class CartController extends AbstractController
         $quantity = (int) $request->request->get('quantite', 1);
         if ($quantity < 1) {
             $this->addFlash('error', 'La quantité doit être au moins 1.');
+<<<<<<< HEAD
             $request->getSession()->set('cart_error_product_id', $id);
+=======
+>>>>>>> 454cf3534cd44ab862139630471999260fa62858
             return $this->redirectToRoute('cart_index');
         }
 

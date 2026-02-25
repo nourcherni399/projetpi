@@ -20,6 +20,8 @@ parameters:
     stripe_secret_key_default: ''
     libretranslate_api_key_default: ''
     groq_api_key_default: ''
+    app.rappel_sms_nom_cabinet: 'AutiCare'
+    app.rappel_sms_default_country_code: '216'
 
     # Répertoires d'uploads
     uploads_directory: '%kernel.project_dir%/public/uploads/produits'
@@ -46,7 +48,10 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
-    
+    # Repository Notification : valeur explicite pour $entityClass (évite l'erreur d'autowiring)
+    App\Repository\NotificationRepository:
+        arguments:
+            $entityClass: App\Entity\Notification
 
     # Subscriber OAuth
     App\EventSubscriber\OAuthRedirectUriContextSubscriber:

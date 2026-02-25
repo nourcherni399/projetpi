@@ -1,0 +1,16 @@
+.git
+.env
+.env.*
+!.env.example
+/vendor
+/var
+/public/bundles
+/public/assets
+node_modules
+.gitignore
+.dockerignore
+Dockerfile
+*.md
+tests
+phpunit.xml
+.phpunit.result.cache

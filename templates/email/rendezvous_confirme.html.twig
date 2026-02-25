@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rendez-vous confirmé</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f1eb; margin: 0; padding: 24px; color: #4B5563; line-height: 1.6; }
+        .container { max-width: 520px; margin: 0 auto; background: #fff; border-radius: 16px; padding: 32px; border: 1px solid #E5E0D8; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+        h1 { color: #1e293b; font-size: 22px; margin: 0 0 8px 0; }
+        .badge { display: inline-block; background: #D4E5D0; color: #2d5a27; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 20px; }
+        .card { background: #f8fafc; border-radius: 12px; padding: 20px; margin: 20px 0; border-left: 4px solid #A8BBA3; }
+        .card p { margin: 6px 0; font-size: 15px; }
+        .card strong { color: #4B3D6B; }
+        .footer { font-size: 12px; color: #94a3b8; margin-top: 28px; padding-top: 20px; border-top: 1px solid #e2e8f0; }
+        .logo { font-weight: bold; color: #CDB4DB; font-size: 18px; letter-spacing: 0.5px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <p class="logo">AutiCare</p>
+    <h1>Votre rendez-vous est confirmé</h1>
+    <p class="badge">Confirmé</p>
+    <p>Bonjour {{ patient_prenom }},</p>
+    <p>Le praticien a accepté votre demande. Votre rendez-vous est confirmé aux détails ci-dessous.</p>
+    <div class="card">
+        <p><strong>Praticien :</strong> {{ medecin_nom }}</p>
+        <p><strong>Date :</strong> {{ date_rdv }}</p>
+        <p><strong>Horaires :</strong> {{ heure_debut }} – {{ heure_fin }}</p>
+        {% if cabinet %}<p><strong>Lieu :</strong> {{ cabinet }}</p>{% endif %}
+        {% if telephone %}<p><strong>Téléphone :</strong> {{ telephone }}</p>{% endif %}
+    </div>
+    <p>Pensez à vous présenter un peu à l'avance. En cas d'empêchement, prévenez le cabinet.</p>
+    {% if add_to_calendar_url|default('') != '' %}
+    <p style="margin-top: 20px;"><a href="{{ add_to_calendar_url }}" style="display: inline-block; padding: 12px 20px; background: #4285F4; color: #fff !important; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">Ajouter à Google Calendar</a></p>
+    {% endif %}
+    {% if page_rdv_url|default('') != '' %}
+    <p style="margin-top: 16px;">Souhaitez-vous <strong>annuler</strong> ou <strong>reporter</strong> ce rendez-vous ?</p>
+    <p><a href="{{ page_rdv_url }}" style="display: inline-block; padding: 12px 20px; background: #CDB4DB; color: #fff !important; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">Annuler ou reporter mon rendez-vous</a></p>
+    {% endif %}
+    <p class="footer">— L'équipe AutiCare</p>
+</div>
+</body>
+</html>

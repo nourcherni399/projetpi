@@ -182,4 +182,8 @@ final class CommentaireController extends AbstractController
             return false;
         }
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 454cf3534cd44ab862139630471999260fa62858

@@ -1,0 +1,339 @@
+{% extends 'layouts/doctor.html.twig' %}
+
+{% block title %}Calendrier - Rendez-vous - AutiCare Médecin{% endblock %}
+
+{% block doctor_content %}
+<div class="space-y-5">
+    {# En-tête avec style cohérent dashboard #}
+    <div class="bg-gradient-to-r from-[#A7C7E7] via-[#B8D4ED] to-[#C5D9F2] dark:from-[#5B7FA3] dark:via-[#6B8FB3] dark:to-[#7B9FC3] rounded-2xl p-6 text-white shadow-lg">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <a href="{{ path('doctor_rendezvous') }}" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/20 hover:bg-white/30 text-white font-medium text-sm transition-colors focus:outline focus:ring-2 focus:ring-white/50">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                    Liste
+                </a>
+                <div>
+                    <h1 class="text-2xl font-bold">Calendrier des rendez-vous</h1>
+                    <p class="text-blue-100 dark:text-blue-200 text-sm mt-0.5">Cliquez sur un créneau pour ajouter un RDV · Glissez un événement pour le déplacer</p>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-4 text-sm">
+                <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/20">
+                    <span class="w-3 h-3 rounded-full bg-emerald-400 shadow-sm"></span>
+                    Confirmé
+                </span>
+                <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/20">
+                    <span class="w-3 h-3 rounded-full bg-amber-400 shadow-sm"></span>
+                    En attente
+                </span>
+            </div>
+        </div>
+    </div>
+
+    {# Zone calendrier avec hauteur fixe et style #}
+    <div class="bg-white dark:bg-gray-700/80 rounded-2xl border border-gray-200 dark:border-gray-600 shadow-lg overflow-hidden">
+        <div id="calendar-loading" class="flex items-center justify-center py-12 text-[#6B7280] dark:text-gray-400 text-sm hidden">
+            <svg class="animate-spin w-6 h-6 mr-2 text-[#A7C7E7]" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            Chargement des rendez-vous…
+        </div>
+        <div id="calendar-wrapper" class="p-4 min-h-[600px]">
+            <div id="calendar"></div>
+        </div>
+    </div>
+
+    {# Modal détail du rendez-vous #}
+    <div id="rdv-detail-modal" class="fixed inset-0 z-[90] hidden" aria-hidden="true">
+        <div class="fixed inset-0 bg-black/50 dark:bg-black/60" id="rdv-detail-backdrop"></div>
+        <div class="fixed inset-0 flex items-center justify-center p-4 pointer-events-none">
+            <div id="rdv-detail-content" class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-600 max-w-lg w-full max-h-[90vh] overflow-hidden pointer-events-auto">
+                <div class="p-6 border-b border-gray-200 dark:border-gray-600 flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">Détail du rendez-vous</h2>
+                    <button type="button" id="rdv-detail-close" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300 transition-colors focus:outline focus:ring-2 focus:ring-[#A7C7E7]" aria-label="Fermer">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
+                <div id="rdv-detail-loading" class="p-8 flex items-center justify-center text-gray-500 dark:text-gray-400">
+                    <svg class="animate-spin w-8 h-8 text-[#A7C7E7]" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                </div>
+                <div id="rdv-detail-body" class="p-6 overflow-y-auto max-h-[60vh] hidden">
+                    <dl class="space-y-4">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Patient</dt>
+                            <dd id="rdv-detail-patient" class="mt-0.5 text-gray-900 dark:text-white font-medium"></dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Date et horaire</dt>
+                            <dd id="rdv-detail-datetime" class="mt-0.5 text-gray-900 dark:text-white"></dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Statut</dt>
+                            <dd id="rdv-detail-status" class="mt-0.5"></dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Motif</dt>
+                            <dd id="rdv-detail-motif" class="mt-0.5 text-gray-900 dark:text-white"></dd>
+                        </div>
+                        <div id="rdv-detail-email-wrap" class="hidden">
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Email</dt>
+                            <dd id="rdv-detail-email" class="mt-0.5 text-gray-900 dark:text-white break-all"></dd>
+                        </div>
+                        <div id="rdv-detail-tel-wrap" class="hidden">
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Téléphone</dt>
+                            <dd id="rdv-detail-tel" class="mt-0.5 text-gray-900 dark:text-white"></dd>
+                        </div>
+                        <div id="rdv-detail-adresse-wrap" class="hidden">
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Adresse</dt>
+                            <dd id="rdv-detail-adresse" class="mt-0.5 text-gray-900 dark:text-white"></dd>
+                        </div>
+                        <div id="rdv-detail-dob-wrap" class="hidden">
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Date de naissance</dt>
+                            <dd id="rdv-detail-dob" class="mt-0.5 text-gray-900 dark:text-white"></dd>
+                        </div>
+                        <div id="rdv-detail-note-wrap" class="hidden">
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Note</dt>
+                            <dd id="rdv-detail-note" class="mt-0.5 text-gray-900 dark:text-white whitespace-pre-wrap"></dd>
+                        </div>
+                    </dl>
+                </div>
+                <div id="rdv-detail-actions" class="p-6 border-t border-gray-200 dark:border-gray-600 flex flex-wrap gap-3 hidden">
+                    <a id="rdv-detail-edit-btn" href="#" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#CDB4DB] hover:bg-[#B8A4CC] text-white font-medium text-sm transition-colors focus:outline focus:ring-2 focus:ring-[#CDB4DB] focus:ring-offset-2">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                        Modifier
+                    </a>
+                    <button type="button" id="rdv-detail-close-btn" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-800 dark:text-gray-200 font-medium text-sm transition-colors focus:outline focus:ring-2 focus:ring-gray-400">
+                        Fermer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Toast pour feedback (déplacement réussi / erreur) #}
+    <div id="calendar-toast" class="fixed bottom-6 right-6 z-[100] max-w-sm rounded-xl shadow-xl border px-4 py-3 flex items-center gap-3 hidden transition-opacity duration-300 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+        <span id="calendar-toast-icon"></span>
+        <span id="calendar-toast-text" class="text-sm font-medium text-gray-800 dark:text-gray-200"></span>
+    </div>
+</div>
+
+<style>
+/* FullCalendar : thème cohérent avec l'espace médecin */
+.fc {
+    --fc-border-color: rgba(229, 224, 216, 0.6);
+    --fc-button-bg-color: #CDB4DB;
+    --fc-button-border-color: #CDB4DB;
+    --fc-button-hover-bg-color: #B8A4CC;
+    --fc-button-hover-border-color: #B8A4CC;
+    --fc-button-active-bg-color: #9B7BB8;
+    --fc-today-bg-color: rgba(167, 199, 231, 0.2);
+    --fc-page-bg-color: transparent;
+    --fc-neutral-bg-color: rgba(248, 250, 252, 0.5);
+}
+.dark .fc {
+    --fc-border-color: rgba(75, 85, 99, 0.6);
+    --fc-today-bg-color: rgba(147, 197, 253, 0.15);
+}
+.fc .fc-toolbar-title { font-size: 1.25rem; font-weight: 700; color: #1e3a5f; }
+.dark .fc .fc-toolbar-title { color: #e5e7eb; }
+.fc .fc-button { font-weight: 600; border-radius: 0.75rem; padding: 0.5rem 1rem; text-transform: capitalize; }
+.fc .fc-button-primary:not(:disabled):hover { opacity: 0.95; }
+.fc .fc-daygrid-day-number { font-weight: 600; color: #6B7280; padding: 0.5rem; border-radius: 0.5rem; }
+.fc .fc-col-header-cell-cushion { font-weight: 600; color: #4B5563; padding: 0.75rem; }
+.dark .fc .fc-col-header-cell-cushion { color: #d1d5db; }
+.fc .fc-timegrid-slot { height: 2.5rem; }
+.fc .fc-event { border-radius: 0.5rem; border: none; padding: 2px 6px; font-weight: 500; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.fc .fc-event:hover { filter: brightness(0.97); }
+.fc .fc-event .fc-event-main { padding: 2px 4px; }
+.fc-direction-ltr .fc-daygrid-event .fc-event-time { font-weight: 600; }
+.fc .fc-highlight { background: rgba(167, 199, 231, 0.25); border-radius: 0.5rem; }
+.fc .fc-daygrid-day.fc-day-today { background: var(--fc-today-bg-color); }
+.fc .fc-scrollgrid { border-radius: 0.75rem; overflow: hidden; }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/locales/fr.global.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var loadingEl = document.getElementById('calendar-loading');
+    var wrapperEl = document.getElementById('calendar-wrapper');
+    if (!calendarEl) return;
+
+    var eventsUrl = '{{ path('doctor_rendezvous_calendar_events')|e('js') }}';
+    var moveUrlTemplate = '{{ path('doctor_rendezvous_move', { id: 0 })|e('js') }}';
+    var detailUrlTemplate = '{{ path('doctor_rendezvous_detail', { id: 0 })|e('js') }}';
+
+    function escapeHtml(s) {
+        if (s == null || s === '') return '';
+        var div = document.createElement('div');
+        div.textContent = s;
+        return div.innerHTML;
+    }
+
+    function showRdvDetailModal(rdvId) {
+        var modal = document.getElementById('rdv-detail-modal');
+        var loading = document.getElementById('rdv-detail-loading');
+        var body = document.getElementById('rdv-detail-body');
+        var actions = document.getElementById('rdv-detail-actions');
+        if (!modal || !loading || !body || !actions) return;
+        modal.classList.remove('hidden');
+        loading.classList.remove('hidden');
+        body.classList.add('hidden');
+        actions.classList.add('hidden');
+        var url = detailUrlTemplate.replace('/0/detail', '/' + rdvId + '/detail');
+        fetch(url, { method: 'GET', headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function(r) {
+                if (!r.ok) throw new Error('Rendez-vous introuvable.');
+                return r.json();
+            })
+            .then(function(d) {
+                loading.classList.add('hidden');
+                body.classList.remove('hidden');
+                actions.classList.remove('hidden');
+                var patient = (d.prenom || '') + ' ' + (d.nom || '').trim() || '—';
+                document.getElementById('rdv-detail-patient').textContent = patient;
+                var dateStr = d.dateRdv || '';
+                var timeStr = (d.heureDebut || '') + (d.heureFin ? ' – ' + d.heureFin : '');
+                document.getElementById('rdv-detail-datetime').textContent = [dateStr, timeStr].filter(Boolean).join(' · ') || '—';
+                var statusEl = document.getElementById('rdv-detail-status');
+                statusEl.textContent = d.status || '—';
+                statusEl.className = 'mt-0.5 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + (d.status === 'Confirmé' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400' : d.status === 'En attente' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-gray-100 text-gray-800 dark:bg-gray-600 dark:text-gray-300');
+                document.getElementById('rdv-detail-motif').textContent = d.motif || '—';
+                var editBtn = document.getElementById('rdv-detail-edit-btn');
+                if (editBtn && d.editUrl) { editBtn.href = d.editUrl; editBtn.classList.remove('hidden'); }
+                function showField(idWrap, idVal, value) {
+                    var w = document.getElementById(idWrap);
+                    var v = document.getElementById(idVal);
+                    if (!w || !v) return;
+                    if (value != null && value !== '' && value !== 'vide') { v.textContent = value; w.classList.remove('hidden'); } else { w.classList.add('hidden'); }
+                }
+                showField('rdv-detail-email-wrap', 'rdv-detail-email', d.email);
+                showField('rdv-detail-tel-wrap', 'rdv-detail-tel', d.telephone);
+                showField('rdv-detail-adresse-wrap', 'rdv-detail-adresse', d.adresse);
+                showField('rdv-detail-dob-wrap', 'rdv-detail-dob', d.dateNaissance);
+                showField('rdv-detail-note-wrap', 'rdv-detail-note', d.notePatient);
+            })
+            .catch(function() {
+                loading.classList.add('hidden');
+                showToast('Impossible de charger le détail du rendez-vous.', true);
+                closeRdvDetailModal();
+            });
+    }
+
+    function closeRdvDetailModal() {
+        var modal = document.getElementById('rdv-detail-modal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function showToast(message, isError) {
+        var toast = document.getElementById('calendar-toast');
+        var icon = document.getElementById('calendar-toast-icon');
+        var text = document.getElementById('calendar-toast-text');
+        if (!toast || !icon || !text) return;
+        text.textContent = message;
+        toast.classList.remove('hidden');
+        if (isError) {
+            icon.innerHTML = '<svg class="w-5 h-5 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+        } else {
+            icon.innerHTML = '<svg class="w-5 h-5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>';
+        }
+        setTimeout(function() { toast.classList.add('hidden'); }, 3500);
+    }
+
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        locale: 'fr',
+        firstDay: 1,
+        initialView: 'dayGridMonth',
+        height: 'auto',
+        contentHeight: 640,
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        buttonText: {
+            today: 'Aujourd\'hui',
+            month: 'Mois',
+            week: 'Semaine',
+            day: 'Jour'
+        },
+        slotMinTime: '06:00:00',
+        slotMaxTime: '22:00:00',
+        slotDuration: '00:30:00',
+        slotLabelInterval: '01:00:00',
+        allDaySlot: false,
+        nowIndicator: true,
+        editable: true,
+        selectable: true,
+        selectMirror: true,
+        dayMaxEvents: 4,
+        weekends: true,
+        loading: function(isLoading) {
+            if (loadingEl) loadingEl.classList.toggle('hidden', !isLoading);
+            if (wrapperEl) wrapperEl.classList.toggle('opacity-60', isLoading);
+        },
+        events: function(info, successCallback, failureCallback) {
+            fetch(eventsUrl + '?start=' + encodeURIComponent(info.startStr) + '&end=' + encodeURIComponent(info.endStr), {
+                method: 'GET',
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(function(r) {
+                if (!r.ok) throw new Error('Chargement impossible');
+                return r.json();
+            })
+            .then(successCallback)
+            .catch(function() {
+                successCallback([]);
+                showToast('Impossible de charger les rendez-vous.', true);
+            });
+        },
+        eventDidMount: function(info) {
+            var status = info.event.extendedProps && info.event.extendedProps.status;
+            var title = info.event.title;
+            var time = info.event.start ? info.event.start.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '';
+            var tip = title + (time ? ' · ' + time : '') + (status === 'confirmer' ? ' · Confirmé' : ' · En attente');
+            info.el.setAttribute('title', tip);
+        },
+        eventDrop: function(info) {
+            var id = info.event.id;
+            var start = info.event.start;
+            if (!id || !start) { info.revert(); return; }
+            var url = moveUrlTemplate.replace('/0/move', '/' + id + '/move');
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: JSON.stringify({ start: start.toISOString() })
+            })
+            .then(function(r) {
+                if (!r.ok) return r.json().then(function(d) { throw new Error(d.error || 'Erreur'); });
+                return r.json();
+            })
+            .then(function() {
+                showToast('Rendez-vous déplacé avec succès.', false);
+            })
+            .catch(function(err) {
+                showToast(err.message || 'Impossible de déplacer le rendez-vous.', true);
+                info.revert();
+            });
+        },
+        eventClick: function(info) {
+            info.jsEvent.preventDefault();
+            var id = info.event.id;
+            if (id) showRdvDetailModal(id);
+        },
+        select: function(info) {
+            var start = info.start;
+            var date = start.toISOString().slice(0, 10);
+            var time = start.toTimeString().slice(0, 5);
+            var url = '{{ path('doctor_rendezvous_new') }}?date=' + encodeURIComponent(date) + '&time=' + encodeURIComponent(time);
+            window.location.href = url;
+        },
+        selectOverlap: false
+    });
+    calendar.render();
+
+    document.getElementById('rdv-detail-backdrop')?.addEventListener('click', closeRdvDetailModal);
+    document.getElementById('rdv-detail-close')?.addEventListener('click', closeRdvDetailModal);
+    document.getElementById('rdv-detail-close-btn')?.addEventListener('click', closeRdvDetailModal);
+});
+</script>
+{% endblock %}

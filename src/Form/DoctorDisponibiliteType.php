@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace App\Form;
 
 use App\Entity\Disponibilite;
-use App\Enum\Jour;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\EnumType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -25,12 +24,10 @@ final class DoctorDisponibiliteType extends AbstractType
         ];
 
         $builder
-            ->add('jour', EnumType::class, [
-                'label' => 'Jour',
-                'class' => Jour::class,
-                'choice_label' => fn (Jour $j) => ucfirst($j->value),
-                'placeholder' => 'Choisir un jour',
-                'constraints' => [new NotBlank(message: 'Le jour est obligatoire.')],
+            ->add('date', DateType::class, [
+                'label' => 'Date',
+                'widget' => 'single_text',
+                'constraints' => [new NotBlank(message: 'La date est obligatoire.')],
                 'attr' => $attr,
             ])
             ->add('heureDebut', TimeType::class, [
@@ -60,6 +57,7 @@ final class DoctorDisponibiliteType extends AbstractType
                 'data' => true,
                 'attr' => ['class' => 'rounded border-[#E5E0D8] text-[#A7C7E7] focus:ring-[#A7C7E7]'],
             ]);
+
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -68,4 +66,6 @@ final class DoctorDisponibiliteType extends AbstractType
             'data_class' => Disponibilite::class,
         ]);
     }
+
 }
+

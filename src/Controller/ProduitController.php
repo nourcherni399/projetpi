@@ -8,10 +8,14 @@ use App\Controller\Traits\FuzzyProductSearchTrait;
 use App\Entity\Produit;
 use App\Enum\StatutPublication;
 use App\Form\ProduitType;
+<<<<<<< HEAD
 use App\Repository\CartItemRepository;
 use App\Repository\LigneCommandeRepository;
 use App\Repository\OrderItemRepository;
 use App\Repository\ProduitHistoriqueRepository;
+=======
+use App\Repository\LigneCommandeRepository;
+>>>>>>> 454cf3534cd44ab862139630471999260fa62858
 use App\Repository\ProduitRepository;
 use App\Service\AIPredictionService;
 use App\Service\ProduitHistoriqueService;
@@ -42,6 +46,7 @@ final class ProduitController extends AbstractController
     public function __construct(
         private readonly ProduitRepository $produitRepository,
         private readonly LigneCommandeRepository $ligneCommandeRepository,
+<<<<<<< HEAD
         private readonly OrderItemRepository $orderItemRepository,
         private readonly CartItemRepository $cartItemRepository,
         private readonly EntityManagerInterface $entityManager,
@@ -51,6 +56,10 @@ final class ProduitController extends AbstractController
         private readonly ProduitHistoriqueService $produitHistoriqueService,
         private readonly ProduitHistoriqueRepository $produitHistoriqueRepository,
         private readonly ProductDescriptionSuggestionService $descriptionSuggestionService,
+=======
+        private readonly EntityManagerInterface $entityManager,
+        private readonly SluggerInterface $slugger,
+>>>>>>> 454cf3534cd44ab862139630471999260fa62858
     ) {
     }
 
@@ -61,6 +70,7 @@ final class ProduitController extends AbstractController
         $sortBy = $request->query->get('sortBy', 'nom');
         $sortOrder = $request->query->get('sortOrder', 'asc');
 
+<<<<<<< HEAD
         $produits = $this->produitRepository->findBy([], ['id' => 'ASC']);
 
         if ($search !== null && $search !== '') {
@@ -73,6 +83,31 @@ final class ProduitController extends AbstractController
         $produits = $this->applySort($produits, $sortBy, $sortOrder);
 
         $stats = $this->getProduitStats();
+=======
+        $orderBy = [];
+        if ($sortBy === 'prix') {
+            $orderBy['prix'] = $sortOrder === 'desc' ? 'DESC' : 'ASC';
+        } else {
+            $orderBy['nom'] = $sortOrder === 'desc' ? 'DESC' : 'ASC';
+        }
+
+        $produits = $this->produitRepository->findBy([], $orderBy);
+
+        if ($search !== null && $search !== '') {
+            $searchTerm = strtolower(trim($search));
+            $produits = array_filter($produits, function ($produit) use ($searchTerm) {
+                $nomMatch = strpos(strtolower($produit->getNom() ?? ''), $searchTerm) !== false;
+                $descriptionMatch = $produit->getDescription() && strpos(strtolower($produit->getDescription()), $searchTerm) !== false;
+                $categorieMatch = $produit->getCategorie() && strpos(strtolower($produit->getCategorie()->label()), $searchTerm) !== false;
+                $prixMatch = strpos((string) $produit->getPrix(), $searchTerm) !== false;
+
+                return $nomMatch || $descriptionMatch || $categorieMatch || $prixMatch;
+            });
+        }
+
+        $stats = $this->getProduitStats();
+        $produitIdsAvecCommandes = $this->ligneCommandeRepository->getProduitIdsAvecCommandes();
+>>>>>>> 454cf3534cd44ab862139630471999260fa62858
 
         return $this->render('admin/produit/index.html.twig', [
             'produits' => $produits,
@@ -80,6 +115,7 @@ final class ProduitController extends AbstractController
             'sortBy' => $sortBy,
             'sortOrder' => $sortOrder,
             'stats' => $stats,
+<<<<<<< HEAD
         ]);
     }
 
@@ -121,10 +157,17 @@ final class ProduitController extends AbstractController
         ]);
     }
 
+=======
+            'produitIdsAvecCommandes' => $produitIdsAvecCommandes,
+        ]);
+    }
+
+>>>>>>> 454cf3534cd44ab862139630471999260fa62858
     #[Route('/export-excel', name: 'admin_produit_export_excel', methods: ['GET'])]
     public function exportExcel(): Response
     {
         $produits = $this->produitRepository->findBy([], ['nom' => 'ASC']);
+<<<<<<< HEAD
         $filename = 'export_produits_' . (new \DateTimeImmutable())->format('Y-m-d_His') . '.xlsx';
 
         $spreadsheet = $this->buildExcelSpreadsheet($produits);
@@ -136,6 +179,13 @@ final class ProduitController extends AbstractController
         $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
         $response->headers->set('Cache-Control', 'max-age=0');
+=======
+        $filename = 'export_produits_' . (new \DateTimeImmutable())->format('Y-m-d_His') . '.csv';
+
+        $response = new Response($this->buildCsvContent($produits));
+        $response->headers->set('Content-Type', 'text/csv; charset=UTF-8');
+        $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
+>>>>>>> 454cf3534cd44ab862139630471999260fa62858
 
         return $response;
     }
@@ -143,6 +193,7 @@ final class ProduitController extends AbstractController
     /**
      * @param list<Produit> $produits
      */
+<<<<<<< HEAD
     private function buildExcelSpreadsheet(array $produits): Spreadsheet
     {
         $spreadsheet = new Spreadsheet();
@@ -233,6 +284,29 @@ final class ProduitController extends AbstractController
         $sheet->freezePane('A2');
 
         return $spreadsheet;
+=======
+    private function buildCsvContent(array $produits): string
+    {
+        $out = fopen('php://temp', 'r+');
+        fprintf($out, "\xEF\xBB\xBF"); // BOM UTF-8 for Excel
+        fputcsv($out, ['ID', 'Nom', 'Description', 'Catégorie', 'Prix (د.ت)', 'Disponible'], ';');
+        foreach ($produits as $p) {
+            fputcsv($out, [
+                $p->getId(),
+                $p->getNom() ?? '',
+                $p->getDescription() ?? '',
+                $p->getCategorie() ? $p->getCategorie()->label() : '',
+                $p->getPrix() !== null ? number_format((float) $p->getPrix(), 2, ',', ' ') : '',
+                $p->isDisponibilite() ? 'Oui' : 'Non',
+            ], ';');
+        }
+        fputcsv($out, ['Total', count($produits) . ' produit(s) exporté(s)', '', '', '', ''], ';');
+        rewind($out);
+        $content = stream_get_contents($out);
+        fclose($out);
+
+        return $content;
+>>>>>>> 454cf3534cd44ab862139630471999260fa62858
     }
 
     /**
@@ -295,12 +369,19 @@ final class ProduitController extends AbstractController
                         ]);
                     }
                 }
+<<<<<<< HEAD
                 $produit->setValide(true);
                 $this->entityManager->persist($produit);
                 $this->entityManager->flush();
                 $produit->setSku('PRD-' . str_pad((string) $produit->getId(), 6, '0', STR_PAD_LEFT));
                 $this->entityManager->flush();
                 $this->addFlash('success', 'Ajouté avec succès.');
+=======
+
+                $this->entityManager->persist($produit);
+                $this->entityManager->flush();
+                $this->addFlash('success', 'Le produit a été créé avec succès.');
+>>>>>>> 454cf3534cd44ab862139630471999260fa62858
                 return $this->redirectToRoute('admin_produit_index');
             }
         }
@@ -345,6 +426,7 @@ final class ProduitController extends AbstractController
             }
 
             if ($form->isValid()) {
+<<<<<<< HEAD
                 if ($user instanceof \App\Entity\User) {
                     if ((string) $oldPrix !== (string) $produit->getPrix()) {
                         $this->produitHistoriqueService->log($produit, $user, 'prix', (string) $oldPrix, (string) $produit->getPrix());
@@ -359,6 +441,8 @@ final class ProduitController extends AbstractController
                         $this->produitHistoriqueService->log($produit, $user, 'disponibilite', $oldDispo ? 'Oui' : 'Non', $produit->isDisponibilite() ? 'Oui' : 'Non');
                     }
                 }
+=======
+>>>>>>> 454cf3534cd44ab862139630471999260fa62858
                 $imageFile = $form->get('image')->getData();
                 if ($imageFile) {
                     $saved = $this->handleImageUpload($imageFile, $produit);
@@ -369,6 +453,10 @@ final class ProduitController extends AbstractController
                         ]);
                     }
                 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 454cf3534cd44ab862139630471999260fa62858
                 $this->entityManager->flush();
                 $this->addFlash('success', 'Le produit a été modifié avec succès.');
                 return $this->redirectToRoute('admin_produit_show', ['id' => $produit->getId()]);
@@ -381,6 +469,7 @@ final class ProduitController extends AbstractController
         ]);
     }
 
+<<<<<<< HEAD
     #[Route('/suggerer-description', name: 'admin_produit_suggerer_description', methods: ['POST'])]
     public function suggererDescription(Request $request): JsonResponse
     {
@@ -566,6 +655,8 @@ final class ProduitController extends AbstractController
         return $this->redirectToRoute('admin_produit_index');
     }
 
+=======
+>>>>>>> 454cf3534cd44ab862139630471999260fa62858
     #[Route('/{id}/confirm-delete', name: 'admin_produit_confirm_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function confirmDelete(Produit $produit): Response
     {
@@ -580,12 +671,22 @@ final class ProduitController extends AbstractController
         if (!$this->isCsrfTokenValid('delete' . $produit->getId(), $request->request->get('_token'))) {
             return $this->redirectToRoute('admin_produit_index');
         }
+<<<<<<< HEAD
         $this->removeProduitFromCommandes($produit);
         $this->removeProduitFromOrders($produit);
         $this->removeProduitFromCartItems($produit);
         $this->entityManager->remove($produit);
         $this->entityManager->flush();
         $this->addFlash('success', 'Le produit a été retiré des commandes, paniers et supprimé avec succès.');
+=======
+        if ($this->ligneCommandeRepository->countByProduit($produit) > 0) {
+            $this->addFlash('error', 'Ce produit ne peut pas être supprimé car il est présent dans une ou plusieurs commandes.');
+            return $this->redirectToRoute('admin_produit_index');
+        }
+        $this->entityManager->remove($produit);
+        $this->entityManager->flush();
+        $this->addFlash('success', 'Le produit a été supprimé avec succès.');
+>>>>>>> 454cf3534cd44ab862139630471999260fa62858
         return $this->redirectToRoute('admin_produit_index');
     }
 
@@ -599,20 +700,37 @@ final class ProduitController extends AbstractController
         }
         $produits = $this->produitRepository->findBy(['id' => $ids]);
         $deleted = 0;
+<<<<<<< HEAD
         foreach ($produits as $produit) {
             $this->removeProduitFromCommandes($produit);
             $this->removeProduitFromOrders($produit);
             $this->removeProduitFromCartItems($produit);
+=======
+        $blocked = [];
+        foreach ($produits as $produit) {
+            if ($this->ligneCommandeRepository->countByProduit($produit) > 0) {
+                $blocked[] = $produit->getNom();
+                continue;
+            }
+>>>>>>> 454cf3534cd44ab862139630471999260fa62858
             $this->entityManager->remove($produit);
             $deleted++;
         }
         $this->entityManager->flush();
         if ($deleted > 0) {
+<<<<<<< HEAD
             $this->addFlash('success', $deleted . ' produit(s) retiré(s) des commandes, paniers et supprimé(s) avec succès.');
+=======
+            $this->addFlash('success', $deleted . ' produit(s) supprimé(s) avec succès.');
+        }
+        if ($blocked !== []) {
+            $this->addFlash('error', 'Produit(s) non supprimé(s) (présents dans des commandes) : ' . implode(', ', $blocked) . '.');
+>>>>>>> 454cf3534cd44ab862139630471999260fa62858
         }
         return $this->redirectToRoute('admin_produit_index');
     }
 
+<<<<<<< HEAD
     private function removeProduitFromCommandes(Produit $produit): void
     {
         $lignes = $this->ligneCommandeRepository->findByProduit($produit);
@@ -659,6 +777,8 @@ final class ProduitController extends AbstractController
         }
     }
 
+=======
+>>>>>>> 454cf3534cd44ab862139630471999260fa62858
     /**
      * @return list<string>
      */
@@ -782,6 +902,7 @@ final class ProduitController extends AbstractController
             return false;
         }
     }
+<<<<<<< HEAD
 
     private function downloadExternalImage(string $imageUrl, string $productName): ?string
     {
@@ -819,4 +940,6 @@ final class ProduitController extends AbstractController
         }
     }
 
+=======
+>>>>>>> 454cf3534cd44ab862139630471999260fa62858
 }

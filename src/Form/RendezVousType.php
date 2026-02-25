@@ -43,12 +43,12 @@ final class RendezVousType extends AbstractType
                 'label' => 'Disponibilité',
                 'class' => Disponibilite::class,
                 'choice_label' => function (Disponibilite $d): string {
-                    $jour = $d->getJour()?->value ?? '';
+                    $dateStr = $d->getDate() ? $d->getDate()->format('d/m/Y') : '';
                     $deb = $d->getHeureDebut()?->format('H:i') ?? '';
                     $fin = $d->getHeureFin()?->format('H:i') ?? '';
                     $med = $d->getMedecin();
                     $medLabel = $med ? $med->getPrenom() . ' ' . $med->getNom() : '';
-                    return trim("{$jour} {$deb}-{$fin} ({$medLabel})");
+                    return trim("{$dateStr} {$deb}-{$fin} ({$medLabel})");
                 },
                 'placeholder' => 'Choisir un créneau (optionnel)',
                 'required' => false,

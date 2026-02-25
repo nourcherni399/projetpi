@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" fill="#F5F0EB"/>
+  <ellipse cx="100" cy="100" rx="28" ry="45" fill="#C4907A"/>
+    <ellipse cx="63" cy="167" rx="38" ry="43" fill="#C4907A"/>
+    <ellipse cx="137" cy="167" rx="38" ry="43" fill="#C4907A"/>
+    <ellipse cx="16" cy="36" rx="47" ry="38" fill="#C4907A"/>
+    <ellipse cx="184" cy="36" rx="47" ry="38" fill="#C4907A"/>
+    <ellipse cx="15" cy="126" rx="38" ry="39" fill="#C4907A"/>
+    <ellipse cx="185" cy="126" rx="38" ry="39" fill="#C4907A"/>
+    <ellipse cx="62" cy="44" rx="29" ry="18" fill="#C4907A"/>
+    <ellipse cx="138" cy="44" rx="29" ry="18" fill="#C4907A"/>
+    <ellipse cx="40" cy="140" rx="24" ry="27" fill="#C4907A"/>
+    <ellipse cx="160" cy="140" rx="24" ry="27" fill="#C4907A"/>
+    <ellipse cx="63" cy="34" rx="40" ry="27" fill="#C4907A"/>
+    <ellipse cx="137" cy="34" rx="40" ry="27" fill="#C4907A"/>
+    <ellipse cx="16" cy="160" rx="28" ry="41" fill="#C4907A"/>
+    <ellipse cx="184" cy="160" rx="28" ry="41" fill="#C4907A"/>
+    <ellipse cx="50" cy="64" rx="40" ry="28" fill="#C4907A"/>
+    <ellipse cx="150" cy="64" rx="40" ry="28" fill="#C4907A"/>
+</svg>

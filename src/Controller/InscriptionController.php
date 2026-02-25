@@ -127,7 +127,7 @@ final class InscriptionController extends AbstractController
 
                 $this->addFlash('success', 'Votre compte a été créé. Vérifiez votre e-mail pour l\'activer.');
                 $targetPath = $request->query->get('_target_path') ?? $request->request->get('_target_path');
-                if ($targetPath !== null && $targetPath !== '') {
+                if (\is_string($targetPath) && $targetPath !== '' && str_starts_with($targetPath, '/') && !str_starts_with($targetPath, '//')) {
                     return $this->redirectToRoute('app_login', ['_target_path' => $targetPath]);
                 }
                 return $this->redirectToRoute('app_login');

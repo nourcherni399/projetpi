@@ -22,4 +22,8 @@ final class LocaleController extends AbstractController
 
         return $this->redirect($referer && str_contains($referer, $request->getHost()) ? $referer : $this->generateUrl('user_blog'));
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 454cf3534cd44ab862139630471999260fa62858

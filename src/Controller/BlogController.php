@@ -370,7 +370,11 @@ final class BlogController extends AbstractController
 
         if (!$groqService->isConfigured()) {
             return $this->json([
+<<<<<<< HEAD
                 'summary' => 'Clé API non configurée. Ajoutez CHAT_API_KEY dans .env',
+=======
+                'summary' => 'Clé API non configurée. Ajoutez GROQ_API_KEY dans .env.local',
+>>>>>>> 454cf3534cd44ab862139630471999260fa62858
                 'success' => false,
             ]);
         }
@@ -734,4 +738,8 @@ final class BlogController extends AbstractController
             return false;
         }
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 454cf3534cd44ab862139630471999260fa62858
