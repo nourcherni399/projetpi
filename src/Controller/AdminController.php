@@ -74,11 +74,13 @@ final class AdminController extends AbstractController
         if (!in_array(strtolower($order), ['asc', 'desc'], true)) {
             $order = 'asc';
         }
-        $users = $this->userRepository->findAllOrdered($order);
+        $search = $request->query->get('q', '');
+        $users = $this->userRepository->findAllOrdered($order, $search !== '' ? $search : null);
         $stats = $this->userRepository->getStats();
         return $this->render('admin/users/index.html.twig', [
             'users' => $users,
             'order' => $order,
+            'search' => $search,
             'stats' => $stats,
         ]);
     }

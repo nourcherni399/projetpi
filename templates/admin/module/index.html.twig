@@ -242,7 +242,7 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+function initModuleResourceFilter() {
     const resourceSelect = document.getElementById('resourceModuleFilter');
     const resourceForm = document.getElementById('resourceFilterForm');
     if (resourceSelect && resourceForm) {
@@ -250,7 +250,8 @@ document.addEventListener('DOMContentLoaded', function() {
             resourceForm.submit();
         });
     }
-});
+}
+document.addEventListener('turbo:load', initModuleResourceFilter);
 </script>
 
 <!-- Statistiques des articles par type et commentaires par module -->
@@ -493,9 +494,10 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+function initModuleIndexCharts() {
     const searchInput = document.getElementById('searchInput');
     const tableBody = document.getElementById('modulesTableBody');
+    if (!searchInput || !tableBody) return;
     const rows = tableBody.getElementsByTagName('tr');
 
     searchInput.addEventListener('input', function() {
@@ -529,7 +531,9 @@ document.addEventListener('DOMContentLoaded', function() {
         'Difficile': {{ modules|filter(m => m.niveau == 'difficile')|length }}
     };
 
-    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    const categoryEl = document.getElementById('categoryChart');
+    if (!categoryEl) return;
+    const categoryCtx = categoryEl.getContext('2d');
     const categoryLabels = Object.keys(categoryData);
     const categoryValues = Object.values(categoryData);
     const categoryColors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#6366F1', '#9CA3AF'];
@@ -775,7 +779,8 @@ document.addEventListener('DOMContentLoaded', function() {
             tableBody.appendChild(row);
         });
     };
-});
+}
+document.addEventListener('turbo:load', initModuleIndexCharts);
 </script>
 
 <!-- Inclusion de jsPDF pour l'export PDF -->

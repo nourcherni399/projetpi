@@ -1,7 +1,14 @@
 # config/services.yaml
-# Ce fichier configure les services et paramètres pour toute l'application
+# This file configures services and parameters for the entire application
 
 parameters:
+    # Secret pour l'API de rappels d'événements (cron)
+    reminder_secret: '%env(default:kernel.secret:REMINDER_SECRET)%'
+    # Gateways Email-to-SMS par code pays (JSON)
+    reminder_sms_gateways: '%env(default::REMINDER_SMS_GATEWAYS)%'
+    reminder_from_email: 'amarahedil8@gmail.com'
+    reminder_from_name: 'AutiCare'
+    
     # Paramètres par défaut
     mailer_from_email_default: 'noreply@auticare.fr'
     openai_chat_model_default: 'gpt-4o'
@@ -23,6 +30,7 @@ parameters:
     uploads_users_directory: '%kernel.project_dir%/public/uploads/users'
     uploads_commentaires_directory: '%kernel.project_dir%/public/uploads/commentaires'
     uploads_thematiques_directory: '%kernel.project_dir%/public/uploads/thematiques'
+    uploads_evenements_directory: '%kernel.project_dir%/public/uploads/evenements'
 
 services:
     # Configuration par défaut pour tous les services
@@ -38,10 +46,7 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
-    # Repositories avec autowiring explicite
-    App\Repository\NotificationRepository:
-        arguments:
-            $entityClass: App\Entity\Notification
+    
 
     # Subscriber OAuth
     App\EventSubscriber\OAuthRedirectUriContextSubscriber:
@@ -111,7 +116,22 @@ services:
         arguments:
             $groqApiKey: '%env(CHAT_API_KEY)%'
 
-    # Nouveaux services du second fichier
+    App\Service\ReminderSmsSender:
+        arguments:
+            $gatewaysJson: '%reminder_sms_gateways%'
+            $fromEmail: '%reminder_from_email%'
+            $fromName: '%reminder_from_name%'
+
+    App\Service\HuggingFaceService:
+        arguments:
+            $apiKey: '%env(default::HUGGINGFACE_API_KEY)%'
+            $projectDir: '%kernel.project_dir%'
+
+    App\Service\GoogleCustomSearchService:
+        arguments:
+            $apiKey: '%env(default::GOOGLE_CSE_API_KEY)%'
+            $searchEngineId: '%env(default::GOOGLE_CSE_CX)%'
+
     App\Service\LibreTranslateService:
         arguments:
             $cache: '@cache.app'
@@ -153,6 +173,7 @@ services:
     App\Service\ProfanityFilterService:
         arguments:
             $badWordsFile: '%kernel.project_dir%/config/bad_words.txt'
+
     # Controllers avec arguments spécifiques
     App\Controller\OrderController:
         arguments:
@@ -161,6 +182,10 @@ services:
     App\Controller\Admin\DemandeProduitController:
         arguments:
             $uploadsDirectory: '%uploads_directory%'
+
+    App\Controller\Admin\IdeesEvenementController:
+        arguments:
+            $cache: '@cache.app'
 
     App\Controller\ProductController:
         arguments:

@@ -765,7 +765,7 @@
     </div>
 </article>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+function initModulePage() {
 
     /* ====== Ouvrir le panneau commentaires si on revient après ajout ====== */
     var urlParams = new URLSearchParams(window.location.search);
@@ -1376,45 +1376,58 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    /* ====== Vérification profanité en temps réel ====== */
+    /* ====== Vérification profanité en temps réel - délégation pour formulaires dynamiques ====== */
     (function initProfanityCheck() {
+        if (window._profanityCheckListenersAdded) return;
+        window._profanityCheckListenersAdded = true;
         var debounceTimers = {};
-        document.querySelectorAll('.comment-form-profanity-check').forEach(function (form) {
-            var ta = form.querySelector('textarea');
-            if (!ta) return;
+        function runCheck(ta) {
+            var form = ta.closest('.comment-form-profanity-check');
+            if (!form) return;
             var articleId = form.getAttribute('data-article-id');
             var checkUrl = form.getAttribute('data-check-profanity-url');
-            if (!articleId || !checkUrl) return;
             var warningEl = document.getElementById('profanity-warning-' + articleId);
-            if (!warningEl) return;
+            if (!articleId || !checkUrl || !warningEl) return;
 
-            function checkProfanity() {
-                var text = (ta.value || '').trim();
-                if (text === '') {
-                    warningEl.classList.add('hidden');
-                    return;
-                }
-                fetch(checkUrl, {
-                    method: 'POST',
-                    credentials: 'same-origin',
-                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                    body: JSON.stringify({ text: text })
-                })
-                .then(function (r) { return r.ok ? r.json() : { hasBadWords: false }; })
-                .then(function (data) {
-                    if (data.hasBadWords) {
-                        warningEl.classList.remove('hidden');
-                    } else {
-                        warningEl.classList.add('hidden');
-                    }
-                })
-                .catch(function () { warningEl.classList.add('hidden'); });
+            var text = (ta.value || '').trim();
+            if (text === '') {
+                warningEl.classList.add('hidden');
+                return;
             }
-
-            ta.addEventListener('input', function () {
-                clearTimeout(debounceTimers[articleId]);
-                debounceTimers[articleId] = setTimeout(checkProfanity, 400);
-            });
+            fetch(checkUrl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: JSON.stringify({ text: text })
+            })
+            .then(function (r) { return r.ok ? r.json() : { hasBadWords: false }; })
+            .then(function (data) {
+                if (data.hasBadWords) {
+                    warningEl.classList.remove('hidden');
+                    warningEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else {
+                    warningEl.classList.add('hidden');
+                }
+            })
+            .catch(function () { warningEl.classList.add('hidden'); });
+        }
+        function debouncedCheck(ta) {
+            var form = ta.closest('.comment-form-profanity-check');
+            if (!form) return;
+            var articleId = form.getAttribute('data-article-id');
+            if (!articleId) return;
+            clearTimeout(debounceTimers[articleId]);
+            debounceTimers[articleId] = setTimeout(function() { runCheck(ta); }, 250);
+        }
+        document.addEventListener('input', function(e) {
+            var ta = e.target.tagName === 'TEXTAREA' ? e.target : null;
+            if (!ta || !ta.closest('.comment-form-profanity-check')) return;
+            debouncedCheck(ta);
+        });
+        document.addEventListener('paste', function(e) {
+            var ta = e.target.tagName === 'TEXTAREA' ? e.target : null;
+            if (!ta || !ta.closest('.comment-form-profanity-check')) return;
+            debouncedCheck(ta);
         });
     })();
 
@@ -1832,7 +1845,8 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     });
-});
+}
+document.addEventListener('turbo:load', initModulePage);
 </script>
 <style>
 .module-tts-active { background-color: rgb(220 252 231) !important; color: rgb(22 163 74) !important; }

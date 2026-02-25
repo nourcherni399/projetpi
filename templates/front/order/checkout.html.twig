@@ -189,11 +189,7 @@
     });
 
     }
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', runCheckoutCardScript);
-    } else {
-        runCheckoutCardScript();
-    }
+    document.addEventListener('turbo:load', runCheckoutCardScript);
 })();
 </script>
 {% endblock %}

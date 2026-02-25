@@ -12,6 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'notification')]
 class Notification
 {
+    // Types de notification
     public const TYPE_ALERTE_STOCK = 'alerte_stock';
     public const TYPE_DEMANDE_RDV = 'demande_rdv';
     public const TYPE_RDV_ACCEPTE = 'rdv_accepte';
@@ -153,5 +154,82 @@ class Notification
     {
         $this->createdAt = $createdAt;
         return $this;
+    }
+
+    /**
+     * Helper method to get all available notification types
+     * 
+     * @return array<string>
+     */
+    public static function getAvailableTypes(): array
+    {
+        return [
+            self::TYPE_ALERTE_STOCK,
+            self::TYPE_DEMANDE_RDV,
+            self::TYPE_RDV_ACCEPTE,
+            self::TYPE_RDV_REFUSE,
+            self::TYPE_COMMANDE_CONFIRMEE,
+            self::TYPE_COMMANDE_LIVRAISON,
+            self::TYPE_COMMANDE_RECU,
+            self::TYPE_NOUVELLE_COMMANDE,
+            self::TYPE_DEMANDE_PRODUIT_IA,
+        ];
+    }
+
+    /**
+     * Get human-readable label for notification type
+     */
+    public function getTypeLabel(): string
+    {
+        return match($this->type) {
+            self::TYPE_ALERTE_STOCK => 'Alerte stock',
+            self::TYPE_DEMANDE_RDV => 'Demande de rendez-vous',
+            self::TYPE_RDV_ACCEPTE => 'Rendez-vous accepté',
+            self::TYPE_RDV_REFUSE => 'Rendez-vous refusé',
+            self::TYPE_COMMANDE_CONFIRMEE => 'Commande confirmée',
+            self::TYPE_COMMANDE_LIVRAISON => 'Commande en livraison',
+            self::TYPE_COMMANDE_RECU => 'Commande reçue',
+            self::TYPE_NOUVELLE_COMMANDE => 'Nouvelle commande',
+            self::TYPE_DEMANDE_PRODUIT_IA => 'Demande de produit IA',
+            default => 'Notification',
+        };
+    }
+
+    /**
+     * Get icon class for notification type
+     */
+    public function getIconClass(): string
+    {
+        return match($this->type) {
+            self::TYPE_ALERTE_STOCK => 'bi-exclamation-triangle',
+            self::TYPE_DEMANDE_RDV => 'bi-calendar-plus',
+            self::TYPE_RDV_ACCEPTE => 'bi-check-circle',
+            self::TYPE_RDV_REFUSE => 'bi-x-circle',
+            self::TYPE_COMMANDE_CONFIRMEE => 'bi-cart-check',
+            self::TYPE_COMMANDE_LIVRAISON => 'bi-truck',
+            self::TYPE_COMMANDE_RECU => 'bi-box-seam',
+            self::TYPE_NOUVELLE_COMMANDE => 'bi-cart-plus',
+            self::TYPE_DEMANDE_PRODUIT_IA => 'bi-robot',
+            default => 'bi-bell',
+        };
+    }
+
+    /**
+     * Get color class for notification type
+     */
+    public function getColorClass(): string
+    {
+        return match($this->type) {
+            self::TYPE_ALERTE_STOCK => 'warning',
+            self::TYPE_DEMANDE_RDV => 'info',
+            self::TYPE_RDV_ACCEPTE => 'success',
+            self::TYPE_RDV_REFUSE => 'danger',
+            self::TYPE_COMMANDE_CONFIRMEE => 'success',
+            self::TYPE_COMMANDE_LIVRAISON => 'primary',
+            self::TYPE_COMMANDE_RECU => 'success',
+            self::TYPE_NOUVELLE_COMMANDE => 'info',
+            self::TYPE_DEMANDE_PRODUIT_IA => 'secondary',
+            default => 'secondary',
+        };
     }
 }

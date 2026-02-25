@@ -80,6 +80,36 @@ class MessageEvenementRepository extends ServiceEntityRepository
     }
 
     /**
+     * Nombre de messages non lus (envoyés par les users) par événement, pour une liste d'IDs.
+     * Utilisé dans la liste admin pour afficher un indicateur par événement.
+     *
+     * @param int[] $eventIds
+     * @return array<int, int> [ event_id => count ]
+     */
+    public function countUnreadFromUserByEvenementIds(array $eventIds): array
+    {
+        if ($eventIds === []) {
+            return [];
+        }
+        $rows = $this->createQueryBuilder('m')
+            ->select('IDENTITY(m.evenement) AS event_id', 'COUNT(m.id) AS cnt')
+            ->andWhere('m.evenement IN (:ids)')
+            ->andWhere('m.envoyePar = :envoyePar')
+            ->andWhere('m.lu = false')
+            ->setParameter('ids', $eventIds)
+            ->setParameter('envoyePar', MessageEvenement::ENVOYE_PAR_USER)
+            ->groupBy('m.evenement')
+            ->getQuery()
+            ->getResult();
+
+        $out = [];
+        foreach ($rows as $row) {
+            $out[(int) $row['event_id']] = (int) $row['cnt'];
+        }
+        return $out;
+    }
+
+    /**
      * ID d'un événement ayant des messages non lus (user → admin), le plus récent en priorité.
      * Pour rediriger l'admin directement vers la discussion.
      */

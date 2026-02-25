@@ -216,7 +216,7 @@
     </div>
 </div>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+function initEcrire() {
     var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
         document.querySelectorAll('.dictation-btn').forEach(function (btn) {
@@ -562,6 +562,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
         });
     })();
-});
+}
+document.addEventListener('turbo:load', initEcrire);
 </script>
 {% endblock %}

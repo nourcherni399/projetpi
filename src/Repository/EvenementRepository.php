@@ -128,10 +128,12 @@ class EvenementRepository extends ServiceEntityRepository
     }
 
     /**
-     * Filtre pour le front : date (from/to), lieu (contient), thématique (id).
+     * Filtre pour le front : date (from/to), lieu (contient), thématique (id), recherche globale (titre, description, lieu, thème).
+     *
+     * @param string|null $rechercheGlobale Mot(s)-clé(s) : recherche dans titre, description, lieu et nom de thématique (LIKE sur chaque mot).
      * @return Evenement[]
      */
-    public function findFilteredForFront(?\DateTimeInterface $dateFrom, ?\DateTimeInterface $dateTo, ?string $lieu, ?int $thematiqueId): array
+    public function findFilteredForFront(?\DateTimeInterface $dateFrom, ?\DateTimeInterface $dateTo, ?string $lieu, ?int $thematiqueId, ?string $rechercheGlobale = null): array
     {
         $qb = $this->createQueryBuilder('e')
             ->leftJoin('e.thematique', 't')
@@ -161,6 +163,64 @@ class EvenementRepository extends ServiceEntityRepository
             $qb->andWhere('e.thematique = :tid')->setParameter('tid', $thematiqueId);
         }
 
+        if ($rechercheGlobale !== null && trim($rechercheGlobale) !== '') {
+            $words = array_filter(preg_split('/\s+/u', trim($rechercheGlobale), -1, PREG_SPLIT_NO_EMPTY));
+            if ($words !== []) {
+                $orParts = [];
+                foreach ($words as $i => $word) {
+                    $pattern = '%' . addcslashes($word, '%_') . '%';
+                    $param = 'glob' . $i;
+                    $orParts[] = $qb->expr()->orX(
+                        $qb->expr()->like('e.title', ':' . $param),
+                        $qb->expr()->like('e.description', ':' . $param),
+                        $qb->expr()->like('e.lieu', ':' . $param),
+                        $qb->expr()->like('t.nomThematique', ':' . $param)
+                    );
+                    $qb->setParameter($param, $pattern);
+                }
+                $qb->andWhere($qb->expr()->andX(...$orParts));
+            }
+        }
+
         return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * Événements dont le début (date + heure) est dans les prochaines 24 h (pour rappels).
+     *
+     * @return Evenement[]
+     */
+    public function findUpcomingForReminder(\DateTimeInterface $from, \DateTimeInterface $to): array
+    {
+        $today = (new \DateTimeImmutable())->setTime(0, 0, 0);
+        $dayAfterTomorrow = $today->modify('+2 days');
+        $qb = $this->createQueryBuilder('e')
+            ->andWhere('e.dateEvent >= :today')
+            ->andWhere('e.dateEvent < :dayAfter')
+            ->setParameter('today', $today)
+            ->setParameter('dayAfter', $dayAfterTomorrow)
+            ->orderBy('e.dateEvent', 'ASC')
+            ->addOrderBy('e.heureDebut', 'ASC');
+        $events = $qb->getQuery()->getResult();
+        $out = [];
+        foreach ($events as $e) {
+            $date = $e->getDateEvent();
+            $heure = $e->getHeureDebut();
+            if ($date === null || $heure === null) {
+                continue;
+            }
+            $start = \DateTimeImmutable::createFromFormat(
+                'Y-m-d H:i:s',
+                $date->format('Y-m-d') . ' ' . $heure->format('H:i:s'),
+                new \DateTimeZone(date_default_timezone_get() ?: 'UTC')
+            );
+            if ($start === false) {
+                continue;
+            }
+            if ($start >= $from && $start < $to) {
+                $out[] = $e;
+            }
+        }
+        return $out;
     }
 }

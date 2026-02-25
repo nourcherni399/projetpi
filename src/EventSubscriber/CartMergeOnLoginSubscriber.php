@@ -51,3 +51,4 @@ final class CartMergeOnLoginSubscriber implements EventSubscriberInterface
         $this->entityManager->flush();
     }
 }
+

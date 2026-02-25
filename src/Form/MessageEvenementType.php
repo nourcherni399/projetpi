@@ -38,3 +38,4 @@ final class MessageEvenementType extends AbstractType
         ]);
     }
 }
+

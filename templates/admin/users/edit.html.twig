@@ -3,90 +3,116 @@
 {% block title %}Modifier {{ user.nom }} {{ user.prenom }} - AutiCare Admin{% endblock %}
 
 {% block admin_content %}
+<style>
+    .admin-user-form input[type="text"],
+    .admin-user-form input[type="email"],
+    .admin-user-form input[type="tel"],
+    .admin-user-form input[type="password"],
+    .admin-user-form input[type="number"],
+    .admin-user-form select,
+    .admin-user-form textarea {
+        width: 100%; padding: 0.625rem 1rem; border-radius: 0.75rem;
+        border: 1px solid #e2e8f0; background: rgba(248,250,252,0.5);
+        transition: all 0.2s;
+    }
+    .admin-user-form input:focus,
+    .admin-user-form select:focus,
+    .admin-user-form textarea:focus {
+        outline: none; box-shadow: 0 0 0 2px #A7C7E7; border-color: #A7C7E7; background: #fff;
+    }
+</style>
 <div class="max-w-2xl">
-    <div class="mb-6 flex items-center gap-4">
-        <a href="{{ path('admin_user_show', { id: user.id }) }}" class="inline-flex items-center gap-2 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded-lg">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-            Retour à la fiche
-        </a>
-    </div>
-    <h1 class="text-2xl font-semibold text-[#4B5563] mb-6">Modifier l'utilisateur</h1>
+    <a href="{{ path('admin_user_show', { id: user.id }) }}" class="inline-flex items-center gap-2 text-slate-600 hover:text-[#A7C7E7] font-medium mb-6 transition-colors">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+        Retour à la fiche
+    </a>
 
     {% for message in app.flashes('error') %}
-        <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-800">{{ message }}</div>
+        <div class="mb-4 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-800 text-sm font-medium">{{ message }}</div>
     {% endfor %}
     {% if form.vars.errors|length > 0 %}
-        <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-800">
+        <div class="mb-4 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-800 text-sm font-medium">
             {{ form_errors(form) }}
         </div>
     {% endif %}
 
-    <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8">
-        {{ form_start(form, {
-            method: 'POST',
-            action: path('admin_user_edit', { id: user.id }),
-            attr: { class: 'space-y-6', novalidate: 'novalidate' },
-            label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }
-        }) }}
-        <div class="grid grid-cols-1 gap-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {{ form_row(form.nom) }}
-                {{ form_row(form.prenom) }}
-            </div>
-            {{ form_row(form.email) }}
-            {{ form_row(form.telephone) }}
-            <div>
-                {{ form_label(form.image, null, {'label_attr': {'class': 'block text-[#4B5563] font-medium mb-1'}}) }}
-                {% if user.image %}
-                    <p class="text-sm text-[#6B7280] mb-2">Photo actuelle :</p>
-                    <img src="{{ asset(user.image) }}" alt="Photo actuelle" class="w-20 h-20 rounded-xl object-cover border border-[#E5E0D8] mb-3">
-                {% endif %}
-                {{ form_widget(form.image) }}
-                {{ form_errors(form.image) }}
-            </div>
-            {{ form_row(form.plainPassword.first) }}
-            {{ form_row(form.plainPassword.second) }}
-            <div class="flex items-center gap-2">
-                {{ form_widget(form.isActive) }}
-                {{ form_label(form.isActive) }}
-                {{ form_errors(form.isActive) }}
-            </div>
-            {{ form_row(form.role) }}
+    <div class="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200/80 overflow-hidden">
+        <div class="bg-gradient-to-r from-[#A7C7E7] via-[#B8D4ED] to-[#96B7DF] px-6 py-5">
+            <h1 class="text-2xl font-bold text-white tracking-tight">Modifier l'utilisateur</h1>
+            <p class="text-white/90 text-sm mt-1">{{ user.nom }} {{ user.prenom }}</p>
+        </div>
 
-            <div id="role-fields-medcin" class="role-fields hidden pt-4 border-t border-[#E5E0D8]" data-role="ROLE_MEDECIN">
-                <h2 class="text-lg font-semibold text-[#4B5563] mb-4">Attributs Médecin</h2>
+        <div class="p-6 md:p-8">
+            {{ form_start(form, {
+                method: 'POST',
+                action: path('admin_user_edit', { id: user.id }),
+                attr: { class: 'admin-user-form space-y-6', novalidate: 'novalidate' },
+                label_attr: { class: 'block text-slate-700 font-medium mb-2 text-sm' }
+            }) }}
+            <div class="grid grid-cols-1 gap-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {{ form_row(form.specialite) }}
-                    {{ form_row(form.nomCabinet) }}
+                    {{ form_row(form.nom, { row_attr: { class: 'space-y-1' } }) }}
+                    {{ form_row(form.prenom, { row_attr: { class: 'space-y-1' } }) }}
                 </div>
-                {{ form_row(form.adresseCabinet) }}
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {{ form_row(form.telephoneCabinet) }}
-                    {{ form_row(form.tarifConsultation) }}
+                {{ form_row(form.email, { row_attr: { class: 'space-y-1' } }) }}
+                {{ form_row(form.telephone, { row_attr: { class: 'space-y-1' } }) }}
+                <div class="space-y-1">
+                    {{ form_label(form.image) }}
+                    {% if user.image %}
+                        <p class="text-sm text-slate-500 mb-2">Photo actuelle :</p>
+                        <img src="{{ asset(user.image) }}" alt="Photo actuelle" class="w-20 h-20 rounded-xl object-cover border-2 border-slate-200 shadow-sm mb-3">
+                    {% endif %}
+                    <div class="px-4 py-3 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/30 hover:border-[#A7C7E7]/50 hover:bg-[#A7C7E7]/5 transition-colors">
+                        {{ form_widget(form.image, { attr: { class: 'text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[#A7C7E7] file:text-white file:font-medium hover:file:bg-[#96B7DF]' } }) }}
+                    </div>
+                    {{ form_errors(form.image) }}
                 </div>
-            </div>
-            <div id="role-fields-parent" class="role-fields hidden pt-4 border-t border-[#E5E0D8]" data-role="ROLE_PARENT">
-                <h2 class="text-lg font-semibold text-[#4B5563] mb-4">Attributs Parent</h2>
-                {{ form_row(form.relationAvecPatient) }}
-            </div>
-            <div id="role-fields-patient" class="role-fields hidden pt-4 border-t border-[#E5E0D8]" data-role="ROLE_PATIENT">
-                <h2 class="text-lg font-semibold text-[#4B5563] mb-4">Attributs Patient</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {{ form_row(form.dateNaissance) }}
-                    {{ form_row(form.sexe) }}
+                {{ form_row(form.plainPassword.first, { row_attr: { class: 'space-y-1' } }) }}
+                {{ form_row(form.plainPassword.second, { row_attr: { class: 'space-y-1' } }) }}
+                <div class="flex items-center gap-3 p-4 rounded-xl bg-emerald-50/80 border border-emerald-200/60">
+                    {{ form_widget(form.isActive, { attr: { class: 'w-5 h-5 rounded border-slate-300 text-[#A7C7E7] focus:ring-[#A7C7E7]' } }) }}
+                    {{ form_label(form.isActive) }}
+                    {{ form_errors(form.isActive) }}
                 </div>
-                {{ form_row(form.adresse) }}
+                {{ form_row(form.role, { row_attr: { class: 'space-y-1' } }) }}
+
+                <div id="role-fields-medcin" class="role-fields hidden pt-6 border-t border-slate-200 rounded-xl bg-slate-50/30 p-4" data-role="ROLE_MEDECIN">
+                    <h2 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2"><span class="w-8 h-8 rounded-lg bg-teal-100 text-teal-600 flex items-center justify-center text-sm">🏥</span> Attributs Médecin</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {{ form_row(form.specialite) }}
+                            {{ form_row(form.nomCabinet) }}
+                        </div>
+                        {{ form_row(form.adresseCabinet) }}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {{ form_row(form.telephoneCabinet) }}
+                            {{ form_row(form.tarifConsultation) }}
+                        </div>
+                    </div>
+                    <div id="role-fields-parent" class="role-fields hidden pt-6 border-t border-slate-200 rounded-xl bg-amber-50/30 p-4" data-role="ROLE_PARENT">
+                        <h2 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2"><span class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center text-sm">👨‍👩‍👧</span> Attributs Parent</h2>
+                        {{ form_row(form.relationAvecPatient) }}
+                    </div>
+                    <div id="role-fields-patient" class="role-fields hidden pt-6 border-t border-slate-200 rounded-xl bg-violet-50/30 p-4" data-role="ROLE_PATIENT">
+                        <h2 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2"><span class="w-8 h-8 rounded-lg bg-violet-100 text-violet-600 flex items-center justify-center text-sm">👤</span> Attributs Patient</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {{ form_row(form.dateNaissance) }}
+                            {{ form_row(form.sexe) }}
+                        </div>
+                        {{ form_row(form.adresse) }}
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-3 pt-6 border-t border-slate-200">
+                    <button type="submit" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#A7C7E7] to-[#96B7DF] text-white font-semibold shadow-lg shadow-[#A7C7E7]/30 hover:shadow-xl hover:from-[#96B7DF] hover:to-[#A7C7E7] transition-all duration-200">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        Enregistrer
+                    </button>
+                    <a href="{{ path('admin_user_show', { id: user.id }) }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-slate-200 text-slate-600 font-medium hover:bg-slate-50 hover:border-slate-300 transition-colors">
+                        Annuler
+                    </a>
+                </div>
+                {{ form_end(form) }}
             </div>
         </div>
-        <div class="flex flex-wrap gap-3 pt-4">
-            <button type="submit" class="px-5 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
-                Enregistrer
-            </button>
-            <a href="{{ path('admin_user_show', { id: user.id }) }}" class="px-5 py-2.5 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB]">
-                Annuler
-            </a>
-        </div>
-        {{ form_end(form) }}
     </div>
 </div>
 

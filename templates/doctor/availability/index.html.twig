@@ -227,7 +227,7 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+function initAvailabilityIndex() {
     const btnNouvelleDispo = document.getElementById('btn-nouvelle-dispo');
     const btnCancelDispo = document.getElementById('btn-cancel-dispo');
     const formNouvelleDispo = document.getElementById('form-nouvelle-dispo');
@@ -261,6 +261,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 400);
         });
     }
-});
+}
+document.addEventListener('turbo:load', initAvailabilityIndex);
 </script>
 {% endblock %}

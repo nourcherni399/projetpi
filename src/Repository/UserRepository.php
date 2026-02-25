@@ -22,10 +22,23 @@ class UserRepository extends ServiceEntityRepository
     /**
      * @return User[]
      */
-    public function findAllOrdered(string $order = 'asc'): array
+    public function findAllOrdered(string $order = 'asc', ?string $search = null): array
     {
         $dir = strtolower($order) === 'desc' ? 'DESC' : 'ASC';
-        return $this->createQueryBuilder('u')
+        $qb = $this->createQueryBuilder('u');
+
+        if ($search !== null && trim($search) !== '') {
+            $term = '%' . trim($search) . '%';
+            $qb->andWhere(
+                $qb->expr()->orX(
+                    $qb->expr()->like('u.nom', ':search'),
+                    $qb->expr()->like('u.prenom', ':search'),
+                    $qb->expr()->like('u.email', ':search')
+                )
+            )->setParameter('search', $term);
+        }
+
+        return $qb
             ->orderBy('u.nom', $dir)
             ->addOrderBy('u.prenom', $dir)
             ->getQuery()

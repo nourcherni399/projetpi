@@ -115,9 +115,10 @@
     </div>
 </div>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+function initModuleEdit() {
     const uploadRadio = document.querySelector('input[name="image_source"][value="upload"]');
     const pexelsRadio = document.querySelector('input[name="image_source"][value="pexels"]');
+    if (!uploadRadio || !pexelsRadio) return;
     const uploadZone = document.getElementById('image-upload-zone');
     const pexelsZone = document.getElementById('pexels-zone');
     const imageInput = document.querySelector('#image-upload-zone input[type="file"]');
@@ -144,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function() {
     uploadRadio.addEventListener('change', switchSource);
     pexelsRadio.addEventListener('change', switchSource);
 
-    pexelsSearchBtn.addEventListener('click', function() {
+    if (pexelsSearchBtn) pexelsSearchBtn.addEventListener('click', function() {
         const query = (pexelsQuery.value || '').trim();
         if (query.length < 2) {
             pexelsResults.innerHTML = '<p class="text-red-600 col-span-full">Champs obligatoire</p>';
@@ -231,6 +232,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
-});
+}
+document.addEventListener('turbo:load', initModuleEdit);
 </script>
 {% endblock %}

@@ -173,7 +173,7 @@
     </div>
 </div>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+function initEditArticle() {
     var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
         document.querySelectorAll('.dictation-btn').forEach(function (btn) {
@@ -464,6 +464,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     });
-});
+}
+document.addEventListener('turbo:load', initEditArticle);
 </script>
 {% endblock %}

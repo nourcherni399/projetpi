@@ -28,8 +28,10 @@ use App\Repository\NotificationRepository;
 use App\Repository\ProduitRepository;
 use App\Repository\RendezVousRepository;
 use App\Repository\ThematiqueRepository;
+use App\Service\MeteoService;
 use App\Service\RecommendationService;
 use App\Service\UserBehaviorTrackerService;
+use App\Service\WelcomeMessageService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -39,6 +41,22 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class HomeController extends AbstractController
 {
+    private const APPOINTMENT_TYPE_LABELS = [
+        'premiere' => 'Première consultation',
+        'bilan' => 'Bilan complet',
+        'suivi' => 'Consultation de suivi',
+        'urgent' => 'Consultation urgente',
+    ];
+    
+    private const APPOINTMENT_MODE_LABELS = [
+        'cabinet' => 'Au cabinet',
+    ];
+
+    private const JOUR_TO_NUMBER = [
+        'lundi' => 1, 'mardi' => 2, 'mercredi' => 3, 'jeudi' => 4,
+        'vendredi' => 5, 'samedi' => 6, 'dimanche' => 7,
+    ];
+
     public function __construct(
         private readonly ProduitRepository $produitRepository,
         private readonly AvisProduitRepository $avisProduitRepository,
@@ -297,7 +315,7 @@ final class HomeController extends AbstractController
     }
 
     #[Route('/evenements/{id}', name: 'user_event_show', requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function eventShow(int $id): Response
+    public function eventShow(int $id, Request $request, MeteoService $meteoService, WelcomeMessageService $welcomeMessageService): Response
     {
         $evenement = $this->evenementRepository->find($id);
         if ($evenement === null) {
@@ -325,12 +343,27 @@ final class HomeController extends AbstractController
             }
         }
 
+        $meteo = $meteoService->getWeatherForEvent($evenement);
+        $welcomeMessage = null;
+        $clientIp = $request->getClientIp();
+        if ($clientIp !== null) {
+            $country = $welcomeMessageService->getCountryFromIp($clientIp);
+            if ($country !== null) {
+                $welcomeMessage = $welcomeMessageService->getWelcomeMessage($country);
+            }
+        }
+        if ($welcomeMessage === null) {
+            $welcomeMessage = $welcomeMessageService->getWelcomeMessage('');
+        }
+
         return $this->render('front/events/show.html.twig', [
             'evenement' => $evenement,
             'userInscrit' => $userInscrit,
             'inscription' => $inscription,
             'messages' => $messages,
             'messageForm' => $messageForm,
+            'meteo' => $meteo,
+            'welcome_message' => $welcomeMessage,
         ]);
     }
 
@@ -471,6 +504,70 @@ final class HomeController extends AbstractController
         return $this->redirectToRoute('user_event_show', ['id' => $id]);
     }
 
+    #[Route('/evenements/{id}/message/{messageId}/supprimer', name: 'user_event_message_delete', requirements: ['id' => '\d+', 'messageId' => '\d+'], methods: ['POST'])]
+    public function eventMessageDelete(int $id, int $messageId, Request $request): Response
+    {
+        $user = $this->getUser();
+        if ($user === null) {
+            $this->addFlash('error', 'Connectez-vous pour gérer vos messages.');
+            return $this->redirectToRoute('app_login', ['_target_path' => $this->generateUrl('user_event_show', ['id' => $id])]);
+        }
+        $evenement = $this->evenementRepository->find($id);
+        if ($evenement === null) {
+            throw $this->createNotFoundException('Événement introuvable.');
+        }
+        $message = $this->messageEvenementRepository->find($messageId);
+        if ($message === null || $message->getEvenement()->getId() !== $evenement->getId() || $message->getUser()->getId() !== $user->getId() || $message->getEnvoyePar() !== MessageEvenement::ENVOYE_PAR_USER) {
+            $this->addFlash('error', 'Message introuvable ou vous ne pouvez pas le supprimer.');
+            return $this->redirectToRoute('user_event_show', ['id' => $id]);
+        }
+        if (!$this->isCsrfTokenValid('user_message_delete_' . $messageId, (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton de sécurité invalide.');
+            return $this->redirectToRoute('user_event_show', ['id' => $id]);
+        }
+        $this->entityManager->remove($message);
+        $this->entityManager->flush();
+        $this->addFlash('success', 'Le message a été supprimé.');
+        return $this->redirectToRoute('user_event_show', ['id' => $id]);
+    }
+
+    #[Route('/evenements/{id}/message/{messageId}/modifier', name: 'user_event_message_edit', requirements: ['id' => '\d+', 'messageId' => '\d+'], methods: ['GET', 'POST'])]
+    public function eventMessageEdit(int $id, int $messageId, Request $request): Response
+    {
+        $user = $this->getUser();
+        if ($user === null) {
+            $this->addFlash('error', 'Connectez-vous pour gérer vos messages.');
+            return $this->redirectToRoute('app_login', ['_target_path' => $this->generateUrl('user_event_show', ['id' => $id])]);
+        }
+        $evenement = $this->evenementRepository->find($id);
+        if ($evenement === null) {
+            throw $this->createNotFoundException('Événement introuvable.');
+        }
+        $message = $this->messageEvenementRepository->find($messageId);
+        if ($message === null || $message->getEvenement()->getId() !== $evenement->getId() || $message->getUser()->getId() !== $user->getId() || $message->getEnvoyePar() !== MessageEvenement::ENVOYE_PAR_USER) {
+            $this->addFlash('error', 'Message introuvable ou vous ne pouvez pas le modifier.');
+            return $this->redirectToRoute('user_event_show', ['id' => $id]);
+        }
+        $form = $this->createForm(MessageEvenementType::class, $message);
+        $form->handleRequest($request);
+        if ($form->isSubmitted()) {
+            if (!$this->isCsrfTokenValid('user_message_edit_' . $messageId, (string) $request->request->get('_token'))) {
+                $this->addFlash('error', 'Jeton de sécurité invalide.');
+                return $this->redirectToRoute('user_event_show', ['id' => $id]);
+            }
+            if ($form->isValid()) {
+                $this->entityManager->flush();
+                $this->addFlash('success', 'Le message a été modifié.');
+                return $this->redirectToRoute('user_event_show', ['id' => $id]);
+            }
+        }
+        return $this->render('front/events/message_edit.html.twig', [
+            'evenement' => $evenement,
+            'message' => $message,
+            'form' => $form,
+        ]);
+    }
+
     #[Route('/rendez-vous', name: 'user_appointments', methods: ['GET'])]
     public function appointments(): Response
     {
@@ -485,21 +582,6 @@ final class HomeController extends AbstractController
             'specialites' => $specialites,
         ]);
     }
-
-    private const APPOINTMENT_TYPE_LABELS = [
-        'premiere' => 'Première consultation',
-        'bilan' => 'Bilan complet',
-        'suivi' => 'Consultation de suivi',
-        'urgent' => 'Consultation urgente',
-    ];
-    private const APPOINTMENT_MODE_LABELS = [
-        'cabinet' => 'Au cabinet',
-    ];
-
-    private const JOUR_TO_NUMBER = [
-        'lundi' => 1, 'mardi' => 2, 'mercredi' => 3, 'jeudi' => 4,
-        'vendredi' => 5, 'samedi' => 6, 'dimanche' => 7,
-    ];
 
     #[Route('/rendez-vous/prendre/{id}', name: 'user_appointment_book', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function appointmentBook(int $id, Request $request): Response
@@ -587,6 +669,9 @@ final class HomeController extends AbstractController
             }
         }
 
+        $requireLogin = !$this->getUser();
+        $returnUri = $request->getPathInfo() . ($request->getQueryString() ? '?' . $request->getQueryString() : '');
+
         return $this->render('front/appointments/book.html.twig', [
             'doctor' => $doctor,
             'step' => $step,
@@ -595,6 +680,8 @@ final class HomeController extends AbstractController
             'form_rdv' => $formRdv,
             'form_errors' => $formErrors,
             'motif_error' => $motifError,
+            'require_login' => $requireLogin,
+            'return_uri' => $returnUri,
         ]);
     }
 

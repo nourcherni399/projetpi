@@ -109,27 +109,25 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const modeSelect = document.querySelector('[name="commande_modePayment"]');
+function initOrderCheckout() {
+    const modeInputs = document.querySelectorAll('input[name*="modePayment"]');
     const cardPaymentDiv = document.getElementById('card-payment');
-    
-    if (modeSelect) {
-        function toggleCardPayment() {
-            const value = modeSelect.value;
-            if (value === 'a_la_livraison') {
-                cardPaymentDiv.classList.add('hidden');
-                // Vider les champs de carte
-                document.querySelector('[name="card_number"]').value = '';
-                document.querySelector('[name="card_expiry"]').value = '';
-                document.querySelector('[name="card_cvc"]').value = '';
-            } else {
-                cardPaymentDiv.classList.remove('hidden');
-            }
+    if (!modeInputs.length || !cardPaymentDiv) return;
+    function toggleCardPayment() {
+        const checked = document.querySelector('input[name*="modePayment"]:checked');
+        const value = checked ? checked.value : '';
+        if (value === 'a_la_livraison') {
+            cardPaymentDiv.classList.add('hidden');
+            const cn = document.querySelector('[name="card_number"]'); if (cn) cn.value = '';
+            const ce = document.querySelector('[name="card_expiry"]'); if (ce) ce.value = '';
+            const cc = document.querySelector('[name="card_cvc"]'); if (cc) cc.value = '';
+        } else {
+            cardPaymentDiv.classList.remove('hidden');
         }
-        
-        modeSelect.addEventListener('change', toggleCardPayment);
-        toggleCardPayment(); // Appel initial
     }
-});
+    modeInputs.forEach(function(inp) { inp.addEventListener('change', toggleCardPayment); });
+    toggleCardPayment();
+}
+document.addEventListener('turbo:load', initOrderCheckout);
 </script>
 {% endblock %}

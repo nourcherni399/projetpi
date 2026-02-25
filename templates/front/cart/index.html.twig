@@ -109,7 +109,7 @@
     </div>
 </div>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+function initCartForms() {
     document.querySelectorAll('.cart-update-form').forEach(function(form) {
         form.addEventListener('submit', function(e) {
             var input = form.querySelector('.cart-qty-input');
@@ -147,7 +147,8 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     });
-});
+}
+document.addEventListener('turbo:load', initCartForms);
 </script>
 
 {% else %}

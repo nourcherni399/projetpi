@@ -148,14 +148,9 @@
         toggleFields();
     }
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initRoleFields);
-    } else {
-        initRoleFields();
-    }
-    setTimeout(initRoleFields, 100);
+    document.addEventListener('turbo:load', initRoleFields);
 
-    (function initPasswordHints() {
+    function initPasswordHints() {
         const passwordInput = document.getElementById('inscription_password_first');
         const lenEl = document.getElementById('reg-pwd-rule-len');
         const upperEl = document.getElementById('reg-pwd-rule-upper');
@@ -176,7 +171,8 @@
 
         passwordInput.addEventListener('input', validate);
         validate();
-    })();
+    }
+    document.addEventListener('turbo:load', initPasswordHints);
     </script>
 {% endblock %}
 {% endblock %}

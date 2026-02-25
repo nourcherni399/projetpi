@@ -14,22 +14,36 @@
 
     <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8">
         {{ form_start(form, {
-            attr: { class: 'space-y-6', novalidate: 'novalidate' },
+            attr: { class: 'space-y-6', novalidate: 'novalidate', 'data-turbo': 'false' },
             label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }
         }) }}
-        {% if form.vars.submitted and not form.vars.valid %}
-        <div class="mb-4 p-4 rounded-lg bg-red-50 border border-red-200 text-red-800 text-sm">
-            Veuillez corriger les erreurs dans le formulaire ci-dessous.
-        </div>
-        {% endif %}
         <div class="grid grid-cols-1 gap-6">
             {{ form_row(form.nomThematique) }}
             {{ form_row(form.codeThematique) }}
             {{ form_row(form.description) }}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {{ form_row(form.couleur) }}
+                <div>
+                    {{ form_row(form.couleur) }}
+                    <p class="text-sm text-[#6B7280] mt-1 mb-2">Couleurs suggérées :</p>
+                    <div class="flex flex-wrap gap-2 items-center">
+                        {% for hex in ['#845EC2', '#D65DB1', '#FF6F91', '#FF9671', '#FFC75F', '#F4A6A6', '#E57373', '#98D4BB', '#C8E6C9'] %}
+                        <button type="button" class="w-10 h-10 rounded-full border-2 border-white shadow-md hover:scale-110 focus:outline focus:ring-2 focus:ring-[#A7C7E7] transition-transform" style="background-color: {{ hex }};" title="{{ hex }}" data-color="{{ hex }}" aria-label="Choisir {{ hex }}"></button>
+                        {% endfor %}
+                    </div>
+                </div>
                 {{ form_row(form.sousTitre) }}
             </div>
+            <script>
+            (function() {
+                var id = '{{ form.couleur.vars.id|e('js') }}';
+                document.querySelectorAll('[data-color]').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        var input = document.getElementById(id);
+                        if (input) input.value = this.getAttribute('data-color');
+                    });
+                });
+            })();
+            </script>
             {% if thematique.image %}
             <div class="rounded-lg border border-[#E5E0D8] p-4 bg-[#F9FAFB]">
                 <p class="text-sm font-medium text-[#4B5563] mb-2">Image actuelle</p>

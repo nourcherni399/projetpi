@@ -138,10 +138,6 @@
         });
     }
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initDictionary);
-    } else {
-        initDictionary();
-    }
+    document.addEventListener('turbo:load', initDictionary);
 })();
 </script>

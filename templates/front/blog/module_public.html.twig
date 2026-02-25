@@ -171,7 +171,7 @@
     </div>
 </article>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+function initModulePublicTTS() {
     function initModuleTTS() {
         document.querySelectorAll('.module-tts-btn').forEach(function (btn) {
             if (btn._ttsInit) return;
@@ -204,7 +204,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     initModuleTTS();
-});
+}
+document.addEventListener('turbo:load', initModulePublicTTS);
 </script>
 <style>
 .module-tts-active { background-color: rgb(220 252 231) !important; color: rgb(22 163 74) !important; }
