@@ -26,7 +26,7 @@ final class MessageEvenementType extends AbstractType
                 new NotBlank(message: 'Le message ne peut pas être vide.'),
                 new Length(['max' => 5000, 'maxMessage' => 'Le message ne peut pas dépasser {{ limit }} caractères.']),
             ],
-            'attr' => $attr + ['placeholder' => 'Écrivez votre question ou message…'],
+            'attr' => $attr + ['placeholder' => 'Écrivez votre question…'],
         ]);
     }
 

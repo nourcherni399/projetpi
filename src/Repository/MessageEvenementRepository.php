@@ -21,7 +21,7 @@ class MessageEvenementRepository extends ServiceEntityRepository
     }
 
     /**
-     * Messages d'une conversation (user + event), triés par date.
+     * Messages d'une conversation (user + event), tri├®s par date.
      *
      * @return list<MessageEvenement>
      */
@@ -38,7 +38,7 @@ class MessageEvenementRepository extends ServiceEntityRepository
     }
 
     /**
-     * Liste des user_id ayant au moins un message pour cet événement (pour l'admin).
+     * Liste des user_id ayant au moins un message pour cet ├®v├®nement (pour l'admin).
      *
      * @return list<array{user_id: int, last_at: \DateTimeInterface}>
      */
@@ -64,7 +64,7 @@ class MessageEvenementRepository extends ServiceEntityRepository
     }
 
     /**
-     * Nombre de messages non lus envoyés par les users (pour l'admin, sur un événement ou tous).
+     * Nombre de messages non lus envoy├®s par les users (pour l'admin, sur un ├®v├®nement ou tous).
      */
     public function countUnreadFromUserByEvenement(?Evenement $evenement = null): int
     {
@@ -80,8 +80,8 @@ class MessageEvenementRepository extends ServiceEntityRepository
     }
 
     /**
-     * Nombre de messages non lus (envoyés par les users) par événement, pour une liste d'IDs.
-     * Utilisé dans la liste admin pour afficher un indicateur par événement.
+     * Nombre de messages non lus (envoy├®s par les users) par ├®v├®nement, pour une liste d'IDs.
+     * Utilis├® dans la liste admin pour afficher un indicateur par ├®v├®nement.
      *
      * @param int[] $eventIds
      * @return array<int, int> [ event_id => count ]
@@ -110,7 +110,7 @@ class MessageEvenementRepository extends ServiceEntityRepository
     }
 
     /**
-     * ID d'un événement ayant des messages non lus (user → admin), le plus récent en priorité.
+     * ID d'un ├®v├®nement ayant des messages non lus (user ÔåÆ admin), le plus r├®cent en priorit├®.
      * Pour rediriger l'admin directement vers la discussion.
      */
     public function findFirstEventIdWithUnreadFromUser(): ?int
@@ -130,7 +130,7 @@ class MessageEvenementRepository extends ServiceEntityRepository
     }
 
     /**
-     * Marquer comme lus les messages envoyés par l'user dans cette conversation.
+     * Marquer comme lus les messages envoy├®s par l'user dans cette conversation.
      */
     public function markAsReadByEvenementAndUser(Evenement $evenement, User $user): void
     {
@@ -149,7 +149,7 @@ class MessageEvenementRepository extends ServiceEntityRepository
     }
 
     /**
-     * Événements pour lesquels l'utilisateur a au moins un message non lu de l'admin (pour les notifs).
+     * ├ëv├®nements pour lesquels l'utilisateur a au moins un message non lu de l'admin (pour les notifs).
      *
      * @return list<array{eventId: int, eventTitle: string}>
      */
@@ -178,7 +178,7 @@ class MessageEvenementRepository extends ServiceEntityRepository
     }
 
     /**
-     * Nombre de messages non lus envoyés par l'admin pour un user sur un événement (côté user).
+     * Nombre de messages non lus envoy├®s par l'admin pour un user sur un ├®v├®nement (c├┤t├® user).
      */
     public function countUnreadFromAdminForUserAndEvenement(User $user, Evenement $evenement): int
     {
@@ -196,7 +196,7 @@ class MessageEvenementRepository extends ServiceEntityRepository
     }
 
     /**
-     * Marquer comme lus les messages admin pour cette conversation (côté user).
+     * Marquer comme lus les messages admin pour cette conversation (c├┤t├® user).
      */
     public function markAdminMessagesAsReadByEvenementAndUser(Evenement $evenement, User $user): void
     {

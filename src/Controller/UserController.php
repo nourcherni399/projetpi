@@ -15,8 +15,4 @@ final class UserController extends AbstractController
     {
         return $this->redirectToRoute('home');
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 454cf3534cd44ab862139630471999260fa62858

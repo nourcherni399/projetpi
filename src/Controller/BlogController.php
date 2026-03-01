@@ -221,6 +221,7 @@ final class BlogController extends AbstractController
                 $form = $this->createForm(CommentaireType::class, $commentaire, [
                     'action' => $this->generateUrl('commentaire_ajouter_module', ['moduleId' => $blog->getId()]),
                     'method' => 'POST',
+                    'csrf_token_id' => 'commentaire_blog_' . $blog->getId(),
                 ]);
                 $commentaireForms[$blog->getId()] = $form->createView();
             }
@@ -370,12 +371,7 @@ final class BlogController extends AbstractController
 
         if (!$groqService->isConfigured()) {
             return $this->json([
-<<<<<<< HEAD
-                'summary' => 'Clé API non configurée. Ajoutez CHAT_API_KEY dans .env',
-=======
-                'summary' => 'Clé API non configurée. Ajoutez GROQ_API_KEY dans .env.local',
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
-                'success' => false,
+                'summary' => 'Clé API non configurée. Ajoutez CHAT_API_KEY dans .env',                'success' => false,
             ]);
         }
 
@@ -608,7 +604,9 @@ final class BlogController extends AbstractController
         }
 
         $commentaire = new Commentaire();
-        $commentaireForm = $this->createForm(CommentaireType::class, $commentaire);
+        $commentaireForm = $this->createForm(CommentaireType::class, $commentaire, [
+            'csrf_token_id' => 'commentaire_blog_' . $blog->getId(),
+        ]);
 
         $reactedCommentTypes = [];
         $user = $this->getUser();
@@ -738,8 +736,4 @@ final class BlogController extends AbstractController
             return false;
         }
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 454cf3534cd44ab862139630471999260fa62858

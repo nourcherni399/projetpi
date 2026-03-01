@@ -55,7 +55,7 @@
     </div>
 </div>
 <script>
-function initProduitNew() {
+document.addEventListener('DOMContentLoaded', function() {
     const btn = document.getElementById('suggest-description-btn');
     const nomInput = document.getElementById('produit_nom');
     const descInput = document.getElementById('produit_description');
@@ -75,7 +75,6 @@ function initProduitNew() {
             else alert(d.error || 'Erreur lors de la suggestion');
         } catch (e) { alert('Erreur réseau'); } finally { btn.disabled = false; loading.classList.add('hidden'); }
     });
-}
-document.addEventListener('turbo:load', initProduitNew);
+});
 </script>
 {% endblock %}

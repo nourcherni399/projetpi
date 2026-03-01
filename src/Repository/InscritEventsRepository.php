@@ -21,7 +21,7 @@ class InscritEventsRepository extends ServiceEntityRepository
     }
 
     /**
-     * Inscriptions en attente de validation (admin), triées par date.
+     * Inscriptions en attente de validation (admin), tri├®es par date.
      *
      * @return InscritEvents[]
      */
@@ -36,7 +36,7 @@ class InscritEventsRepository extends ServiceEntityRepository
     }
 
     /**
-     * Inscriptions acceptées, refusées ou en attente pour les bandeaux utilisateur.
+     * Inscriptions accept├®es, refus├®es ou en attente pour les bandeaux utilisateur.
      *
      * @return InscritEvents[]
      */
@@ -78,7 +78,7 @@ class InscritEventsRepository extends ServiceEntityRepository
     }
 
     /**
-     * Inscrits à qui envoyer un rappel (acceptés ou en attente, toujours inscrits).
+     * Inscrits ├á qui envoyer un rappel (accept├®s ou en attente, toujours inscrits).
      *
      * @return InscritEvents[]
      */

@@ -223,7 +223,7 @@ final class IdeesEvenementController extends AbstractController
         $fragment = $returnToEvents ? 'recherche-avancee' : 'resultats-recherche-mondiale';
 
         if (!$this->huggingFace->hasApiKey()) {
-            $this->addFlash('warning', 'L’IA n’est pas configurée. Ajoutez HUGGINGFACE_API_KEY dans .env pour générer des idées.');
+            $this->addFlash('warning', 'L\'IA n\'est pas configurée. Ajoutez HUGGINGFACE_API_KEY dans .env pour générer des idées.');
             return $this->redirectToRoute($redirectRoute, ['_fragment' => $fragment]);
         }
 
@@ -279,13 +279,13 @@ final class IdeesEvenementController extends AbstractController
             if ($returnToEvents) {
                 $this->addFlash('success_idees', $count);
             } else {
-                $this->addFlash('success', $count . ' idée(s) générée(s) par l’IA. Vous pouvez les consulter dans Idées ou en créer un brouillon d’événement.');
+                $this->addFlash('success', $count . ' idée(s) générée(s) par l\'IA. Vous pouvez les consulter dans Idées ou en créer un brouillon d\'événement.');
             }
         } else {
             $err = $this->huggingFace->getLastApiError();
             $this->addFlash('warning', $err !== null
                 ? 'Aucune idée générée. ' . ($err['message'] ?? 'Erreur IA.')
-                : 'Aucune idée générée. Réessayez avec d’autres mots-clés.');
+                : 'Aucune idée générée. Réessayez avec d\'autres mots-clés.');
         }
 
         return $this->redirectToRoute($redirectRoute, ['_fragment' => $fragment]);
@@ -303,11 +303,11 @@ final class IdeesEvenementController extends AbstractController
             return $this->redirectToRoute('admin_idees_evenement_index', ['_fragment' => 'resultats-recherche-mondiale']);
         }
 
-        // Toujours rediriger vers la page Idées après « Générer », pour afficher le résultat ou l’erreur au bon endroit
+        // Toujours rediriger vers la page Idées après « Générer », pour afficher le résultat ou l'erreur au bon endroit
         $redirectToIdees = fn (string $fragment = 'resultats-recherche-mondiale') => $this->redirectToRoute('admin_idees_evenement_index', ['_fragment' => $fragment]);
 
         if (!$this->huggingFace->hasApiKey()) {
-            $this->addFlash('warning', 'L’IA n’est pas configurée. Ajoutez HUGGINGFACE_API_KEY dans .env.');
+            $this->addFlash('warning', 'L\'IA n\'est pas configurée. Ajoutez HUGGINGFACE_API_KEY dans .env.');
             return $redirectToIdees();
         }
 
@@ -343,7 +343,7 @@ final class IdeesEvenementController extends AbstractController
             $out = $this->huggingFace->analyzeSearchResultsAndSuggestEvents($searchResultsText, $query !== '' ? $query : 'recherche', $periodKey);
         } else {
             if ($query === '') {
-                $this->addFlash('warning', 'Saisissez des mots-clés pour que l’IA propose des idées (ex. violence, éducation Tunisie).');
+                $this->addFlash('warning', 'Saisissez des mots-clés pour que l\'IA propose des idées (ex. violence, éducation Tunisie).');
                 return $redirectToIdees();
             }
             $out = $this->huggingFace->suggestEventIdeasFromQueryWithAnalysis($query, $periodKey);
@@ -351,8 +351,8 @@ final class IdeesEvenementController extends AbstractController
         if ($out === [] || ($out['propositions'] ?? []) === []) {
             $err = $this->huggingFace->getLastApiError();
             $this->addFlash('warning', $err !== null
-                ? 'L’IA n’a pas pu analyser. ' . ($err['message'] ?? '')
-                : 'Aucune proposition générée. Réessayez avec d’autres résultats.');
+                ? 'L\'IA n\'a pas pu analyser. ' . ($err['message'] ?? '')
+                : 'Aucune proposition générée. Réessayez avec d\'autres résultats.');
             return $redirectToIdees();
         }
 

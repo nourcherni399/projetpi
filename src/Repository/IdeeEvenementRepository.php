@@ -31,7 +31,7 @@ class IdeeEvenementRepository extends ServiceEntityRepository
     }
 
     /**
-     * Retourne les idées par IDs en conservant l'ordre des IDs.
+     * Retourne les id├®es par IDs en conservant l'ordre des IDs.
      *
      * @param int[] $ids
      * @return IdeeEvenement[]

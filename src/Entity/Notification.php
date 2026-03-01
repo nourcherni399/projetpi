@@ -17,6 +17,8 @@ class Notification
     public const TYPE_DEMANDE_RDV = 'demande_rdv';
     public const TYPE_RDV_ACCEPTE = 'rdv_accepte';
     public const TYPE_RDV_REFUSE = 'rdv_refuse';
+    public const TYPE_RDV_ANNULE_PATIENT = 'rdv_annule_patient';
+    public const TYPE_RDV_REPORTE_PATIENT = 'rdv_reporte_patient';
     public const TYPE_COMMANDE_CONFIRMEE = 'commande_confirmée';
     public const TYPE_COMMANDE_LIVRAISON = 'commande_livraison';
     public const TYPE_COMMANDE_RECU = 'commande_recu';
@@ -168,6 +170,8 @@ class Notification
             self::TYPE_DEMANDE_RDV,
             self::TYPE_RDV_ACCEPTE,
             self::TYPE_RDV_REFUSE,
+            self::TYPE_RDV_ANNULE_PATIENT,
+            self::TYPE_RDV_REPORTE_PATIENT,
             self::TYPE_COMMANDE_CONFIRMEE,
             self::TYPE_COMMANDE_LIVRAISON,
             self::TYPE_COMMANDE_RECU,
@@ -186,6 +190,8 @@ class Notification
             self::TYPE_DEMANDE_RDV => 'Demande de rendez-vous',
             self::TYPE_RDV_ACCEPTE => 'Rendez-vous accepté',
             self::TYPE_RDV_REFUSE => 'Rendez-vous refusé',
+            self::TYPE_RDV_ANNULE_PATIENT => 'RDV annulé par le patient',
+            self::TYPE_RDV_REPORTE_PATIENT => 'RDV reporté par le patient',
             self::TYPE_COMMANDE_CONFIRMEE => 'Commande confirmée',
             self::TYPE_COMMANDE_LIVRAISON => 'Commande en livraison',
             self::TYPE_COMMANDE_RECU => 'Commande reçue',
@@ -205,6 +211,8 @@ class Notification
             self::TYPE_DEMANDE_RDV => 'bi-calendar-plus',
             self::TYPE_RDV_ACCEPTE => 'bi-check-circle',
             self::TYPE_RDV_REFUSE => 'bi-x-circle',
+            self::TYPE_RDV_ANNULE_PATIENT => 'bi-calendar-x',
+            self::TYPE_RDV_REPORTE_PATIENT => 'bi-calendar-event',
             self::TYPE_COMMANDE_CONFIRMEE => 'bi-cart-check',
             self::TYPE_COMMANDE_LIVRAISON => 'bi-truck',
             self::TYPE_COMMANDE_RECU => 'bi-box-seam',
@@ -224,6 +232,8 @@ class Notification
             self::TYPE_DEMANDE_RDV => 'info',
             self::TYPE_RDV_ACCEPTE => 'success',
             self::TYPE_RDV_REFUSE => 'danger',
+            self::TYPE_RDV_ANNULE_PATIENT => 'danger',
+            self::TYPE_RDV_REPORTE_PATIENT => 'info',
             self::TYPE_COMMANDE_CONFIRMEE => 'success',
             self::TYPE_COMMANDE_LIVRAISON => 'primary',
             self::TYPE_COMMANDE_RECU => 'success',

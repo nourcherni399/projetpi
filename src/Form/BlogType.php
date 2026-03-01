@@ -13,6 +13,8 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -112,6 +114,22 @@ final class BlogType extends AbstractType
                 'data' => true,
                 'attr' => ['class' => 'rounded border-[#E5E0D8] text-[#A7C7E7] focus:ring-[#A7C7E7]'],
             ]);
+
+        // Avant validation : fixe les champs non mappés/obligatoires (image, dateCreation, dateModif)
+        $builder->addEventListener(FormEvents::SUBMIT, function (FormEvent $event): void {
+            $blog = $event->getData();
+            if (!$blog instanceof Blog) {
+                return;
+            }
+            if ($blog->getImage() === null) {
+                $blog->setImage('');
+            }
+            if ($blog->getDateCreation() === null) {
+                $now = new \DateTime();
+                $blog->setDateCreation($now);
+                $blog->setDateModif($now);
+            }
+        });
     }
 
     public function configureOptions(OptionsResolver $resolver): void

@@ -19,10 +19,7 @@ use App\Service\ProductAutoCreateService;
 use App\Service\ProductPriceSearchService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-<<<<<<< HEAD
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-=======
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -100,7 +97,6 @@ final class ProductController extends AbstractController
         if ($minPriceVal !== null || $maxPriceVal !== null || $searchTerm !== '') {
             $minFilter = $minPriceVal ?? 0;
             $maxFilter = $maxPriceVal ?? PHP_INT_MAX;
-<<<<<<< HEAD
             $searchTermTrimmed = trim((string) $search);
 
             $produits = array_filter($produits, function ($produit) use ($minFilter, $maxFilter, $searchTerm, $searchTermTrimmed) {
@@ -111,22 +107,6 @@ final class ProductController extends AbstractController
                 }
 
                 return $priceMatch && $this->fuzzySearchMatch($searchTermTrimmed, $produit);
-=======
-
-            $produits = array_filter($produits, function ($produit) use ($minFilter, $maxFilter, $searchTerm) {
-                $priceMatch = $produit->getPrix() !== null && (float) $produit->getPrix() >= $minFilter && (float) $produit->getPrix() <= $maxFilter;
-
-                if ($searchTerm === '') {
-                    return $priceMatch;
-                }
-
-                $nom = $produit->getNom() ?? '';
-                $nomMatch = strpos(strtolower($nom), $searchTerm) !== false;
-                $descriptionMatch = $produit->getDescription() !== null && strpos(strtolower($produit->getDescription()), $searchTerm) !== false;
-                $categorieMatch = $produit->getCategorie() !== null && strpos(strtolower($produit->getCategorie()->label()), $searchTerm) !== false;
-
-                return $priceMatch && ($nomMatch || $descriptionMatch || $categorieMatch);
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
             });
         }
 
@@ -140,45 +120,6 @@ final class ProductController extends AbstractController
             'sortBy' => $sortBy,
             'sortOrder' => $sortOrder,
             'cart_add' => true,
-<<<<<<< HEAD
-=======
-        ]);
-    }
-
-    #[Route('/suggest', name: 'user_products_suggest', methods: ['POST'])]
-    public function suggest(Request $request): JsonResponse
-    {
-        $message = $request->request->get('message') ?? $request->getContent();
-        if (is_string($message) && trim($message) === '' && $request->getContent() !== '') {
-            $data = json_decode($request->getContent(), true);
-            $message = $data['message'] ?? '';
-        }
-        $message = is_string($message) ? trim($message) : '';
-
-        $produits = $this->produitRepository->suggestByNeed($message);
-
-        if (count($produits) === 0) {
-            $reply = 'Aucun produit ne correspond exactement à votre demande. Essayez d\'autres mots (ex. sensoriel, relaxation, jeu, communication) ou parcourez les catégories.';
-        } else {
-            $reply = 'Voici ' . count($produits) . ' produit(s) qui peuvent correspondre à votre besoin :';
-        }
-
-        $productsData = array_map(function ($p) {
-            return [
-                'id' => $p->getId(),
-                'nom' => $p->getNom(),
-                'description' => $p->getDescription() ? mb_substr($p->getDescription(), 0, 120) . '…' : null,
-                'prix' => $p->getPrix(),
-                'categorie' => $p->getCategorie() ? $p->getCategorie()->label() : null,
-                'image' => $p->getImage(),
-                'disponibilite' => $p->isDisponibilite(),
-            ];
-        }, $produits);
-
-        return new JsonResponse([
-            'reply' => $reply,
-            'products' => $productsData,
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
         ]);
     }
 

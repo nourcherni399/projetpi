@@ -3,265 +3,158 @@
 {% block title %}Disponibilités - AutiCare Médecin{% endblock %}
 
 {% block doctor_content %}
-<div class="space-y-6">
-    <!-- En-tête moderne -->
-    <div class="bg-gradient-to-r from-[#A7C7E7] to-[#B8D4ED] rounded-2xl p-8 text-white shadow-xl">
-        <div class="flex items-center justify-between">
+<h1 class="text-2xl font-bold text-[#374151] tracking-tight mb-6">Gestion des disponibilités</h1>
+<div id="form-nouvelle-dispo" class="mb-6 bg-white rounded-2xl border border-[#E5E7EB] shadow-soft overflow-hidden {% if not form.vars.submitted or form.vars.valid %}hidden{% endif %}" aria-hidden="{{ (form.vars.submitted and not form.vars.valid) ? 'false' : 'true' }}">
+    <div class="p-5 border-b border-[#E5E7EB] bg-slate-50/50">
+        <h2 class="text-lg font-semibold text-[#374151]">Nouvelle disponibilité</h2>
+        <p class="text-sm text-[#6B7280] mt-1">Date, heure de début et fin, durée (minutes), disponible.</p>
+    </div>
+    <div class="p-6">
+        {{ form_start(form, { attr: { class: 'space-y-4' }, label_attr: { class: 'block text-[#4B5563] font-medium mb-1' } }) }}
+        {{ form_errors(form) }}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-                <h1 class="text-3xl font-bold mb-2">Gestion des disponibilités</h1>
-                <p class="text-blue-100">Configurez vos créneaux horaires pour optimiser votre planning</p>
+                {{ form_label(form.date) }}
+                {{ form_widget(form.date) }}
+                {{ form_errors(form.date) }}
             </div>
-            <div class="text-center">
-                <div class="text-4xl font-bold">{{ disponibilites|length }}</div>
-                <div class="text-sm text-blue-100">Créneaux configurés</div>
+            <div>
+                {{ form_label(form.heureDebut) }}
+                <div class="mt-1 relative flex items-center rounded-lg border border-[#E5E0D8] bg-white px-4 py-2.5 text-[#4B5563] focus-within:ring-2 focus-within:ring-[#A7C7E7] focus-within:border-transparent">
+                    {{ form_widget(form.heureDebut, { attr: { class: 'border-0 bg-transparent p-0 flex-1 min-w-0 pr-10 focus:ring-0 focus:outline-none w-full text-[#4B5563]' } }) }}
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-[#4B5563] pointer-events-none" id="heure-debut-ampm" aria-hidden="true">--</span>
+                </div>
+                {{ form_errors(form.heureDebut) }}
+            </div>
+            <div>
+                {{ form_label(form.heureFin) }}
+                <div class="mt-1 relative flex items-center rounded-lg border border-[#E5E0D8] bg-white px-4 py-2.5 text-[#4B5563] focus-within:ring-2 focus-within:ring-[#A7C7E7] focus-within:border-transparent">
+                    {{ form_widget(form.heureFin, { attr: { class: 'border-0 bg-transparent p-0 flex-1 min-w-0 pr-10 focus:ring-0 focus:outline-none w-full text-[#4B5563]' } }) }}
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-[#4B5563] pointer-events-none" id="heure-fin-ampm" aria-hidden="true">--</span>
+                </div>
+                {{ form_errors(form.heureFin) }}
+            </div>
+            <div>
+                {{ form_label(form.duree) }}
+                {{ form_widget(form.duree) }}
+                {{ form_errors(form.duree) }}
+            </div>
+            <div class="flex items-center gap-2 md:col-span-2">
+                {{ form_widget(form.estDispo) }}
+                {{ form_label(form.estDispo) }}
+                {{ form_errors(form.estDispo) }}
             </div>
         </div>
+        <div class="mt-5 flex gap-3">
+            <button type="submit" class="px-5 py-2.5 rounded-xl bg-[#5B9BD5] text-white font-medium hover:bg-[#4A8BC4] focus:outline focus:ring-2 focus:ring-[#5B9BD5]/50 shadow-soft transition-colors">Enregistrer la disponibilité</button>
+            <button type="button" id="btn-annuler-dispo" class="px-5 py-2.5 rounded-xl border border-[#E5E7EB] text-[#374151] font-medium hover:bg-slate-100 focus:outline focus:ring-2 focus:ring-[#5B9BD5]/40 transition-colors">Annuler</button>
+        </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+
+<div class="bg-white rounded-2xl border border-[#E5E7EB] shadow-soft overflow-hidden">
+    <div class="p-4 border-b border-[#E5E7EB] flex flex-wrap gap-4 justify-between items-center bg-white">
+        <form method="get" action="{{ path('doctor_availability') }}" class="flex items-center gap-2 max-w-xs w-full">
+            {% if calendar_first is defined %}
+            <input type="hidden" name="month" value="{{ calendar_first|date('Y-m') }}">
+            {% endif %}
+            <input
+                type="search"
+                name="q"
+                value="{{ search ?? app.request.query.get('q') }}"
+                placeholder="Rechercher un créneau…"
+                class="px-4 py-2.5 rounded-xl border border-[#E5E7EB] bg-slate-50 text-[#374151] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#5B9BD5]/40 focus:border-[#5B9BD5] w-full transition-shadow"
+            >
+        </form>
+        <button type="button" id="btn-nouvelle-dispo" class="px-5 py-2.5 rounded-xl bg-[#5B9BD5] text-white font-medium hover:bg-[#4A8BC4] focus:outline focus:ring-2 focus:ring-[#5B9BD5]/50 shadow-soft transition-colors">Nouvelle disponibilité</button>
     </div>
 
-    <!-- Messages flash -->
-    {% for message in app.flashes('success') %}
-        <div class="bg-green-50 border border-green-200 text-green-800 px-6 py-4 rounded-xl flex items-center gap-3 shadow-lg">
-            <svg class="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            {{ message }}
-        </div>
-    {% endfor %}
-    {% for message in app.flashes('error') %}
-        <div class="bg-red-50 border border-red-200 text-red-800 px-6 py-4 rounded-xl flex items-center gap-3 shadow-lg">
-            <svg class="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            {{ message }}
-        </div>
-    {% endfor %}
+    {# Navigation du calendrier #}
+    <div class="p-4 border-b border-[#E5E7EB] flex items-center justify-between bg-slate-50/30">
+        <a href="{{ path('doctor_availability', { month: prev_month, q: search|default('') }) }}" class="p-2.5 rounded-xl border border-[#E5E7EB] text-[#374151] hover:bg-slate-100 focus:outline focus:ring-2 focus:ring-[#5B9BD5]/40 transition-colors" aria-label="Mois précédent">←</a>
+        <h2 class="text-lg font-semibold text-[#374151] capitalize">{{ calendar_label|default('') }}</h2>
+        <a href="{{ path('doctor_availability', { month: next_month, q: search|default('') }) }}" class="p-2.5 rounded-xl border border-[#E5E7EB] text-[#374151] hover:bg-slate-100 focus:outline focus:ring-2 focus:ring-[#5B9BD5]/40 transition-colors" aria-label="Mois suivant">→</a>
+    </div>
 
-    <!-- Section recherche et ajout -->
-    <div class="bg-white rounded-2xl border border-[#E5E0D8] shadow-lg overflow-hidden">
-        <div class="p-6 border-b border-[#E5E0D8] bg-gray-50">
-            <form id="availability-filter-form" method="get" action="{{ path('doctor_availability') }}" class="flex flex-col sm:flex-row gap-4 items-center justify-between">
-                <div class="relative flex-1 max-w-md w-full">
-                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    <input id="availability-search" type="search" name="q" value="{{ search|default('') }}"
-                           placeholder="Rechercher un créneau..."
-                           class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:border-[#A7C7E7] focus:ring-2 focus:ring-[#A7C7E7]/20 transition-all">
-                </div>
-                <div class="flex items-center gap-3">
-                    {% set currentOrder = order|default('asc') %}
-                    <a href="{{ path('doctor_availability', { q: search|default(''), order: currentOrder == 'asc' ? 'desc' : 'asc' }) }}"
-                       class="inline-flex items-center gap-2 px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-700 text-sm font-medium hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#A7C7E7]">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8m-6 5h6m-4 5h4" />
-                        </svg>
-                        Trier par jour
-                        <span class="text-xs text-gray-500">
-                            {{ currentOrder == 'asc' ? '(A → Z)' : '(Z → A)' }}
-                        </span>
-                    </a>
-                    <button type="button" id="btn-nouvelle-dispo"
-                            class="px-6 py-3 bg-gradient-to-r from-[#A7C7E7] to-[#B8D4ED] text-white rounded-xl hover:shadow-lg transition-all transform hover:scale-105 flex items-center gap-2 font-medium shrink-0">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                        </svg>
-                        Ajouter un créneau
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Formulaire d'ajout -->
-        <div id="form-nouvelle-dispo" class="{% if not form.vars.submitted or form.vars.valid %}hidden{% endif %}" aria-hidden="{{ (form.vars.submitted and not form.vars.valid) ? 'false' : 'true' }}">
-            <div class="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 border-b border-[#E5E0D8]">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-[#A7C7E7]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Nouvelle disponibilité
-                </h3>
-                {{ form_start(form, { attr: { class: 'space-y-4', 'data-turbo': 'false', novalidate: 'novalidate' } }) }}
-                {{ form_errors(form) }}
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="space-y-2">
-                        {{ form_label(form.jour, null, { 'label_attr': { 'class': 'text-sm font-medium text-gray-700' } }) }}
-                        {{ form_widget(form.jour, { 'attr': { 'class': 'w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-[#A7C7E7] focus:ring-2 focus:ring-[#A7C7E7]/20 transition-all' } }) }}
-                        {{ form_errors(form.jour) }}
-                    </div>
-                    <div class="space-y-2">
-                        {{ form_label(form.heureDebut, null, { 'label_attr': { 'class': 'text-sm font-medium text-gray-700' } }) }}
-                        {{ form_widget(form.heureDebut, { 'attr': { 'class': 'w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-[#A7C7E7] focus:ring-2 focus:ring-[#A7C7E7]/20 transition-all' } }) }}
-                        {{ form_errors(form.heureDebut) }}
-                    </div>
-                    <div class="space-y-2">
-                        {{ form_label(form.heureFin, null, { 'label_attr': { 'class': 'text-sm font-medium text-gray-700' } }) }}
-                        {{ form_widget(form.heureFin, { 'attr': { 'class': 'w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-[#A7C7E7] focus:ring-2 focus:ring-[#A7C7E7]/20 transition-all' } }) }}
-                        {{ form_errors(form.heureFin) }}
-                    </div>
-                    <div class="space-y-2">
-                        {{ form_label(form.duree, null, { 'label_attr': { 'class': 'text-sm font-medium text-gray-700' } }) }}
-                        {{ form_widget(form.duree, { 'attr': { 'class': 'w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-[#A7C7E7] focus:ring-2 focus:ring-[#A7C7E7]/20 transition-all' } }) }}
-                        {{ form_errors(form.duree) }}
-                    </div>
-                </div>
-                <div class="flex items-center gap-3 p-4 bg-white rounded-lg">
-                    {{ form_widget(form.estDispo, { 'attr': { 'class': 'w-5 h-5 text-[#A7C7E7] border-gray-300 rounded focus:ring-[#A7C7E7]' } }) }}
-                    {{ form_label(form.estDispo, null, { 'label_attr': { 'class': 'text-gray-700 font-medium' } }) }}
-                    {{ form_errors(form.estDispo) }}
-                </div>
-                <div class="flex gap-3 pt-4">
-                    <button type="submit" class="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:shadow-lg transition-all transform hover:scale-105 flex items-center gap-2 font-medium">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                        Enregistrer
-                    </button>
-                    <button type="button" id="btn-cancel-dispo" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all font-medium">
-                        Annuler
-                    </button>
-                </div>
-                {{ form_end(form) }}
-            </div>
-        </div>
-
-        <!-- Tableau moderne -->
-        <div class="overflow-x-auto">
-            {% if disponibilites|length > 0 %}
-                <table class="w-full">
-                    <thead class="bg-gray-50 border-b border-gray-200">
-                        <tr>
-                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jour</th>
-                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Horaire</th>
-                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Durée</th>
-                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
-                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200">
-                        {% for dispo in disponibilites %}
-                        <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-3 h-3 rounded-full {% if dispo.estDispo %}bg-green-500{% else %}bg-gray-300{% endif %}"></div>
-                                    <span class="font-medium text-gray-900">{{ dispo.jour ? dispo.jour.value|capitalize : '—' }}</span>
+    {# Grille calendrier (lundi = premier jour) #}
+    <div class="p-4 overflow-x-auto">
+        <table class="w-full border-collapse calendar-grid">
+            <thead>
+                <tr>
+                    <th class="p-2 text-center text-xs font-semibold uppercase tracking-wider text-[#6B7280] border-b border-[#E5E7EB] bg-[#F9FAFB]">Lun</th>
+                    <th class="p-2 text-center text-xs font-semibold uppercase tracking-wider text-[#6B7280] border-b border-[#E5E7EB] bg-[#F9FAFB]">Mar</th>
+                    <th class="p-2 text-center text-xs font-semibold uppercase tracking-wider text-[#6B7280] border-b border-[#E5E7EB] bg-[#F9FAFB]">Mer</th>
+                    <th class="p-2 text-center text-xs font-semibold uppercase tracking-wider text-[#6B7280] border-b border-[#E5E7EB] bg-[#F9FAFB]">Jeu</th>
+                    <th class="p-2 text-center text-xs font-semibold uppercase tracking-wider text-[#6B7280] border-b border-[#E5E7EB] bg-[#F9FAFB]">Ven</th>
+                    <th class="p-2 text-center text-xs font-semibold uppercase tracking-wider text-[#6B7280] border-b border-[#E5E7EB] bg-[#F9FAFB]">Sam</th>
+                    <th class="p-2 text-center text-xs font-semibold uppercase tracking-wider text-[#6B7280] border-b border-[#E5E7EB] bg-[#F9FAFB]">Dim</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set today = "now"|date("Y-m-d") %}
+                {% for week in calendar_weeks|default([]) %}
+                <tr>
+                    {% for day in week %}
+                    <td class="align-top border-b border-r border-[#E5E7EB] p-2 min-h-[120px] w-[14.28%]                     {% if day.date|date('Y-m-d') == today %}bg-[#EFF6FF]{% elseif day.is_current_month %}bg-white{% else %}bg-slate-50/50{% endif %}">
+                        <div class="flex items-center justify-center w-7 h-7 rounded-full text-sm font-semibold mb-2 {% if day.date|date('Y-m-d') == today %}bg-[#5B9BD5] text-white{% elseif day.is_current_month %}text-[#374151]{% else %}text-[#9CA3AF]{% endif %}">{{ day.date|date('j') }}</div>
+                        <div class="space-y-2">
+                            {% for dispo in day.dispos %}
+                            <div class="creneau-card group rounded-xl bg-white border border-[#E5E7EB] shadow-soft hover:shadow-soft-md hover:border-[#5B9BD5]/50 transition-all duration-200 overflow-hidden">
+                                <div class="flex items-center gap-2 px-2.5 py-2 border-l-4 border-l-[#5B9BD5] bg-gradient-to-r from-[#F0F9FF] to-white">
+                                    <span class="text-sm font-semibold tabular-nums text-[#374151]">{{ dispo.heureDebut ? dispo.heureDebut|date('H:i') : '—' }} – {{ dispo.heureFin ? dispo.heureFin|date('H:i') : '—' }}</span>
+                                    <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-[#DBEAFE] text-[#1D4ED8]">{{ dispo.duree }} min</span>
                                 </div>
-                            </td>
-                            <td class="px-6 py-4 text-gray-600">
-                                {% if dispo.heureDebut and dispo.heureFin %}
-                                    <div class="flex items-center gap-2">
-                                        <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        {{ dispo.heureDebut|date('H:i') }} - {{ dispo.heureFin|date('H:i') }}
-                                    </div>
-                                {% else %}
-                                    <span class="text-gray-400">—</span>
-                                {% endif %}
-                            </td>
-                            <td class="px-6 py-4 text-gray-600">
-                                <div class="flex items-center gap-2">
-                                    <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    {{ dispo.duree }} min
-                                </div>
-                            </td>
-                            <td class="px-6 py-4">
-                                {% if dispo.estDispo %}
-                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        Actif
-                                    </span>
-                                {% else %}
-                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                                        </svg>
-                                        Inactif
-                                    </span>
-                                {% endif %}
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-2">
-                                    <a href="{{ path('doctor_availability_edit', { id: dispo.id }) }}"
-                                       class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
-                                       title="Modifier">
-                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
-                                        </svg>
+                                <div class="flex items-center justify-center gap-1.5 px-2 pb-2 pt-0.5">
+                                    <a href="{{ path('doctor_availability_edit', { id: dispo.id }) }}" title="Modifier" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#DBEAFE] text-[#5B9BD5] hover:bg-[#BFDBFE] transition-colors" aria-label="Modifier">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
                                     </a>
-                                    <form action="{{ path('doctor_availability_delete', { id: dispo.id }) }}" method="post" class="inline"
-                                          onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce créneau horaire ?');">
+                                    <form action="{{ path('doctor_availability_delete', { id: dispo.id }) }}" method="post" class="inline" onsubmit="return confirm('Supprimer ce créneau ?');">
                                         <input type="hidden" name="_token" value="{{ csrf_token('doctor_availability_delete_' ~ dispo.id) }}">
-                                        <button type="submit"
-                                                class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-red-600 bg-red-50 hover:bg-red-100 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
-                                                title="Supprimer">
-                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                                            </svg>
+                                        <button type="submit" title="Supprimer" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#FEF2F2] text-[#DC2626] hover:bg-[#FEE2E2] transition-colors" aria-label="Supprimer">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
                                         </button>
                                     </form>
                                 </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <div class="text-center py-16">
-                    <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">Aucune disponibilité configurée</h3>
-                    <p class="text-gray-500 mb-6">Commencez par ajouter vos premiers créneaux horaires</p>
-                    <button type="button" onclick="document.getElementById('btn-nouvelle-dispo').click()"
-                            class="px-6 py-3 bg-gradient-to-r from-[#A7C7E7] to-[#B8D4ED] text-white rounded-xl hover:shadow-lg transition-all transform hover:scale-105">
-                        Ajouter votre premier créneau
-                    </button>
-                </div>
-            {% endif %}
-        </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 
 <script>
-function initAvailabilityIndex() {
-    const btnNouvelleDispo = document.getElementById('btn-nouvelle-dispo');
-    const btnCancelDispo = document.getElementById('btn-cancel-dispo');
-    const formNouvelleDispo = document.getElementById('form-nouvelle-dispo');
+var formDispoEl = document.getElementById('form-nouvelle-dispo');
+document.getElementById('btn-nouvelle-dispo').addEventListener('click', function() {
+    formDispoEl.classList.toggle('hidden');
+    formDispoEl.setAttribute('aria-hidden', formDispoEl.classList.contains('hidden'));
+});
+document.getElementById('btn-annuler-dispo').addEventListener('click', function() {
+    formDispoEl.classList.add('hidden');
+    formDispoEl.setAttribute('aria-hidden', 'true');
+});
 
-    if (btnNouvelleDispo && formNouvelleDispo) {
-        btnNouvelleDispo.addEventListener('click', function() {
-            formNouvelleDispo.classList.remove('hidden');
-            formNouvelleDispo.setAttribute('aria-hidden', 'false');
-            formNouvelleDispo.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        });
-    }
-
-    if (btnCancelDispo && formNouvelleDispo) {
-        btnCancelDispo.addEventListener('click', function() {
-            formNouvelleDispo.classList.add('hidden');
-            formNouvelleDispo.setAttribute('aria-hidden', 'true');
-        });
-    }
-
-    // Recherche automatique des créneaux sans appuyer sur Entrée
-    const searchInput = document.getElementById('availability-search');
-    const filterForm = document.getElementById('availability-filter-form');
-    if (searchInput && filterForm) {
-        let debounceTimer = null;
-        searchInput.addEventListener('input', function () {
-            if (debounceTimer !== null) {
-                clearTimeout(debounceTimer);
-            }
-            debounceTimer = setTimeout(function () {
-                filterForm.submit();
-            }, 400);
-        });
-    }
+function updateAmPm(input, spanId) {
+    var span = document.getElementById(spanId);
+    if (!span) return;
+    var val = input ? input.value : '';
+    if (!val) { span.textContent = '--'; return; }
+    var h = parseInt(val.split(':')[0], 10);
+    span.textContent = h >= 12 ? 'PM' : 'AM';
 }
-document.addEventListener('turbo:load', initAvailabilityIndex);
+var timeInputs = formDispoEl.querySelectorAll('input[type="time"]');
+if (timeInputs.length >= 2) {
+    timeInputs[0].addEventListener('input', function() { updateAmPm(timeInputs[0], 'heure-debut-ampm'); });
+    timeInputs[0].addEventListener('change', function() { updateAmPm(timeInputs[0], 'heure-debut-ampm'); });
+    timeInputs[1].addEventListener('input', function() { updateAmPm(timeInputs[1], 'heure-fin-ampm'); });
+    timeInputs[1].addEventListener('change', function() { updateAmPm(timeInputs[1], 'heure-fin-ampm'); });
+    updateAmPm(timeInputs[0], 'heure-debut-ampm');
+    updateAmPm(timeInputs[1], 'heure-fin-ampm');
+}
 </script>
 {% endblock %}

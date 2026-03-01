@@ -162,8 +162,4 @@ final class CommandeController extends AbstractController
 
         return $this->redirectToRoute('admin_commandes_index');
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 454cf3534cd44ab862139630471999260fa62858

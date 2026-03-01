@@ -1,0 +1,81 @@
+﻿{% extends 'layouts/admin.html.twig' %}
+
+{% block title %}Nouveau produit - AutiCare Admin{% endblock %}
+
+{% block admin_content %}
+<div class="max-w-2xl">
+    <div class="mb-6 flex items-center gap-4">
+        <a href="{{ path('admin_produit_index') }}" class="inline-flex items-center gap-2 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded-lg">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            Retour aux produits
+        </a>
+    </div>
+    <h1 class="text-2xl font-semibold text-[#4B5563] mb-6">Nouveau produit</h1>
+
+    <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8">
+        {{ form_start(form, {
+            attr: { class: 'space-y-6', novalidate: 'novalidate', 'data-turbo': 'false' },
+            label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }
+        }) }}
+        <div class="grid grid-cols-1 gap-6">
+            {{ form_row(form.nom) }}
+            <div class="space-y-1">
+                {{ form_label(form.description) }}
+                <div class="flex gap-2 items-center mb-1">
+                    <button type="button" id="suggest-description-btn"
+                            class="px-3 py-1.5 text-sm rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:ring-2 focus:ring-[#A7C7E7] flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        Sugg├®rer une description
+                    </button>
+                    <span id="suggest-description-loading" class="hidden text-sm text-[#6B7280]">G├®n├®rationÔÇª</span>
+                </div>
+                {{ form_widget(form.description) }}
+                {{ form_errors(form.description) }}
+            </div>
+            {{ form_row(form.categorie) }}
+            {{ form_row(form.prix) }}
+            <div class="flex items-center gap-2">
+                {{ form_widget(form.disponibilite) }}
+                {{ form_label(form.disponibilite) }}
+                {{ form_errors(form.disponibilite) }}
+            </div>
+            {{ form_row(form.stock) }}
+            {{ form_row(form.quantite) }}
+            {{ form_row(form.image) }}
+        </div>
+        <div class="flex flex-wrap gap-3 pt-4">
+            <button type="submit" class="px-5 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                Enregistrer le produit
+            </button>
+            <a href="{{ path('admin_produit_index') }}" class="px-5 py-2.5 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                Annuler
+            </a>
+        </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+<script>
+function initProduitNew() {
+    const btn = document.getElementById('suggest-description-btn');
+    const nomInput = document.getElementById('produit_nom');
+    const descInput = document.getElementById('produit_description');
+    const loading = document.getElementById('suggest-description-loading');
+    if (!btn || !nomInput || !descInput) return;
+    btn.addEventListener('click', async function() {
+        const nom = nomInput.value.trim();
+        if (!nom) { alert('Saisissez d\'abord le nom du produit.'); return; }
+        btn.disabled = true;
+        loading.classList.remove('hidden');
+        try {
+            const fd = new FormData();
+            fd.append('nom', nom);
+            const r = await fetch('{{ path("admin_produit_suggerer_description") }}', { method: 'POST', body: fd, headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } });
+            const d = await r.json();
+            if (d.description) descInput.value = d.description;
+            else alert(d.error || 'Erreur lors de la suggestion');
+        } catch (e) { alert('Erreur r├®seau'); } finally { btn.disabled = false; loading.classList.add('hidden'); }
+    });
+}
+document.addEventListener('turbo:load', initProduitNew);
+</script>
+{% endblock %}

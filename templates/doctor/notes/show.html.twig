@@ -24,8 +24,12 @@
             </p>
         </div>
         <div class="p-6">
-            <div class="prose prose-[#4B5563] max-w-none">
-                <p class="text-[#6B7280] whitespace-pre-wrap">{{ note.contenu ?? '—' }}</p>
+            <div class="prose prose-[#4B5563] max-w-none note-contenu-html text-[#4B5563]">
+                {% if note.contenu %}
+                    <div class="note-contenu-body text-[#6B7280]">{{ note.contenu|raw }}</div>
+                {% else %}
+                    <p class="text-[#6B7280]">—</p>
+                {% endif %}
             </div>
             <div class="mt-6 pt-4 border-t border-[#E5E0D8] flex flex-wrap gap-2">
                 <a href="{{ path('doctor_note_export_pdf', { id: note.id }) }}" class="inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 focus:outline focus:ring-2 focus:ring-red-500" title="Télécharger cette note en PDF">
@@ -38,4 +42,14 @@
         </div>
     </div>
 </div>
+<style>
+.note-contenu-html .note-contenu-body,
+.note-contenu-html .note-contenu-body ul,
+.note-contenu-html .note-contenu-body ol { margin: 0.5em 0; }
+.note-contenu-html .note-contenu-body ul { list-style-type: disc; padding-left: 1.5em; }
+.note-contenu-html .note-contenu-body ol { list-style-type: decimal; padding-left: 1.5em; }
+.note-contenu-html .note-contenu-body li { display: list-item; }
+.note-contenu-html .note-contenu-body a { color: #2563eb; text-decoration: underline; }
+.note-contenu-html .note-contenu-body img { max-width: 100%; height: auto; }
+</style>
 {% endblock %}

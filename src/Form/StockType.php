@@ -37,4 +37,3 @@ final class StockType extends AbstractType
         ]);
     }
 }
-

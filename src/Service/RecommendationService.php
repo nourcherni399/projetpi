@@ -13,6 +13,7 @@ use App\Repository\EvenementRepository;
 use App\Repository\InscritEventsRepository;
 use App\Repository\MedcinRepository;
 use App\Repository\ProduitRepository;
+use App\Repository\RendezVousRepository;
 use App\Repository\UserHistoryRepository;
 use App\Repository\UserPreferenceRepository;
 

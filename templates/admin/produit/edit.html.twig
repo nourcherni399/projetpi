@@ -156,7 +156,7 @@
 </div>
 
 <script>
-function initProduitEdit() {
+document.addEventListener('DOMContentLoaded', function() {
     const suggestBtn = document.getElementById('suggest-description-btn');
     const nomInput = document.getElementById('produit_nom');
     const descInput = document.getElementById('produit_description');
@@ -326,7 +326,6 @@ function initProduitEdit() {
             searchBtn.click();
         }
     });
-}
-document.addEventListener('turbo:load', initProduitEdit);
+});
 </script>
 {% endblock %}

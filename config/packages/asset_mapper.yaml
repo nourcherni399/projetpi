@@ -4,6 +4,11 @@ framework:
         paths:
             - assets/
         missing_import_mode: strict
+        # Désactive le polyfill es-module-shims (source des warnings "import map rule was removed")
+        importmap_polyfill: false
+        importmap_script_attributes:
+            id: importmap
+            data-turbo-permanent: ''
 
 when@prod:
     framework:

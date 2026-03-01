@@ -90,13 +90,36 @@
         if (statusEl) statusEl.textContent = text || '';
     }
 
+    var stopSpeakingMsg = { 'fr-FR': 'Arrêter la parole', 'en-US': 'Stop speaking', 'ar-TN': 'إيقاف الكلام', 'ar-SA': 'إيقاف الكلام', 'es-ES': 'Dejar de hablar', 'de-DE': 'Sprechen stoppen', 'it-IT': 'Ferma di parlare' };
+
     function speak(text, langCode) {
         if (!SpeechSynthesis || !text) return;
         var u = new SpeechSynthesisUtterance(text);
         u.lang = (langCode && langCode.length >= 2) ? langCode : 'fr-FR';
         u.rate = 0.95;
+        u.onend = function() { updateBtnForSpeaking(false); };
+        u.onerror = function() { updateBtnForSpeaking(false); };
         SpeechSynthesis.cancel();
         SpeechSynthesis.speak(u);
+        updateBtnForSpeaking(true);
+    }
+
+    function updateBtnForSpeaking(active) {
+        if (!btn || !btnText) return;
+        if (active) {
+            btn.disabled = false;
+            btnText.textContent = stopSpeakingMsg[getRecognitionLang()] || stopSpeakingMsg['fr-FR'];
+            btn.classList.add('vocal-rdv-speaking');
+        } else {
+            btnText.textContent = 'Parler pour prendre RDV';
+            btn.classList.remove('vocal-rdv-speaking');
+        }
+    }
+
+    function stopSpeaking() {
+        if (!SpeechSynthesis) return;
+        SpeechSynthesis.cancel();
+        updateBtnForSpeaking(false);
     }
 
     var isListening = false;
@@ -155,6 +178,10 @@
 
     if (btn) {
         btn.addEventListener('click', function() {
+            if (SpeechSynthesis && (SpeechSynthesis.speaking || SpeechSynthesis.paused)) {
+                stopSpeaking();
+                return;
+            }
             if (isListening) {
                 userRequestedStop = true;
                 recognition.stop();

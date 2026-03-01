@@ -161,7 +161,7 @@
 {% endif %}
 
 <script>
-function initProduitIndex() {
+document.addEventListener('DOMContentLoaded', function() {
     var searchInput = document.querySelector('input[name="search"]');
     var indexUrl = {{ path('admin_produit_index')|json_encode|raw }};
     if (searchInput) {
@@ -169,7 +169,6 @@ function initProduitIndex() {
             if (this.value.trim() === '') window.location.href = indexUrl;
         });
     }
-}
-document.addEventListener('turbo:load', initProduitIndex);
+});
 </script>
 {% endblock %}

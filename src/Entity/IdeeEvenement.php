@@ -32,7 +32,7 @@ class IdeeEvenement
     #[ORM\Column(name: 'mots_cle', length: 255, nullable: true)]
     private ?string $motsCle = null;
 
-    /** Score de pertinence (0-100) fourni par l'IA pour les propositions issues de l'analyse des résultats. */
+    /** Score de pertinence (0-100) fourni par l'IA pour les propositions issues de l'analyse des r├®sultats. */
     #[ORM\Column(nullable: true)]
     private ?int $score = null;
 

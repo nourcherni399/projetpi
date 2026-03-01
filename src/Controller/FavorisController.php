@@ -249,8 +249,4 @@ final class FavorisController extends AbstractController
 
         return $this->redirectToRoute('favoris_index', ['tab' => 'saved']);
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 454cf3534cd44ab862139630471999260fa62858

@@ -9,14 +9,14 @@ use App\Repository\LigneCommandeRepository;
 use App\Repository\OrderItemRepository;
 use App\Repository\ProduitRepository;
 use Phpml\Clustering\KMeans;
-use Phpml\Preprocessing\Normalizer as PhpmlNormalizer;
+use Phpml\Preprocessing\Normalizer;
 
 final class SalesPredictionService
 {
     private const DAYS_RECENT = 90;
     private const DAYS_PREVIOUS = 90;
     private const MOIS_PREVISION = 12;
-    private const NORM_STD = PhpmlNormalizer::NORM_STD;
+    private const NORM_STD = Normalizer::NORM_STD;
 
     public function __construct(
         private readonly ProduitRepository $produitRepository,
@@ -318,7 +318,7 @@ final class SalesPredictionService
         }
 
         $matrix = array_values($samples);
-        $normalizer = new PhpmlNormalizer(self::NORM_STD);
+        $normalizer = new Normalizer(self::NORM_STD);
         $normalizer->fit($matrix);
         $normalizer->transform($matrix);
 

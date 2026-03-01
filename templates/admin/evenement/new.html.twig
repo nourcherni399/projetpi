@@ -32,8 +32,10 @@
                 {{ form_row(form.heureFin) }}
             </div>
             {{ form_row(form.mode) }}
-            {{ form_row(form.lieu) }}
-            <div class="presentiel-location-row" data-visible-mode="presentiel" style="display:none">
+            <div class="lieu-row" data-visible-mode="presentiel,hybride" style="display:none">
+                {{ form_row(form.lieu) }}
+            </div>
+            <div class="presentiel-location-row" data-visible-mode="presentiel,hybride" style="display:none">
                 {{ form_row(form.locationUrl) }}
                 <div class="flex flex-wrap items-end gap-4">
                     <div class="flex-1 min-w-[140px]">{{ form_row(form.latitude) }}</div>
@@ -72,6 +74,7 @@
 (function() {
     var zoomRow = document.querySelector('.zoom-meeting-row');
     var presentielRow = document.querySelector('.presentiel-location-row');
+    var lieuRow = document.querySelector('.lieu-row');
     var modeSelect = document.querySelector('select[name="{{ form.mode.vars.full_name }}"]');
     function toggleZoomRow() {
         var mode = modeSelect ? modeSelect.value : '';
@@ -79,12 +82,22 @@
     }
     function togglePresentielRow() {
         var mode = modeSelect ? modeSelect.value : '';
-        if (presentielRow) presentielRow.style.display = (mode === 'presentiel') ? '' : 'none';
+        if (presentielRow) presentielRow.style.display = (mode === 'presentiel' || mode === 'hybride') ? '' : 'none';
+    }
+    function toggleLieuRow() {
+        var mode = modeSelect ? modeSelect.value : '';
+        if (lieuRow) lieuRow.style.display = (mode === 'presentiel' || mode === 'hybride') ? '' : 'none';
+        var lieuInput = document.querySelector('input[name="{{ form.lieu.vars.full_name }}"]');
+        if (lieuInput) {
+            lieuInput.required = (mode === 'presentiel' || mode === 'hybride');
+            if (mode === 'en_ligne') lieuInput.value = '';
+        }
     }
     if (modeSelect) {
-        modeSelect.addEventListener('change', function() { toggleZoomRow(); togglePresentielRow(); });
+        modeSelect.addEventListener('change', function() { toggleZoomRow(); togglePresentielRow(); toggleLieuRow(); });
         toggleZoomRow();
         togglePresentielRow();
+        toggleLieuRow();
     }
 
     function dateToYmd(val) {
@@ -147,6 +160,7 @@
     var locationUrlInput = document.querySelector('input[name="{{ form.locationUrl.vars.full_name }}"]');
     if (!btn || !lieuInput || !latInput || !lngInput) return;
     var url = '{{ path('admin_evenement_geocode')|e('js') }}';
+    var btnGeocodeOriginalText = btn.textContent;
     btn.addEventListener('click', function() {
         var address = lieuInput.value.trim();
         if (!address) { alert('Renseignez d\'abord le lieu / adresse.'); return; }
@@ -166,7 +180,10 @@
                 }
             })
             .catch(function() { alert('Erreur réseau.'); })
-            .finally(function() { btn.disabled = false; btn.textContent = 'Récupérer les coordonnées (lieu)'; });
+            .finally(function() {
+                btn.textContent = btnGeocodeOriginalText;
+                setTimeout(function() { btn.disabled = false; }, 2000);
+            });
     });
 
     var descInput = document.querySelector('textarea[name="{{ form.description.vars.full_name }}"]');

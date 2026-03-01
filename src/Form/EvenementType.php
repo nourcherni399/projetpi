@@ -64,7 +64,8 @@ final class EvenementType extends AbstractType
             ])
             ->add('lieu', TextType::class, [
                 'label' => 'Lieu / Adresse',
-                'required' => true,
+                'required' => false,
+                'constraints' => [],
                 'attr' => $attr + ['placeholder' => 'Ex. Salle principale'],
             ])
             ->add('locationUrl', TextType::class, [
@@ -75,7 +76,7 @@ final class EvenementType extends AbstractType
             ->add('meetingUrl', TextType::class, [
                 'label' => 'Lien réunion Zoom / visio',
                 'required' => false,
-                'attr' => $attr + ['placeholder' => 'Généré automatiquement ou collez un lien'],
+                'attr' => $attr + ['placeholder' => 'Générer automatiquement ou collez un lien'],
             ])
             ->add('latitude', TextType::class, [
                 'label' => 'Latitude (carte)',

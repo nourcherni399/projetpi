@@ -73,3 +73,5 @@ class Stock
         return $this;
     }
 }
+
+

@@ -69,8 +69,9 @@ class Produit
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?User $user = null;
 
-    #[ORM\ManyToOne(inversedBy: 'produits')]
-    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    #[ORM\ManyToOne(inversedBy: 'produits', targetEntity: Stock::class)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    #[Assert\NotNull(message: 'Le stock est obligatoire.')]
     private ?Stock $stock = null;
 
     #[ORM\Column(type: 'integer', options: ['default' => 1])]

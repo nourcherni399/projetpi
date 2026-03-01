@@ -152,7 +152,7 @@
     {{ form_start(commentaireForm, {
         'action': path('commentaire_ajouter_module', {'moduleId': article.id}),
         'method': 'POST',
-        'attr': {'class': 'comment-form-inline comment-form-profanity-check', 'data-article-id': article.id, 'data-check-profanity-url': path('commentaire_check_profanity')}
+        'attr': {'class': 'comment-form-inline comment-form-profanity-check', 'data-article-id': article.id, 'data-check-profanity-url': path('commentaire_check_profanity'), 'enctype': 'multipart/form-data', 'data-turbo': 'false'}
     }) }}
     <input type="hidden" name="_redirect" value="{{ redirectUrl }}">
     <div class="relative">

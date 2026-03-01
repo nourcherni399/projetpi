@@ -25,7 +25,7 @@ class Ressource
     #[Assert\Choice(choices: ['url', 'video', 'audio'], message: 'Le type de ressource doit etre url, video ou audio.')]
     private ?string $typeRessource = null;
 
-    #[ORM\Column(type: 'text')]
+    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $contenu = null;
 
     #[ORM\Column(type: 'datetime_immutable')]

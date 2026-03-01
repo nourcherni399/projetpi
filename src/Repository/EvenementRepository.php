@@ -128,9 +128,9 @@ class EvenementRepository extends ServiceEntityRepository
     }
 
     /**
-     * Filtre pour le front : date (from/to), lieu (contient), thématique (id), recherche globale (titre, description, lieu, thème).
+     * Filtre pour le front : date (from/to), lieu (contient), th├®matique (id), recherche globale (titre, description, lieu, th├¿me).
      *
-     * @param string|null $rechercheGlobale Mot(s)-clé(s) : recherche dans titre, description, lieu et nom de thématique (LIKE sur chaque mot).
+     * @param string|null $rechercheGlobale Mot(s)-cl├®(s) : recherche dans titre, description, lieu et nom de th├®matique (LIKE sur chaque mot).
      * @return Evenement[]
      */
     public function findFilteredForFront(?\DateTimeInterface $dateFrom, ?\DateTimeInterface $dateTo, ?string $lieu, ?int $thematiqueId, ?string $rechercheGlobale = null): array
@@ -186,7 +186,7 @@ class EvenementRepository extends ServiceEntityRepository
     }
 
     /**
-     * Événements dont le début (date + heure) est dans les prochaines 24 h (pour rappels).
+     * ├ëv├®nements dont le d├®but (date + heure) est dans les prochaines 24 h (pour rappels).
      *
      * @return Evenement[]
      */

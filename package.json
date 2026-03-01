@@ -1,0 +1,11 @@
+{
+  "name": "auticare",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i ./assets/styles/app.css -o ./public/build/app.css --minify",
+    "watch:css": "tailwindcss -i ./assets/styles/app.css -o ./public/build/app.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  }
+}

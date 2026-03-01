@@ -50,6 +50,7 @@ final class MeteoService
 
     public function __construct(
         private readonly HttpClientInterface $httpClient,
+        private readonly ?NominatimGeocodingService $geocodingService = null,
     ) {
     }
 
@@ -61,16 +62,26 @@ final class MeteoService
      */
     public function getWeatherForEvent(Evenement $event): ?array
     {
-        $coords = $event->getCoordinates();
-        if ($coords === null) {
-            return null;
-        }
         $mode = $event->getMode();
         if ($mode !== 'presentiel' && $mode !== 'hybride') {
             return null;
         }
         $dateEvent = $event->getDateEvent();
         if ($dateEvent === null) {
+            return null;
+        }
+
+        $coords = $event->getCoordinates();
+        if ($coords === null && $this->geocodingService !== null) {
+            $lieu = $event->getLieu();
+            if ($lieu !== null && trim($lieu) !== '') {
+                $result = $this->geocodingService->geocode(trim($lieu));
+                if (!isset($result['error']) && isset($result['lat'], $result['lng'])) {
+                    $coords = [(float) $result['lat'], (float) $result['lng']];
+                }
+            }
+        }
+        if ($coords === null) {
             return null;
         }
         $dateStr = $dateEvent->format('Y-m-d');

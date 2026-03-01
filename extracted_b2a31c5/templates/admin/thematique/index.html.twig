@@ -1,0 +1,165 @@
+﻿{% extends 'layouts/admin.html.twig' %}
+
+{% block title %}Th├®matiques - AutiCare Admin{% endblock %}
+
+{% block admin_content %}
+<h1 class="text-2xl font-semibold text-[#4B5563] mb-6">Gestion des th├®matiques</h1>
+{% for message in app.flashes('success') %}
+    <div class="mb-4 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">{{ message }}</div>
+{% endfor %}
+
+<div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden mb-6">
+    <div class="p-4 border-b border-[#E5E0D8]">
+        <form method="get" action="{{ path('admin_thematique_index') }}" class="flex flex-nowrap gap-3 items-center" id="thematique-search-form">
+            <div class="relative flex-1 min-w-0 max-w-sm">
+                <input type="search" id="q-thematique" name="q" value="{{ q|default('') }}" placeholder="Rechercher une th├®matiqueÔÇª" class="w-full px-4 py-2 pr-10 rounded-lg border border-[#E5E0D8] bg-[#F5F1EB] text-[#4B5563] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                <button type="button" id="thematique-clear-search" class="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-[#6B7280] hover:bg-[#E5E0D8] hover:text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7] {% if not q %}hidden{% endif %}" title="Afficher toutes les th├®matiques" aria-label="Effacer la recherche">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <button type="submit" class="shrink-0 px-4 py-2 rounded-lg bg-[#F5F1EB] border border-[#E5E0D8] text-[#4B5563] font-medium hover:bg-[#E5E0D8] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">Rechercher</button>
+            <a href="{{ path('admin_thematique_new') }}" class="inline-flex items-center gap-2 shrink-0 px-4 py-2.5 rounded-xl bg-sky-500 text-white font-medium hover:bg-sky-600 focus:outline focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 no-underline shadow-md hover:shadow-lg transition-all">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+                Nouvel ├®l├®ment
+            </a>
+        </form>
+    </div>
+    <div class="p-6">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for thematique in thematiques %}
+    <a href="{{ path('admin_thematique_show', { id: thematique.id }) }}" class="group block bg-white rounded-xl border border-[#E5E0D8] overflow-hidden hover:shadow-md transition-shadow duration-200 focus:outline focus:ring-2 focus:ring-[#A7C7E7] focus:ring-offset-2 {{ thematique.couleur ? 'border-l-4' : '' }}" {% if thematique.couleur %}style="border-left-color: {{ thematique.couleur }};"{% endif %}>
+        {% if thematique.image %}
+        {% set imgUrl = thematique.image starts with 'http' ? thematique.image : asset(thematique.image) %}
+        <div class="aspect-[21/9] max-h-36 bg-[#E5E0D8] overflow-hidden">
+            <img src="{{ imgUrl }}" alt="{{ thematique.nomThematique }}" class="w-full h-full object-cover" loading="lazy">
+        </div>
+        {% endif %}
+        <div class="p-5 flex flex-col h-full relative">
+            <span class="absolute top-4 right-4 flex items-center justify-center w-8 h-8 rounded-full bg-[#A7C7E7] text-white text-sm font-semibold">{{ thematique.id }}</span>
+            <h2 class="text-lg font-semibold text-[#4B5563] pr-10 mb-1">{{ thematique.nomThematique }}</h2>
+            <p class="text-[#6B7280] text-sm mb-2">Code : {{ thematique.codeThematique }}</p>
+            {% if thematique.sousTitre %}
+            <p class="text-[#6B7280] text-sm mb-2">{{ thematique.sousTitre }}</p>
+            {% elseif thematique.publicCible is defined and thematique.publicCible %}
+            <p class="text-[#6B7280] text-sm mb-2">{{ thematique.publicCible is iterable ? thematique.publicCible.value|default(thematique.publicCible) : thematique.publicCible }}</p>
+            {% endif %}
+            <div class="mt-auto pt-3 flex flex-wrap items-center gap-2">
+                <span class="text-[#A7C7E7] font-medium text-sm">{{ thematique.evenements|length }} ├®v├®nement{{ thematique.evenements|length != 1 ? 's' : '' }}</span>
+                {% if thematique.couleur %}
+                <span class="w-3 h-3 rounded-full shrink-0" style="background-color: {{ thematique.couleur }};" title="{{ thematique.couleur }}"></span>
+                {% endif %}
+                {% if not thematique.actif %}
+                <span class="ml-auto text-xs px-2 py-1 rounded bg-[#E5E0D8] text-[#6B7280]">Masqu├®e</span>
+                {% endif %}
+            </div>
+        </div>
+    </a>
+    {% else %}
+    <div class="col-span-full bg-white rounded-xl border border-[#E5E0D8] px-6 py-12 text-center text-[#6B7280]">
+        Aucune th├®matique.
+    </div>
+    {% endfor %}
+</div>
+    </div>
+</div>
+
+<!-- Donn├®es pour les graphiques (lues par le layout admin au chargement et apr├¿s navigation Turbo) -->
+<script type="application/json" id="thematique-chart-data">
+{{ chartData|default({})|json_encode|raw }}
+</script>
+
+<!-- R├®partition des th├®matiques / ├ëv├®nements par th├®matique -->
+<div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
+        <h3 class="text-base font-semibold text-[#4B5563] mb-4">R├®partition des th├®matiques</h3>
+        <div class="relative h-64 flex items-center justify-center">
+            <canvas id="thematiqueRepartitionChart"></canvas>
+        </div>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
+        <h3 class="text-base font-semibold text-[#4B5563] mb-4">R├®partition des ├®v├®nements par th├®matique</h3>
+        <div class="relative h-64 flex items-center justify-center">
+            <canvas id="eventsByThematiqueChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Statistiques des th├®matiques -->
+<div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
+        <h3 class="text-lg font-semibold text-[#4B5563] mb-4">├ëv├®nements par th├®matique</h3>
+        <div class="space-y-3">
+            {% for row in thematiquesWithCount|default([]) %}
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-[#6B7280] truncate pr-2">{{ row.thematique.nomThematique }}</span>
+                <span class="px-2 py-1 text-xs font-medium rounded-full shrink-0 {{ cycle(['bg-blue-100 text-blue-800', 'bg-green-100 text-green-800', 'bg-amber-100 text-amber-800', 'bg-red-100 text-red-800', 'bg-purple-100 text-purple-800', 'bg-indigo-100 text-indigo-800', 'bg-teal-100 text-teal-800'], loop.index0) }}">{{ row.event_count }}</span>
+            </div>
+            {% else %}
+            <p class="text-sm text-[#9CA3AF]">Aucune donn├®e</p>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
+        <h3 class="text-lg font-semibold text-[#4B5563] mb-4">Th├®matiques par type</h3>
+        <div class="space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-[#6B7280]">Avec ├®v├®nements</span>
+                <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">{{ thematiquesAvecEvenements|default(0) }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-[#6B7280]">Sans ├®v├®nement</span>
+                <span class="px-2 py-1 bg-amber-100 text-amber-800 text-xs font-medium rounded-full">{{ thematiquesSansEvenement|default(0) }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
+        <h3 class="text-lg font-semibold text-[#4B5563] mb-4">Statistiques g├®n├®rales</h3>
+        <div class="grid grid-cols-2 gap-4">
+            <div class="text-center">
+                <div class="text-2xl font-bold text-[#4B5563]">{{ totalThematiques|default(0) }}</div>
+                <div class="text-sm text-[#6B7280]">Total des th├®matiques</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-green-600">{{ thematiquesAvecEvenements|default(0) }}</div>
+                <div class="text-sm text-[#6B7280]">Avec ├®v├®nements</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-violet-600">{{ totalEvenements|default(0) }}</div>
+                <div class="text-sm text-[#6B7280]">Total ├®v├®nements</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    var searchInput = document.getElementById('q-thematique');
+    var form = searchInput ? document.getElementById('thematique-search-form') : null;
+    var clearBtn = document.getElementById('thematique-clear-search');
+
+    if (form && searchInput) {
+        function toggleClearButton() {
+            if (clearBtn) clearBtn.classList.toggle('hidden', !searchInput.value.trim());
+        }
+        toggleClearButton();
+        searchInput.addEventListener('input', toggleClearButton);
+
+        function submitWithoutQuery() {
+            searchInput.value = '';
+            clearBtn && clearBtn.classList.add('hidden');
+            form.submit();
+        }
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function() {
+                submitWithoutQuery();
+            });
+        }
+        searchInput.addEventListener('search', function() {
+            if (!searchInput.value.trim()) form.submit();
+        });
+    }
+    if (window.initThematiqueCharts) window.initThematiqueCharts();
+})();
+</script>
+{% endblock %}

@@ -96,6 +96,26 @@ class NotificationRepository extends ServiceEntityRepository
     }
 
     /**
+     * Notifications RDV annulés ou reportés par le patient (pour le médecin destinataire).
+     *
+     * @return list<Notification>
+     */
+    public function findAnnuleReportePatientByDestinataireOrderByCreatedDesc(User $user): array
+    {
+        return $this->createQueryBuilder('n')
+            ->andWhere('n.destinataire = :user')
+            ->andWhere('n.type IN (:types)')
+            ->setParameter('user', $user)
+            ->setParameter('types', [
+                Notification::TYPE_RDV_ANNULE_PATIENT,
+                Notification::TYPE_RDV_REPORTE_PATIENT,
+            ])
+            ->orderBy('n.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
      * Récupère toutes les notifications d'un destinataire triées par date de création.
      *
      * @return list<Notification>
@@ -105,6 +125,29 @@ class NotificationRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('n')
             ->andWhere('n.destinataire = :user')
             ->setParameter('user', $user)
+            ->orderBy('n.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Notifications pour le médecin (hors commandes : RDV, demandes produit, alerte stock).
+     *
+     * @return list<Notification>
+     */
+    public function findByDestinataireOrderByCreatedDescExcludingCommands(User $user): array
+    {
+        $excludedTypes = [
+            Notification::TYPE_COMMANDE_CONFIRMEE,
+            Notification::TYPE_COMMANDE_LIVRAISON,
+            Notification::TYPE_COMMANDE_RECU,
+            Notification::TYPE_NOUVELLE_COMMANDE,
+        ];
+        return $this->createQueryBuilder('n')
+            ->andWhere('n.destinataire = :user')
+            ->andWhere('n.type NOT IN (:excluded)')
+            ->setParameter('user', $user)
+            ->setParameter('excluded', $excludedTypes)
             ->orderBy('n.createdAt', 'DESC')
             ->getQuery()
             ->getResult();
@@ -121,6 +164,29 @@ class NotificationRepository extends ServiceEntityRepository
             ->andWhere('n.lu = :lu')
             ->setParameter('user', $user)
             ->setParameter('lu', false)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Compte le nombre de notifications non lues pour un destinataire, hors commandes (pour médecin).
+     */
+    public function countUnreadByDestinataireExcludingCommands(User $user): int
+    {
+        $excludedTypes = [
+            Notification::TYPE_COMMANDE_CONFIRMEE,
+            Notification::TYPE_COMMANDE_LIVRAISON,
+            Notification::TYPE_COMMANDE_RECU,
+            Notification::TYPE_NOUVELLE_COMMANDE,
+        ];
+        return (int) $this->createQueryBuilder('n')
+            ->select('COUNT(n.id)')
+            ->andWhere('n.destinataire = :user')
+            ->andWhere('n.lu = :lu')
+            ->andWhere('n.type NOT IN (:excluded)')
+            ->setParameter('user', $user)
+            ->setParameter('lu', false)
+            ->setParameter('excluded', $excludedTypes)
             ->getQuery()
             ->getSingleScalarResult();
     }

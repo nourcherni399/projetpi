@@ -31,7 +31,7 @@
             <tr>
                 <td>{{ note.patient ? (note.patient.nom ~ ' ' ~ note.patient.prenom) : '—' }}</td>
                 <td>{{ note.dateCreation ? note.dateCreation|date('d/m/Y H:i') : '—' }}</td>
-                <td class="contenu">{{ note.contenu|nl2br }}</td>
+                <td class="contenu">{{ note.contenu|striptags }}</td>
             </tr>
             {% else %}
             <tr><td colspan="3">Aucune note.</td></tr>

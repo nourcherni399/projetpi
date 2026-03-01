@@ -2,100 +2,226 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Confirmation de commande #{{ commande.id }} - AutiCare</title>
+    <title>Reçu de commande #{{ commande.id }} - AutiCare</title>
     <style>
-        body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #333; line-height: 1.4; }
-        h1 { font-size: 16px; margin-bottom: 8px; color: #4B5563; }
-        .header { text-align: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #E5E0D8; }
-        .label { font-weight: bold; color: #4B5563; }
-        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
-        th, td { padding: 6px 8px; text-align: left; border-bottom: 1px solid #E5E0D8; }
-        th { background: #F5F1EB; font-size: 10px; }
-        .total-row { font-weight: bold; font-size: 12px; }
-        .block { margin: 10px 0; }
-        .confirmation-box { background: #F5F1EB; padding: 12px; margin: 16px 0; border: 1px solid #E5E0D8; text-align: center; font-weight: bold; }
-        .signature-zone { margin-top: 30px; padding-top: 20px; border-top: 1px solid #E5E0D8; }
-        .signature-line { border-bottom: 1px solid #333; width: 250px; height: 40px; margin: 8px 0 4px 0; }
-        .footer { margin-top: 24px; padding-top: 12px; border-top: 1px solid #E5E0D8; font-size: 10px; color: #6B7280; text-align: center; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'DejaVu Sans', Arial, sans-serif;
+            font-size: 11pt;
+            color: #4B5563;
+            line-height: 1.5;
+            padding: 24px;
+            background: #F5F1EB;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #E5E0D8;
+        }
+        .header {
+            background: #A7C7E7;
+            color: #ffffff;
+            padding: 28px 32px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 24pt;
+            font-weight: bold;
+            margin-bottom: 4px;
+            letter-spacing: -0.5px;
+        }
+        .header .subtitle {
+            font-size: 11pt;
+            opacity: 0.95;
+        }
+        .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.3);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 10pt;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+        .content { padding: 28px 32px; }
+        .section { margin-bottom: 24px; }
+        .section-title {
+            font-size: 10pt;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #9CA3AF;
+            margin-bottom: 12px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #E5E0D8;
+        }
+        .info-table { width: 100%; border-collapse: collapse; }
+        .info-table td {
+            padding: 6px 0;
+            vertical-align: top;
+        }
+        .info-label {
+            color: #6B7280;
+            font-size: 10pt;
+            width: 35%;
+        }
+        .info-value { font-weight: 600; }
+        table.products {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+        }
+        table.products th {
+            background: #F5F1EB;
+            color: #4B5563;
+            font-size: 10pt;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 2px solid #E5E0D8;
+        }
+        table.products th:last-child,
+        table.products td:nth-child(3),
+        table.products td:nth-child(4) {
+            text-align: right;
+        }
+        table.products td {
+            padding: 14px;
+            border-bottom: 1px solid #E5E0D8;
+            vertical-align: top;
+        }
+        table.products tr:last-child td {
+            border-bottom: none;
+        }
+        .product-name {
+            font-weight: 600;
+            color: #4B5563;
+            font-size: 11pt;
+        }
+        .product-qty {
+            color: #6B7280;
+            font-size: 10pt;
+        }
+        .price { font-weight: 600; color: #A7C7E7; }
+        .total-row td {
+            background: #F5F1EB;
+            padding: 16px 20px;
+            font-size: 12pt;
+            font-weight: 600;
+            color: #4B5563;
+        }
+        .total-amount {
+            text-align: right;
+            font-size: 16pt;
+            font-weight: bold;
+            color: #A7C7E7;
+        }
+        .address-block {
+            background: #F9FAFB;
+            padding: 14px 16px;
+            border-radius: 8px;
+            border-left: 4px solid #A7C7E7;
+        }
+        .address-block p { margin: 2px 0; }
+        .footer {
+            background: #F5F1EB;
+            padding: 16px 32px;
+            text-align: center;
+            font-size: 10pt;
+            color: #6B7280;
+        }
+        .footer strong { color: #4B5563; }
+        .recu-note {
+            background: #ECFDF5;
+            border: 1px solid #A7F3D0;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-top: 20px;
+            font-size: 10pt;
+            color: #065F46;
+        }
     </style>
 </head>
 <body>
-    {% set isPaiementEnLigne = commande.modePayment == 'carte_bancaire' or (commande.modePayment ?? '') starts with 'carte_' or commande.stripePaymentIntent %}
+<div class="container">
     <div class="header">
-        <h1>Confirmation de commande - AutiCare</h1>
-        <div><strong>{% if isPaiementEnLigne %}Bon de livraison — Paiement déjà effectué (à présenter au livreur){% else %}Bon de livraison{% endif %}</strong> - Commande n°{{ commande.id }} | Date : {{ commande.dateCreation ? commande.dateCreation|date('d/m/Y H:i') : '—' }}</div>
+        <h1>AutiCare</h1>
+        <p class="subtitle">Reçu de commande</p>
+        <span class="badge">Commande n°{{ commande.id }}</span>
     </div>
 
-    <div class="confirmation-box">
-        {% if isPaiementEnLigne %}
-        Ce document atteste que le client a payé sa commande n°{{ commande.id }} en ligne. À présenter au livreur pour la remise du colis.
+    <div class="content">
+        <div class="section">
+            <div class="section-title">Informations de la commande</div>
+            <table class="info-table">
+                <tr><td class="info-label">Date</td><td class="info-value">{{ commande.dateCreation|date('d/m/Y à H:i') }}</td></tr>
+                <tr><td class="info-label">Client</td><td class="info-value">{{ commande.nom }}</td></tr>
+                <tr><td class="info-label">Paiement</td><td class="info-value">{% if commande.modePayment == 'a_la_livraison' or commande.modePayment == 'delivery' %}À la livraison{% elseif commande.modePayment starts with 'carte_' %}Carte bancaire{% else %}{{ commande.modePayment }}{% endif %}</td></tr>
+            </table>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Produits commandés</div>
+            <table class="products">
+                <thead>
+                    <tr>
+                        <th>Produit</th>
+                        <th style="text-align:center;">Qté</th>
+                        <th style="text-align:right;">Prix unit.</th>
+                        <th style="text-align:right;">Sous-total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ligne in commande.lignes %}
+                    <tr>
+                        <td>
+                            <span class="product-name">{{ ligne.produit ? ligne.produit.nom : 'Produit' }}</span>
+                        </td>
+                        <td style="text-align:center;">{{ ligne.quantite }}</td>
+                        <td class="price" style="text-align:right;">{{ ligne.prix|number_format(2, ',', ' ') }} د.ت</td>
+                        <td class="price" style="text-align:right;">{{ ligne.sousTotal|number_format(2, ',', ' ') }} د.ت</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <table style="width:100%;margin-top:16px;">
+                <tr class="total-row">
+                    <td>Total à payer</td>
+                    <td class="total-amount" style="text-align:right;">{{ commande.total|number_format(2, ',', ' ') }} د.ت</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Adresse de livraison</div>
+            <div class="address-block">
+                <p><strong>{{ commande.nom }}</strong></p>
+                <p>{{ commande.adresse }}</p>
+                <p>{{ commande.codePostal }} {{ commande.ville }}</p>
+                <p>{{ commande.telephone }} — {{ commande.email }}</p>
+            </div>
+        </div>
+
+        {% if commande.modePayment == 'carte_bancaire' or commande.modePayment starts with 'carte_' %}
+        <div class="recu-note">
+            ✓ Présentez ce document au livreur comme preuve de paiement. Aucun règlement supplémentaire à la livraison.
+        </div>
         {% else %}
-        Ce document atteste que le client a bien passé la commande n°{{ commande.id }} auprès d'AutiCare. Paiement à la livraison.
-        {% endif %}
-    </div>
-
-    <div class="block">
-        <span class="label">Client :</span>
-        {{ commande.nom }}<br>
-        {{ commande.email }}<br>
-        {{ commande.telephone }}
-    </div>
-
-    <div class="block">
-        <span class="label">Mode de paiement :</span>
-        {% if isPaiementEnLigne %}Carte bancaire / Paiement en ligne (déjà réglé){% else %}À la livraison{% endif %}
-    </div>
-
-    <div class="block">
-        <span class="label">Adresse de livraison :</span>
-        {{ commande.adresse }}, {{ commande.codePostal }} {{ commande.ville }}
-    </div>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Produit</th>
-                <th>Qté</th>
-                <th>Prix unit.</th>
-                <th>Sous-total</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for ligne in commande.lignes %}
-            <tr>
-                <td>{{ ligne.produit ? ligne.produit.nom : 'Produit' }}</td>
-                <td>{{ ligne.quantite }}</td>
-                <td>{{ ligne.prix|number_format(2, ',', ' ') }} DT</td>
-                <td>{{ ligne.sousTotal|number_format(2, ',', ' ') }} DT</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-        <tfoot>
-            <tr class="total-row">
-                <td colspan="3">Total</td>
-                <td>{{ commande.total|number_format(2, ',', ' ') }} DT</td>
-            </tr>
-        </tfoot>
-    </table>
-
-    <div class="signature-zone">
-        <div class="label">{% if isPaiementEnLigne %}Remise de la commande — Paiement déjà effectué{% else %}Paiement à la livraison{% endif %}</div>
-        <p class="text-sm" style="font-size: 9px; color: #6B7280;">{% if isPaiementEnLigne %}Le client a payé en ligne. Le livreur remet la commande au client et signe ci-dessous. Aucun paiement à percevoir.{% else %}Le livreur remet la commande, perçoit le paiement et signe ci-dessous.{% endif %}</p>
-        {% if not isPaiementEnLigne %}
-        <div style="margin: 12px 0;">
-            <span class="label">Montant perçu :</span>
-            <span style="display: inline-block; width: 80px; border-bottom: 1px solid #333; margin-left: 8px; vertical-align: middle;"></span>
-            <span style="margin-left: 8px;">DT</span>
+        <div class="recu-note">
+            ✓ Payez le montant indiqué à la livraison. Conservez ce bon comme justificatif.
         </div>
         {% endif %}
-        <div class="label">Signature du livreur / Client</div>
-        <div class="signature-line"></div>
-        <div style="font-size: 9px; color: #6B7280;">Nom du livreur</div>
     </div>
 
     <div class="footer">
-        Merci pour votre confiance. Ce bon atteste de la commande n°{{ commande.id }}.<br>
-        AutiCare - Document généré le {{ "now"|date("d/m/Y à H:i") }}
+        <p><strong>AutiCare</strong> — Merci pour votre confiance</p>
+        <p>Document généré le {{ "now"|date('d/m/Y H:i') }}</p>
     </div>
+</div>
 </body>
 </html>

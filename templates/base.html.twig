@@ -1,106 +1,78 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-turbo="false">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        (function(){
+            var skip = /import map rule for specifier|was removed, as it conflicted|webgl backend was already registered|cpu backend was already registered|Platform browser has already been set|Stripe\.js integration over HTTP|merchant-ui-api\.stripe\.com|wallet-config.*401|Blocked aria-hidden|descendant retained focus|PrivateStripeElement/i;
+            var _w = console.warn, _e = console.error;
+            console.warn = function(){ var s = [].join.call(arguments,' '); if(skip.test(s)) return; _w.apply(console, arguments); };
+            console.error = function(){ var s = [].join.call(arguments,' '); if(skip.test(s)) return; _e.apply(console, arguments); };
+        })();
+    </script>
+    {% block head_extra %}{% endblock %}
     <title>{% block title %}AutiCare{% endblock %}</title>
     <link rel="icon" href="{{ asset('images/logo.png') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
     {% block stylesheets %}
-        <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
         <style>
             :root {
-                --auticare-bg: #F5F1EB;
-                --auticare-text: #687280;
-                --auticare-text-strong: #485563;
-                --auticare-border: #E5E0D8;
-                --auticare-border-pastel: #E8DED5;
-                --auticare-accent: #A7C7E7;
-                --auticare-accent-hover: #95b8dc;
-                --auticare-accent-soft: #B8D4ED;
+                --pastel-bg: #FDF8F5;
+                --pastel-cream: #FFF8F0;
+                --pastel-mint: #A8BBA3;
+                --pastel-mint-soft: #D4E5D0;
+                --pastel-lavender: #CDB4DB;
+                --pastel-lavender-soft: #E8DCF0;
+                --pastel-peach: #F0D5C8;
+                --pastel-peach-soft: #FAEDE8;
+                --pastel-sky: #B5D4E8;
+                --pastel-sky-soft: #DFEEF5;
+                --pastel-apricot: #F5D0C5;
+                --pastel-text: #5C5C5C;
+                --pastel-text-strong: #3D3D3D;
+                --pastel-border: #E8DED5;
                 --auticare-card: #FFFFFF;
-                --auticare-title-light: #1e3a5f;
-                --auticare-title-dark: #93C5FD;
-                --auticare-lavender: #E8DCF0;
-                --auticare-violet-sidebar: #4B3D6B;
-                --auticare-violet-accent: #CDB4DB;
-                --auticare-green-soft: #A8BBA3;
-                --auticare-green-bg: #D4E5D0;
-                --auticare-blue-bg: #DFEEF5;
-                --auticare-blue-bg-light: #E8F4FC;
-                --auticare-peach-bg: #FAEDE8;
-                --auticare-overlay: #FDF8F5;
-                --auticare-tag-green: #95d7b5;
-                --auticare-tag-blue: #A7C7E7;
-                --auticare-tag-purple: #D8B4FE;
-                --auticare-alert: #F87171;
+                --auticare-shadow: 0 2px 8px rgb(0 0 0 / 0.04);
+                --auticare-shadow-md: 0 4px 16px rgb(0 0 0 / 0.06);
             }
-            @keyframes fadeInUp {
-                from { opacity: 0; transform: translateY(20px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-            .animate-fade-in-up {
-                animation: fadeInUp 0.5s ease-out forwards;
-            }
-            @media (prefers-reduced-motion: reduce) {
-                *, *::before, *::after {
-                    animation-duration: 0.01ms !important;
-                    animation-iteration-count: 1 !important;
-                    transition-duration: 0.01ms !important;
-                }
-            }
+            body { font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif; }
         </style>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script>
-            tailwind.config = {
-                theme: {
-                    extend: {
-                        colors: {
-                            autocare: {
-                                bg: '#F5F1EB',
-                                text: '#687280',
-                                'text-strong': '#485563',
-                                border: '#E5E0D8',
-                                'border-pastel': '#E8DED5',
-                                accent: '#A7C7E7',
-                                'accent-hover': '#95b8dc',
-                                'accent-soft': '#B8D4ED',
-                                card: '#FFFFFF',
-                                'title-light': '#1e3a5f',
-                                'title-dark': '#93C5FD',
-                                lavender: '#E8DCF0',
-                                'violet-sidebar': '#4B3D6B',
-                                'violet-accent': '#CDB4DB',
-                                'green-soft': '#A8BBA3',
-                                'green-bg': '#D4E5D0',
-                                'blue-bg': '#DFEEF5',
-                                'blue-bg-light': '#E8F4FC',
-                                'peach-bg': '#FAEDE8',
-                                overlay: '#FDF8F5',
-                                'tag-green': '#95d7b5',
-                                'tag-blue': '#A7C7E7',
-                                'tag-purple': '#D8B4FE',
-                                alert: '#F87171',
-                            }
-                        },
-                        animation: {
-                            'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
-                        },
-                        keyframes: {
-                            fadeInUp: {
-                                from: { opacity: '0', transform: 'translateY(20px)' },
-                                to: { opacity: '1', transform: 'translateY(0)' },
-                            }
-                        }
-                    }
-                }
-            }
-        </script>
+        <link rel="stylesheet" href="{{ asset('build/app.css') }}">
     {% endblock %}
     {% block javascripts %}
         {% block importmap %}{{ importmap('app') }}{% endblock %}
     {% endblock %}
+<script>
+            document.addEventListener('turbo:before-render', function(e) {
+                var doc = e.detail?.newBody?.ownerDocument;
+                if (doc) {
+                    doc.querySelectorAll('script[type="importmap"]').forEach(function(s) { s.remove(); });
+                    doc.querySelectorAll('script[type="module"]:not([src])').forEach(function(s) {
+                        if (s.textContent && /import\s+['"]app['"]/.test(s.textContent.trim())) {
+                            s.remove();
+                        }
+                    });
+                    doc.querySelectorAll('link[rel="modulepreload"]').forEach(function(s) { s.remove(); });
+                    if (window.faceapi) {
+                        doc.querySelectorAll('script[src*="face-api"]').forEach(function(s) { s.remove(); });
+                    }
+                }
+            });
+</script>
+<script>
+            (function() {
+                var theme = localStorage.getItem('auticare-theme');
+                if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches))
+                    document.documentElement.classList.add('dark');
+                else
+                    document.documentElement.classList.remove('dark');
+            })();
+        </script>
 </head>
-<body class="bg-[#F5F1EB] text-[#687280] antialiased">
+<body class="bg-[#FDF8F5] text-[#5C5C5C] dark:bg-gray-700 dark:text-gray-200 antialiased transition-colors duration-200">
     {% block body %}{% endblock %}
 </body>
 </html>

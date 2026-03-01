@@ -39,6 +39,7 @@ final class CommentaireController extends AbstractController
     }
 
     #[Route('/ajouter/{blogId}', name: 'commentaire_ajouter', requirements: ['blogId' => '\d+'], methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
     public function ajouter(Request $request, int $blogId): Response
     {
         $blog = $this->entityManager->getRepository(Blog::class)->find($blogId);
@@ -47,18 +48,17 @@ final class CommentaireController extends AbstractController
         }
 
         $commentaire = new Commentaire();
-        $form = $this->createForm(CommentaireType::class, $commentaire);
+        $form = $this->createForm(CommentaireType::class, $commentaire, [
+            'csrf_token_id' => 'commentaire_blog_' . $blogId,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $contenu = trim((string) ($commentaire->getContenu() ?? ''));
             if ($contenu !== '' && $this->profanityFilter->containsBadWords($contenu)) {
                 $this->addFlash('warning', 'Votre commentaire contient des termes inappropriés. Veuillez le reformuler.');
-                $redirect = $request->request->get('_redirect');
-                if ($redirect && filter_var($redirect, FILTER_VALIDATE_URL)) {
-                    return $this->redirect($redirect);
-                }
-                return $this->redirectToRoute('user_blog_show_article', ['id' => $blogId]);
+                $redirect = $this->resolveRedirect($request, $blogId);
+                return $redirect ?? $this->redirectToRoute('user_blog_show_article', ['id' => $blogId]);
             }
 
             $user = $this->getUser();
@@ -80,35 +80,34 @@ final class CommentaireController extends AbstractController
             }
         }
 
-        $redirect = $request->request->get('_redirect');
-        if ($redirect && filter_var($redirect, FILTER_VALIDATE_URL)) {
-            return $this->redirect($redirect);
+        $redirect = $this->resolveRedirect($request, $blogId);
+        if ($redirect !== null) {
+            return $redirect;
         }
         return $this->redirectToRoute('user_blog_show_article', ['id' => $blogId]);
     }
 
     #[Route('/ajouter-module/{moduleId}', name: 'commentaire_ajouter_module', requirements: ['moduleId' => '\d+'], methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
     public function ajouterModule(Request $request, int $moduleId): Response
     {
-        // Récupérer le premier article publié du module pour associer le commentaire
         $blog = $this->entityManager->getRepository(Blog::class)->find($moduleId);
         if (!$blog) {
             throw $this->createNotFoundException('Article non trouvé');
         }
 
         $commentaire = new Commentaire();
-        $form = $this->createForm(CommentaireType::class, $commentaire);
+        $form = $this->createForm(CommentaireType::class, $commentaire, [
+            'csrf_token_id' => 'commentaire_blog_' . $moduleId,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $contenu = trim((string) ($commentaire->getContenu() ?? ''));
             if ($contenu !== '' && $this->profanityFilter->containsBadWords($contenu)) {
                 $this->addFlash('warning', 'Votre commentaire contient des termes inappropriés. Veuillez le reformuler.');
-                $redirect = $request->request->get('_redirect');
-                if ($redirect && filter_var($redirect, FILTER_VALIDATE_URL)) {
-                    return $this->redirect($redirect);
-                }
-                return $this->redirectToRoute('user_blog_show_article', ['id' => $blog->getId()]);
+                $redirect = $this->resolveRedirect($request, $blog->getId());
+                return $redirect ?? $this->redirectToRoute('user_blog_show_article', ['id' => $blog->getId()]);
             }
 
             $user = $this->getUser();
@@ -130,9 +129,9 @@ final class CommentaireController extends AbstractController
             }
         }
 
-        $redirect = $request->request->get('_redirect');
-        if ($redirect && filter_var($redirect, FILTER_VALIDATE_URL)) {
-            return $this->redirect($redirect);
+        $redirect = $this->resolveRedirect($request, $blog->getId());
+        if ($redirect !== null) {
+            return $redirect;
         }
         return $this->redirectToRoute('user_blog_show_article', ['id' => $blog->getId()]);
     }
@@ -156,11 +155,27 @@ final class CommentaireController extends AbstractController
             $this->addFlash('success', 'Le commentaire a été supprimé avec succès');
         }
 
-        $redirect = $request->request->get('_redirect');
-        if ($redirect && filter_var($redirect, FILTER_VALIDATE_URL)) {
-            return $this->redirect($redirect);
+        $redirect = $this->resolveRedirect($request, $blogId);
+        if ($redirect !== null) {
+            return $redirect;
         }
         return $this->redirectToRoute('user_blog_show_article', ['id' => $blogId]);
+    }
+
+    private function resolveRedirect(Request $request, int $blogId): ?Response
+    {
+        $redirect = $request->request->get('_redirect');
+        if ($redirect === null || $redirect === '') {
+            return null;
+        }
+        $redirect = trim((string) $redirect);
+        if (filter_var($redirect, FILTER_VALIDATE_URL)) {
+            return $this->redirect($redirect);
+        }
+        if (str_starts_with($redirect, '/')) {
+            return $this->redirect($request->getSchemeAndHttpHost() . $redirect);
+        }
+        return null;
     }
 
     private function handleMediaUpload(UploadedFile $mediaFile, Commentaire $commentaire): bool
@@ -182,8 +197,4 @@ final class CommentaireController extends AbstractController
             return false;
         }
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 454cf3534cd44ab862139630471999260fa62858

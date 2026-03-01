@@ -3,247 +3,222 @@
 {% block title %}Tableau de bord - AutiCare Médecin{% endblock %}
 
 {% block doctor_content %}
-<div class="space-y-6">
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-3xl font-bold text-[#4B5563]">Tableau de bord</h1>
-            <p class="text-[#6B7280] mt-1">Bienvenue, Dr {{ app.user ? app.user.prenom ~ ' ' ~ app.user.nom : '' }}</p>
-        </div>
-        <div class="flex items-center gap-2 text-sm text-[#6B7280]">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            {{ "now"|date("d/m/Y H:i") }}
-        </div>
+{# Message de bienvenue + illustration #}
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 p-6 rounded-2xl bg-white dark:bg-gray-700/80 border border-[#e2e8f0] dark:border-gray-600 shadow-sm">
+    <div>
+        <h2 class="text-xl font-bold text-[#1e293b] dark:text-white mb-1">
+            Bonjour, Dr {{ app.user ? app.user.prenom : '' }}
+        </h2>
+        <p class="text-[#64748b] dark:text-gray-400 text-sm mb-0.5">Consultez vos rendez-vous et votre activité.</p>
+        <p class="text-[#94a3b8] dark:text-gray-500 text-sm">Bonne journée.</p>
     </div>
+    <div class="flex items-center justify-center w-24 h-24 rounded-2xl bg-gradient-to-br from-[#E8DCF0] to-[#D4E5D0] dark:from-[#CDB4DB]/30 dark:to-[#A8BBA3]/30 shrink-0">
+        <svg class="w-12 h-12 text-[#CDB4DB] dark:text-[#93C5FD]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+    </div>
+</div>
 
-    {% if stats is defined %}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 p-6 hover:shadow-lg transition-shadow">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-blue-600 text-sm font-medium">Patients suivis</p>
-                    <p class="text-3xl font-bold text-blue-900 mt-2">{{ stats.total_patients|default(0) }}</p>
-                    <p class="text-blue-600 text-xs mt-1">Total unique</p>
-                </div>
-                <div class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-200">
-                    <svg class="w-6 h-6 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                </div>
+{# KPIs - 4 cartes #}
+{% if stats is defined %}
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="rounded-2xl border border-[#e2e8f0] dark:border-gray-600 bg-white dark:bg-gray-700/80 p-5 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-[#64748b] dark:text-gray-400 text-sm font-medium">Patients suivis</p>
+                <p class="text-2xl font-bold text-[#1e293b] dark:text-white mt-1">{{ stats.total_patients|default(0) }}</p>
+                <p class="text-[#94a3b8] dark:text-gray-500 text-xs mt-0.5">Total unique</p>
             </div>
-        </div>
-
-        <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 p-6 hover:shadow-lg transition-shadow">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-green-600 text-sm font-medium">Rendez-vous</p>
-                    <p class="text-3xl font-bold text-green-900 mt-2">{{ stats.total_rdv|default(0) }}</p>
-                    <p class="text-green-600 text-xs mt-1">{{ stats.rdv_today|default(0) }} aujourd'hui</p>
-                </div>
-                <div class="flex items-center justify-center w-12 h-12 rounded-full bg-green-200">
-                    <svg class="w-6 h-6 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200 p-6 hover:shadow-lg transition-shadow">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-purple-600 text-sm font-medium">Notes rédigées</p>
-                    <p class="text-3xl font-bold text-purple-900 mt-2">{{ stats.total_notes|default(0) }}</p>
-                    <p class="text-purple-600 text-xs mt-1">Total notes</p>
-                </div>
-                <div class="flex items-center justify-center w-12 h-12 rounded-full bg-purple-200">
-                    <svg class="w-6 h-6 text-purple-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                    </svg>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border border-orange-200 p-6 hover:shadow-lg transition-shadow">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-orange-600 text-sm font-medium">Disponibilités</p>
-                    <p class="text-3xl font-bold text-orange-900 mt-2">Actif</p>
-                    <p class="text-orange-600 text-xs mt-1">Gérer les créneaux</p>
-                </div>
-                <div class="flex items-center justify-center w-12 h-12 rounded-full bg-orange-200">
-                    <svg class="w-6 h-6 text-orange-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
+            <div class="w-12 h-12 rounded-xl bg-[#E8DCF0] dark:bg-[#CDB4DB]/30 flex items-center justify-center">
+                <svg class="w-6 h-6 text-[#CDB4DB] dark:text-[#93C5FD]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
             </div>
         </div>
     </div>
-    {% endif %}
-
-    <div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
-        <div class="p-6 border-b border-[#E5E0D8] bg-gradient-to-r from-[#A7C7E7]/10 to-transparent">
-            <div class="flex items-center justify-between">
-                <h2 class="text-xl font-semibold text-[#4B5563]">Activité des rendez-vous</h2>
-                <div class="flex items-center gap-2 text-sm text-[#6B7280]">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                    <span>Derniers 6 mois</span>
-                </div>
+    <div class="rounded-2xl border border-[#e2e8f0] dark:border-gray-600 bg-white dark:bg-gray-700/80 p-5 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-[#64748b] dark:text-gray-400 text-sm font-medium">Rendez-vous</p>
+                <p class="text-2xl font-bold text-[#1e293b] dark:text-white mt-1">{{ stats.total_rdv|default(0) }}</p>
+                <p class="text-[#94a3b8] dark:text-gray-500 text-xs mt-0.5">{{ stats.rdv_today|default(0) }} aujourd'hui</p>
             </div>
-        </div>
-        <div class="p-6">
-            <div class="h-64 flex items-center justify-center">
-                <canvas id="activityChart" class="w-full h-full"></canvas>
+            <div class="w-12 h-12 rounded-xl bg-[#D4E5D0] dark:bg-[#A8BBA3]/30 flex items-center justify-center">
+                <svg class="w-6 h-6 text-[#A8BBA3] dark:text-[#93C5FD]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
             </div>
         </div>
     </div>
+    <div class="rounded-2xl border border-[#e2e8f0] dark:border-gray-600 bg-white dark:bg-gray-700/80 p-5 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-[#64748b] dark:text-gray-400 text-sm font-medium">Notes rédigées</p>
+                <p class="text-2xl font-bold text-[#1e293b] dark:text-white mt-1">{{ stats.total_notes|default(0) }}</p>
+                <p class="text-[#94a3b8] dark:text-gray-500 text-xs mt-0.5">Total notes</p>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-[#E8DCF0] dark:bg-[#CDB4DB]/30 flex items-center justify-center">
+                <svg class="w-6 h-6 text-[#CDB4DB] dark:text-[#93C5FD]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+            </div>
+        </div>
+    </div>
+    <div class="rounded-2xl border border-[#e2e8f0] dark:border-gray-600 bg-white dark:bg-gray-700/80 p-5 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-[#64748b] dark:text-gray-400 text-sm font-medium">Disponibilités</p>
+                <p class="text-2xl font-bold text-[#1e293b] dark:text-white mt-1">Actif</p>
+                <p class="text-[#94a3b8] dark:text-gray-500 text-xs mt-0.5">Gérer les créneaux</p>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-[#D4E5D0] dark:bg-[#A8BBA3]/30 flex items-center justify-center">
+                <svg class="w-6 h-6 text-[#A8BBA3] dark:text-[#93C5FD]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
-            <div class="p-6 border-b border-[#E5E0D8] bg-gradient-to-r from-[#A7C7E7]/10 to-transparent">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-xl font-semibold text-[#4B5563]">Prochains rendez-vous</h2>
-                    <a href="{{ path('doctor_rendezvous') }}" class="text-sm text-[#A7C7E7] hover:underline font-medium">Voir tout →</a>
-                </div>
+{# Activité + grille RDV / Profil #}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    {# Colonne gauche : Activité (graph) + Prochains RDV #}
+    <div class="lg:col-span-2 space-y-6">
+        <div class="rounded-2xl border border-[#e2e8f0] dark:border-gray-600 bg-white dark:bg-gray-700/80 overflow-hidden shadow-sm">
+            <div class="px-6 py-4 border-b border-[#e2e8f0] dark:border-gray-600 flex items-center justify-between">
+                <h3 class="font-semibold text-[#1e293b] dark:text-white">Activité</h3>
+                <span class="text-xs text-[#94a3b8] dark:text-gray-500">Derniers 6 mois</span>
             </div>
             <div class="p-6">
+                <div class="h-56">
+                    <canvas id="activityChart" class="w-full h-full"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="rounded-2xl border border-[#e2e8f0] dark:border-gray-600 bg-white dark:bg-gray-700/80 overflow-hidden shadow-sm">
+            <div class="px-6 py-4 border-b border-[#e2e8f0] dark:border-gray-600 flex items-center justify-between">
+                <h3 class="font-semibold text-[#1e293b] dark:text-white">Prochains rendez-vous</h3>
+                <a href="{{ path('doctor_rendezvous') }}" class="text-sm text-[#CDB4DB] dark:text-[#93C5FD] font-medium hover:underline">Voir tout →</a>
+            </div>
+            <div class="p-4">
                 {% if stats is defined and stats.upcoming_rdv is defined and stats.upcoming_rdv is not empty %}
-                    <div class="space-y-4">
+                    <ul class="space-y-2">
                         {% for rdv in stats.upcoming_rdv %}
-                            <div class="flex items-center justify-between p-4 bg-[#F5F1EB]/50 rounded-lg hover:bg-[#F5F1EB] transition-colors">
-                                <div class="flex items-center gap-4">
-                                    <div class="flex items-center justify-center w-10 h-10 rounded-full bg-[#A7C7E7]/20">
-                                        <svg class="w-5 h-5 text-[#A7C7E7]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p class="font-medium text-[#4B5563]">
-                                            {{ rdv.patient ? (rdv.patient.prenom ~ ' ' ~ rdv.patient.nom) : 'Patient non spécifié' }}
-                                        </p>
-                                        <p class="text-sm text-[#6B7280]">
-                                            {{ rdv.dateRdv ? rdv.dateRdv|date('d/m/Y') : '' }}
-                                            {% if rdv.disponibilite is defined and rdv.disponibilite %}
-                                                à {{ rdv.disponibilite.heureDebut|date('H:i') }} - {{ rdv.disponibilite.heureFin|date('H:i') }}
-                                            {% endif %}
-                                        </p>
-                                    </div>
-                                </div>
-                                <span class="px-3 py-1 rounded-full text-xs font-medium
-                                    {% if rdv.status is defined and rdv.status == 'confirmer' %}bg-green-100 text-green-800
-                                    {% elseif rdv.status is defined and rdv.status == 'en_attente' %}bg-yellow-100 text-yellow-800
-                                    {% else %}bg-red-100 text-red-800{% endif %}">
-                                    {{ rdv.status is defined and rdv.status is iterable ? rdv.status.value|replace({'_': ' '})|title : '—' }}
+                        <li>
+                            <a href="{{ path('doctor_rendezvous_edit', { id: rdv.id }) }}" class="flex items-center gap-4 p-3 rounded-xl hover:bg-[#f8fafc] dark:hover:bg-gray-600/50 transition-colors group">
+                                <span class="flex items-center justify-center w-10 h-10 rounded-full bg-[#E8DCF0] dark:bg-[#CDB4DB]/30 text-[#CDB4DB] dark:text-[#93C5FD] font-semibold text-sm shrink-0">
+                                    {{ rdv.patient ? (rdv.patient.prenom|slice(0,1) ~ rdv.patient.nom|slice(0,1))|upper : '?' }}
                                 </span>
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="text-center py-8">
-                        <svg class="w-16 h-16 text-[#E5E0D8] mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <p class="text-[#6B7280]">Aucun rendez-vous à venir</p>
-                        <p class="text-[#9CA3AF] text-sm mt-1">Vos prochains rendez-vous apparaîtront ici</p>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-
-        <div class="bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
-            <div class="p-6 border-b border-[#E5E0D8] bg-gradient-to-r from-purple-50 to-transparent">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-xl font-semibold text-[#4B5563]">Notes des patients</h2>
-                    <a href="{{ path('doctor_rendezvous') }}" class="text-sm text-purple-600 hover:underline font-medium">Voir les RDV →</a>
-                </div>
-            </div>
-            <div class="p-6">
-                {% if stats is defined and stats.patient_notes_from_rdv is defined and stats.patient_notes_from_rdv is not empty %}
-                    <div class="space-y-4">
-                        {% for rdv in stats.patient_notes_from_rdv %}
-                            <div class="p-4 bg-purple-50 rounded-lg">
-                                <div class="flex items-center justify-between mb-2">
-                                    <p class="font-medium text-[#4B5563] text-sm">
-                                        {{ rdv.patient ? (rdv.patient.prenom ~ ' ' ~ rdv.patient.nom) : (rdv.prenom ~ ' ' ~ rdv.nom) }}
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-medium text-[#1e293b] dark:text-white text-sm truncate">
+                                        {{ rdv.patient ? (rdv.patient.prenom ~ ' ' ~ rdv.patient.nom) : 'Patient non spécifié' }}
                                     </p>
-                                    <span class="text-xs text-purple-600">
-                                        RDV {{ rdv.dateRdv ? rdv.dateRdv|date('d/m/Y') : '' }}
-                                    </span>
+                                    <p class="text-xs text-[#64748b] dark:text-gray-400">
+                                        {{ rdv.dateRdv ? rdv.dateRdv|date('d/m/Y') : '' }}
+                                        {% if rdv.disponibilite is defined and rdv.disponibilite %}
+                                            · {{ rdv.disponibilite.heureDebut|date('H:i') }} - {{ rdv.disponibilite.heureFin|date('H:i') }}
+                                        {% endif %}
+                                    </p>
                                 </div>
-                                <p class="text-[#6B7280] text-sm line-clamp-3">
-                                    {{ rdv.notePatient|length > 80 ? (rdv.notePatient|slice(0, 80) ~ '...') : rdv.notePatient }}
-                                </p>
-                            </div>
+                                {% set statusVal = rdv.status is defined and rdv.status is not null ? (rdv.status.value ?? rdv.status) : '' %}
+                                <span class="px-2.5 py-1 rounded-lg text-xs font-medium shrink-0
+                                    {% if statusVal == 'confirmer' %}bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300
+                                    {% elseif statusVal == 'en_attente' %}bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300
+                                    {% else %}bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300{% endif %}">
+                                    {{ statusVal ? statusVal|replace({'_': ' '})|title : '—' }}
+                                </span>
+                                <svg class="w-5 h-5 text-[#94a3b8] dark:text-gray-500 group-hover:text-[#CDB4DB] dark:group-hover:text-[#93C5FD] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                            </a>
+                        </li>
                         {% endfor %}
-                    </div>
+                    </ul>
                 {% else %}
-                    <div class="text-center py-8">
-                        <svg class="w-16 h-16 text-[#E5E0D8] mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                        </svg>
-                        <p class="text-[#6B7280]">Aucune note de patient</p>
-                        <p class="text-[#9CA3AF] text-sm mt-1">Les notes saisies lors de la réservation apparaîtront ici</p>
+                    <div class="text-center py-10">
+                        <div class="w-14 h-14 rounded-2xl bg-[#f1f5f9] dark:bg-gray-600 mx-auto mb-3 flex items-center justify-center">
+                            <svg class="w-7 h-7 text-[#cbd5e1] dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+                        </div>
+                        <p class="text-[#64748b] dark:text-gray-400 text-sm">Aucun rendez-vous à venir</p>
+                        <a href="{{ path('doctor_availability_new') }}" class="inline-block mt-2 text-sm text-[#CDB4DB] dark:text-[#93C5FD] font-medium hover:underline">Ajouter des créneaux</a>
                     </div>
                 {% endif %}
             </div>
         </div>
     </div>
 
-    <div class="bg-white rounded-xl border border-[#E5E0D8] p-6">
-        <h2 class="text-xl font-semibold text-[#4B5563] mb-4">Actions rapides</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <a href="{{ path('doctor_availability') }}" class="flex items-center gap-3 p-4 bg-[#A7C7E7]/10 rounded-lg hover:bg-[#A7C7E7]/20 transition-colors group">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-[#A7C7E7] group-hover:scale-110 transition-transform">
-                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <div>
-                    <p class="font-medium text-[#4B5563]">Gérer les disponibilités</p>
-                    <p class="text-sm text-[#6B7280]">Ajouter/modifier les créneaux</p>
-                </div>
-            </a>
-
-            <a href="{{ path('doctor_notes') }}" class="flex items-center gap-3 p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors group">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-purple-500 group-hover:scale-110 transition-transform">
-                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                    </svg>
-                </div>
-                <div>
-                    <p class="font-medium text-[#4B5563]">Rédiger une note</p>
-                    <p class="text-sm text-[#6B7280]">Ajouter une note patient</p>
-                </div>
-            </a>
-
-            <a href="{{ path('doctor_rendezvous') }}" class="flex items-center gap-3 p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors group">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-green-500 group-hover:scale-110 transition-transform">
-                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                </div>
-                <div>
-                    <p class="font-medium text-[#4B5563]">Voir les rendez-vous</p>
-                    <p class="text-sm text-[#6B7280]">Consulter l'agenda</p>
-                </div>
-            </a>
+    {# Colonne droite : Mon profil + Mon agenda #}
+    <div class="space-y-6">
+        <div class="rounded-2xl border border-[#e2e8f0] dark:border-gray-600 bg-white dark:bg-gray-700/80 overflow-hidden shadow-sm">
+            <div class="px-6 py-4 border-b border-[#e2e8f0] dark:border-gray-600">
+                <h3 class="font-semibold text-[#1e293b] dark:text-white">Mon profil</h3>
+            </div>
+            <div class="p-6 text-center">
+                <span class="inline-flex items-center justify-center w-16 h-16 rounded-2xl overflow-hidden bg-gradient-to-br from-[#CDB4DB] to-[#A8BBA3] text-white font-bold text-lg mb-3">
+                    {% if app.user and app.user.image %}<img src="{{ asset(app.user.image) }}" alt="" class="w-full h-full object-cover">{% else %}{{ app.user ? (app.user.prenom|slice(0,1) ~ app.user.nom|slice(0,1))|upper : 'DR' }}{% endif %}
+                </span>
+                <p class="font-semibold text-[#1e293b] dark:text-white">Dr {{ app.user ? app.user.prenom ~ ' ' ~ app.user.nom : '' }}</p>
+                <p class="text-xs text-[#64748b] dark:text-gray-400 mt-0.5">{{ app.user ? app.user.email : '' }}</p>
+                <p class="text-sm text-[#64748b] dark:text-gray-400 mt-3">Vous avez {{ stats.rdv_today|default(0) }} rendez-vous aujourd'hui.</p>
+                <a href="{{ path('doctor_profile') }}" class="inline-block mt-4 px-4 py-2 rounded-xl bg-[#E8DCF0] dark:bg-[#CDB4DB]/30 text-[#4B3D6B] dark:text-white text-sm font-medium hover:bg-[#CDB4DB]/50 dark:hover:bg-[#CDB4DB]/50 transition-colors">Voir le profil</a>
+            </div>
         </div>
+
+        <div class="rounded-2xl border border-[#e2e8f0] dark:border-gray-600 bg-white dark:bg-gray-700/80 overflow-hidden shadow-sm">
+            <div class="px-6 py-4 border-b border-[#e2e8f0] dark:border-gray-600 flex items-center justify-between">
+                <h3 class="font-semibold text-[#1e293b] dark:text-white">Aujourd'hui</h3>
+                <span class="text-xs text-[#94a3b8] dark:text-gray-500">{{ "now"|date("d/m/Y") }}</span>
+            </div>
+            <div class="p-4">
+                <div class="rounded-xl bg-[#f8fafc] dark:bg-gray-600/50 p-4 mb-4">
+                    <p class="text-center text-2xl font-bold text-[#1e293b] dark:text-white">{{ "now"|date("d") }}</p>
+                    <p class="text-center text-xs text-[#64748b] dark:text-gray-400">{{ "now"|date("F") }}</p>
+                </div>
+                <p class="text-sm text-[#64748b] dark:text-gray-400">{{ stats.rdv_today|default(0) }} rendez-vous prévus.</p>
+                <a href="{{ path('doctor_rendezvous') }}" class="inline-flex items-center gap-1.5 mt-3 text-sm text-[#CDB4DB] dark:text-[#93C5FD] font-medium hover:underline">
+                    Voir l'agenda
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Actions rapides #}
+<div class="rounded-2xl border border-[#e2e8f0] dark:border-gray-600 bg-white dark:bg-gray-700/80 p-6 shadow-sm">
+    <h3 class="font-semibold text-[#1e293b] dark:text-white mb-4">Actions rapides</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <a href="{{ path('doctor_availability_new') }}" class="flex items-center gap-3 p-4 rounded-xl bg-[#E8DCF0]/50 dark:bg-[#CDB4DB]/20 hover:bg-[#E8DCF0] dark:hover:bg-[#CDB4DB]/30 transition-colors group">
+            <span class="w-10 h-10 rounded-xl bg-[#CDB4DB] dark:bg-[#9B7BB8] flex items-center justify-center text-white group-hover:scale-105 transition-transform">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+            </span>
+            <div>
+                <p class="font-medium text-[#1e293b] dark:text-white text-sm">Nouveau créneau</p>
+                <p class="text-xs text-[#64748b] dark:text-gray-400">Ajouter une disponibilité</p>
+            </div>
+        </a>
+        <a href="{{ path('doctor_notes') }}" class="flex items-center gap-3 p-4 rounded-xl bg-[#D4E5D0]/50 dark:bg-[#A8BBA3]/20 hover:bg-[#D4E5D0] dark:hover:bg-[#A8BBA3]/30 transition-colors group">
+            <span class="w-10 h-10 rounded-xl bg-[#A8BBA3] dark:bg-[#7B9B6E] flex items-center justify-center text-white group-hover:scale-105 transition-transform">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+            </span>
+            <div>
+                <p class="font-medium text-[#1e293b] dark:text-white text-sm">Notes patients</p>
+                <p class="text-xs text-[#64748b] dark:text-gray-400">Consulter et rédiger</p>
+            </div>
+        </a>
+        <a href="{{ path('doctor_rendezvous') }}" class="flex items-center gap-3 p-4 rounded-xl bg-[#E8DCF0]/50 dark:bg-[#CDB4DB]/20 hover:bg-[#E8DCF0] dark:hover:bg-[#CDB4DB]/30 transition-colors group">
+            <span class="w-10 h-10 rounded-xl bg-[#CDB4DB] dark:bg-[#9B7BB8] flex items-center justify-center text-white group-hover:scale-105 transition-transform">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+            </span>
+            <div>
+                <p class="font-medium text-[#1e293b] dark:text-white text-sm">Agenda</p>
+                <p class="text-xs text-[#64748b] dark:text-gray-400">Voir les rendez-vous</p>
+            </div>
+        </a>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-function initDoctorDashboard() {
+document.addEventListener('DOMContentLoaded', function() {
     var canvas = document.getElementById('activityChart');
     if (!canvas) return;
     var ctx = canvas.getContext('2d');
-    var months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin'];
+    var months = ['Janv.', 'Févr.', 'Mars', 'Avr.', 'Mai', 'Juin'];
     var data = [12, 19, 15, 25, 22, 30];
-    var gradient = ctx.createLinearGradient(0, 0, 0, 250);
-    gradient.addColorStop(0, 'rgba(167, 199, 231, 0.3)');
-    gradient.addColorStop(1, 'rgba(167, 199, 231, 0.01)');
+    var gradient = ctx.createLinearGradient(0, 0, 0, 220);
+    gradient.addColorStop(0, 'rgba(205, 180, 219, 0.35)');
+    gradient.addColorStop(1, 'rgba(205, 180, 219, 0.02)');
     new Chart(ctx, {
         type: 'line',
         data: {
@@ -251,16 +226,16 @@ function initDoctorDashboard() {
             datasets: [{
                 label: 'Rendez-vous',
                 data: data,
-                borderColor: '#A7C7E7',
+                borderColor: '#CDB4DB',
                 backgroundColor: gradient,
-                borderWidth: 3,
+                borderWidth: 2,
                 fill: true,
                 tension: 0.4,
-                pointBackgroundColor: '#A7C7E7',
+                pointBackgroundColor: '#CDB4DB',
                 pointBorderColor: '#fff',
                 pointBorderWidth: 2,
-                pointRadius: 6,
-                pointHoverRadius: 8
+                pointRadius: 4,
+                pointHoverRadius: 6
             }]
         },
         options: {
@@ -268,12 +243,11 @@ function initDoctorDashboard() {
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
-                x: { grid: { display: false }, ticks: { color: '#6B7280', font: { size: 12 } } },
-                y: { beginAtZero: true, grid: { color: 'rgba(229, 224, 216, 0.3)' }, ticks: { color: '#6B7280', font: { size: 12 } } }
+                x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 11 } } },
+                y: { beginAtZero: true, grid: { color: 'rgba(148, 163, 184, 0.2)' }, ticks: { color: '#94a3b8', font: { size: 11 } } }
             }
         }
     });
-}
-document.addEventListener('turbo:load', initDoctorDashboard);
+});
 </script>
 {% endblock %}

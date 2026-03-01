@@ -1,0 +1,183 @@
+﻿{% extends 'layouts/admin.html.twig' %}
+
+{% block title %}Modifier {{ evenement.title }} - AutiCare Admin{% endblock %}
+
+{% block admin_content %}
+<div class="max-w-2xl">
+    <div class="mb-6 flex items-center gap-4">
+        <a href="{{ path('admin_evenement_show', { id: evenement.id }) }}" class="inline-flex items-center gap-2 text-[#6B7280] hover:text-[#A7C7E7] focus:outline focus:ring-2 focus:ring-[#A7C7E7] rounded-lg">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            Retour ├á l'├®v├®nement
+        </a>
+    </div>
+    <h1 class="text-2xl font-semibold text-[#4B5563] mb-6">Modifier l'├®v├®nement</h1>
+
+    <div class="bg-white rounded-xl border border-[#E5E0D8] p-6 md:p-8">
+        {{ form_start(form, {
+            attr: { class: 'space-y-6', novalidate: 'novalidate', autocomplete: 'off', 'data-turbo': 'false' },
+            label_attr: { class: 'block text-[#4B5563] font-medium mb-1' }
+        }) }}
+        <div class="grid grid-cols-1 gap-6">
+            {{ form_row(form.title) }}
+            <div class="space-y-2">
+                {{ form_row(form.description) }}
+                <div class="flex flex-wrap gap-2">
+                    <button type="button" id="btn-ia-resumer" class="px-3 py-2 rounded-lg border border-emerald-500 bg-emerald-50 text-emerald-700 text-sm font-medium hover:bg-emerald-100">R├®sumer avec l'IA</button>
+                    <button type="button" id="btn-ia-sugg├®rer" class="px-3 py-2 rounded-lg border border-sky-500 bg-sky-50 text-sky-700 text-sm font-medium hover:bg-sky-100">Sugg├®rer une description</button>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {{ form_row(form.dateEvent) }}
+                {{ form_row(form.heureDebut) }}
+                {{ form_row(form.heureFin) }}
+            </div>
+            {{ form_row(form.mode) }}
+            {{ form_row(form.lieu) }}
+            <div class="presentiel-location-row" data-visible-mode="presentiel" style="{{ evenement.mode == 'presentiel' ? '' : 'display:none' }}">
+                {{ form_row(form.locationUrl) }}
+                <div class="flex flex-wrap items-end gap-4">
+                    <div class="flex-1 min-w-[140px]">{{ form_row(form.latitude) }}</div>
+                    <div class="flex-1 min-w-[140px]">{{ form_row(form.longitude) }}</div>
+                    <div>
+                        <label class="block text-[#4B5563] font-medium mb-1">&nbsp;</label>
+                        <button type="button" id="btn-geocode" class="px-4 py-2.5 rounded-lg border border-[#A7C7E7] bg-[#A7C7E7]/20 text-[#4B5563] font-medium hover:bg-[#A7C7E7]/30 focus:outline focus:ring-2 focus:ring-[#A7C7E7]" title="Recherche approximative ├á partir du texte du lieu">
+                            R├®cup├®rer les coordonn├®es (lieu)
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-end gap-4 zoom-meeting-row" data-visible-mode="en_ligne,hybride" style="{{ (evenement.mode == 'en_ligne' or evenement.mode == 'hybride') ? '' : 'display:none' }}">
+                <div class="flex-1 min-w-[200px]">{{ form_row(form.meetingUrl) }}</div>
+                <div>
+                    <label class="block text-[#4B5563] font-medium mb-1">&nbsp;</label>
+                    <button type="button" id="btn-generer-zoom" class="px-4 py-2.5 rounded-lg border border-[#A7C7E7] bg-[#A7C7E7]/20 text-[#4B5563] font-medium hover:bg-[#A7C7E7]/30 focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                        G├®n├®rer le lien Zoom
+                    </button>
+                </div>
+            </div>
+            {{ form_row(form.thematique) }}
+        </div>
+        <div class="flex flex-wrap gap-3 pt-4">
+            <button type="submit" class="px-5 py-2.5 rounded-lg bg-[#A7C7E7] text-white font-medium hover:bg-[#B8D4ED] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                Enregistrer
+            </button>
+            <a href="{{ path('admin_evenement_show', { id: evenement.id }) }}" class="px-5 py-2.5 rounded-lg border border-[#E5E0D8] text-[#6B7280] font-medium hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                Annuler
+            </a>
+        </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+<script>
+(function() {
+    var btn = document.getElementById('btn-geocode');
+    var lieuInput = document.querySelector('input[name="{{ form.lieu.vars.full_name }}"]');
+    var latInput = document.querySelector('input[name="{{ form.latitude.vars.full_name }}"]');
+    var lngInput = document.querySelector('input[name="{{ form.longitude.vars.full_name }}"]');
+    var locationUrlInput = document.querySelector('input[name="{{ form.locationUrl.vars.full_name }}"]');
+    if (!btn || !lieuInput || !latInput || !lngInput) return;
+    var url = '{{ path('admin_evenement_geocode')|e('js') }}';
+    btn.addEventListener('click', function() {
+        var address = lieuInput.value.trim();
+        if (!address) { alert('Renseignez d\'abord le lieu / adresse.'); return; }
+        btn.disabled = true;
+        btn.textContent = 'RechercheÔÇª';
+        fetch(url + '?address=' + encodeURIComponent(address))
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.lat != null && data.lng != null) {
+                    latInput.value = data.lat;
+                    lngInput.value = data.lng;
+                    if (locationUrlInput) {
+                        locationUrlInput.value = 'https://www.google.com/maps?q=' + encodeURIComponent(data.lat + ',' + data.lng);
+                    }
+                } else {
+                    alert(data.error || 'Adresse introuvable.');
+                }
+            })
+            .catch(function() { alert('Erreur r├®seau.'); })
+            .finally(function() { btn.disabled = false; btn.textContent = 'R├®cup├®rer les coordonn├®es (lieu)'; });
+    });
+
+    function dateToYmd(val) {
+        if (!val) return '';
+        var parts = String(val).trim().split(/[\/\-.]/);
+        if (parts.length !== 3) return val;
+        var d = parts[0], m = parts[1], y = parts[2];
+        if (y.length === 4) return y + '-' + m.padStart(2, '0') + '-' + d.padStart(2, '0');
+        if (d.length === 4) return d + '-' + m.padStart(2, '0') + '-' + y.padStart(2, '0');
+        return val;
+    }
+    var zoomRow = document.querySelector('.zoom-meeting-row');
+    var presentielRow = document.querySelector('.presentiel-location-row');
+    var modeSelect = document.querySelector('select[name="{{ form.mode.vars.full_name }}"]');
+    var meetingUrlInput = document.querySelector('input[name="{{ form.meetingUrl.vars.full_name }}"]');
+    var btnZoom = document.getElementById('btn-generer-zoom');
+    var genererZoomUrl = '{{ path('admin_evenement_generer_zoom', { id: evenement.id })|e('js') }}';
+    var zoomToken = '{{ csrf_token('admin_evenement_generer_zoom_' ~ evenement.id)|e('js') }}';
+    function toggleZoomRow() {
+        var mode = modeSelect ? modeSelect.value : '';
+        if (zoomRow) zoomRow.style.display = (mode === 'en_ligne' || mode === 'hybride') ? '' : 'none';
+    }
+    function togglePresentielRow() {
+        var mode = modeSelect ? modeSelect.value : '';
+        if (presentielRow) presentielRow.style.display = (mode === 'presentiel') ? '' : 'none';
+    }
+    if (modeSelect) {
+        modeSelect.addEventListener('change', function() { toggleZoomRow(); togglePresentielRow(); });
+        toggleZoomRow();
+        togglePresentielRow();
+    }
+    if (btnZoom && meetingUrlInput) {
+        btnZoom.addEventListener('click', function() {
+            var mode = modeSelect ? modeSelect.value : '';
+            if (mode !== 'en_ligne' && mode !== 'hybride') {
+                alert('S├®lectionnez d\'abord le mode ┬½ En ligne ┬╗ ou ┬½ Hybride ┬╗ pour g├®n├®rer un lien Zoom.');
+                return;
+            }
+            btnZoom.disabled = true;
+            btnZoom.textContent = 'G├®n├®rationÔÇª';
+            var body = new FormData();
+            body.append('_token', zoomToken);
+            body.append('mode', mode);
+            fetch(genererZoomUrl, { method: 'POST', body: body })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.join_url) {
+                        meetingUrlInput.value = data.join_url;
+                    } else {
+                        alert(data.error || 'Impossible de cr├®er la r├®union Zoom.');
+                    }
+                })
+                .catch(function() { alert('Erreur r├®seau.'); })
+                .finally(function() { btnZoom.disabled = false; btnZoom.textContent = 'G├®n├®rer le lien Zoom'; });
+        });
+    }
+
+    var descInput = document.querySelector('textarea[name="{{ form.description.vars.full_name }}"]');
+    var lieuInputEv = document.querySelector('input[name="{{ form.lieu.vars.full_name }}"]');
+    var dateInput = document.querySelector('input[name="{{ form.dateEvent.vars.full_name }}"]');
+    var themeSelect = document.querySelector('select[name="{{ form.thematique.vars.full_name }}"]');
+    var baseUrl = '{{ path('admin_api_ai_summarize')|e('js') }}'.replace('/summarize', '');
+    var opts = { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' };
+    document.getElementById('btn-ia-resumer')?.addEventListener('click', function() {
+        var text = descInput?.value?.trim() || '';
+        if (!text) { alert('Saisissez d\'abord une description ├á r├®sumer.'); return; }
+        this.disabled = true; this.textContent = 'En coursÔÇª';
+        fetch(baseUrl + '/summarize', { ...opts, body: JSON.stringify({ text: text }) })
+            .then(function(r) { if (!r.ok) return r.json().catch(function() { return {}; }).then(function(d) { throw new Error(d.error || 'Erreur ' + r.status); }); return r.json(); })
+            .then(function(d) { if (d.summary) descInput.value = d.summary; else alert(d.error || 'R├®sum├® indisponible.'); })
+            .catch(function(e) { alert(e && e.message ? e.message : 'Erreur r├®seau.'); })
+            .finally(function() { this.disabled = false; this.textContent = 'R├®sumer avec l\'IA'; }.bind(this));
+    });
+    document.getElementById('btn-ia-sugg├®rer')?.addEventListener('click', function() {
+        var lieu = lieuInputEv?.value?.trim() || '', date = dateToYmd(dateInput?.value || ''), theme = themeSelect?.options[themeSelect.selectedIndex]?.text || '';
+        this.disabled = true; this.textContent = 'En coursÔÇª';
+        fetch(baseUrl + '/suggest-description', { ...opts, body: JSON.stringify({ lieu: lieu, thematique: theme, date: date }) }).then(function(r) { return r.json(); })
+            .then(function(d) { if (d.suggestion && descInput) descInput.value = d.suggestion; })
+            .catch(function() { alert('Erreur r├®seau.'); })
+            .finally(function() { this.disabled = false; this.textContent = 'Sugg├®rer une description'; }.bind(this));
+    });
+})();
+</script>
+{% endblock %}

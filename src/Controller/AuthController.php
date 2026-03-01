@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use App\EventSubscriber\LoginValidationSubscriber;
-use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils; 
 
 final class AuthController extends AbstractController
 {
@@ -36,49 +36,12 @@ final class AuthController extends AbstractController
             }
             return $this->redirectToRoute('home');
         }
-<<<<<<< HEAD
-=======
-
-        $session = $request->getSession();
-        $targetPath = $request->query->get('_target_path') ?? $request->request->get('_target_path');
-        // N'accepter qu'un chemin relatif (ex. /rendez-vous/prendre/5?etape=2) pour éviter les redirections ouvertes
-        if (\is_string($targetPath) && $targetPath !== '' && str_starts_with($targetPath, '/') && !str_starts_with($targetPath, '//')) {
-            $session->set('_security.main.target_path', $targetPath);
-        }
-
-        $validationErrors = $session->remove(LoginValidationSubscriber::SESSION_VALIDATION_ERRORS);
-        $lastUsernameFromValidation = $session->remove(LoginValidationSubscriber::SESSION_LAST_USERNAME);
-
-        $error = $authenticationUtils->getLastAuthenticationError();
-        $lastUsername = $lastUsernameFromValidation !== null && $lastUsernameFromValidation !== ''
-            ? $lastUsernameFromValidation
-            : $authenticationUtils->getLastUsername();
-        $this->regenerateLoginCaptcha($request);
-
-        return $this->render('front/auth/login.html.twig', [
-            'last_username' => $lastUsername,
-            'error' => $error,
-            'errors' => $validationErrors ?? [],
-            'target_path' => $targetPath,
-            'captcha_image_url' => $this->generateUrl('app_login_captcha_image', ['_t' => time()]),
-        ]);
-    }
-
-    #[Route('/connexion/faciale', name: 'app_login_face', methods: ['GET'])]
-    public function faceLogin(Request $request): Response
-    {
-        $user = $this->getUser();
-        if ($user instanceof User) {
-            return $this->redirectToRoute('home');
-        }
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
 
         $targetPath = $request->query->get('_target_path') ?? $request->request->get('_target_path');
         if ($targetPath !== null && $targetPath !== '') {
             $request->getSession()->set('_security.main.target_path', $targetPath);
         }
 
-<<<<<<< HEAD
         $session = $request->getSession();
         $validationErrors = $session->remove(LoginValidationSubscriber::SESSION_VALIDATION_ERRORS);
         $lastUsernameFromValidation = $session->remove(LoginValidationSubscriber::SESSION_LAST_USERNAME);
@@ -113,10 +76,6 @@ final class AuthController extends AbstractController
 
         return $this->render('front/auth/face_login.html.twig', [
             'target_path' => $targetPath,
-=======
-        return $this->render('front/auth/face_login.html.twig', [
-            'target_path' => $targetPath,
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
         ]);
     }
 

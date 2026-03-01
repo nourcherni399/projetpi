@@ -78,3 +78,4 @@ PROMPT;
         return trim($content);
     }
 }
+

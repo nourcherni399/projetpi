@@ -300,7 +300,7 @@
 </div>
 
 <script>
-function initAvailabilityImproved() {
+document.addEventListener('DOMContentLoaded', function() {
     const btnNouvelleDispo = document.getElementById('btn-nouvelle-dispo');
     const btnCancelDispo = document.getElementById('btn-cancel-dispo');
     const formNouvelleDispo = document.getElementById('form-nouvelle-dispo');
@@ -319,7 +319,6 @@ function initAvailabilityImproved() {
             formNouvelleDispo.setAttribute('aria-hidden', 'true');
         });
     }
-}
-document.addEventListener('turbo:load', initAvailabilityImproved);
+});
 </script>
 {% endblock %}

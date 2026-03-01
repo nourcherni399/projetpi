@@ -3,18 +3,32 @@
 {% block title %}Finaliser la commande - AutiCare{% endblock %}
 
 {% block user_content %}
-<section class="text-center mb-10">
-    <h1 class="text-3xl font-bold text-[#4B5563] mb-3">Finaliser votre commande</h1>
-    <p class="text-[#6B7280]">Vos informations liées au compte sont pré-remplies. Complétez l'adresse et le mode de paiement.</p>
+<section class="text-center mb-12">
+    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#E8DCF0]/40 text-[#5C5C5C] text-sm font-medium mb-4">
+        <svg class="w-5 h-5 text-[#CDB4DB]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+        </svg>
+        Finalisation de commande
+    </div>
+    <h1 class="text-3xl md:text-4xl font-bold text-[#3D3D3D] dark:text-gray-100 mb-3">Finaliser votre commande</h1>
+    <p class="text-[#5C5C5C] dark:text-gray-300 max-w-2xl mx-auto text-lg">Vos informations liées au compte sont pré-remplies. Complétez l'adresse et le mode de paiement.</p>
 </section>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
     <div class="lg:col-span-2">
         {{ form_start(form, { attr: { class: 'space-y-6', novalidate: 'novalidate', id: 'checkout-form' } }) }}
-            <div id="checkout-validation-errors" class="hidden mb-4 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-sm"></div>
-            <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
-                <h2 class="text-xl font-semibold text-[#4B5563] mb-4">Informations personnelles</h2>
-                <p class="text-sm text-[#6B7280] mb-4">Ces champs sont pré-remplis depuis votre compte. L’adresse email indiquée ici recevra le mail de confirmation de paiement (vous pouvez la modifier si la commande est pour quelqu’un d’autre).</p>
+            <div id="checkout-validation-errors" class="hidden mb-4 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-800 text-sm"></div>
+            
+            <div class="bg-white dark:bg-gray-600/70 rounded-3xl border-2 border-[#E8DCF0] dark:border-gray-600 p-6 shadow-pastel">
+                <h2 class="text-xl font-semibold text-[#3D3D3D] dark:text-gray-100 mb-4 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-[#CDB4DB]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                    </svg>
+                    Informations personnelles
+                </h2>
+                <p class="text-sm text-[#5C5C5C] dark:text-gray-300 mb-4 bg-[#F5F1EB] dark:bg-gray-600/40 p-4 rounded-2xl">
+                    Ces champs sont pré-remplis depuis votre compte. L'adresse email indiquée ici recevra le mail de confirmation de paiement (vous pouvez la modifier si la commande est pour quelqu'un d'autre).
+                </p>
                 <div class="space-y-4">
                     {{ form_row(form.nom) }}
                     {{ form_row(form.email) }}
@@ -22,8 +36,14 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
-                <h2 class="text-xl font-semibold text-[#4B5563] mb-4">Adresse de livraison</h2>
+            <div class="bg-white dark:bg-gray-600/70 rounded-3xl border-2 border-[#D4E5D0] dark:border-gray-600 p-6 shadow-pastel">
+                <h2 class="text-xl font-semibold text-[#3D3D3D] dark:text-gray-100 mb-4 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-[#A8BBA3]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                    </svg>
+                    Adresse de livraison
+                </h2>
                 <div class="space-y-4">
                     {{ form_row(form.adresse) }}
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -33,65 +53,103 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
-                <h2 class="text-xl font-semibold text-[#4B5563] mb-4">Mode de paiement</h2>
-                <div class="mode-payment-wrap space-y-2">
-                    {{ form_label(form.modePayment) }}
-                    {{ form_widget(form.modePayment) }}
+            <div class="bg-white dark:bg-gray-600/70 rounded-3xl border-2 border-[#DFEEF5] dark:border-gray-600 p-6 shadow-pastel">
+                <h2 class="text-xl font-semibold text-[#3D3D3D] dark:text-gray-100 mb-4 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-[#B5D4E8]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+                    </svg>
+                    Mode de paiement
+                </h2>
+                <div class="mode-payment-wrap space-y-3">
+                    {{ form_label(form.modePayment, null, { label_attr: { class: 'block text-sm font-medium text-[#5C5C5C] dark:text-gray-300 mb-2' } }) }}
+                    {{ form_widget(form.modePayment, { attr: { class: 'space-y-2' } }) }}
                     {{ form_errors(form.modePayment) }}
-                    <!-- Formulaire carte - affiché par CSS quand Carte Bancaire est sélectionné (aucun JavaScript) -->
-                    <div id="card-payment" class="mt-6 bg-[#F5F1EB] rounded-lg p-6 border border-[#E5E0D8] card-payment-toggle">
-                    <input type="hidden" name="stripe_payment_method_id" id="stripe_payment_method_id" value="">
-                    <h3 class="font-semibold text-[#4B5563] mb-2">Détails de la carte bancaire</h3>
-                    <p class="text-sm text-[#6B7280] mb-4">Complétez ces champs uniquement si vous avez choisi le paiement par carte bancaire ci-dessus.</p>
-                    {% if stripePublishableKey %}
-                    <p class="text-sm text-[#6B7280] mb-4">Paiement sécurisé par Stripe. Vos données bancaires ne transitent jamais par nos serveurs.</p>
-                    <div id="card-element-wrapper" class="card-input-wrapper p-4 rounded-lg border border-[#E5E0D8] bg-white">
-                        <div id="card-element"></div>
+                    
+                    <!-- Formulaire carte - affiché par CSS quand Carte Bancaire est sélectionné -->
+                    <div id="card-payment" class="mt-6 bg-[#F5F1EB] dark:bg-gray-600/40 rounded-2xl p-6 border-2 border-[#E8DCF0] dark:border-gray-600 card-payment-toggle">
+                        <input type="hidden" name="stripe_payment_method_id" id="stripe_payment_method_id" value="">
+                        <h3 class="font-semibold text-[#3D3D3D] dark:text-gray-100 mb-2 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-[#CDB4DB]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                            </svg>
+                            Détails de la carte bancaire
+                        </h3>
+                        <p class="text-sm text-[#5C5C5C] dark:text-gray-300 mb-4">Complétez ces champs uniquement si vous avez choisi le paiement par carte bancaire ci-dessus.</p>
+                        
+                        {% if stripePublishableKey %}
+                        <p class="text-sm text-[#5C5C5C] dark:text-gray-300 mb-4 bg-white dark:bg-gray-600/70 p-3 rounded-xl border border-[#E8DCF0]">
+                            <span class="font-medium">Paiement sécurisé par Stripe.</span> Vos données bancaires ne transitent jamais par nos serveurs.
+                        </p>
+                        <div id="card-element-wrapper" class="card-input-wrapper p-4 rounded-xl border-2 border-[#E8DCF0] dark:border-gray-600 bg-white dark:bg-gray-700">
+                            <div id="card-element"></div>
+                        </div>
+                        <p id="card-element-error" class="hidden mt-2 text-sm text-red-600"></p>
+                        {# Masqués pour éviter le doublon avec form_rest - Stripe gère tout #}
+                        <div class="hidden">{{ form_row(form.cardNumber) }}{{ form_row(form.cardExpiry) }}</div>
+                        {% else %}
+                        <div class="space-y-4" id="card-fallback-form">
+                            {{ form_row(form.cardNumber, { row_attr: { class: 'form-group mb-4' }, label_attr: { class: 'block text-sm font-medium text-[#5C5C5C] dark:text-gray-300 mb-2' } }) }}
+                            {{ form_row(form.cardExpiry, { row_attr: { class: 'form-group mb-4' }, label_attr: { class: 'block text-sm font-medium text-[#5C5C5C] dark:text-gray-300 mb-2' } }) }}
+                        </div>
+                        {% endif %}
                     </div>
-                    <p id="card-element-error" class="hidden mt-2 text-sm text-red-600">Veuillez corriger les erreurs ci-dessus.</p>
-                    {% else %}
-                    <div class="space-y-4" id="card-fallback-form">
-                        {{ form_row(form.cardNumber, { row_attr: { class: 'form-group mb-4' }, label_attr: { class: 'block text-sm font-medium text-[#4B5563] mb-2' } }) }}
-                        {{ form_row(form.cardExpiry, { row_attr: { class: 'form-group mb-4' }, label_attr: { class: 'block text-sm font-medium text-[#4B5563] mb-2' } }) }}
-                    </div>
-                    {% endif %}
                 </div>
             </div>
 
-            <div class="flex flex-wrap gap-4 mt-6">
-                <button type="submit" class="px-6 py-3 bg-[#3B82F6] text-white rounded-lg font-semibold hover:bg-[#2563EB] transition">
-                    Confirmer la Commande
+            <div class="flex flex-wrap gap-4 mt-8">
+                <button type="submit" class="inline-flex items-center gap-2 px-7 py-4 rounded-2xl bg-[#CDB4DB] text-white font-semibold hover:bg-[#B8A4CC] shadow-pastel transition-all hover:scale-105">
+                    Confirmer la commande
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
                 </button>
-                <a href="{{ path('cart_index') }}" class="px-6 py-3 bg-white border border-[#E5E0D8] text-[#4B5563] rounded-lg font-semibold hover:bg-[#F5F1EB] transition inline-block">
-                    Retour au Panier
+                <a href="{{ path('cart_index') }}" class="inline-flex items-center gap-2 px-7 py-4 rounded-2xl border-2 border-[#E8DED5] bg-white dark:bg-gray-700 text-[#5C5C5C] dark:text-gray-200 font-semibold hover:bg-[#FFF8F0] dark:hover:bg-gray-600 transition-all">
+                    Retour au panier
                 </a>
             </div>
         {{ form_end(form) }}
     </div>
 
     <div>
-        <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6 sticky top-20">
-            <h3 class="text-lg font-semibold text-[#4B5563] mb-4">Résumé de la commande</h3>
-            <div class="space-y-3 mb-6 pb-6 border-b border-[#E5E0D8]">
+        <div class="bg-white dark:bg-gray-600/70 rounded-3xl border-2 border-[#FAEDE8] dark:border-gray-600 p-6 shadow-pastel sticky top-20">
+            <h3 class="text-lg font-semibold text-[#3D3D3D] dark:text-gray-100 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-[#F0D5C8]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                </svg>
+                Résumé de la commande
+            </h3>
+            
+            <div class="space-y-3 mb-6 pb-6 border-b-2 border-[#FAEDE8] dark:border-gray-600">
                 {% for item in cart.items %}
-                <div class="flex justify-between text-sm text-[#6B7280]">
-                    <span>{{ item.produit.nom }} x {{ item.quantite }}</span>
-                    <span>{{ item.totalPrice|number_format(2, ',', ' ') }} dt</span>
+                <div class="flex justify-between text-sm text-[#5C5C5C] dark:text-gray-300">
+                    <span>{{ item.produit.nom }} <span class="text-[#CDB4DB] font-medium">x{{ item.quantite }}</span></span>
+                    <span class="font-medium">{{ item.totalPrice|number_format(2, ',', ' ') }} dt</span>
                 </div>
                 {% endfor %}
-                <div class="flex justify-between text-[#6B7280] text-sm pt-2">
+                <div class="flex justify-between text-[#5C5C5C] dark:text-gray-300 text-sm pt-2">
                     <span>Nombre d'articles :</span>
-                    <span>{{ totalItems }}</span>
+                    <span class="font-medium">{{ totalItems }}</span>
                 </div>
             </div>
-            <div class="flex justify-between text-lg font-bold text-[#4B5563] mb-6">
+            
+            <div class="flex justify-between text-xl font-bold text-[#3D3D3D] dark:text-gray-100 mb-6">
                 <span>Total :</span>
-                <span class="text-[#A7C7E7]">{{ totalPrice|number_format(2, ',', ' ') }} dt</span>
+                <span class="text-[#CDB4DB]">{{ totalPrice|number_format(2, ',', ' ') }} dt</span>
             </div>
-            <div class="bg-[#F5F1EB] rounded-lg p-4 text-sm text-[#6B7280]">
-                <p><strong>Livraison gratuite</strong> partout en Tunisie.</p>
-                <p class="mt-2">Votre commande sera livrée dans 2-3 jours ouvrables.</p>
+            
+            <div class="bg-[#FAEDE8] dark:bg-gray-600/40 rounded-2xl p-4 text-sm text-[#5C5C5C] dark:text-gray-300 border-2 border-[#F0D5C8]/50">
+                <div class="flex items-start gap-2 mb-2">
+                    <svg class="w-5 h-5 text-[#A8BBA3] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <p><span class="font-medium text-[#A8BBA3]">Livraison gratuite</span> partout en Tunisie</p>
+                </div>
+                <div class="flex items-start gap-2">
+                    <svg class="w-5 h-5 text-[#B5D4E8] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p>Votre commande sera livrée dans <span class="font-medium text-[#B5D4E8]">2-3 jours ouvrables</span></p>
+                </div>
             </div>
         </div>
     </div>
@@ -101,10 +159,58 @@
 /* Affichage formulaire carte : CSS pur, aucun JavaScript nécessaire */
 .card-payment-toggle { display: none !important; }
 .mode-payment-wrap:has(input[value="carte_bancaire"]:checked) .card-payment-toggle { display: block !important; }
+
+/* Style pour les radios de paiement */
+.mode-payment-wrap input[type="radio"] {
+    accent-color: #CDB4DB;
+    width: 1.2rem;
+    height: 1.2rem;
+    margin-right: 0.5rem;
+}
+
+.mode-payment-wrap .form-check {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    border: 2px solid #E8DCF0;
+    border-radius: 1rem;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s;
+    background-color: white;
+}
+
+.mode-payment-wrap .form-check:has(input:checked) {
+    border-color: #CDB4DB;
+    background-color: #FDF8F5;
+}
+
+/* Mode sombre */
+.dark .mode-payment-wrap .form-check {
+    background-color: rgba(75, 85, 99, 0.7);
+    border-color: #4B5563;
+}
+
+.dark .mode-payment-wrap .form-check:has(input:checked) {
+    border-color: #CDB4DB;
+    background-color: rgba(75, 85, 99, 0.9);
+}
+
+/* Style Stripe Element */
+.StripeElement {
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    background-color: white;
+}
+
+.dark .StripeElement {
+    background-color: #374151;
+}
 </style>
+
 {% if stripePublishableKey %}
 <script src="https://js.stripe.com/v3/"></script>
 {% endif %}
+
 <script>
 (function() {
     function runCheckoutCardScript() {
@@ -117,79 +223,148 @@
         if (stripePk && document.getElementById('card-element') && typeof Stripe !== 'undefined') {
             stripe = Stripe(stripePk);
             var elements = stripe.elements();
-            cardElement = elements.create('card', { style: { base: { fontSize: '16px', color: '#4B5563' } } });
+            cardElement = elements.create('card', { 
+                style: { 
+                    base: { 
+                        fontSize: '16px', 
+                        color: '#4B5563',
+                        fontFamily: 'system-ui, -apple-system, sans-serif',
+                        '::placeholder': { color: '#9CA3AF' }
+                    } 
+                } 
+            });
             cardElement.mount('#card-element');
-            cardElement.on('change', function(ev) { setCardElementError(!!ev.error); });
+            cardElement.on('change', function(ev) { setCardElementError(!!ev.error, ev.error ? ev.error.message : null); });
         }
 
-    function clearCardErrors() {
-        var w = document.getElementById('card-element-wrapper'); if (w) w.classList.remove('border-red-500', 'bg-red-50');
-        var e = document.getElementById('card-element-error'); if (e) e.classList.add('hidden');
-        document.querySelectorAll('#card-payment .form-group').forEach(function(w){
-            w.classList.remove('bg-red-50'); w.querySelectorAll('input').forEach(function(i){ i.classList.remove('border-red-500'); });
-            var err = w.querySelector('.text-red-600'); if (err) err.textContent = '';
+        function clearCardErrors() {
+            var w = document.getElementById('card-element-wrapper'); 
+            if (w) w.classList.remove('border-red-500', 'bg-red-50');
+            var e = document.getElementById('card-element-error'); 
+            if (e) e.classList.add('hidden');
+            
+            document.querySelectorAll('#card-payment .form-group').forEach(function(w){
+                w.classList.remove('bg-red-50'); 
+                w.querySelectorAll('input').forEach(function(i){ i.classList.remove('border-red-500'); });
+                var err = w.querySelector('.text-red-600'); 
+                if (err) err.textContent = '';
+            });
+        }
+
+        function setCardElementError(show, message) {
+            var w = document.getElementById('card-element-wrapper'); 
+            if (!w) return;
+            if (show) { 
+                w.classList.add('border-red-500', 'bg-red-50'); 
+            } else { 
+                w.classList.remove('border-red-500', 'bg-red-50'); 
+            }
+            var e = document.getElementById('card-element-error'); 
+            if (e) { 
+                e.classList.toggle('hidden', !show); 
+                e.textContent = (show && message) ? message : '';
+            }
+        }
+
+        function luhnCheck(num) {
+            var n = (num || '').replace(/\D/g,'');
+            if (n.length < 13 || n.length > 19) return false;
+            var sum = 0, alt = false;
+            for (var i = n.length - 1; i >= 0; i--) {
+                var d = parseInt(n[i],10); 
+                if (alt) d *= 2; 
+                if (d > 9) d -= 9; 
+                sum += d; 
+                alt = !alt;
+            }
+            return sum % 10 === 0;
+        }
+
+        function validateExpiry(val) {
+            var m = /^(\d{2})\/(\d{2})$/.exec((val || '').trim());
+            if (!m) return false;
+            var mm = parseInt(m[1],10), yy = parseInt(m[2],10) + 2000;
+            if (mm < 1 || mm > 12) return false;
+            var now = new Date(); 
+            var y = now.getFullYear(), mnow = now.getMonth() + 1;
+            return yy > y || (yy === y && mm >= mnow);
+        }
+
+        function validateFallbackCard() {
+            var cardNum = document.querySelector('[name*="[cardNumber]"]');
+            var cardExp = document.querySelector('[name*="[cardExpiry]"]');
+            if (!cardNum || !cardExp) return true;
+            var ok = true;
+            
+            document.querySelectorAll('#card-payment .form-group').forEach(function(w){ 
+                w.classList.remove('bg-red-50'); 
+                w.querySelectorAll('input').forEach(function(i){ i.classList.remove('border-red-500'); }); 
+                var err = w.querySelector('.text-red-600'); 
+                if (err) err.textContent = ''; 
+            });
+            
+            if (!luhnCheck(cardNum.value)) { 
+                var row = cardNum.closest('.form-group'); 
+                if (row) row.classList.add('bg-red-50'); 
+                cardNum.classList.add('border-red-500'); 
+                var err = cardNum.closest('.form-group')?.querySelector('.text-red-600'); 
+                if (err) { 
+                    err.textContent = 'Numéro de carte invalide'; 
+                    err.style.display = ''; 
+                } 
+                ok = false; 
+            }
+            
+            if (!validateExpiry(cardExp.value)) { 
+                var row = cardExp.closest('.form-group'); 
+                if (row) row.classList.add('bg-red-50'); 
+                cardExp.classList.add('border-red-500'); 
+                var err = cardExp.closest('.form-group')?.querySelector('.text-red-600'); 
+                if (err) { 
+                    err.textContent = 'Format invalide (MM/YY requis)'; 
+                    err.style.display = ''; 
+                } 
+                ok = false; 
+            }
+            return ok;
+        }
+
+        var submittingStripe = false;
+        form.addEventListener('submit', function(e) {
+            if (submittingStripe) return;
+            
+            var checked = document.querySelector('input[name*="modePayment"]:checked');
+            var isCard = checked && checked.value === 'carte_bancaire';
+            
+            if (!isCard) { 
+                document.getElementById('stripe_payment_method_id').value = ''; 
+                return; 
+            }
+
+            if (stripePk && cardElement) {
+                e.preventDefault();
+                setCardElementError(false);
+                
+                stripe.createPaymentMethod({ type: 'card', card: cardElement }).then(function(r) {
+                    if (r.error) { 
+                        setCardElementError(true, r.error.message || 'Veuillez corriger les informations de carte.'); 
+                        return; 
+                    }
+                    document.getElementById('stripe_payment_method_id').value = r.paymentMethod.id;
+                    submittingStripe = true;
+                    form.submit();
+                });
+            } else {
+                if (!validateFallbackCard()) e.preventDefault();
+            }
         });
     }
 
-    function setCardElementError(show) {
-        var w = document.getElementById('card-element-wrapper'); if (!w) return;
-        if (show) { w.classList.add('border-red-500', 'bg-red-50'); } else { w.classList.remove('border-red-500', 'bg-red-50'); }
-        var e = document.getElementById('card-element-error'); if (e) e.classList.toggle('hidden', !show);
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', runCheckoutCardScript);
+    } else {
+        runCheckoutCardScript();
     }
-
-    function luhnCheck(num) {
-        var n = (num || '').replace(/\D/g,'');
-        if (n.length < 13 || n.length > 19) return false;
-        var sum = 0, alt = false;
-        for (var i = n.length - 1; i >= 0; i--) {
-            var d = parseInt(n[i],10); if (alt) d *= 2; if (d > 9) d -= 9; sum += d; alt = !alt;
-        }
-        return sum % 10 === 0;
-    }
-
-    function validateExpiry(val) {
-        var m = /^(\d{2})\/(\d{2})$/.exec((val || '').trim());
-        if (!m) return false;
-        var mm = parseInt(m[1],10), yy = parseInt(m[2],10) + 2000;
-        if (mm < 1 || mm > 12) return false;
-        var now = new Date(); var y = now.getFullYear(), mnow = now.getMonth() + 1;
-        return yy > y || (yy === y && mm >= mnow);
-    }
-
-    function validateFallbackCard() {
-        var cardNum = document.querySelector('[name*="[cardNumber]"]');
-        var cardExp = document.querySelector('[name*="[cardExpiry]"]');
-        if (!cardNum || !cardExp) return true;
-        var ok = true;
-        document.querySelectorAll('#card-payment .form-group').forEach(function(w){ w.classList.remove('bg-red-50'); w.querySelectorAll('input').forEach(function(i){ i.classList.remove('border-red-500'); }); var err = w.querySelector('.text-red-600'); if (err) err.textContent = ''; });
-        if (!luhnCheck(cardNum.value)) { var row = cardNum.closest('.form-group'); if (row) row.classList.add('bg-red-50'); cardNum.classList.add('border-red-500'); var err = cardNum.closest('.form-group')?.querySelector('.text-red-600'); if (err) { err.textContent = 'Numéro de carte invalide'; err.style.display = ''; } ok = false; }
-        if (!validateExpiry(cardExp.value)) { var row = cardExp.closest('.form-group'); if (row) row.classList.add('bg-red-50'); cardExp.classList.add('border-red-500'); var err = cardExp.closest('.form-group')?.querySelector('.text-red-600'); if (err) { err.textContent = 'Format invalide (MM/YY requis)'; err.style.display = ''; } ok = false; }
-        return ok;
-    }
-
-    var submittingStripe = false;
-    form.addEventListener('submit', function(e) {
-        if (submittingStripe) return;
-        var checked = document.querySelector('input[name*="modePayment"]:checked');
-        var isCard = checked && checked.value === 'carte_bancaire';
-        if (!isCard) { document.getElementById('stripe_payment_method_id').value = ''; return; }
-
-        if (stripePk && cardElement) {
-            e.preventDefault();
-            setCardElementError(false);
-            stripe.createPaymentMethod({ type: 'card', card: cardElement }).then(function(r) {
-                if (r.error) { setCardElementError(true); return; }
-                document.getElementById('stripe_payment_method_id').value = r.paymentMethod.id;
-                submittingStripe = true;
-                form.submit();
-            });
-        } else {
-            if (!validateFallbackCard()) e.preventDefault();
-        }
-    });
-
-    }
-    document.addEventListener('turbo:load', runCheckoutCardScript);
 })();
 </script>
 {% endblock %}

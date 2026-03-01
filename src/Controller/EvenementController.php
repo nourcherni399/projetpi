@@ -11,31 +11,21 @@ use App\Form\MessageEvenementType;
 use App\Repository\EvenementRepository;
 use App\Repository\InscritEventsRepository;
 use App\Repository\MessageEvenementRepository;
-<<<<<<< HEAD
 use App\Repository\ThematiqueRepository;
 use App\Repository\UserRepository;
 use App\Service\EventReminderService;
 use App\Service\HuggingFaceService;
-=======
-use App\Repository\UserRepository;
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
 use App\Service\NominatimGeocodingService;
 use App\Service\ZoomApiService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-<<<<<<< HEAD
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-=======
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
-<<<<<<< HEAD
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-=======
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
 
 #[Route('/admin/evenements')]
 final class EvenementController extends AbstractController
@@ -45,17 +35,12 @@ final class EvenementController extends AbstractController
         private readonly InscritEventsRepository $inscritEventsRepository,
         private readonly MessageEvenementRepository $messageEvenementRepository,
         private readonly UserRepository $userRepository,
-<<<<<<< HEAD
         private readonly ThematiqueRepository $thematiqueRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly ZoomApiService $zoomApiService,
         private readonly EventReminderService $eventReminderService,
         private readonly HuggingFaceService $huggingFaceService,
         private readonly UrlGeneratorInterface $urlGenerator,
-=======
-        private readonly EntityManagerInterface $entityManager,
-        private readonly ZoomApiService $zoomApiService,
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
     ) {
     }
 
@@ -81,12 +66,9 @@ final class EvenementController extends AbstractController
             $sortOrder = 'asc';
         }
         $evenements = $this->evenementRepository->searchAndSort($q, $sortBy, $sortOrder);
-<<<<<<< HEAD
         $eventIds = array_map(static fn ($e) => (int) $e->getId(), $evenements);
         $unreadByEvent = $this->messageEvenementRepository->countUnreadFromUserByEvenementIds($eventIds);
 
-=======
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
         $totalEvenements = $this->evenementRepository->countAll();
         $evenementsAvenir = $this->evenementRepository->countUpcoming();
         $evenementsPasses = $this->evenementRepository->countPast();
@@ -94,13 +76,10 @@ final class EvenementController extends AbstractController
         $inscriptionsEnAttente = $this->inscritEventsRepository->countByStatut('en_attente');
         $totalInscriptions = $this->inscritEventsRepository->countTotalInscriptions();
 
-<<<<<<< HEAD
         $session = $request->getSession();
         $upcoming = $session->get(self::SESSION_RECHERCHE_MONDIALE);
         $session->remove(self::SESSION_RECHERCHE_MONDIALE);
 
-=======
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
         return $this->render('admin/evenement/index.html.twig', [
             'evenements' => $evenements,
             'unreadByEvent' => $unreadByEvent,
@@ -113,7 +92,6 @@ final class EvenementController extends AbstractController
             'inscriptionsAcceptees' => $inscriptionsAcceptees,
             'inscriptionsEnAttente' => $inscriptionsEnAttente,
             'totalInscriptions' => $totalInscriptions,
-<<<<<<< HEAD
             'periods' => self::PERIODS_RECHERCHE,
             'upcomingEventsResults' => $upcoming['results'] ?? null,
             'upcomingEventsError' => $upcoming['error'] ?? null,
@@ -122,8 +100,6 @@ final class EvenementController extends AbstractController
             'upcomingSearchQuery' => $upcoming['query'] ?? '',
             'upcomingSearchPeriod' => $upcoming['periodKey'] ?? '2025',
             'huggingface_configured' => $this->huggingFaceService->hasApiKey(),
-=======
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
         ]);
     }
 
@@ -131,7 +107,6 @@ final class EvenementController extends AbstractController
     public function new(Request $request): Response
     {
         $evenement = new Evenement();
-<<<<<<< HEAD
         $prefill = $request->getSession()->remove('idee_evenement_prefill');
         if (\is_array($prefill)) {
             if (!empty($prefill['titre'])) {
@@ -147,8 +122,6 @@ final class EvenementController extends AbstractController
                 }
             }
         }
-=======
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
         $form = $this->createForm(EvenementType::class, $evenement);
         $form->handleRequest($request);
 
@@ -200,7 +173,6 @@ final class EvenementController extends AbstractController
             }
         }
 
-<<<<<<< HEAD
         $imageFileExists = false;
         $imageUrl = null;
         if ($evenement->getImage() !== null && $evenement->getImage() !== '') {
@@ -212,8 +184,6 @@ final class EvenementController extends AbstractController
             }
         }
 
-=======
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
         return $this->render('admin/evenement/show.html.twig', [
             'evenement' => $evenement,
             'participants' => $participants,
@@ -222,7 +192,6 @@ final class EvenementController extends AbstractController
             'conversationUser' => $conversationUser,
             'conversationMessages' => $conversationMessages,
             'replyForm' => $replyForm,
-<<<<<<< HEAD
             'image_file_exists' => $imageFileExists,
             'image_url' => $imageUrl,
             'huggingface_configured' => $this->huggingFaceService->hasApiKey(),
@@ -266,11 +235,6 @@ final class EvenementController extends AbstractController
         return $response;
     }
 
-=======
-        ]);
-    }
-
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
     #[Route('/{id}/message', name: 'admin_evenement_message_reply', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function replyMessage(Request $request, int $id): Response
     {
@@ -312,7 +276,6 @@ final class EvenementController extends AbstractController
         return $this->redirectToRoute('admin_evenement_show', ['id' => $id, 'user' => $userId]);
     }
 
-<<<<<<< HEAD
     #[Route('/message/{messageId}/supprimer', name: 'admin_evenement_message_delete', requirements: ['messageId' => '\d+'], methods: ['POST'])]
     public function deleteMessage(Request $request, int $messageId): Response
     {
@@ -398,7 +361,7 @@ final class EvenementController extends AbstractController
             $result['sentEmail']
         );
         if ($result['sentEmail'] === 0 && $result['sentSms'] === 0) {
-            $this->addFlash('warning', 'Aucun rappel envoyé. Vérifiez que l’événement a des participants avec le statut « Accepté » ou « En attente » et une adresse e-mail renseignée dans leur profil.');
+            $this->addFlash('warning', 'Aucun rappel envoyé. Vérifiez que l\'événement a des participants avec le statut « Accepté » ou « En attente » et une adresse e-mail renseignée dans leur profil.');
         } elseif ($result['errors'] !== []) {
             $this->addFlash('warning', $msg . ' Quelques erreurs : ' . implode(' ; ', array_slice($result['errors'], 0, 3)));
         } else {
@@ -488,8 +451,6 @@ final class EvenementController extends AbstractController
         ]);
     }
 
-=======
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
     #[Route('/{id}/liste-participants.pdf', name: 'admin_evenement_participants_pdf', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function participantsPdf(int $id): Response
     {
@@ -611,7 +572,6 @@ final class EvenementController extends AbstractController
         return new JsonResponse(['lat' => $result['lat'], 'lng' => $result['lng']]);
     }
 
-<<<<<<< HEAD
     /**
      * Génère un lien Zoom sans événement (pour formulaire de création).
      * POST: title, date (Y-m-d), heure_debut (H:i), heure_fin (H:i), mode, _token.
@@ -660,8 +620,6 @@ final class EvenementController extends AbstractController
         return new JsonResponse(['join_url' => $result['join_url']]);
     }
 
-=======
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
     #[Route('/{id}/generer-zoom', name: 'admin_evenement_generer_zoom', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function genererZoom(Request $request, int $id): JsonResponse
     {

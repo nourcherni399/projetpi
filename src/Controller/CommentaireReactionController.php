@@ -99,8 +99,4 @@ final class CommentaireReactionController extends AbstractController
 
         return $this->redirectToRoute('user_blog');
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 454cf3534cd44ab862139630471999260fa62858

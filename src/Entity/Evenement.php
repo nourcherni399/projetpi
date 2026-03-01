@@ -10,8 +10,10 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity(repositoryClass: EvenementRepository::class)]
+#[Assert\Callback(callback: [self::class, 'validateLieuForMode'])]
 class Evenement
 {
     #[ORM\Id]
@@ -41,7 +43,6 @@ class Evenement
     private ?\DateTimeInterface $heureFin = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Assert\NotBlank(message: 'Le lieu est obligatoire.')]
     #[Assert\Length(max: 255, maxMessage: 'Le lieu ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $lieu = null;
 
@@ -90,6 +91,19 @@ class Evenement
     public function __construct()
     {
         $this->inscrits = new ArrayCollection();
+    }
+
+    public static function validateLieuForMode(self $evenement, ExecutionContextInterface $context): void
+    {
+        if ($evenement->getMode() === 'en_ligne') {
+            return; // En ligne : lieu optionnel
+        }
+        $lieu = $evenement->getLieu();
+        if ($lieu === null || trim($lieu) === '') {
+            $context->buildViolation('Le lieu est obligatoire pour les événements présentiels ou hybrides.')
+                ->atPath('lieu')
+                ->addViolation();
+        }
     }
 
     public function getId(): ?int
@@ -246,8 +260,23 @@ class Evenement
             return [(float) $this->latitude, (float) $this->longitude];
         }
         $url = $this->locationUrl;
-        if ($url !== null && preg_match('/@(-?\d+\.?\d*),(-?\d+\.?\d*)/', $url, $m)) {
-            return [(float) $m[1], (float) $m[2]];
+        if ($url !== null) {
+            // Format Google Maps : @lat,lng (ex. .../@35.8288,10.6405,...)
+            if (preg_match('/@(-?\d+\.?\d*),(-?\d+\.?\d*)/', $url, $m)) {
+                $lat = (float) $m[1];
+                $lng = (float) $m[2];
+                if ($lat >= -90 && $lat <= 90 && $lng >= -180 && $lng <= 180) {
+                    return [$lat, $lng];
+                }
+            }
+            // Format ?q=lat,lng ou &q=lat,lng (coordonnées numériques)
+            if (preg_match('/[?&]q=(-?\d+\.?\d*),(-?\d+\.?\d*)(?:[&#]|$)/', $url, $m)) {
+                $lat = (float) $m[1];
+                $lng = (float) $m[2];
+                if ($lat >= -90 && $lat <= 90 && $lng >= -180 && $lng <= 180) {
+                    return [$lat, $lng];
+                }
+            }
         }
         return null;
     }

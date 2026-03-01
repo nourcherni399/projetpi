@@ -1,0 +1,376 @@
+﻿{% extends 'layouts/admin.html.twig' %}
+
+{% block title %}├ëv├®nements - AutiCare Admin{% endblock %}
+
+{% block admin_content %}
+<div class="w-full max-w-[1600px]">
+<h1 class="text-2xl font-bold text-slate-800 mb-1">Gestion des ├®v├®nements</h1>
+<p class="text-slate-500 text-sm mb-6">Recherchez, triez et g├®rez vos ├®v├®nements.</p>
+{% for message in app.flashes('success') %}
+    <div class="mb-4 px-4 py-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 shadow-sm">{{ message }}</div>
+{% endfor %}
+{% for count in app.flashes('success_idees') %}
+    <div class="mb-4 px-4 py-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 shadow-sm">
+        <p class="mb-2">{{ count }} id├®e(s) g├®n├®r├®e(s) par lÔÇÖIA.</p>
+        <a href="{{ path('admin_idees_evenement_index') }}#propositions" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-700 no-underline shadow-sm hover:shadow transition-shadow">
+            Voir les propositions et cr├®er un brouillon dÔÇÖ├®v├®nement ÔåÆ
+        </a>
+    </div>
+{% endfor %}
+{% for message in app.flashes('error') %}
+    <div class="mb-4 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-800 shadow-sm">{{ message }}</div>
+{% endfor %}
+
+<div class="bg-white rounded-2xl border border-slate-200/80 shadow-lg shadow-slate-200/50 overflow-hidden">
+    <div class="p-5 sm:p-6 border-b border-slate-100 bg-gradient-to-b from-slate-50/80 to-white flex flex-wrap gap-4 justify-between items-end">
+        <form method="get" action="{{ path('admin_evenement_index') }}" class="flex flex-wrap gap-4 items-end flex-1 min-w-0">
+            <div class="flex-1 min-w-[240px]">
+                <label for="q" class="block text-sm font-medium text-slate-600 mb-1">Recherche</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+                    </span>
+                    <input type="search" id="q" name="q" value="{{ q|default('') }}" placeholder="Titre, lieu, th├®matique ou date" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 placeholder-slate-400 text-center focus:outline focus:ring-2 focus:ring-sky-400/50 focus:border-sky-400 transition-shadow shadow-sm">
+                </div>
+            </div>
+            <div>
+                <label for="sort" class="block text-sm font-medium text-slate-600 mb-1 text-center">Tri</label>
+                <select id="sort" name="sort" class="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-center focus:outline focus:ring-2 focus:ring-sky-400/50 focus:border-sky-400 shadow-sm js-sort-submit">
+                    <option value="date" {{ sortBy|default('date') == 'date' ? 'selected' : '' }}>Date</option>
+                    <option value="titre" {{ sortBy|default('date') == 'titre' ? 'selected' : '' }}>Titre</option>
+                    <option value="lieu" {{ sortBy|default('date') == 'lieu' ? 'selected' : '' }}>Lieu</option>
+                    <option value="theme" {{ sortBy|default('date') == 'theme' ? 'selected' : '' }}>Th├®matique</option>
+                </select>
+            </div>
+            <div>
+                <label for="order" class="block text-sm font-medium text-slate-600 mb-1 text-center">Ordre</label>
+                <select id="order" name="order" class="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-center focus:outline focus:ring-2 focus:ring-sky-400/50 focus:border-sky-400 shadow-sm js-sort-submit">
+                    <option value="asc" {{ sortOrder|default('asc') == 'asc' ? 'selected' : '' }}>Croissant</option>
+                    <option value="desc" {{ sortOrder|default('asc') == 'desc' ? 'selected' : '' }}>D├®croissant</option>
+                </select>
+            </div>
+            <button type="submit" class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-medium hover:bg-slate-200 focus:outline focus:ring-2 focus:ring-slate-300 transition-colors shadow-sm">Filtrer</button>
+        </form>
+        <div class="flex flex-wrap gap-3 items-center shrink-0">
+            <a href="#recherche-avancee" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-violet-500 text-white font-medium hover:bg-violet-600 focus:outline focus:ring-2 focus:ring-violet-400 focus:ring-offset-2 no-underline shadow-md hover:shadow-lg transition-all" title="Recherche mondiale">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+                Recherche avanc├®e
+            </a>
+            <a href="{{ path('admin_evenement_new') }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-500 text-white font-medium hover:bg-sky-600 focus:outline focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 no-underline shadow-md hover:shadow-lg transition-all">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+                Nouvel ├®l├®ment
+            </a>
+        </div>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead class="bg-slate-50 border-b border-slate-200">
+                <tr>
+                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Titre</th>
+                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center w-24">Messages</th>
+                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Date</th>
+                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Lieu</th>
+                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Th├®matique</th>
+                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center w-36">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for event in evenements %}
+                <tr class="hover:bg-sky-50/50 transition-colors group">
+                    <td class="px-6 py-4 font-medium text-slate-800">{{ event.title }}</td>
+                    <td class="px-6 py-4 text-center">
+                        {% set unreadCount = unreadByEvent[event.id]|default(0) %}
+                        {% if unreadCount > 0 %}
+                        <a href="{{ path('admin_evenement_show', { id: event.id }) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-sky-500 text-white hover:bg-sky-600 shadow-sm transition-transform hover:scale-105" title="{{ unreadCount }} message(s) non lu(s)">
+                            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" /></svg>
+                        </a>
+                        {% else %}
+                        <span class="text-slate-300 text-sm">ÔÇö</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-slate-600 text-center text-sm">{{ event.dateEvent ? event.dateEvent|date('d/m/Y') : 'ÔÇö' }}</td>
+                    <td class="px-6 py-4 text-slate-600 text-center text-sm">{{ event.lieu }}</td>
+                    <td class="px-6 py-4">
+                        {% if event.thematique %}
+                            <span class="inline-flex px-2.5 py-1 rounded-lg text-xs font-medium {{ event.thematique.couleur ? '' : 'bg-slate-100 text-slate-600' }}" {% if event.thematique.couleur %}style="background-color: {{ event.thematique.couleur }}20; color: {{ event.thematique.couleur }}; border: 1px solid {{ event.thematique.couleur }}40;"{% endif %}>{{ event.thematique.nomThematique }}</span>
+                        {% else %}
+                            <span class="inline-flex px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-600">ÔÇö</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex gap-1.5 items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity">
+                            <a href="{{ path('admin_evenement_show', { id: event.id }) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:shadow-sm focus:outline focus:ring-2 focus:ring-emerald-400 transition-all" title="Voir">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                            </a>
+                            <a href="{{ path('admin_evenement_edit', { id: event.id }) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-sky-50 text-sky-600 hover:bg-sky-100 hover:shadow-sm focus:outline focus:ring-2 focus:ring-sky-400 transition-all" title="Modifier">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                            </a>
+                            <form method="post" action="{{ path('admin_evenement_delete', { id: event.id }) }}" class="inline" onsubmit="return confirm('Supprimer cet ├®v├®nement ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_evenement_' ~ event.id) }}">
+                                <button type="submit" class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 hover:shadow-sm focus:outline focus:ring-2 focus:ring-red-400 transition-all" title="Supprimer">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="px-6 py-12 text-center text-slate-500">Aucun ├®v├®nement.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Recherche avanc├®e : recherche mondiale d'├®v├®nements -->
+<details id="recherche-avancee" class="mt-6 bg-white rounded-xl border border-[#E5E0D8] overflow-hidden" {{ upcomingSearchPerformed|default(false) ? 'open' : '' }}>
+    <summary class="p-4 cursor-pointer font-medium text-[#4B5563] hover:bg-[#F5F1EB] focus:outline focus:ring-2 focus:ring-[#A7C7E7] list-none flex items-center gap-2">
+        <svg class="w-5 h-5 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+        Recherche avanc├®e ÔÇö ├®v├®nements dans le monde
+    </summary>
+    <div class="p-6 border-t border-[#E5E0D8] relative">
+        <div id="recherche-mondiale-loader" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+            <div class="flex flex-col items-center gap-4 rounded-2xl bg-white shadow-xl border border-[#E5E0D8] px-10 py-8">
+                <svg class="w-14 h-14 animate-spin text-violet-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="text-lg font-medium text-[#4B5563]">Recherche en coursÔÇª</span>
+                <span class="text-sm text-[#6B7280]">Affichage des r├®sultats dans un instant.</span>
+            </div>
+        </div>
+        <form id="form-recherche-mondiale" method="post" action="{{ path('admin_idees_evenement_search_upcoming') }}" class="flex flex-wrap gap-4 items-end" data-turbo="false">
+            <input type="hidden" name="_token" value="{{ csrf_token('admin_idees_evenement_search_upcoming') }}">
+            <input type="hidden" name="return_to" value="events">
+            <div class="flex-1 min-w-[200px]">
+                <label for="upcoming_query_evt" class="block text-sm font-medium text-[#4B5563] mb-1">Mots-cl├®s (th├¿me, lieu, type)</label>
+                <input type="text" id="upcoming_query_evt" name="upcoming_query" value="{{ upcomingSearchQuery|default('') }}" placeholder="" class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-white text-[#4B5563] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+            </div>
+            <div class="min-w-[160px]">
+                <label for="upcoming_period_evt" class="block text-sm font-medium text-[#4B5563] mb-1">P├®riode</label>
+                <select id="upcoming_period_evt" name="upcoming_period" class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0D8] bg-white text-[#4B5563] focus:outline focus:ring-2 focus:ring-[#A7C7E7]">
+                    {% for label, value in periods|default([]) %}
+                        <option value="{{ label }}" {{ (upcomingSearchPeriod|default('2025')) == label ? 'selected' : '' }}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" id="btn-recherche-mondiale" class="px-5 py-2.5 rounded-lg bg-violet-600 text-white font-medium hover:bg-violet-700 focus:outline focus:ring-2 focus:ring-violet-500">
+                Rechercher dans le monde
+            </button>
+        </form>
+    </div>
+    {% if upcomingSearchPerformed|default(false) or (upcomingEventsResults is defined and upcomingEventsResults is not null) %}
+        <div id="resultats-recherche-mondiale" class="p-6 border-t border-[#E5E0D8] bg-[#FAFAFA]/30">
+            <h3 class="text-base font-medium text-[#4B5563] mb-3">R├®sultats de la recherche</h3>
+            {% set _search_query = upcomingSearchQuerySent|default('') != '' ? upcomingSearchQuerySent : 'upcoming events ' ~ (upcomingSearchQuery|default('')) ~ ' ' ~ (upcomingSearchPeriod|default('2025')) %}
+            {% if upcomingEventsResults is defined and upcomingEventsResults is not null and upcomingEventsResults is not empty %}
+                <p class="text-sm text-[#6B7280] mb-2">{{ upcomingEventsResults|length }} r├®sultat(s) pour ┬½ {{ upcomingSearchQuery|e }} ┬╗.</p>
+                <div class="space-y-4">
+                    {% for item in upcomingEventsResults %}
+                        <div class="border border-[#E5E0D8] rounded-lg p-4 bg-white">
+                            <a href="{{ item.url|e('html_attr') }}" target="_blank" rel="noopener" class="font-medium text-[#4B5563] hover:text-violet-600 hover:underline block mb-1">{{ item.name }}</a>
+                            <p class="text-sm text-[#6B7280]">{{ item.snippet }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-sm text-[#6B7280] mb-2">Requ├¬te : <code class="px-1.5 py-0.5 rounded bg-[#E5E0D8]">{{ _search_query|e }}</code></p>
+                <p class="text-sm text-[#6B7280] mb-4">Aucun r├®sultat affich├® dans l'interface pour cette recherche. Vous pouvez r├®essayer (moteur de secours) ou ouvrir Google.</p>
+                <div class="flex flex-wrap gap-3 items-center">
+                    <button type="submit" form="form-recherche-mondiale" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-violet-600 text-white font-medium hover:bg-violet-700 focus:outline focus:ring-2 focus:ring-violet-500">
+                        R├®essayer la recherche
+                    </button>
+                    <a href="https://www.google.com/search?q={{ _search_query|url_encode }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[#E5E0D8] bg-white text-[#4B5563] font-medium hover:bg-[#F5F1EB] no-underline">Ouvrir sur Google (nouvel onglet)</a>
+                </div>
+            {% endif %}
+            {% if (upcomingSearchPerformed|default(false)) and (huggingface_configured|default(false)) and (upcomingEventsResults|default([])|length > 0) %}
+                <div class="mt-4 pt-4 border-t border-[#E5E0D8] relative">
+                    <div id="loader-generer-idees" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+                        <div class="flex flex-col items-center gap-4 rounded-2xl bg-white shadow-xl border border-[#E5E0D8] px-10 py-8">
+                            <svg class="w-14 h-14 animate-spin text-violet-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            <span class="text-lg font-medium text-[#4B5563]">G├®n├®ration des id├®es en coursÔÇª</span>
+                            <span class="text-sm text-[#6B7280]">LÔÇÖIA pr├®pare des propositions selon votre recherche.</span>
+                        </div>
+                    </div>
+                    <form id="form-idees-ia" method="post" action="{{ path('admin_idees_evenement_analyze_and_propose') }}" class="inline" data-turbo="false">
+                        <input type="hidden" name="_token" value="{{ csrf_token('admin_idees_evenement_analyze_and_propose') }}">
+                        <input type="hidden" name="return_to" value="events">
+                        <input type="hidden" name="upcoming_query" value="{{ upcomingSearchQuery|default('')|e('html_attr') }}">
+                        <input type="hidden" name="upcoming_period" value="{{ upcomingSearchPeriod|default('2025')|e('html_attr') }}">
+                        {% set results_for_ia = [] %}
+                        {% for item in upcomingEventsResults|default([]) %}
+                            {% set results_for_ia = results_for_ia|merge([{'name': item.name|default(''), 'snippet': item.snippet|default('')}]) %}
+                        {% endfor %}
+                        <input type="hidden" name="results_json" value="{{ results_for_ia|json_encode|e('html_attr') }}">
+                        <button type="submit" id="btn-idees-ia" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-violet-600 text-white font-medium hover:bg-violet-700 focus:outline focus:ring-2 focus:ring-violet-500">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" /></svg>
+                            Analyser et proposer des id├®es avec lÔÇÖIA
+                        </button>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+</details>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var form = document.getElementById('form-recherche-mondiale');
+    var loader = document.getElementById('recherche-mondiale-loader');
+    var btn = document.getElementById('btn-recherche-mondiale');
+    if (form && loader) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            loader.classList.remove('hidden');
+            if (btn) { btn.disabled = true; }
+            setTimeout(function() { form.submit(); }, 150);
+        });
+    }
+    var formIdees = document.getElementById('form-idees-ia');
+    var loaderIdees = document.getElementById('loader-generer-idees');
+    var btnIdees = document.getElementById('btn-idees-ia');
+    if (formIdees && loaderIdees) {
+        formIdees.addEventListener('submit', function(e) {
+            loaderIdees.classList.remove('hidden');
+            if (btnIdees) { btnIdees.disabled = true; }
+        });
+    }
+    {% if upcomingSearchPerformed|default(false) %}
+    var el = document.getElementById('resultats-recherche-mondiale');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    {% endif %}
+});
+</script>
+
+<!-- Visualisations avec graphiques (comme page Modules) -->
+<div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
+        <h3 class="text-lg font-semibold text-[#4B5563] mb-4">R├®partition des ├®v├®nements par p├®riode</h3>
+        <div class="relative h-64 flex items-center justify-center">
+            <canvas id="eventPeriodChart" width="300" height="300"></canvas>
+        </div>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
+        <h3 class="text-lg font-semibold text-[#4B5563] mb-4">R├®partition des inscriptions</h3>
+        <div class="relative h-64 flex items-center justify-center">
+            <canvas id="inscriptionChart" width="300" height="300"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Statistiques des ├®v├®nements -->
+<div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
+        <h3 class="text-lg font-semibold text-[#4B5563] mb-4">├ëv├®nements par p├®riode</h3>
+        <div class="space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-[#6B7280]">├Ç venir</span>
+                <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">{{ evenementsAvenir|default(0) }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-[#6B7280]">Pass├®s</span>
+                <span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs font-medium rounded-full">{{ evenementsPasses|default(0) }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
+        <h3 class="text-lg font-semibold text-[#4B5563] mb-4">Inscriptions par statut</h3>
+        <div class="space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-[#6B7280]">Accept├®es</span>
+                <span class="px-2 py-1 bg-teal-100 text-teal-800 text-xs font-medium rounded-full">{{ inscriptionsAcceptees|default(0) }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-[#6B7280]">En attente</span>
+                <span class="px-2 py-1 bg-amber-100 text-amber-800 text-xs font-medium rounded-full">{{ inscriptionsEnAttente|default(0) }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-[#E5E0D8] p-6">
+        <h3 class="text-lg font-semibold text-[#4B5563] mb-4">Statistiques g├®n├®rales</h3>
+        <div class="grid grid-cols-2 gap-4">
+            <div class="text-center">
+                <div class="text-2xl font-bold text-[#4B5563]">{{ totalEvenements|default(0) }}</div>
+                <div class="text-sm text-[#6B7280]">Total des ├®v├®nements</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-green-600">{{ evenementsAvenir|default(0) }}</div>
+                <div class="text-sm text-[#6B7280]">├Ç venir</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-orange-600">{{ totalInscriptions|default(0) }}</div>
+                <div class="text-sm text-[#6B7280]">Total inscriptions</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+(function() {
+    var searchInput = document.getElementById('q');
+    var form = searchInput ? searchInput.closest('form') : null;
+    if (form && searchInput) {
+        function submitIfEmpty() {
+            if (searchInput.value.trim() === '') form.submit();
+        }
+        searchInput.addEventListener('input', submitIfEmpty);
+        searchInput.addEventListener('search', submitIfEmpty);
+    }
+    document.querySelectorAll('.js-sort-submit').forEach(function(el) {
+        el.addEventListener('change', function() { this.closest('form').submit(); });
+    });
+
+    if (typeof Chart !== 'undefined') {
+        var periodData = { '├Ç venir': {{ evenementsAvenir|default(0) }}, 'Pass├®s': {{ evenementsPasses|default(0) }} };
+        var periodCtx = document.getElementById('eventPeriodChart');
+        if (periodCtx) {
+            new Chart(periodCtx.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(periodData),
+                    datasets: [{
+                        data: Object.values(periodData),
+                        backgroundColor: ['#10B981', '#9CA3AF'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { padding: 15, font: { size: 12 } } },
+                        tooltip: { callbacks: { label: function(c) { return (c.label || '') + ': ' + (c.parsed || 0) + ' ├®v├®nement(s)'; } } }
+                    }
+                }
+            });
+        }
+        var inscData = { 'Accept├®es': {{ inscriptionsAcceptees|default(0) }}, 'En attente': {{ inscriptionsEnAttente|default(0) }} };
+        var inscCtx = document.getElementById('inscriptionChart');
+        if (inscCtx) {
+            new Chart(inscCtx.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(inscData),
+                    datasets: [{
+                        data: Object.values(inscData),
+                        backgroundColor: ['#14B8A6', '#F59E0B'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { padding: 15, font: { size: 12 } } },
+                        tooltip: { callbacks: { label: function(c) { return (c.label || '') + ': ' + (c.parsed || 0); } } }
+                    }
+                }
+            });
+        }
+    }
+})();
+</script>
+</div>
+{% endblock %}

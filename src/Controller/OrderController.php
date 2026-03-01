@@ -7,10 +7,7 @@ namespace App\Controller;
 use App\Entity\Cart;
 use App\Entity\Commande;
 use App\Entity\LigneCommande;
-<<<<<<< HEAD
 use App\Entity\Notification;
-=======
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
 use App\Entity\Produit;
 use App\Form\CommandeType;
 use App\Repository\CartRepository;
@@ -43,7 +40,6 @@ final class OrderController extends AbstractController
         private readonly ProduitRepository $produitRepository,
         private readonly CartRepository $cartRepository,
         private readonly CommandeRepository $commandeRepository,
-<<<<<<< HEAD
         private readonly UserRepository $userRepository,
         private readonly MailerInterface $mailer,
         private readonly EmailApiService $emailApiService,
@@ -51,8 +47,6 @@ final class OrderController extends AbstractController
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly ?string $mailerFromEmail = null,
         private readonly ?StripeService $stripeService = null,
-=======
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
     ) {
     }
 
@@ -139,7 +133,6 @@ final class OrderController extends AbstractController
         $commande->setTelephone((string) ($user->getTelephone() ?? ''));
         $commande->setStatut('en_attente');
         $commande->setTotal($cart->getTotalPrice());
-<<<<<<< HEAD
         $commande->setModePayment('a_la_livraison');
 
         $stripePublishableKey = $_ENV['STRIPE_PUBLISHABLE_KEY'] ?? '';
@@ -150,38 +143,24 @@ final class OrderController extends AbstractController
         $form = $this->createForm(CommandeType::class, $commande, [
             'lock_user_fields' => false,
             'stripe_configured' => $stripeConfigured,
-=======
-
-        $form = $this->createForm(CommandeType::class, $commande, [
-            'lock_user_fields' => true,
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
         ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $commande = $form->getData();
             $commande->setUser($user);
-<<<<<<< HEAD
             $emailCommande = trim((string) ($commande->getEmail() ?? ''));
             if ($emailCommande === '') {
                 $commande->setEmail($user->getEmail() ?? '');
             }
 
             $checkoutData = [
-=======
-            $commande->setNom($user->getNom() ?? '');
-            $commande->setEmail($user->getEmail() ?? '');
-            $commande->setTelephone((string) ($user->getTelephone() ?? ''));
-
-            $request->getSession()->set('order_checkout_data', [
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
                 'nom' => $commande->getNom(),
                 'email' => $commande->getEmail(),
                 'telephone' => $commande->getTelephone(),
                 'adresse' => $commande->getAdresse(),
                 'codePostal' => $commande->getCodePostal(),
                 'ville' => $commande->getVille(),
-<<<<<<< HEAD
                 'modePayment' => $commande->getModePayment() ?? 'a_la_livraison',
             ];
             $paymentMethodId = $request->request->get('stripe_payment_method_id');
@@ -190,10 +169,6 @@ final class OrderController extends AbstractController
             }
 
             $request->getSession()->set('order_checkout_data', $checkoutData);
-=======
-                'modePayment' => $commande->getModePayment(),
-            ]);
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
             return $this->redirectToRoute('order_review');
         }
 
@@ -202,10 +177,7 @@ final class OrderController extends AbstractController
             'cart' => $cart,
             'totalPrice' => $cart->getTotalPrice(),
             'totalItems' => $cart->getTotalItems(),
-<<<<<<< HEAD
             'stripePublishableKey' => $stripeConfigured ? $stripePublishableKey : null,
-=======
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
         ]);
     }
 
@@ -213,15 +185,11 @@ final class OrderController extends AbstractController
     public function cancelCheckout(Request $request): Response
     {
         $request->getSession()->remove('order_checkout_data');
-<<<<<<< HEAD
         $request->getSession()->remove('order_verify_email_sent');
-=======
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
         $this->addFlash('info', 'Commande annulée. Votre panier est inchangé.');
         return $this->redirectToRoute('cart_index');
     }
 
-<<<<<<< HEAD
     /**
      * Page affichée après envoi de l'email de vérification paiement par carte.
      */
@@ -274,9 +242,6 @@ final class OrderController extends AbstractController
 
     #[Route('/recapitulatif', name: 'review', methods: ['GET'])]
     public function review(Request $request): Response
-=======
-    #[Route('/recapitulatif', name: 'review', methods: ['GET'])]
-    public function review(Request $request): Response
     {
         $user = $this->getUser();
         if (!$user) {
@@ -294,55 +259,6 @@ final class OrderController extends AbstractController
             $request->getSession()->remove('order_checkout_data');
             $this->addFlash('warning', 'Votre panier est vide.');
             return $this->redirectToRoute('cart_index');
-        }
-
-        foreach ($cart->getItems() as $item) {
-            if ($item->getQuantite() <= 0) {
-                $this->addFlash('error', 'La quantité de chaque produit doit être au moins 1. Veuillez corriger le panier.');
-                return $this->redirectToRoute('cart_index');
-            }
-        }
-
-        return $this->render('front/order/review.html.twig', [
-            'orderData' => $data,
-            'cart' => $cart,
-            'totalPrice' => $cart->getTotalPrice(),
-            'totalItems' => $cart->getTotalItems(),
-        ]);
-    }
-
-    #[Route('/confirmer', name: 'confirm', methods: ['POST'])]
-    public function confirm(Request $request): Response
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
-    {
-        $user = $this->getUser();
-        if (!$user) {
-            return $this->redirectToRoute('app_login');
-        }
-
-<<<<<<< HEAD
-        $data = $request->getSession()->get('order_checkout_data');
-        if (!$data || !is_array($data)) {
-            $this->addFlash('warning', 'Veuillez remplir le formulaire de commande.');
-=======
-        if (!$this->isCsrfTokenValid('order_confirm', $request->request->get('_token'))) {
-            $this->addFlash('error', 'Jeton de sécurité invalide.');
-            return $this->redirectToRoute('cart_index');
-        }
-
-        $data = $request->getSession()->get('order_checkout_data');
-        if (!$data || !is_array($data)) {
-            $this->addFlash('warning', 'Session expirée. Veuillez refaire le formulaire.');
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
-            return $this->redirectToRoute('order_checkout');
-        }
-
-        $cart = $this->cartRepository->findOneBy(['user' => $user]);
-        if (!$cart || $cart->isEmpty()) {
-            $request->getSession()->remove('order_checkout_data');
-            $this->addFlash('warning', 'Votre panier est vide.');
-            return $this->redirectToRoute('cart_index');
-<<<<<<< HEAD
         }
 
         foreach ($cart->getItems() as $item) {
@@ -386,10 +302,6 @@ final class OrderController extends AbstractController
             return $this->redirectToRoute('cart_index');
         }
 
-=======
-        }
-
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
         foreach ($cart->getItems() as $item) {
             if ($item->getQuantite() <= 0) {
                 $this->addFlash('error', 'La quantité de chaque produit doit être au moins 1. Veuillez corriger le panier.');
@@ -420,7 +332,6 @@ final class OrderController extends AbstractController
             $commande->addLigne($ligne);
             $totalPrice += $item->getTotalPrice();
             $this->entityManager->persist($ligne);
-<<<<<<< HEAD
         }
         $commande->setTotal($totalPrice);
 
@@ -464,17 +375,6 @@ final class OrderController extends AbstractController
                 $this->addFlash('warning', 'Commande enregistrée, mais l\'e-mail de confirmation de paiement n\'a pas pu être envoyé.');
             }
         }
-=======
-        }
-        $commande->setTotal($totalPrice);
-
-        $this->entityManager->persist($commande);
-        $cart->clear();
-        $cart->setUpdatedAt(new \DateTimeImmutable());
-        $this->entityManager->flush();
-
-        $request->getSession()->remove('order_checkout_data');
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
 
         $this->addFlash('success', 'Commande enregistrée avec succès. Numéro : ' . $commande->getId());
         return $this->redirectToRoute('order_confirmation', ['id' => $commande->getId()]);
@@ -482,7 +382,6 @@ final class OrderController extends AbstractController
 
     #[Route('/mes-commandes', name: 'my_orders', methods: ['GET'])]
     public function myOrders(): Response
-<<<<<<< HEAD
     {
         $user = $this->getUser();
         if (!$user) {
@@ -495,25 +394,6 @@ final class OrderController extends AbstractController
     #[Route('/confirmation/{id}/recu', name: 'receipt', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function receipt(int $id): Response
     {
-=======
-    {
-        $user = $this->getUser();
-        if (!$user) {
-            $this->addFlash('error', 'Vous devez être connecté pour voir vos commandes.');
-            return $this->redirectToRoute('app_login');
-        }
-
-        $commandes = $this->commandeRepository->findByUserOrderedByDate($user);
-
-        return $this->render('front/order/list.html.twig', [
-            'commandes' => $commandes,
-        ]);
-    }
-
-    #[Route('/confirmation/{id}', name: 'confirmation', requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function confirmation(int $id): Response
-    {
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
         $commande = $this->commandeRepository->find($id);
         if (!$commande) {
             throw $this->createNotFoundException('Commande introuvable');
@@ -522,7 +402,6 @@ final class OrderController extends AbstractController
         $user = $this->getUser();
         $isOwner = $user && $commande->getUser() && $commande->getUser()->getId() === $user->getId();
         if (!$isOwner && !$this->isGranted('ROLE_ADMIN')) {
-<<<<<<< HEAD
             throw $this->createAccessDeniedException('Vous ne pouvez pas consulter ce reçu.');
         }
 
@@ -558,8 +437,6 @@ final class OrderController extends AbstractController
         $user = $this->getUser();
         $isOwner = $user && $commande->getUser() && $commande->getUser()->getId() === $user->getId();
         if (!$isOwner && !$this->isGranted('ROLE_ADMIN')) {
-=======
->>>>>>> 454cf3534cd44ab862139630471999260fa62858
             throw $this->createAccessDeniedException('Vous ne pouvez pas consulter cette commande.');
         }
 

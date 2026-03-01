@@ -45,17 +45,21 @@
             {% for item in cart.items %}
             <li class="flex justify-between text-[#6B7280]">
                 <span>{{ item.produit.nom }} x {{ item.quantite }}</span>
-                <span>{{ item.totalPrice|number_format(2, ',', ' ') }} dt</span>
+                <span>{{ item.totalPrice|number_format(2, ',', ' ') }} د.ت</span>
             </li>
             {% endfor %}
         </ul>
         <div class="flex justify-between text-lg font-bold text-[#4B5563]">
             <span>Total</span>
-            <span class="text-[#A7C7E7]">{{ totalPrice|number_format(2, ',', ' ') }} dt</span>
+            <span class="text-[#A7C7E7]">{{ totalPrice|number_format(2, ',', ' ') }} د.ت</span>
         </div>
     </div>
 
-    <div class="flex flex-wrap gap-4 justify-center sm:justify-between">
+    <div class="mt-8 p-6 rounded-xl border-2 border-[#E5E0D8] bg-[#F5F1EB]/50">
+        {{ include('partials/_vocal_commande_widget.html.twig', { api_vocal_commande_url: path('api_vocal_commande') }) }}
+    </div>
+
+    <div class="flex flex-wrap gap-4 justify-center sm:justify-between mt-8">
         <a href="{{ path('order_checkout_cancel') }}" class="px-6 py-3 border border-red-500 text-red-600 rounded-lg font-semibold hover:bg-red-50 transition inline-block">
             Annuler la commande
         </a>

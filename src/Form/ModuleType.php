@@ -15,6 +15,8 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -96,6 +98,22 @@ final class ModuleType extends AbstractType
                 ],
                 'label_attr' => ['class' => 'text-[#4B5563]'],
             ]);
+
+        // Avant validation : fixe les champs non mappés/obligatoires (image, dateCreation, dateModif)
+        $builder->addEventListener(FormEvents::SUBMIT, function (FormEvent $event): void {
+            $module = $event->getData();
+            if (!$module instanceof Module) {
+                return;
+            }
+            if ($module->getImage() === null) {
+                $module->setImage('');
+            }
+            if ($module->getDateCreation() === null) {
+                $now = new \DateTime();
+                $module->setDateCreation($now);
+                $module->setDateModif($now);
+            }
+        });
     }
 
     public function configureOptions(OptionsResolver $resolver): void
