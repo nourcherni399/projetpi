@@ -22,7 +22,15 @@ use App\Repository\BlogRepository;
 use App\Repository\CommentaireReactionRepository;
 use App\Repository\FavorisArticleRepository;
 use App\Repository\FavorisModuleRepository;
+use App\Repository\ModuleBookmarkRepository;
+use App\Entity\ModuleCompletion;
+use App\Entity\ModuleQuiz;
+use App\Entity\ModuleQuizAttempt;
+use App\Repository\ModuleCompletionRepository;
+use App\Repository\ModuleQuizRepository;
 use App\Repository\ModuleRepository;
+use App\Service\GroqQuizGeneratorService;
+use App\Service\ModuleProgressionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -40,6 +48,7 @@ final class BlogController extends AbstractController
         private readonly BlogRepository $blogRepository,
         private readonly ModuleRepository $moduleRepository,
         private readonly FavorisModuleRepository $favorisModuleRepository,
+        private readonly ModuleBookmarkRepository $moduleBookmarkRepository,
         private readonly FavorisArticleRepository $favorisArticleRepository,
         private readonly CommentaireReactionRepository $commentaireReactionRepository,
         private readonly EntityManagerInterface $entityManager,
@@ -48,6 +57,10 @@ final class BlogController extends AbstractController
         private readonly GroqBlogGeneratorService $groqBlogGenerator,
         private readonly GroqSpellCheckService $groqSpellCheck,
         private readonly WikipediaService $wikipediaService,
+        private readonly GroqQuizGeneratorService $groqQuizGenerator,
+        private readonly ModuleProgressionService $moduleProgressionService,
+        private readonly ModuleQuizRepository $moduleQuizRepository,
+        private readonly ModuleCompletionRepository $moduleCompletionRepository,
     ) {
     }
 
@@ -168,15 +181,39 @@ final class BlogController extends AbstractController
                 'categorie' => $catEnum,
                 'isPublished' => true
             ], ['dateCreation' => 'DESC']);
+            // Trier par niveau : Facile → Moyen → Difficile
+            $niveauOrdre = ['facile' => 1, 'moyen' => 2, 'difficile' => 3];
+            usort($modules, function ($a, $b) use ($niveauOrdre) {
+                $ordA = $niveauOrdre[$a->getNiveau() ?? ''] ?? 999;
+                $ordB = $niveauOrdre[$b->getNiveau() ?? ''] ?? 999;
+                return $ordA <=> $ordB;
+            });
             
         } catch (\ValueError $e) {
             throw $this->createNotFoundException('Catégorie introuvable.');
         }
 
-        $savedModuleIds = [];
+        $bookmarkedModuleIds = [];
         $user = $this->getUser();
         if ($user !== null) {
-            $savedModuleIds = $this->favorisModuleRepository->findModuleIdsByUser($user);
+            $bookmarkedModuleIds = $this->moduleBookmarkRepository->findModuleIdsByUser($user);
+        }
+
+        $unlockedModuleIds = [];
+        $completedModuleIds = [];
+        if ($user !== null) {
+            foreach ($modules as $m) {
+                if ($this->moduleProgressionService->isModuleUnlocked($user, $m)) {
+                    $unlockedModuleIds[] = $m->getId();
+                }
+            }
+            $completedModuleIds = $this->moduleProgressionService->getCompletedModuleIds($user);
+        } else {
+            foreach ($modules as $m) {
+                if ($m->getNiveau() === 'facile') {
+                    $unlockedModuleIds[] = $m->getId();
+                }
+            }
         }
 
         $categoriesData = $this->getCategoriesWithModules('');
@@ -184,7 +221,9 @@ final class BlogController extends AbstractController
         return $this->render('front/blog/categorie.html.twig', [
             'categorie' => $categorie,
             'modules' => $modules,
-            'savedModuleIds' => $savedModuleIds,
+            'savedModuleIds' => $bookmarkedModuleIds,
+            'unlockedModuleIds' => $unlockedModuleIds,
+            'completedModuleIds' => $completedModuleIds,
             'searchTerm' => $searchTerm,
             'categories' => $categoriesData,
         ]);
@@ -250,9 +289,9 @@ final class BlogController extends AbstractController
                     $saved = $this->handleImageUpload($imageFile, $newArticle);
                     if (!$saved) {
                         $articleForm = $articleFormObject->createView();
-                        $isModuleSaved = false;
+                        $isModuleLiked = false;
                         if ($user !== null) {
-                            $isModuleSaved = $this->favorisModuleRepository->findOneByUserAndModule($user, $module) !== null;
+                            $isModuleLiked = $this->favorisModuleRepository->findOneByUserAndModule($user, $module) !== null;
                         }
                         $savedArticleIds = [];
                         $reactedCommentTypes = [];
@@ -261,15 +300,20 @@ final class BlogController extends AbstractController
                             $reactedCommentTypes = $this->commentaireReactionRepository->findReactionTypesByUser($user);
                         }
 
+                        $isModuleUnlockedInner = $this->moduleProgressionService->isModuleUnlocked($user, $module);
+                        $hasCompletedModuleInner = $this->moduleProgressionService->hasCompletedModule($user, $module);
                         return $this->render('front/blog/module.html.twig', [
                             'module' => $module,
                             'commentaireForms' => $commentaireForms,
                             'searchTerm' => $searchTerm,
                             'articleForm' => $articleForm,
-                            'isModuleSaved' => $isModuleSaved,
+                            'isModuleLiked' => $isModuleLiked,
                             'savedArticleIds' => $savedArticleIds,
                             'reactedCommentTypes' => $reactedCommentTypes,
                             'wikiUrl' => $wikiUrl,
+                            'isModuleUnlocked' => $isModuleUnlockedInner,
+                            'hasCompletedModule' => $hasCompletedModuleInner,
+                            'canTakeQuiz' => !$hasCompletedModuleInner,
                         ]);
                     }
                 } elseif ($pexelsUrl !== '' && filter_var($pexelsUrl, FILTER_VALIDATE_URL)) {
@@ -280,15 +324,20 @@ final class BlogController extends AbstractController
                     } else {
                         $this->addFlash('error', 'Impossible de télécharger l\'image depuis Pexels.');
                         $articleForm = $articleFormObject->createView();
+                        $isModUnlocked = $this->moduleProgressionService->isModuleUnlocked($user, $module);
+                        $hasModCompleted = $this->moduleProgressionService->hasCompletedModule($user, $module);
                         return $this->render('front/blog/module.html.twig', [
                             'module' => $module,
                             'commentaireForms' => $commentaireForms,
                             'searchTerm' => $searchTerm,
                             'articleForm' => $articleForm,
-                            'isModuleSaved' => $this->favorisModuleRepository->findOneByUserAndModule($user, $module) !== null,
+                            'isModuleLiked' => $this->favorisModuleRepository->findOneByUserAndModule($user, $module) !== null,
                             'savedArticleIds' => $this->favorisArticleRepository->findBlogIdsByUser($user),
                             'reactedCommentTypes' => $this->commentaireReactionRepository->findReactionTypesByUser($user),
                             'wikiUrl' => $wikiUrl,
+                            'isModuleUnlocked' => $isModUnlocked,
+                            'hasCompletedModule' => $hasModCompleted,
+                            'canTakeQuiz' => !$hasModCompleted,
                         ]);
                     }
                 }
@@ -307,9 +356,9 @@ final class BlogController extends AbstractController
             $articleForm = $articleFormObject->createView();
         }
 
-        $isModuleSaved = false;
+        $isModuleLiked = false;
         if ($user !== null) {
-            $isModuleSaved = $this->favorisModuleRepository->findOneByUserAndModule($user, $module) !== null;
+            $isModuleLiked = $this->favorisModuleRepository->findOneByUserAndModule($user, $module) !== null;
         }
         $savedArticleIds = [];
         $reactedCommentTypes = [];
@@ -318,15 +367,22 @@ final class BlogController extends AbstractController
             $reactedCommentTypes = $this->commentaireReactionRepository->findReactionTypesByUser($user);
         }
 
+        $isModuleUnlocked = $this->moduleProgressionService->isModuleUnlocked($user, $module);
+        $hasCompletedModule = $user !== null && $this->moduleProgressionService->hasCompletedModule($user, $module);
+        $canTakeQuiz = $user !== null && $isModuleUnlocked && !$hasCompletedModule;
+
         return $this->render('front/blog/module.html.twig', [
             'module' => $module,
             'commentaireForms' => $commentaireForms,
             'searchTerm' => $searchTerm,
             'articleForm' => $articleForm,
-            'isModuleSaved' => $isModuleSaved,
+                            'isModuleLiked' => $isModuleLiked,
             'savedArticleIds' => $savedArticleIds,
             'reactedCommentTypes' => $reactedCommentTypes,
             'wikiUrl' => $wikiUrl,
+            'isModuleUnlocked' => $isModuleUnlocked,
+            'hasCompletedModule' => $hasCompletedModule,
+            'canTakeQuiz' => $canTakeQuiz,
         ]);
     }
 
@@ -505,6 +561,140 @@ final class BlogController extends AbstractController
         return $this->render('front/blog/ecrire.html.twig', [
             'module' => $module,
             'form' => $form,
+        ]);
+    }
+
+    #[Route('/module/{id}/quiz/start', name: 'user_blog_quiz_start', requirements: ['id' => '\d+'], methods: ['GET'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function quizStart(int $id): Response
+    {
+        $module = $this->moduleRepository->find($id);
+        if ($module === null || !$module->isPublished()) {
+            throw $this->createNotFoundException('Module introuvable.');
+        }
+
+        $user = $this->getUser();
+        if (!$user instanceof \App\Entity\User) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        if (!$this->moduleProgressionService->isModuleUnlocked($user, $module)) {
+            $this->addFlash('error', 'Terminez tous les modules du niveau précédent pour débloquer ce module.');
+            return $this->redirectToRoute('user_blog_module', ['id' => $id]);
+        }
+
+        if ($this->moduleProgressionService->hasCompletedModule($user, $module)) {
+            $this->addFlash('info', 'Vous avez déjà validé ce module.');
+            return $this->redirectToRoute('user_blog_module', ['id' => $id]);
+        }
+
+        $result = $this->groqQuizGenerator->generateForModule($module);
+        if (isset($result['error'])) {
+            $this->addFlash('error', $result['error']);
+            return $this->redirectToRoute('user_blog_module', ['id' => $id]);
+        }
+
+        $questions = $result['questions'] ?? [];
+        if (count($questions) < 3) {
+            $this->addFlash('error', 'Impossible de générer un quiz valide pour ce module.');
+            return $this->redirectToRoute('user_blog_module', ['id' => $id]);
+        }
+
+        $moduleQuiz = new ModuleQuiz();
+        $moduleQuiz->setModule($module);
+        $moduleQuiz->setQuestionsJson($questions);
+        $this->entityManager->persist($moduleQuiz);
+        $this->entityManager->flush();
+
+        return $this->redirectToRoute('user_blog_quiz', ['id' => $id, 'quizId' => $moduleQuiz->getId()]);
+    }
+
+    #[Route('/module/{id}/quiz', name: 'user_blog_quiz', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function quiz(Request $request, int $id, ?int $quizId = null): Response
+    {
+        $module = $this->moduleRepository->find($id);
+        if ($module === null || !$module->isPublished()) {
+            throw $this->createNotFoundException('Module introuvable.');
+        }
+
+        $user = $this->getUser();
+        if (!$user instanceof \App\Entity\User) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        if (!$this->moduleProgressionService->isModuleUnlocked($user, $module)) {
+            $this->addFlash('error', 'Terminez tous les modules du niveau précédent pour débloquer ce module.');
+            return $this->redirectToRoute('user_blog_module', ['id' => $id]);
+        }
+
+        if ($this->moduleProgressionService->hasCompletedModule($user, $module)) {
+            $this->addFlash('info', 'Vous avez déjà validé ce module.');
+            return $this->redirectToRoute('user_blog_module', ['id' => $id]);
+        }
+
+        $quizId = $quizId ?? (int) $request->query->get('quizId', 0);
+        $moduleQuiz = $quizId > 0 ? $this->moduleQuizRepository->find($quizId) : null;
+        if ($moduleQuiz === null || $moduleQuiz->getModule()?->getId() !== $id) {
+            $this->addFlash('error', 'Quiz invalide. Veuillez recommencer.');
+            return $this->redirectToRoute('user_blog_module', ['id' => $id]);
+        }
+
+        if ($request->isMethod('POST')) {
+            $reponsesRaw = $request->request->all()['reponses'] ?? [];
+            $reponses = \is_array($reponsesRaw) ? $reponsesRaw : [];
+            if (!$this->isCsrfTokenValid('quiz_' . $moduleQuiz->getId(), (string) $request->request->get('_token', ''))) {
+                $this->addFlash('error', 'Jeton de sécurité invalide.');
+                return $this->render('front/blog/quiz.html.twig', [
+                    'module' => $module,
+                    'moduleQuiz' => $moduleQuiz,
+                ]);
+            }
+
+            $questions = $moduleQuiz->getQuestionsJson();
+            $correctCount = 0;
+            $answersForAttempt = [];
+
+            foreach ($questions as $index => $q) {
+                $userAnswer = isset($reponses[$index]) ? (int) $reponses[$index] : -1;
+                $answersForAttempt[$index] = $userAnswer;
+                if ($userAnswer === ($q['bonneReponse'] ?? -2)) {
+                    $correctCount++;
+                }
+            }
+
+            $total = count($questions);
+            $scorePercent = $total > 0 ? round(($correctCount / $total) * 100, 2) : 0;
+            $passed = $scorePercent > 80;
+
+            $attempt = new ModuleQuizAttempt();
+            $attempt->setUser($user);
+            $attempt->setModule($module);
+            $attempt->setQuiz($moduleQuiz);
+            $attempt->setScorePercent((string) $scorePercent);
+            $attempt->setPassed($passed);
+            $attempt->setAnswersJson($answersForAttempt);
+            $attempt->setCompletedAt(new \DateTimeImmutable());
+            $this->entityManager->persist($attempt);
+
+            if ($passed) {
+                $this->moduleProgressionService->markModuleComplete($user, $module, $attempt);
+            }
+
+            $this->entityManager->flush();
+
+            return $this->render('front/blog/quiz_result.html.twig', [
+                'module' => $module,
+                'passed' => $passed,
+                'scorePercent' => $scorePercent,
+                'correctCount' => $correctCount,
+                'totalCount' => $total,
+            ]);
+        }
+
+        return $this->render('front/blog/quiz.html.twig', [
+            'module' => $module,
+            'moduleQuiz' => $moduleQuiz,
         ]);
     }
 

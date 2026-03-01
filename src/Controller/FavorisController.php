@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Entity\Favoris;
 use App\Entity\FavorisArticle;
 use App\Entity\FavorisModule;
+use App\Entity\ModuleBookmark;
 use App\Entity\Blog;
 use App\Entity\Module;
 use App\Entity\Produit;
@@ -14,7 +15,9 @@ use App\Repository\BlogRepository;
 use App\Repository\FavorisArticleRepository;
 use App\Repository\FavorisModuleRepository;
 use App\Repository\FavorisRepository;
+use App\Repository\ModuleBookmarkRepository;
 use App\Repository\ModuleRepository;
+use App\Service\GoogleBooksService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -29,9 +32,11 @@ final class FavorisController extends AbstractController
         private readonly FavorisRepository $favorisRepository,
         private readonly FavorisArticleRepository $favorisArticleRepository,
         private readonly FavorisModuleRepository $favorisModuleRepository,
+        private readonly ModuleBookmarkRepository $moduleBookmarkRepository,
         private readonly ModuleRepository $moduleRepository,
         private readonly BlogRepository $blogRepository,
         private readonly EntityManagerInterface $entityManager,
+        private readonly GoogleBooksService $googleBooksService,
     ) {
     }
 
@@ -44,13 +49,14 @@ final class FavorisController extends AbstractController
         }
 
         $tab = (string) $request->query->get('tab', 'all');
-        if (!in_array($tab, ['all', 'saved', 'liked', 'history'], true)) {
+        if (!in_array($tab, ['all', 'saved', 'liked', 'bibliotheque'], true)) {
             $tab = 'all';
         }
 
         $favoris = $this->favorisRepository->findByUser($user);
         $favorisArticles = $this->favorisArticleRepository->findByUser($user);
         $favorisModules = $this->favorisModuleRepository->findByUser($user);
+        $moduleBookmarks = $this->moduleBookmarkRepository->findByUser($user);
         $recentModules = $this->moduleRepository->findBy(['isPublished' => true], ['dateCreation' => 'DESC'], 20);
         $recentArticles = $this->blogRepository->findBy(['isPublished' => true, 'isVisible' => true], ['dateCreation' => 'DESC'], 20);
 
@@ -77,13 +83,66 @@ final class FavorisController extends AbstractController
             return $dateB <=> $dateA;
         });
 
+        // Favoris : fusion modules + articles (cœur), triés par date, affichage comme Tous
+        $favorisItems = [];
+        foreach ($favorisModules as $fm) {
+            $favorisItems[] = [
+                'type' => 'module',
+                'date' => $fm->getCreatedAt(),
+                'module' => $fm->getModule(),
+                'favoriModule' => $fm,
+            ];
+        }
+        foreach ($favorisArticles as $fa) {
+            $favorisItems[] = [
+                'type' => 'article',
+                'date' => $fa->getCreatedAt(),
+                'article' => $fa->getBlog(),
+                'favoriArticle' => $fa,
+            ];
+        }
+        usort($favorisItems, static function (array $a, array $b): int {
+            $dateA = $a['date'] instanceof \DateTimeInterface ? $a['date']->getTimestamp() : 0;
+            $dateB = $b['date'] instanceof \DateTimeInterface ? $b['date']->getTimestamp() : 0;
+
+            return $dateB <=> $dateA;
+        });
+
+        $bookSearchQuery = '';
+        $bookResults = ['items' => [], 'error' => null];
+        if ($tab === 'bibliotheque') {
+            $bookSearchQuery = trim((string) $request->query->get('q', ''));
+            $searchQuery = $bookSearchQuery !== '' ? $bookSearchQuery : 'autisme';
+            $bookResults = $this->googleBooksService->search($searchQuery, 20);
+        }
+
         return $this->render('front/favoris/index.html.twig', [
             'favoris' => $favoris,
             'favorisArticles' => $favorisArticles,
             'favorisModules' => $favorisModules,
+            'moduleBookmarks' => $moduleBookmarks,
+            'favorisItems' => $favorisItems,
             'recentAdds' => $recentAdds,
             'activeTab' => $tab,
+            'bookSearchQuery' => $bookSearchQuery,
+            'bookResults' => $bookResults,
         ]);
+    }
+
+    #[Route('/books/{id}', name: 'books_detail', methods: ['GET'], requirements: ['id' => '[a-zA-Z0-9_-]+'])]
+    public function bookDetail(string $id): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return new JsonResponse(['error' => 'Non autorisé'], 401);
+        }
+
+        $book = $this->googleBooksService->getVolume($id);
+        if ($book === null) {
+            return new JsonResponse(['error' => 'Livre non trouvé'], 404);
+        }
+
+        return new JsonResponse($book);
     }
 
     #[Route('/ajouter/{id}', name: 'add', methods: ['POST'])]
@@ -171,13 +230,58 @@ final class FavorisController extends AbstractController
         $isSaved = false;
         if ($existing instanceof FavorisModule) {
             $this->entityManager->remove($existing);
-            $this->addFlash('success', 'Module retiré des enregistrements.');
+            $this->addFlash('success', 'Module retiré des favoris.');
         } else {
             $saved = new FavorisModule();
             $saved->setUser($user);
             $saved->setModule($module);
             $this->entityManager->persist($saved);
-            $this->addFlash('success', 'Module enregistré avec succès.');
+            $this->addFlash('success', 'Module ajouté aux favoris.');
+            $isSaved = true;
+        }
+
+        $this->entityManager->flush();
+
+        if ($request->isXmlHttpRequest()) {
+            return new JsonResponse(['saved' => $isSaved]);
+        }
+
+        $referer = $request->headers->get('referer');
+        if ($referer && str_contains($referer, $request->getHost())) {
+            return $this->redirect($referer);
+        }
+
+        return $this->redirectToRoute('favoris_index', ['tab' => 'liked']);
+    }
+
+    #[Route('/module/bookmark/{id}', name: 'module_bookmark_toggle', methods: ['POST'])]
+    public function toggleModuleBookmark(Module $module, Request $request): Response
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        $token = (string) $request->request->get('_token');
+        if (!$this->isCsrfTokenValid('toggle_module_bookmark_' . $module->getId(), $token)) {
+            if ($request->isXmlHttpRequest()) {
+                return new JsonResponse(['error' => 'Token CSRF invalide'], 403);
+            }
+            $this->addFlash('error', 'Requête invalide.');
+            return $this->redirectToRoute('user_blog');
+        }
+
+        $existing = $this->moduleBookmarkRepository->findOneByUserAndModule($user, $module);
+        $isSaved = false;
+        if ($existing instanceof ModuleBookmark) {
+            $this->entityManager->remove($existing);
+            $this->addFlash('success', 'Module retiré des enregistrements.');
+        } else {
+            $bookmark = new ModuleBookmark();
+            $bookmark->setUser($user);
+            $bookmark->setModule($module);
+            $this->entityManager->persist($bookmark);
+            $this->addFlash('success', 'Module enregistré.');
             $isSaved = true;
         }
 
@@ -247,6 +351,6 @@ final class FavorisController extends AbstractController
             return $this->redirect($referer);
         }
 
-        return $this->redirectToRoute('favoris_index', ['tab' => 'saved']);
+        return $this->redirectToRoute('favoris_index', ['tab' => 'liked']);
     }
 }

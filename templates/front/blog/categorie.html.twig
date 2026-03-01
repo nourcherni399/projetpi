@@ -2,10 +2,25 @@
 
 {% block title %}{{ categorie.name|blog_translate }} - Blog AutiCare{% endblock %}
 
+{% block stylesheets %}
+{{ parent() }}
+<style>
+.modules-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 1.5rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+.modules-grid > * { min-width: 0 !important; }
+@media (max-width: 768px) { .modules-grid { grid-template-columns: 1fr !important; } }
+@media (min-width: 769px) and (max-width: 1024px) { .modules-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
+</style>
+{% endblock %}
 {% block user_content %}
 <div class="max-w-7xl mx-auto space-y-6">
     <div class="flex flex-col gap-2">
-        <a href="{{ path('user_blog') }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#E8DED5] text-[#4B5563] font-medium hover:bg-[#F5F1EB] transition-colors w-fit">
+        <a href="{{ path('user_blog') }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#E8DCF0] border border-[#CDB4DB] text-[#4B3D6B] font-medium hover:bg-[#DDD0E8] transition-colors w-fit">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
@@ -37,10 +52,12 @@
     <div class="flex flex-col lg:flex-row gap-10">
         <div class="flex-1 min-w-0 space-y-8">
             {% if modules|length > 0 %}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="modules-grid w-full">
                 {% for module in modules %}
-                <a href="{{ path('user_blog_module', { id: module.id }) }}" class="block group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A7C7E7] focus-visible:ring-offset-2 rounded-3xl">
-                    <article class="relative rounded-3xl overflow-hidden bg-[#1F1F1F] aspect-square w-full flex flex-col shadow-lg ring-1 ring-white/20 opacity-0 animate-fade-in-up transition-all duration-300 ease-out group-hover:scale-[1.02] group-hover:shadow-xl group-hover:ring-[#A7C7E7]/30" style="animation-delay: {{ loop.index * 0.1 }}s">
+                {% set isUnlocked = module.id in (unlockedModuleIds|default([])) %}
+                {% set isCompleted = module.id in (completedModuleIds|default([])) %}
+                <a href="{{ path('user_blog_module', { id: module.id }) }}" class="block w-full group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A7C7E7] focus-visible:ring-offset-2 rounded-3xl">
+                    <article class="relative rounded-3xl overflow-hidden bg-[#1F1F1F] aspect-square w-full flex flex-col shadow-lg ring-1 ring-white/20 transition-all duration-300 ease-out group-hover:scale-[1.02] group-hover:shadow-xl group-hover:ring-[#A7C7E7]/30 {{ not isUnlocked ? 'opacity-90' }}">
                         {% if module.image %}
                             <img src="{{ asset(module.image) }}" alt="{{ module.titre|blog_translate }}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                         {% else %}
@@ -48,13 +65,29 @@
                         {% endif %}
 
                         <div class="absolute inset-0 bg-black/30"></div>
+                        {% if not isUnlocked %}
+                            <div class="absolute inset-0 bg-black/50 flex items-center justify-center z-20">
+                                <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-black/60 text-white text-sm font-medium">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                    </svg>
+                                    {{ 'Terminez le niveau précédent'|blog_translate }}
+                                </span>
+                            </div>
+                        {% endif %}
                         <div class="absolute inset-0 bg-gradient-to-t from-black/78 via-black/35 to-black/10"></div>
 
                         <div class="relative z-10 p-5 md:p-6 h-full text-white">
-                            <div class="absolute top-5 left-5 md:top-6 md:left-6">
+                            <div class="absolute top-5 left-5 md:top-6 md:left-6 flex items-center gap-2">
                                 <span class="inline-flex px-3 py-1 rounded-full text-[10px] font-semibold bg-[#A8BBA3] text-white">
                                     {{ module.niveau|capitalize }}
                                 </span>
+                                {% if isCompleted %}
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#D4E5D0] text-[#4B5563]">
+                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                        {{ 'Terminé'|blog_translate }}
+                                    </span>
+                                {% endif %}
                             </div>
 
                             <div class="h-full flex flex-col justify-end">
@@ -79,8 +112,8 @@
                                     </span>
                                     {% if app.user %}
                                         {% set isSaved = module.id in (savedModuleIds|default([])) %}
-                                        <form method="POST" action="{{ path('favoris_module_toggle', { id: module.id }) }}" class="contents" onclick="event.stopPropagation()">
-                                            <input type="hidden" name="_token" value="{{ csrf_token('toggle_module_favori_' ~ module.id) }}">
+                                        <form method="POST" action="{{ path('favoris_module_bookmark_toggle', { id: module.id }) }}" class="contents" onclick="event.stopPropagation()">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('toggle_module_bookmark_' ~ module.id) }}">
                                             <button type="submit"
                                                     aria-label="{{ isSaved ? 'Retirer des enregistrements' : 'Enregistrer le module' }}"
                                                     class="inline-flex items-center justify-center w-12 h-12 rounded-2xl transition-colors {{ isSaved ? 'bg-[#FF6B00] text-white hover:bg-[#ff7f26]' : 'bg-white/20 text-white hover:bg-white/30' }}">
@@ -112,7 +145,7 @@
                 </svg>
                 <h3 class="text-lg font-semibold text-[#4B5563] mb-2">{{ 'Aucun module disponible'|blog_translate }}</h3>
                 <p class="text-[#687280] mb-6">{{ 'Il n\'y a pas encore de modules dans cette catégorie.'|blog_translate }}</p>
-                <a href="{{ path('user_blog') }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#A7C7E7] text-white font-medium hover:bg-[#95b8dc] transition-colors">
+                <a href="{{ path('user_blog') }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#E8DCF0] border border-[#CDB4DB] text-[#4B3D6B] font-medium hover:bg-[#DDD0E8] transition-colors">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>

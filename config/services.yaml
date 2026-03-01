@@ -27,6 +27,7 @@ parameters:
     ai_recommender_api_key_default: ''
     ai_recommender_model_default: ''
     ai_recommender_base_url_default: ''
+    youtube_api_key_default: ''
 
 services:
     # default configuration for services in *this* file
@@ -91,6 +92,10 @@ services:
         arguments:
             $apiKey: '%env(default:groq_api_key_default:GROQ_API_KEY)%'
 
+    App\Service\GroqQuizGeneratorService:
+        arguments:
+            $apiKey: '%env(default:groq_api_key_default:GROQ_API_KEY)%'
+
     App\Service\ProfanityFilterService:
         arguments:
             $badWordsFile: '%kernel.project_dir%/config/bad_words.txt'
@@ -146,6 +151,21 @@ services:
         arguments:
             $uploadDir: '%uploads_tsa_generated_directory%'
             $platesDir: '%rorschach_plates_directory%'
+
+    App\Service\YoutubeVideoService:
+        arguments:
+            $apiKey: '%env(default:youtube_api_key_default:YOUTUBE_API_KEY)%'
+
+    App\Service\GoogleBooksService:
+        arguments:
+            $apiKey: '%env(default::GOOGLE_BOOKS_API_KEY)%'
+
+    # Injection explicite des repositories pour FavorisController (évite confusion autowiring)
+    App\Controller\FavorisController:
+        arguments:
+            $moduleBookmarkRepository: '@App\Repository\ModuleBookmarkRepository'
+            $moduleRepository: '@App\Repository\ModuleRepository'
+            $googleBooksService: '@App\Service\GoogleBooksService'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

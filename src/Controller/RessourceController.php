@@ -7,9 +7,11 @@ use App\Entity\Ressource;
 use App\Form\RessourceType;
 use App\Repository\ModuleRepository;
 use App\Repository\RessourceRepository;
+use App\Service\YoutubeVideoService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,7 +26,21 @@ final class RessourceController extends AbstractController
         private readonly ModuleRepository $moduleRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly SluggerInterface $slugger,
+        private readonly YoutubeVideoService $youtubeVideoService,
     ) {
+    }
+
+    #[Route('/youtube-search', name: 'admin_ressource_youtube_search', methods: ['GET'])]
+    public function youtubeSearch(Request $request): JsonResponse
+    {
+        $query = trim((string) $request->query->get('q', ''));
+        if ($query === '') {
+            return $this->json(['videos' => [], 'error' => 'Entrez un mot-clé.']);
+        }
+
+        $result = $this->youtubeVideoService->search($query, 12);
+
+        return $this->json($result);
     }
 
     #[Route('', name: 'admin_ressource_index', methods: ['GET'])]
@@ -158,6 +174,16 @@ final class RessourceController extends AbstractController
             if ($mediaFile === null && !$isHttpUrl && !$isLocalUploadedFile) {
                 $form->get('contenu')->addError(new FormError('Pour le type video, fournissez une URL video ou uploadez un fichier video.'));
             }
+
+            if ($mediaFile === null && $isHttpUrl && $this->youtubeVideoService->isYoutubeUrl($contenu)) {
+                $result = $this->youtubeVideoService->validateAndGetMetadata($contenu);
+                if (!$result['valid']) {
+                    $form->get('contenu')->addError(new FormError($result['error'] ?? 'URL YouTube invalide.'));
+                } elseif (!empty($result['title']) && trim((string) $ressource->getTitre()) === '') {
+                    $ressource->setTitre($result['title']);
+                }
+            }
+
             return;
         }
 

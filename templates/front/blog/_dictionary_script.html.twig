@@ -9,11 +9,10 @@
         if (!sel || sel.isCollapsed) return null;
         var text = sel.toString().trim();
         if (!text) return null;
-        var match = text.match(/[\p{L}\p{N}\-']+/u);
-        var word = match ? match[0] : text.split(/\s+/)[0];
-        if (!word) return null;
-        word = word.replace(/^["'\(\[\{-]+|[\)\]\}\-\.\,\:\;\!\?"']+$/g, '');
-        return word.length >= 2 ? word : null;
+        /* Un seul mot : refuser si la sélection contient des espaces */
+        if (/\s/.test(text)) return null;
+        var word = text.replace(/^["'\(\[\{-]+|[\)\]\}\-\.\,\:\;\!\?"']+$/g, '');
+        return (word.length >= 2 && /^[\p{L}\p{N}\-']+$/u.test(word)) ? word : null;
     }
 
     function hideDictButton() {

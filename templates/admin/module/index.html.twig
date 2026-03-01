@@ -238,6 +238,62 @@
     </div>
 </div>
 
+{# Playlist YouTube - section séparée, style YouTube #}
+<div class="mt-8 bg-white rounded-xl border border-[#E5E0D8] overflow-hidden">
+    <div class="p-6 border-b border-[#E5E0D8] flex items-center gap-2">
+        <svg class="w-6 h-6 text-[#FF0000]" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+        <h3 class="text-lg font-semibold text-[#0f0f0f]">Playlist YouTube des ressources</h3>
+        {% if youtubePlaylistVideos|length > 0 %}
+            <span class="text-sm text-[#606060]">({{ youtubePlaylistVideos|length }} vidéo{{ youtubePlaylistVideos|length > 1 ? 's' : '' }})</span>
+        {% endif %}
+    </div>
+    {% if youtubePlaylistVideos|length > 0 %}
+        <div class="flex flex-col lg:flex-row">
+            <div class="lg:w-2/3 shrink-0 bg-[#0f0f0f]">
+                <div class="aspect-video">
+                    <iframe id="youtube-playlist-player" class="w-full h-full" src="https://www.youtube.com/embed/{{ youtubePlaylistVideos[0].id }}?playlist={{ youtubePlaylistIds }}" title="Playlist YouTube" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+            </div>
+            <div class="lg:w-1/3 flex flex-col bg-[#f9f9f9] dark:bg-[#212121] max-h-[400px] overflow-y-auto">
+                {% for video in youtubePlaylistVideos %}
+                    <a href="https://www.youtube.com/watch?v={{ video.id }}" target="_blank" rel="noopener noreferrer" class="youtube-playlist-item flex gap-3 p-3 hover:bg-[#f2f2f2] dark:hover:bg-[#303030] border-b border-[#E5E0D8] dark:border-gray-600 group cursor-pointer {{ loop.first ? 'bg-[#e8e8e8] dark:bg-[#383838]' : '' }}" data-video-id="{{ video.id }}">
+                        <span class="shrink-0 w-8 h-8 flex items-center justify-center text-xs font-medium text-[#606060] dark:text-gray-400">{{ loop.index }}</span>
+                        <div class="shrink-0 w-40 aspect-video overflow-hidden rounded bg-black">
+                            <img src="https://img.youtube.com/vi/{{ video.id }}/mqdefault.jpg" alt="" class="w-full h-full object-cover group-hover:opacity-90 transition-opacity">
+                        </div>
+                        <div class="min-w-0 flex-1 flex flex-col justify-center py-0.5">
+                            <p class="text-sm font-medium text-[#0f0f0f] dark:text-[#f1f1f1] line-clamp-2 group-hover:text-[#FF0000] transition-colors">{{ video.titre }}</p>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var player = document.getElementById('youtube-playlist-player');
+            var items = document.querySelectorAll('.youtube-playlist-item');
+            items.forEach(function(item) {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var vid = item.dataset.videoId;
+                    if (vid && player) {
+                        player.src = 'https://www.youtube.com/embed/' + vid + '?playlist={{ youtubePlaylistIds }}&autoplay=1';
+                        items.forEach(function(i) { i.classList.remove('bg-[#e8e8e8]', 'dark:bg-[#383838]'); });
+                        item.classList.add('bg-[#e8e8e8]', 'dark:bg-[#383838]');
+                    }
+                });
+            });
+        });
+        </script>
+    {% else %}
+        <div class="p-8 text-center text-[#606060] dark:text-gray-400">
+            <svg class="w-16 h-16 mx-auto mb-4 opacity-50" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            <p class="text-sm">Aucune vidéo YouTube dans les ressources.</p>
+            <p class="text-xs mt-1">Ajoutez des ressources de type « vidéo » avec une URL YouTube pour les afficher ici.</p>
+        </div>
+    {% endif %}
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const resourceSelect = document.getElementById('resourceModuleFilter');

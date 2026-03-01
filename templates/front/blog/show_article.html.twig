@@ -15,7 +15,7 @@
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
             </svg>
-            <span class="text-[#4B5563] font-medium">{{ article.titre|blog_translate }}</span>
+            <span class="text-[#4B3D6B] font-medium">{{ article.titre|blog_translate }}</span>
         </nav>
     </div>
 
@@ -59,7 +59,7 @@
             <div class="flex-1">
                 <!-- Titre et badges -->
                 <div class="flex items-center gap-3 mb-3">
-                    <h1 class="text-3xl font-bold text-[#4B5563]">{{ article.titre|blog_translate }}</h1>
+                    <h1 class="text-3xl font-bold text-[#4B3D6B]">{{ article.titre|blog_translate }}</h1>
                 </div>
                 
                 <!-- Métadonnées -->
@@ -143,7 +143,7 @@
                                 <img src="{{ asset(similarArticle.image) }}" alt="{{ similarArticle.titre|blog_translate }}" class="w-12 h-12 object-cover rounded-lg flex-shrink-0">
                             {% endif %}
                             <div class="flex-1 min-w-0">
-                                <h3 class="font-medium text-[#4B5563] truncate">{{ similarArticle.titre|blog_translate }}</h3>
+                                <h3 class="font-medium text-[#4B3D6B] truncate">{{ similarArticle.titre|blog_translate }}</h3>
                                 <p class="text-sm text-[#6B7280] mt-1">{{ similarArticle.dateCreation|date('d/m/Y') }}</p>
                                 <a href="{{ path('user_blog_show_article', {'id': similarArticle.id}) }}" class="inline-flex items-center gap-1 text-[#A7C7E7] hover:text-[#B8D4ED] text-sm font-medium mt-2">
                                     {{ 'Lire'|blog_translate }}

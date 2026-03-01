@@ -3,9 +3,12 @@
 {% block title %}{{ module.titre }} - Blog AutiCare{% endblock %}
 
 {% block user_content %}
+<style>
+.user-highlight { background: rgba(253, 224, 71, 0.5); padding: 0 1px; border-radius: 1px; }
+</style>
 <article class="max-w-7xl mx-auto">
     <div class="mb-6">
-        <a href="{{ path('user_blog') }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#E8DED5] text-[#4B5563] font-medium hover:bg-[#F5F1EB] transition-colors w-fit">
+        <a href="{{ module.categorie and module.categorie.value ? path('user_blog_categorie', { slug: module.categorie.value }) : path('user_blog') }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#E8DCF0] border border-[#CDB4DB] text-[#4B3D6B] font-medium hover:bg-[#DDD0E8] transition-colors w-fit">
             <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
             {{ 'Retour au blog'|blog_translate }}
         </a>
@@ -21,10 +24,10 @@
     <div class="flex flex-col lg:flex-row gap-8 items-start">
     <!-- Colonne gauche : Contenu du module (cadre) -->
     <div class="w-full lg:w-2/5 lg:min-w-0 lg:sticky lg:top-8 flex-shrink-0 order-1 lg:order-1">
-    <div class="bg-[#FDF8F5] rounded-xl border border-[#E8DED5] p-6 md:p-8 shadow-sm">
+    <div class="bg-[#FBF7F4] rounded-2xl shadow-pastel-md border-2 border-[#E8DED5] p-6 md:p-8">
         <header class="mb-8">
             <div class="flex items-start justify-between gap-4 mb-3">
-                <h1 class="text-3xl font-bold text-[#4B5563]">
+                <h1 class="text-3xl font-bold text-[#1e3a5f]">
                     {{ module.titre|blog_translate }}
                 </h1>
                 <span class="inline-block px-3 py-1 rounded-lg bg-[#A7C7E7]/30 text-[#4B5563] text-sm font-medium shrink-0">{{ module.niveau|capitalize }}</span>
@@ -72,7 +75,7 @@
         </header>
 
         {% if module.description %}
-        <p class="text-lg text-[#687280] mb-6 whitespace-normal break-words">{{ module.description|blog_translate }}</p>
+        <p class="text-lg text-[#374151] mb-6 whitespace-normal break-words">{{ module.description|blog_translate }}</p>
         {% endif %}
 
         {% if module.image %}
@@ -83,9 +86,9 @@
         </div>
         {% endif %}
 
-        <div class="prose prose-[#4B5563] max-w-none mb-10 break-words">
+        <div class="prose prose-[#374151] max-w-none mb-10 break-words">
             {% if module.contenu %}
-            <div class="dict-content text-[#4B5563] whitespace-pre-wrap break-words" data-dict-lang="{{ app.session.get('blog_locale', 'fr') }}">{{ module.contenu|blog_translate|raw }}</div>
+            <div class="dict-content highlightable-content text-[#374151] text-base leading-relaxed whitespace-pre-wrap break-words" data-dict-lang="{{ app.session.get('blog_locale', 'fr') }}" data-target-type="module" data-target-id="{{ module.id }}">{{ module.contenu|blog_translate|raw }}</div>
             {% else %}
             <p class="text-[#687280]">{{ 'Aucun contenu disponible.'|blog_translate }}</p>
             {% endif %}
@@ -158,21 +161,55 @@
             {% endif %}
         </div>
 
-        {# Barre d'icônes (favoris, ajouter, repost, partager) - au-dessus du lien En savoir plus #}
+        {# Quiz de validation / Module terminé #}
+        {% if hasCompletedModule is defined and hasCompletedModule %}
+            <div class="mb-8 p-4 rounded-xl border border-[#A8BBA3] bg-[#D4E5D0]/50">
+                <div class="flex items-center gap-2 text-[#4B5563]">
+                    <svg class="w-6 h-6 text-[#A8BBA3] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="font-semibold">{{ 'Module terminé'|blog_translate }}</span>
+                </div>
+            </div>
+        {% elseif canTakeQuiz is defined and canTakeQuiz %}
+            <div class="mb-8">
+                <a href="{{ path('user_blog_quiz_start', { id: module.id }) }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#A8BBA3] text-white font-semibold hover:bg-[#95B89E] transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                    {{ 'Passer le quiz'|blog_translate }}
+                </a>
+            </div>
+        {% elseif isModuleUnlocked is defined and not isModuleUnlocked and app.user %}
+            <div class="mb-8 p-4 rounded-xl border border-[#E8DED5] bg-[#FAEDE8]">
+                <p class="text-[#687280]">{{ 'Terminez tous les modules du niveau précédent pour débloquer le quiz de ce module.'|blog_translate }}</p>
+            </div>
+        {% endif %}
+
+        {# Pied du cadre : lien En savoir plus + icônes intégrées #}
+        <div class="mt-8 pt-6 border-t border-[#E8DED5] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <a href="{{ wikiUrl|default('https://fr.wikipedia.org/wiki/Autisme') }}"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="inline-flex items-center gap-2 text-[#1e3a5f] hover:text-[#0369A1] hover:underline font-medium text-sm transition-colors">
+                {{ 'En savoir plus sur ce module'|blog_translate }}
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H18m0 0v4.5M18 6l-7.5 7.5M6 10.5V18h7.5" />
+                </svg>
+            </a>
         {% if app.user %}
                 {% set hasFormErrors = articleForm is defined and articleForm and not articleForm.vars.valid and articleForm.vars.submitted %}
                 {% set showArticleForm = articleForm is defined and articleForm and (articleForm.vars.submitted or hasFormErrors) %}
-                <div class="flex justify-center my-6">
-                    <div class="module-actions-float inline-flex items-center gap-1 bg-[#FDF8F5] rounded-full shadow-xl border border-[#E8DED5] px-3 py-2.5">
+                    <div class="inline-flex items-center gap-1">
                         <button type="button"
                                 id="module-heart-btn"
-                                class="inline-flex items-center justify-center w-10 h-10 rounded-full transition-colors {{ isModuleSaved is defined and isModuleSaved ? 'bg-[#BE185D] text-white' : 'bg-[#FCE7F3] text-[#BE185D]' }} hover:bg-[#FBCFE8]"
-                                title="{{ isModuleSaved is defined and isModuleSaved ? 'Retirer des favoris' : 'Enregistrer le module' }}"
+                                class="inline-flex items-center justify-center w-10 h-10 rounded-full transition-colors {{ isModuleLiked is defined and isModuleLiked ? 'bg-[#BE185D] text-white' : 'bg-[#FCE7F3] text-[#BE185D]' }} hover:bg-[#FBCFE8]"
+                                title="{{ isModuleLiked is defined and isModuleLiked ? 'Retirer des favoris' : 'Ajouter aux favoris' }}"
                                 data-module-id="{{ module.id }}"
-                                data-saved="{{ isModuleSaved is defined and isModuleSaved ? '1' : '0' }}"
+                                data-saved="{{ isModuleLiked is defined and isModuleLiked ? '1' : '0' }}"
                                 data-toggle-url="{{ path('favoris_module_toggle', {id: module.id}) }}"
                                 data-csrf="{{ csrf_token('toggle_module_favori_' ~ module.id) }}">
-                            <svg class="w-8 h-8 shrink-0" fill="{{ isModuleSaved is defined and isModuleSaved ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <svg class="w-8 h-8 shrink-0" fill="{{ isModuleLiked is defined and isModuleLiked ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                             </svg>
                         </button>
@@ -184,11 +221,6 @@
                                 title="Ajouter un article">
                             <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m-7-7h14" />
-                            </svg>
-                        </button>
-                        <button type="button" id="repost-module" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#E8F4FC] text-[#1e3a5f] hover:bg-[#D4E8F8] transition-colors" title="Copier le lien public" data-public-url="{{ url('module_public', { id: module.id }) }}">
-                            <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 1l4 4-4 4M3 11V9a4 4 0 014-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 01-4 4H3" />
                             </svg>
                         </button>
                         <button type="button"
@@ -203,20 +235,12 @@
                             </svg>
                         </button>
                     </div>
-                </div>
         {% endif %}
+        </div>
 
-        {# Lien Wikipedia - En savoir plus sur le module #}
-        <div class="mt-4">
-            <a href="{{ wikiUrl|default('https://fr.wikipedia.org/wiki/Autisme') }}"
-               target="_blank"
-               rel="noopener noreferrer"
-               class="inline-flex items-center gap-2 text-[#1e3a5f] hover:text-[#0369A1] hover:underline font-medium text-sm transition-colors">
-                {{ 'En savoir plus sur ce module'|blog_translate }}
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H18m0 0v4.5M18 6l-7.5 7.5M6 10.5V18h7.5" />
-                </svg>
-            </a>
+        {# Popup surligner #}
+        <div id="highlight-popup" class="fixed z-[90] hidden px-3 py-2 rounded-lg bg-[#4B5563] text-white text-sm shadow-lg" style="left:0;top:0" role="tooltip">
+            <button type="button" id="highlight-btn" class="font-medium hover:underline">{{ 'Surligner'|blog_translate }}</button>
         </div>
 
         {# Toast notification #}
@@ -240,7 +264,7 @@
                             {% if module.image %}
                                 <img src="{{ asset(module.image) }}" alt="{{ module.titre|blog_translate }}" class="w-full h-44 object-cover rounded-lg mb-3">
                             {% endif %}
-                            <p class="font-semibold text-[#4B5563] line-clamp-2">{{ module.titre|blog_translate }}</p>
+                            <p class="font-semibold text-[#1e3a5f] line-clamp-2">{{ module.titre|blog_translate }}</p>
                             <p class="text-sm text-[#687280] line-clamp-2 mt-1">{{ (module.description ?: 'Découvrez ce module sur AutiCare.')|blog_translate }}</p>
                         </div>
 
@@ -315,7 +339,7 @@
             {% if articles|length > 0 %}
             <div class="space-y-4">
                 {% for article in articles|sort((a, b) => b.dateCreation <=> a.dateCreation) %}
-                    <div class="bg-[#FAE8E3] rounded-xl border border-[#E8DED5] p-6 hover:shadow-md transition-shadow relative">
+                    <div class="bg-[#F8F3FC] rounded-2xl shadow-pastel border-2 border-[#E8DED5] p-6 hover:shadow-pastel-md transition-all duration-200 relative">
                         <!-- Icônes d'action fixes dans le coin supérieur droit -->
                         <div class="absolute top-4 right-4 flex gap-1.5 shrink-0">
                             <a href="{{ path('user_blog_article_download', {'id': article.id}) }}"
@@ -334,7 +358,7 @@
                                         data-article-titre="{{ article.titre|e('html_attr') }}"
                                         data-article-contenu="{{ article.contenu|e('html_attr') }}">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                 </button>
                                 <a href="{{ path('user_blog_edit_article', {'id': article.id, 'moduleId': module.id}) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#E8F4FC] text-[#1e3a5f] hover:bg-[#D4E8F8] transition-colors focus:outline focus:ring-2 focus:ring-[#93C5FD]" title="{{ 'Modifier l\'article'|blog_translate }}">
@@ -362,7 +386,7 @@
                                     </div>
                                 {% endif %}
                                 <div class="flex-1 min-w-0">
-                                    <h3 class="text-lg font-semibold text-[#4B5563] mb-2 break-words">{{ article.titre|blog_translate }}</h3>
+                                    <h3 class="text-lg font-semibold text-[#4B3D6B] mb-2 break-words">{{ article.titre|blog_translate }}</h3>
                                     <div class="flex items-center gap-4 text-sm text-[#687280] mb-3">
                                         <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
                                             {% if article.type == 'recommandation' %}bg-[#E8F4FC] text-[#1e3a5f]
@@ -380,8 +404,8 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="prose prose-[#4B5563] max-w-none">
-                            <div class="dict-content text-[#4B5563] break-words whitespace-pre-wrap" data-dict-lang="{{ app.session.get('blog_locale', 'fr') }}">{{ article.contenu|blog_translate|raw }}</div>
+                        <div class="prose prose-[#374151] max-w-none">
+                            <div class="dict-content highlightable-content text-[#374151] text-base leading-relaxed break-words whitespace-pre-wrap" data-dict-lang="{{ app.session.get('blog_locale', 'fr') }}" data-target-type="article" data-target-id="{{ article.id }}">{{ article.contenu|blog_translate|raw }}</div>
                         </div>
 
                         {# --- Barre d'interaction de l'article --- #}
@@ -416,13 +440,6 @@
                                 </span>
                             </button>
 
-                            {# Repost article #}
-                            <button type="button" class="article-repost-btn inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#E0F2FE] text-[#0369A1] hover:bg-[#BAE6FD] transition-colors" data-url="{{ url('user_blog_show_article', {id: article.id}) }}">
-                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 1l4 4-4 4M3 11V9a4 4 0 014-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 01-4 4H3" />
-                                </svg>
-                            </button>
-
                             {# Partage article #}
                             <button type="button" class="article-share-btn inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#DCFCE7] text-[#15803D] hover:bg-[#BBF7D0] transition-colors" data-url="{{ url('user_blog_show_article', {id: article.id}) }}" data-title="{{ article.titre|blog_translate }}">
                                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -450,7 +467,7 @@
                     <h3 class="text-lg font-semibold text-[#4B5563] mb-4">{{ 'Vos brouillons'|blog_translate }}</h3>
                     <div class="space-y-4">
                         {% for article in drafts|sort((a, b) => b.dateCreation <=> a.dateCreation) %}
-                            <div class="bg-[#FAE8E3] rounded-xl border border-dashed border-[#E8DED5] p-6 hover:shadow-sm transition-shadow relative">
+                            <div class="bg-[#F8F3FC] rounded-2xl shadow-pastel border-2 border-dashed border-[#E8DED5] p-6 hover:shadow-pastel-md transition-all duration-200 relative">
                                 <div class="absolute top-4 right-4 flex gap-1.5 shrink-0">
                                     <span class="inline-flex items-center justify-center px-2 py-1 rounded-full bg-yellow-50 text-yellow-700 text-xs font-medium">
                                         {{ 'Brouillon'|blog_translate }}
@@ -478,13 +495,13 @@
                                             </div>
                                         {% endif %}
                                         <div class="flex-1 min-w-0">
-                                            <h4 class="text-lg font-semibold text-[#4B5563] mb-1 break-words">{{ article.titre|blog_translate }}</h4>
+                                            <h4 class="text-lg font-semibold text-[#4B3D6B] mb-1 break-words">{{ article.titre|blog_translate }}</h4>
                                             <p class="text-sm text-[#687280] mb-2">{{ 'Créé le'|blog_translate }} {{ article.dateCreation|date('d/m/Y à H:i') }}</p>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="prose prose-[#4B5563] max-w-none">
-                                    <div class="dict-content text-[#4B5563] break-words whitespace-pre-wrap" data-dict-lang="{{ app.session.get('blog_locale', 'fr') }}">{{ article.contenu|blog_translate|raw }}</div>
+                                <div class="prose prose-[#374151] max-w-none">
+                                    <div class="dict-content highlightable-content text-[#374151] text-base leading-relaxed break-words whitespace-pre-wrap" data-dict-lang="{{ app.session.get('blog_locale', 'fr') }}" data-target-type="article" data-target-id="{{ article.id }}">{{ article.contenu|blog_translate|raw }}</div>
                                 </div>
                             </div>
                         {% endfor %}
@@ -509,7 +526,7 @@
     {% if app.user %}
     {# Formulaire nouvel article - affiché à droite sous les articles au clic sur l'icône + #}
     <div id="article-form-panel" class="mt-6 {{ showArticleForm is defined and showArticleForm ? '' : 'hidden' }}">
-        <div class="rounded-xl border border-[#E8DED5] bg-[#FAEDE8] p-4 md:p-5">
+        <div class="rounded-2xl shadow-pastel-md border-2 border-[#E8DED5] bg-[#FBF7F4] p-6 md:p-8">
             <h3 class="text-lg font-semibold text-[#4B5563] mb-4">{{ 'Nouvel article'|blog_translate }}</h3>
             {% if articleForm is defined and articleForm %}
             {% form_theme articleForm 'form/form_div_layout.html.twig' %}
@@ -565,7 +582,7 @@
                                     title="{{ 'Vérifier l\'orthographe'|blog_translate }}"
                                     aria-label="{{ 'Vérifier l\'orthographe pour le titre'|blog_translate }}">
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </button>
                             <button type="button"
@@ -605,7 +622,7 @@
                                     title="{{ 'Vérifier l\'orthographe'|blog_translate }}"
                                     aria-label="{{ 'Vérifier l\'orthographe pour le contenu'|blog_translate }}">
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </button>
                             <button type="button"
@@ -766,6 +783,202 @@
 </article>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+
+    /* ====== Surlignage de texte (module + articles) ====== */
+    (function() {
+        var userLoggedIn = {{ app.user ? 'true' : 'false' }};
+        if (!userLoggedIn) return;
+        var highlightPopup = document.getElementById('highlight-popup');
+        var highlightBtn = document.getElementById('highlight-btn');
+        if (!highlightPopup || !highlightBtn) return;
+        /* Déplacer le popup dans body pour éviter les problèmes de position fixed (transform sur ancêtres) */
+        if (highlightPopup.parentNode !== document.body) document.body.appendChild(highlightPopup);
+        var listUrl = '{{ path("api_highlight_list") }}';
+        var saveUrl = '{{ path("api_highlight_save") }}';
+        var csrfToken = '{{ csrf_token("highlight_save") }}';
+
+        function getTextOffset(container, targetNode, targetOffset) {
+            try {
+                var range = document.createRange();
+                range.selectNodeContents(container);
+                range.setEnd(targetNode, targetOffset);
+                return range.toString().length;
+            } catch (e) {
+                return -1;
+            }
+        }
+
+        function getPositionAtOffset(container, charOffset) {
+            var current = 0;
+            var result = null;
+            function walk(node) {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    var len = node.textContent.length;
+                    if (current + len >= charOffset) {
+                        result = { node: node, offset: charOffset - current };
+                        return true;
+                    }
+                    current += len;
+                } else {
+                    for (var i = 0; i < node.childNodes.length; i++) {
+                        if (walk(node.childNodes[i])) return true;
+                    }
+                }
+                return false;
+            }
+            walk(container);
+            return result;
+        }
+
+        function getEndPositionAtOffset(container, charOffset) {
+            var current = 0;
+            var result = null;
+            function walk(node) {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    var len = node.textContent.length;
+                    if (current + len >= charOffset) {
+                        result = { node: node, offset: Math.min(charOffset - current, len) };
+                        return true;
+                    }
+                    current += len;
+                } else {
+                    for (var i = 0; i < node.childNodes.length; i++) {
+                        if (walk(node.childNodes[i])) return true;
+                    }
+                }
+                return false;
+            }
+            walk(container);
+            return result;
+        }
+
+        function applyHighlightToDOM(container, startOffset, endOffset) {
+            var startPos = getPositionAtOffset(container, startOffset);
+            var endPos = getEndPositionAtOffset(container, endOffset);
+            if (!startPos || !endPos) return false;
+            try {
+                var range = document.createRange();
+                range.setStart(startPos.node, startPos.offset);
+                range.setEnd(endPos.node, endPos.offset);
+                var mark = document.createElement('mark');
+                mark.className = 'user-highlight';
+                try {
+                    range.surroundContents(mark);
+                } catch (e) {
+                    var frag = range.extractContents();
+                    mark.appendChild(frag);
+                    range.insertNode(mark);
+                }
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        var currentHighlightCtx = null;
+
+        function showHighlightPopup(x, y, container, targetType, targetId, startOffset, endOffset) {
+            currentHighlightCtx = { container: container, targetType: targetType, targetId: targetId, startOffset: startOffset, endOffset: endOffset };
+            var popupW = 90, popupH = 36;
+            highlightPopup.style.left = Math.max(8, Math.min(x - popupW/2, window.innerWidth - popupW - 8)) + 'px';
+            highlightPopup.style.top = Math.max(8, y - popupH - 6) + 'px';
+            highlightPopup.classList.remove('hidden');
+        }
+
+        function hideHighlightPopup() {
+            currentHighlightCtx = null;
+            if (highlightPopup) highlightPopup.classList.add('hidden');
+        }
+
+        function saveHighlight() {
+            if (!currentHighlightCtx) return;
+            var ctx = currentHighlightCtx;
+            hideHighlightPopup();
+            fetch(saveUrl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: JSON.stringify({
+                    _token: csrfToken,
+                    targetType: ctx.targetType,
+                    targetId: ctx.targetId,
+                    startOffset: ctx.startOffset,
+                    endOffset: ctx.endOffset
+                })
+            }).then(function(r) {
+                return r.json().then(
+                    function(data) {
+                        if (r.ok) return data;
+                        throw new Error((data && data.error) || 'Erreur ' + r.status);
+                    },
+                    function() { if (!r.ok) throw new Error('Erreur serveur'); return {}; }
+                );
+            }).then(function(data) {
+                if (data.success) {
+                    applyHighlightToDOM(ctx.container, ctx.startOffset, ctx.endOffset);
+                    showToast('{{ "Texte surligné"|blog_translate }}');
+                }
+            }).catch(function(err) {
+                showToast(err && err.message ? err.message : '{{ "Une erreur est survenue"|blog_translate }}');
+            });
+        }
+
+        highlightBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            saveHighlight();
+        });
+
+        document.addEventListener('click', function(e) {
+            if (highlightPopup && !highlightPopup.classList.contains('hidden') && !highlightPopup.contains(e.target)) hideHighlightPopup();
+        });
+
+        document.addEventListener('mouseup', function() {
+            setTimeout(function() {
+                var sel = window.getSelection();
+                var text = (sel && sel.toString()) ? sel.toString().trim() : '';
+                if (!text || !sel || !sel.rangeCount) { hideHighlightPopup(); return; }
+                var container = null, targetType = null, targetId = null;
+                document.querySelectorAll('.highlightable-content').forEach(function(el) {
+                    if (sel.anchorNode && sel.focusNode && el.contains(sel.anchorNode) && el.contains(sel.focusNode)) {
+                        container = el;
+                        targetType = el.getAttribute('data-target-type');
+                        targetId = parseInt(el.getAttribute('data-target-id') || '0', 10);
+                    }
+                });
+                if (!container || !targetType || !targetId) { hideHighlightPopup(); return; }
+                var startOffset = getTextOffset(container, sel.anchorNode, sel.anchorOffset);
+                var endOffset = getTextOffset(container, sel.focusNode, sel.focusOffset);
+                if (startOffset > endOffset) { var t = startOffset; startOffset = endOffset; endOffset = t; }
+                if (startOffset < 0 || endOffset <= startOffset) { hideHighlightPopup(); return; }
+                var rect = sel.getRangeAt(0).getBoundingClientRect();
+                var cx = rect.left + rect.width / 2;
+                showHighlightPopup(cx, rect.bottom, container, targetType, targetId, startOffset, endOffset);
+            }, 20);
+        });
+
+        function loadAndApplyHighlights() {
+            document.querySelectorAll('.highlightable-content').forEach(function(container) {
+                var targetType = container.getAttribute('data-target-type');
+                var targetId = parseInt(container.getAttribute('data-target-id') || '0', 10);
+                if (!targetType || !targetId) return;
+                fetch(listUrl + '?targetType=' + encodeURIComponent(targetType) + '&targetId=' + targetId, {
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                }).then(function(r) {
+                    if (!r.ok) return [];
+                    return r.json();
+                }).then(function(data) {
+                    var highlights = data.highlights || [];
+                    highlights.sort(function(a, b) { return b.startOffset - a.startOffset; });
+                    highlights.forEach(function(h) {
+                        applyHighlightToDOM(container, h.startOffset, h.endOffset);
+                    });
+                }).catch(function() {});
+            });
+        }
+        loadAndApplyHighlights();
+    })();
 
     /* ====== Ouvrir le panneau commentaires si on revient après ajout ====== */
     var urlParams = new URLSearchParams(window.location.search);

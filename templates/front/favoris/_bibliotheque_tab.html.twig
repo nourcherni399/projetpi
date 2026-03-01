@@ -1,0 +1,77 @@
+<div class="space-y-6">
+    <div class="mb-4">
+        <form method="GET" action="{{ path('favoris_index') }}">
+            <input type="hidden" name="tab" value="bibliotheque">
+            <input type="search" name="q" value="{{ bookSearchQuery|default('') }}"
+                   placeholder="Titre, auteur, mot-clé..."
+                   class="w-full px-4 py-3 rounded-xl border border-[#E8DED5] bg-[#FDF8F5] text-[#687280] placeholder-[#9CA3AF] focus:outline focus:ring-2 focus:ring-[#A7C7E7] focus:border-[#A7C7E7] transition-all duration-300">
+        </form>
+    </div>
+
+    {% if bookResults.error|default(null) %}
+        <div class="bg-[#FAEDE8] border border-[#E8DED5] rounded-2xl p-6 text-[#4B5563]">
+            {{ bookResults.error }}
+        </div>
+    {% elseif bookResults.items|default([])|length > 0 %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {% for book in bookResults.items %}
+                <div class="bg-[#FBF7F4] rounded-2xl shadow-sm border border-[#E8DED5] p-5 hover:shadow-md hover:ring-2 hover:ring-[#A7C7E7]/30 transition-all overflow-hidden">
+                    <div class="flex gap-4 mb-3">
+                        {% if book.thumbnail %}
+                            <img src="{{ book.thumbnail }}" alt="{{ book.title }}" class="w-20 h-28 object-cover rounded-lg shrink-0 shadow border border-[#E8DED5]">
+                        {% else %}
+                            <div class="w-20 h-28 rounded-lg bg-[#D4E5D0] border border-[#A8BBA3] shrink-0 flex items-center justify-center">
+                                <svg class="w-10 h-10 text-[#A8BBA3]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.256A8.967 8.967 0 016 18c2.295 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.256A8.967 8.967 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
+                            </div>
+                        {% endif %}
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-bold text-[#4B5563] line-clamp-2 mb-1">{{ book.title }}</h3>
+                            {% if book.authors|default([])|length > 0 %}
+                                <p class="text-sm text-[#687280] line-clamp-2">{{ book.authors|join(', ') }}</p>
+                            {% endif %}
+                            {% if book.publishedDate %}<p class="text-xs text-[#687280] mt-1">{{ book.publishedDate }}</p>{% endif %}
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="button" data-book-id="{{ book.id }}" class="book-detail-btn flex-1 px-4 py-2.5 rounded-xl bg-[#A8BBA3] text-white text-sm font-semibold hover:bg-[#95B89E] transition-all">
+                            Voir détails
+                        </button>
+                        {% set contentLink = book.previewLink|default(book.infoLink|default(null)) %}
+                        {% if contentLink %}
+                            <a href="{{ contentLink }}" target="_blank" rel="noopener" class="flex-1 px-4 py-2.5 rounded-xl bg-[#E8DCF0] border border-[#CDB4DB] text-[#4B3D6B] text-sm font-semibold hover:bg-[#DDD0E8] transition-all text-center inline-flex items-center justify-center">
+                                Extrait
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% elseif bookSearchQuery|default('') != '' %}
+        <div class="bg-[#FAEDE8] rounded-2xl border border-[#E8DED5] p-12 text-center">
+            <p class="text-[#4B5563] mb-2">Aucun livre trouvé pour « {{ bookSearchQuery }} »</p>
+            <p class="text-sm text-[#687280]">Essayez d'autres mots-clés (titre, auteur, sujet).</p>
+        </div>
+    {% else %}
+        <div class="bg-[#FAEDE8] rounded-2xl border border-[#E8DED5] p-12 text-center">
+            <div class="w-20 h-20 mx-auto mb-5 rounded-2xl bg-[#D4E5D0] border-2 border-[#A8BBA3] flex items-center justify-center">
+                <svg class="w-10 h-10 text-[#A8BBA3]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.256A8.967 8.967 0 016 18c2.295 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.256A8.967 8.967 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
+            </div>
+            <p class="text-[#4B5563] mb-2 text-lg font-semibold">Recherchez un livre</p>
+            <p class="text-sm text-[#687280]">Utilisez la barre de recherche ci-dessus pour trouver des livres par titre, auteur ou mot-clé (Google Books).</p>
+        </div>
+    {% endif %}
+</div>
+
+{# Modal détails livre #}
+<div id="book-detail-modal" class="fixed inset-0 z-50 hidden" aria-modal="true">
+    <div class="fixed inset-0 bg-black/50" data-close-modal></div>
+    <div class="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[#FBF7F4] rounded-2xl shadow-xl border border-[#E8DED5] p-6 m-4">
+        <div class="flex justify-between items-start mb-4">
+            <h3 class="text-xl font-bold text-[#4B5563]">Détails du livre</h3>
+            <button type="button" data-close-modal class="p-2 rounded-lg hover:bg-[#E8DED5]/50 text-[#687280]">✕</button>
+        </div>
+        <div id="book-detail-content" class="space-y-4">
+            <p class="text-[#687280] animate-pulse">Chargement…</p>
+        </div>
+    </div>
+</div>

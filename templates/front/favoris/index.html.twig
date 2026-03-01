@@ -3,384 +3,356 @@
 {% block title %}Mes Favoris - AutiCare{% endblock %}
 
 {% block user_content %}
-{% set hasSavedModules = favorisModules|default([])|length > 0 %}
+{% set hasBookmarkedModules = moduleBookmarks|default([])|length > 0 %}
+{% set hasLikedModules = favorisModules|default([])|length > 0 %}
 {% set hasSavedArticles = favorisArticles|default([])|length > 0 %}
 {% set hasSavedProducts = favoris|default([])|length > 0 %}
-<style>
-    .favoris-compact article { padding-top: .75rem; padding-bottom: .75rem; }
-    .favoris-compact article h2 { font-size: 1.05rem; line-height: 1.35; margin-bottom: .25rem; font-weight: 600; }
-    .favoris-compact article p { font-size: .84rem; line-height: 1.45; }
-    .favoris-compact article .text-sm { font-size: .78rem; }
-    .favoris-compact article .px-4.py-2,
-    .favoris-compact article .px-3.py-2 { padding: .35rem .65rem; font-size: .75rem; }
-    .favoris-compact .content-with-thumb { position: relative; padding-right: 6.25rem; }
-    .favoris-compact .date-with-thumb { position: absolute; right: 0; top: -0.1rem; display: flex; flex-direction: column; align-items: flex-end; gap: .25rem; text-align: right; }
-    .favoris-compact .thumb-under-date { width: 4rem; height: 4rem; object-fit: cover; border: none; border-radius: .5rem; }
-</style>
-<section class="favoris-compact w-full max-w-5xl mx-auto rounded-2xl bg-white text-sm text-[#4B5563] border border-[#E5E0D8] overflow-hidden shadow-sm">
-    <div class="px-4 md:px-6 py-4 border-b border-[#E5E0D8] bg-[#F9F7F3]">
-        <div class="flex items-center justify-between">
-            <h1 class="text-2xl font-bold tracking-tight text-[#4B5563]">Abonnements</h1>
-        </div>
-        <div class="mt-4 flex flex-wrap gap-2">
-            <a href="{{ path('favoris_index', { tab: 'all' }) }}"
-               class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors bg-[#C9A38E] text-white border border-[#C9A38E] hover:bg-[#b9917b]">
-                <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.889a1 1 0 00-.364 1.118l1.518 4.674c.3.922-.755 1.688-1.539 1.118l-3.975-2.889a1 1 0 00-1.176 0l-3.975 2.889c-.784.57-1.838-.196-1.539-1.118l1.518-4.674a1 1 0 00-.364-1.118L2.077 10.1c-.783-.57-.38-1.81.588-1.81h4.915a1 1 0 00.95-.69l1.519-4.674z" />
-                </svg>
-                {% if activeTab == 'all' %}<span>Tous</span>{% endif %}
-            </a>
-            <a href="{{ path('favoris_index', { tab: 'saved' }) }}"
-               class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors {{ activeTab == 'saved' ? 'bg-[#A7C7E7] text-white' : 'bg-white border border-[#E5E0D8] text-[#6B7280] hover:bg-[#F5F1EB]' }}">
-                Enregistré
-            </a>
-            <a href="{{ path('favoris_index', { tab: 'liked' }) }}"
-               class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors {{ activeTab == 'liked' ? 'bg-[#A7C7E7] text-white' : 'bg-white border border-[#E5E0D8] text-[#6B7280] hover:bg-[#F5F1EB]' }}">
-                Liké
-            </a>
-            <a href="{{ path('favoris_index', { tab: 'history' }) }}"
-               class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors {{ activeTab == 'history' ? 'bg-[#A7C7E7] text-white' : 'bg-white border border-[#E5E0D8] text-[#6B7280] hover:bg-[#F5F1EB]' }}">
-                Historique
-            </a>
-        </div>
+<div class="max-w-7xl mx-auto space-y-6">
+<section class="relative text-center p-6 md:p-8 rounded-2xl bg-[#FAEDE8] border border-[#E8DED5] shadow-sm overflow-hidden">
+    <div class="inline-flex items-center justify-center w-20 h-20 rounded-full border-2 border-[#A8BBA3] bg-[#D4E5D0] mb-4 shadow-[0_0_20px_rgba(168,187,163,0.3)] p-2">
+        <img src="{{ asset('images/abonnements-icon.png') }}" alt="" class="w-full h-full object-contain" aria-hidden="true">
     </div>
+    <h1 class="text-3xl font-extrabold text-[#4B5563] mb-3 tracking-tight">Plus d'informations sur notre blog</h1>
+    <p class="text-[#687280] max-w-2xl mx-auto leading-relaxed text-base">Suivez les nouveaux modules et articles, retrouvez vos favoris enregistrés.</p>
+    <div class="absolute right-0 bottom-0 w-48 h-48 md:w-64 md:h-64 lg:w-72 lg:h-72 flex flex-col justify-end items-end">
+        <img src="{{ asset('images/abonnements-illustration.png') }}" alt="" class="max-w-full max-h-full object-contain object-bottom object-right" aria-hidden="true">
+    </div>
+</section>
+
+<div class="flex flex-wrap gap-2 mb-6">
+    <a href="{{ path('favoris_index', { tab: 'all' }) }}"
+       class="px-4 py-3 rounded-xl text-sm font-semibold transition-all {{ activeTab == 'all' ? 'bg-[#A8BBA3] text-white hover:bg-[#95B89E]' : 'bg-[#E8DCF0] border border-[#CDB4DB] text-[#4B3D6B] hover:bg-[#DDD0E8]' }}">
+        Tous
+    </a>
+    <a href="{{ path('favoris_index', { tab: 'saved' }) }}"
+       class="px-4 py-3 rounded-xl text-sm font-semibold transition-all {{ activeTab == 'saved' ? 'bg-[#A8BBA3] text-white hover:bg-[#95B89E]' : 'bg-[#E8DCF0] border border-[#CDB4DB] text-[#4B3D6B] hover:bg-[#DDD0E8]' }}">
+        Enregistré
+    </a>
+    <a href="{{ path('favoris_index', { tab: 'liked' }) }}"
+       class="px-4 py-3 rounded-xl text-sm font-semibold transition-all {{ activeTab == 'liked' ? 'bg-[#A8BBA3] text-white hover:bg-[#95B89E]' : 'bg-[#E8DCF0] border border-[#CDB4DB] text-[#4B3D6B] hover:bg-[#DDD0E8]' }}">
+        Favoris
+    </a>
+    <a href="{{ path('favoris_index', { tab: 'bibliotheque' }) }}"
+       class="px-4 py-3 rounded-xl text-sm font-semibold transition-all {{ activeTab == 'bibliotheque' ? 'bg-[#A8BBA3] text-white hover:bg-[#95B89E]' : 'bg-[#E8DCF0] border border-[#CDB4DB] text-[#4B3D6B] hover:bg-[#DDD0E8]' }}">
+        Bibliothèque
+    </a>
+</div>
+<div class="border-t border-[#E8DED5]"></div>
 
     {% if activeTab == 'all' %}
         {% if recentAdds|default([])|length > 0 %}
-            <div class="divide-y divide-[#E5E0D8]">
+            <ul class="space-y-5">
                 {% for item in recentAdds %}
                     {% if item.type == 'module' %}
                         {% set module = item.module %}
-                        <article class="px-5 md:px-8 py-5 hover:bg-[#F9F7F3] transition-colors">
-                            <div class="flex items-start gap-4">
-                                <div class="w-2 h-2 mt-2 rounded-full bg-[#A7C7E7] shrink-0"></div>
-                                <div class="min-w-0 flex-1 content-with-thumb">
-                                    <div class="flex items-start justify-between gap-3 mb-2">
-                                        <div class="text-sm text-[#6B7280] truncate">Nouveau module</div>
-                                        <div class="shrink-0 date-with-thumb">
-                                            <div class="text-sm text-[#9CA3AF]">{{ item.date ? item.date|date('d M H:i') : '' }}</div>
-                                            {% if module.image %}
-                                                <img src="{{ asset(module.image) }}" alt="{{ module.titre }}" class="thumb-under-date">
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                    <h2 class="text-2xl font-bold leading-tight mb-2 text-[#4B5563] line-clamp-2">{{ module.titre }}</h2>
-                                    <p class="text-[#6B7280] leading-relaxed line-clamp-2 mb-1">{{ module.description ?: 'Module sans description.' }}</p>
-                                </div>
+                        <li class="bg-[#FBF7F4] rounded-2xl shadow-sm border border-[#E8DED5] p-6 flex flex-col sm:flex-row gap-6 hover:shadow-md hover:ring-2 hover:ring-[#A7C7E7]/30 transition-all duration-200">
+                            <div class="flex items-center justify-center w-14 h-14 rounded-full bg-[#D4E5D0] border-2 border-[#A8BBA3] shrink-0">
+                                <svg class="w-7 h-7 text-[#A8BBA3]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.256A8.967 8.967 0 016 18c2.295 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.256A8.967 8.967 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
                             </div>
-                        </article>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex flex-wrap items-center gap-2 mb-2">
+                                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-[#D4E5D0] text-[#2D5A2A]">Nouveau module</span>
+                                    <span class="text-sm text-[#687280]">{{ item.date ? item.date|date('d M H:i') : '' }}</span>
+                                </div>
+                                <h2 class="text-lg font-bold text-[#4B5563] mb-2 line-clamp-2">{{ module.titre }}</h2>
+                                <p class="text-[#687280] text-sm line-clamp-2">{{ module.description ?: 'Module sans description.' }}</p>
+                            </div>
+                            <div class="sm:text-right shrink-0 flex flex-col justify-center">
+                                {% if module.image %}
+                                    <img src="{{ asset(module.image) }}" alt="{{ module.titre }}" class="w-20 h-20 rounded-xl object-cover border border-[#E8DED5]">
+                                {% endif %}
+                                <a href="{{ path('user_blog_module', { id: module.id }) }}" class="mt-3 inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-[#A8BBA3] text-white text-sm font-semibold hover:bg-[#95B89E] transition-all">Voir</a>
+                            </div>
+                        </li>
                     {% elseif item.type == 'article' %}
                         {% set article = item.article %}
-                        <article class="px-5 md:px-8 py-5 hover:bg-[#F9F7F3] transition-colors">
-                            <div class="flex items-start gap-4">
-                                <div class="w-2 h-2 mt-2 rounded-full bg-pink-500 shrink-0"></div>
-                                <div class="min-w-0 flex-1 content-with-thumb">
-                                    <div class="flex items-start justify-between gap-3 mb-2">
-                                        <div class="text-sm text-[#6B7280] truncate">Nouvel article publié</div>
-                                        <div class="shrink-0 date-with-thumb">
-                                            <div class="text-sm text-[#9CA3AF]">{{ item.date ? item.date|date('d M H:i') : '' }}</div>
-                                            {% if article.image %}
-                                                <img src="{{ asset(article.image) }}" alt="{{ article.titre ?: 'Article' }}" class="thumb-under-date">
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                    <h2 class="text-2xl font-bold leading-tight mb-2 text-[#4B5563] line-clamp-2">{{ article.titre ?: 'Article sans titre' }}</h2>
-                                    <p class="text-[#6B7280] leading-relaxed line-clamp-2 mb-1">{{ article.contenu ?: 'Article sans contenu.' }}</p>
-                                </div>
+                        <li class="bg-[#FBF7F4] rounded-2xl shadow-sm border border-[#E8DED5] p-6 flex flex-col sm:flex-row gap-6 hover:shadow-md hover:ring-2 hover:ring-[#A7C7E7]/30 transition-all duration-200">
+                            <div class="flex items-center justify-center w-14 h-14 rounded-full bg-[#E8DCF0] border-2 border-[#CDB4DB] shrink-0">
+                                <svg class="w-7 h-7 text-[#CDB4DB]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6m4-4h-1.5a1.5 1.5 0 00-1.5 1.5v3H7v-3A1.5 1.5 0 005.5 4h-1.5a1.5 1.5 0 00-1.5 1.5v3H3v-3A1.5 1.5 0 003.5 4H2"/></svg>
                             </div>
-                        </article>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex flex-wrap items-center gap-2 mb-2">
+                                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-[#E8DCF0] text-[#4B3D6B]">Nouvel article publié</span>
+                                    <span class="text-sm text-[#687280]">{{ item.date ? item.date|date('d M H:i') : '' }}</span>
+                                </div>
+                                <h2 class="text-lg font-bold text-[#4B5563] mb-2 line-clamp-2">{{ article.titre ?: 'Article sans titre' }}</h2>
+                                <p class="text-[#687280] text-sm line-clamp-2">{{ article.contenu ?: 'Article sans contenu.' }}</p>
+                            </div>
+                            <div class="sm:text-right shrink-0 flex flex-col justify-center">
+                                {% if article.image %}
+                                    <img src="{{ asset(article.image) }}" alt="{{ article.titre ?: 'Article' }}" class="w-20 h-20 rounded-xl object-cover border border-[#E8DED5]">
+                                {% endif %}
+                                <a href="{{ path('user_blog_show_article', { id: article.id }) }}" class="mt-3 inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-[#A8BBA3] text-white text-sm font-semibold hover:bg-[#95B89E] transition-all">Voir</a>
+                            </div>
+                        </li>
                     {% endif %}
                 {% endfor %}
-            </div>
+            </ul>
         {% else %}
-            <div class="px-5 md:px-8 py-16 text-center">
-                <p class="text-[#4B5563] text-lg font-semibold mb-2">Aucun nouvel ajout</p>
-                <p class="text-[#6B7280]">Les nouveaux modules et les nouveaux articles publiés apparaîtront ici.</p>
+            <div class="bg-[#FAEDE8] rounded-2xl border border-[#E8DED5] p-12 text-center">
+                <p class="text-[#4B5563] mb-4 text-lg font-medium">Aucun nouvel ajout.</p>
+                <p class="text-sm text-[#687280]">Les nouveaux modules et les nouveaux articles publiés apparaîtront ici.</p>
             </div>
         {% endif %}
-    {% elseif activeTab == 'history' %}
-        <div class="px-5 md:px-8 py-16 text-center">
-            <p class="text-[#4B5563] text-lg font-semibold mb-2">Historique bientôt disponible</p>
-            <p class="text-[#6B7280]">Tu peux déjà gérer tes contenus enregistrés dans l'onglet Enregistré.</p>
-        </div>
+    {% elseif activeTab == 'bibliotheque' %}
+        {% include 'front/favoris/_bibliotheque_tab.html.twig' %}
     {% elseif activeTab == 'saved' %}
-        {% if hasSavedModules or hasSavedArticles %}
-            <div class="divide-y divide-[#E5E0D8]">
-                {% for favoriArticle in favorisArticles|default([]) %}
-                    {% set article = favoriArticle.blog %}
-                    <article class="px-5 md:px-8 py-5 hover:bg-[#F9F7F3] transition-colors">
-                        <div class="flex items-start gap-4">
-                            <div class="w-2 h-2 mt-2 rounded-full bg-pink-500 shrink-0"></div>
-                            <div class="min-w-0 flex-1 content-with-thumb">
-                                <div class="flex items-start justify-between gap-3 mb-2">
-                                    <div class="text-sm text-[#6B7280] truncate">Article enregistré</div>
-                                    <div class="shrink-0 date-with-thumb">
-                                        <div class="text-sm text-[#9CA3AF]">{{ favoriArticle.createdAt|date('d M') }}</div>
-                                        {% if article.image %}
-                                            <img src="{{ asset(article.image) }}" alt="{{ article.titre ?: 'Article' }}" class="thumb-under-date">
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                <h2 class="text-2xl font-bold leading-tight mb-2 text-[#4B5563] line-clamp-2">{{ article.titre ?: 'Article sans titre' }}</h2>
-                                <p class="text-[#6B7280] leading-relaxed line-clamp-2 mb-1">
-                                    {{ article.contenu ?: 'Article sans contenu.' }}
-                                </p>
+        {% if hasBookmarkedModules %}
+            <ul class="space-y-5">
+                {% for bookmark in moduleBookmarks %}
+                    {% set module = bookmark.module %}
+                    <li class="bg-[#FBF7F4] rounded-2xl shadow-sm border border-[#E8DED5] p-6 flex flex-col sm:flex-row gap-6 hover:shadow-md hover:ring-2 hover:ring-[#A7C7E7]/30 transition-all duration-200">
+                        <div class="flex items-center justify-center w-14 h-14 rounded-full bg-[#D4E5D0] border-2 border-[#A8BBA3] shrink-0">
+                            <svg class="w-7 h-7 text-[#A8BBA3]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.256A8.967 8.967 0 016 18c2.295 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.256A8.967 8.967 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex flex-wrap items-center gap-2 mb-2">
+                                <span class="px-3 py-1 rounded-full text-xs font-medium bg-[#D4E5D0] text-[#2D5A2A]">{{ module.categorie ? module.categorie.label : 'Module' }}</span>
+                                <span class="text-sm text-[#687280]">{{ bookmark.createdAt|date('d M') }}</span>
+                            </div>
+                            <h2 class="text-lg font-bold text-[#4B5563] mb-2 line-clamp-2">{{ module.titre }}</h2>
+                            <p class="text-[#687280] text-sm line-clamp-2">{{ module.description ?: 'Module sans description.' }}</p>
+                        </div>
+                        <div class="sm:text-right shrink-0 flex flex-col justify-center gap-2">
+                            {% if module.image %}<img src="{{ asset(module.image) }}" alt="" class="w-20 h-20 rounded-xl object-cover border border-[#E8DED5]">{% endif %}
+                            <div class="flex flex-col gap-2">
+                                <a href="{{ path('user_blog_module', { id: module.id }) }}" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#A8BBA3] text-white text-sm font-semibold hover:bg-[#95B89E]">Voir</a>
+                                <form method="POST" action="{{ path('favoris_module_bookmark_toggle', { id: module.id }) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('toggle_module_bookmark_' ~ module.id) }}">
+                                    <button type="submit" class="w-full px-4 py-2 rounded-xl border border-[#E8DED5] text-[#4B5563] text-sm font-medium hover:bg-[#F5F1EB]">Retirer</button>
+                                </form>
                             </div>
                         </div>
-                    </article>
+                    </li>
                 {% endfor %}
-
-                {% for favoriModule in favorisModules %}
-                    {% set module = favoriModule.module %}
-                <article class="px-5 md:px-8 py-5 hover:bg-[#F9F7F3] transition-colors">
-                    <div class="flex items-start gap-4">
-                        <div class="w-2 h-2 mt-2 rounded-full bg-[#A7C7E7] shrink-0"></div>
-                        <div class="min-w-0 flex-1 content-with-thumb">
-                            <div class="flex items-start justify-between gap-3 mb-2">
-                                <div class="text-sm text-[#6B7280] truncate">Module enregistré</div>
-                                <div class="shrink-0 date-with-thumb">
-                                    <div class="text-sm text-[#9CA3AF]">{{ favoriModule.createdAt|date('d M') }}</div>
-                                    {% if module.image %}
-                                        <img src="{{ asset(module.image) }}" alt="{{ module.titre }}" class="thumb-under-date">
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <h2 class="text-2xl font-bold leading-tight mb-2 text-[#4B5563] line-clamp-2">{{ module.titre }}</h2>
-                            <p class="text-[#6B7280] leading-relaxed line-clamp-2 mb-1">
-                                {{ module.description ?: 'Module sans description.' }}
-                            </p>
-                        </div>
-                    </div>
-                </article>
-                {% endfor %}
-            </div>
+            </ul>
         {% else %}
-            <div class="px-5 md:px-8 py-16 text-center">
-                <div class="w-20 h-20 mx-auto mb-5 rounded-2xl bg-[#F5F1EB] border border-[#E5E0D8] flex items-center justify-center">
-                    <svg class="w-10 h-10 text-[#A7C7E7]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3-7 3V5z" />
-                    </svg>
+            <div class="bg-[#FAEDE8] rounded-2xl border border-[#E8DED5] p-12 text-center">
+                <div class="w-20 h-20 mx-auto mb-5 rounded-2xl bg-[#D4E5D0] border-2 border-[#A8BBA3] flex items-center justify-center">
+                    <svg class="w-10 h-10 text-[#A8BBA3]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3-7 3V5z"/></svg>
                 </div>
-                <p class="text-[#4B5563] text-lg font-semibold mb-2">Aucun favori enregistré</p>
-                <p class="text-[#6B7280] mb-6">Ajoute des articles ou des modules aux favoris pour les retrouver ici.</p>
-                <a href="{{ path('user_blog') }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#A7C7E7] text-white font-semibold hover:bg-[#B8D4ED] transition-colors">
-                    Explorer le blog
-                </a>
+                <p class="text-[#4B5563] text-lg font-semibold mb-2">Aucun module enregistré</p>
+                <p class="text-sm text-[#687280] mb-6">Cliquez sur l'icône signet (elle devient orange) pour enregistrer un module et le retrouver ici.</p>
+                <a href="{{ path('user_blog') }}" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#A8BBA3] text-white font-semibold hover:bg-[#95B89E] transition-all">Explorer les modules</a>
             </div>
         {% endif %}
     {% elseif activeTab == 'liked' %}
-        {% if hasSavedModules or hasSavedArticles %}
-            <div class="divide-y divide-[#E5E0D8]">
-                {% for favoriArticle in favorisArticles|default([]) %}
-                    {% set article = favoriArticle.blog %}
-                    <article class="px-5 md:px-8 py-5 hover:bg-[#F9F7F3] transition-colors">
-                        <div class="flex items-start gap-4">
-                            <div class="w-2 h-2 mt-2 rounded-full bg-pink-500 shrink-0"></div>
-                            <div class="min-w-0 flex-1 content-with-thumb">
-                                <div class="flex items-start justify-between gap-3 mb-2">
-                                    <div class="text-sm text-[#6B7280] truncate">Article</div>
-                                    <div class="shrink-0 date-with-thumb">
-                                        <div class="text-sm text-[#9CA3AF]">{{ favoriArticle.createdAt|date('d M') }}</div>
-                                        {% if article.image %}
-                                            <img src="{{ asset(article.image) }}" alt="{{ article.titre ?: 'Article' }}" class="thumb-under-date">
-                                        {% endif %}
-                                    </div>
+        {% if favorisItems|default([])|length > 0 %}
+            <ul class="space-y-5">
+                {% for item in favorisItems %}
+                    {% if item.type == 'module' %}
+                        {% set module = item.module %}
+                        <li class="bg-[#FBF7F4] rounded-2xl shadow-sm border border-[#E8DED5] p-6 flex flex-col sm:flex-row gap-6 hover:shadow-md hover:ring-2 hover:ring-[#A7C7E7]/30 transition-all duration-200">
+                            <div class="flex items-center justify-center w-14 h-14 rounded-full bg-[#D4E5D0] border-2 border-[#A8BBA3] shrink-0">
+                                <svg class="w-7 h-7 text-[#A8BBA3]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.256A8.967 8.967 0 016 18c2.295 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.256A8.967 8.967 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex flex-wrap items-center gap-2 mb-2">
+                                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-[#D4E5D0] text-[#2D5A2A]">Module</span>
+                                    <span class="text-sm text-[#687280]">{{ item.date ? item.date|date('d M H:i') : '' }}</span>
                                 </div>
-                                <h2 class="text-2xl font-bold leading-tight mb-2 text-[#4B5563] line-clamp-2">{{ article.titre ?: 'Article sans titre' }}</h2>
-                                <p class="text-[#6B7280] leading-relaxed line-clamp-2 mb-1">
-                                    {{ article.contenu ?: 'Article sans contenu.' }}
-                                </p>
-                                <div class="mt-4 flex items-center gap-2">
-                                    <form method="POST" action="{{ path('favoris_article_toggle', { id: article.id }) }}">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('toggle_article_favori_' ~ article.id) }}">
-                                        <button type="submit" class="px-3 py-2 rounded-lg bg-white border border-[#E5E0D8] text-[#6B7280] text-sm hover:bg-[#F5F1EB] transition-colors">
-                                            Retirer
-                                        </button>
+                                <h2 class="text-lg font-bold text-[#4B5563] mb-2 line-clamp-2">{{ module.titre }}</h2>
+                                <p class="text-[#687280] text-sm line-clamp-2">{{ module.description ?: 'Module sans description.' }}</p>
+                            </div>
+                            <div class="sm:text-right shrink-0 flex flex-col justify-center">
+                                {% if module.image %}<img src="{{ asset(module.image) }}" alt="{{ module.titre }}" class="w-20 h-20 rounded-xl object-cover border border-[#E8DED5]">{% endif %}
+                                <div class="mt-3 flex flex-col gap-2">
+                                    <a href="{{ path('user_blog_module', { id: module.id }) }}" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#A8BBA3] text-white text-sm font-semibold hover:bg-[#95B89E] transition-all">Voir <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg></a>
+                                    <form method="POST" action="{{ path('favoris_module_toggle', { id: module.id }) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('toggle_module_favori_' ~ module.id) }}">
+                                        <button type="submit" class="w-full px-4 py-2 rounded-xl border border-[#E8DED5] text-[#4B5563] text-sm font-medium hover:bg-[#F5F1EB]">Retirer</button>
                                     </form>
                                 </div>
                             </div>
-                        </div>
-                    </article>
-                {% endfor %}
-
-                {% for favoriModule in favorisModules %}
-                    {% set module = favoriModule.module %}
-                <article class="px-5 md:px-8 py-5 hover:bg-[#F9F7F3] transition-colors">
-                    <div class="flex items-start gap-4">
-                        <div class="w-2 h-2 mt-2 rounded-full bg-[#A7C7E7] shrink-0"></div>
-                        <div class="min-w-0 flex-1 content-with-thumb">
-                            <div class="flex items-start justify-between gap-3 mb-2">
-                                <div class="text-sm text-[#6B7280] truncate">{{ module.categorie ? module.categorie.label : 'Module' }}</div>
-                                <div class="shrink-0 date-with-thumb">
-                                    <div class="text-sm text-[#9CA3AF]">{{ favoriModule.createdAt|date('d M') }}</div>
-                                    {% if module.image %}
-                                        <img src="{{ asset(module.image) }}" alt="{{ module.titre }}" class="thumb-under-date">
-                                    {% endif %}
+                        </li>
+                    {% elseif item.type == 'article' %}
+                        {% set article = item.article %}
+                        <li class="bg-[#FBF7F4] rounded-2xl shadow-sm border border-[#E8DED5] p-6 flex flex-col sm:flex-row gap-6 hover:shadow-md hover:ring-2 hover:ring-[#A7C7E7]/30 transition-all duration-200">
+                            <div class="flex items-center justify-center w-14 h-14 rounded-full bg-[#E8DCF0] border-2 border-[#CDB4DB] shrink-0">
+                                <svg class="w-7 h-7 text-[#CDB4DB]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6m4-4h-1.5a1.5 1.5 0 00-1.5 1.5v3H7v-3A1.5 1.5 0 005.5 4h-1.5a1.5 1.5 0 00-1.5 1.5v3H3v-3A1.5 1.5 0 003.5 4H2"/></svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex flex-wrap items-center gap-2 mb-2">
+                                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-[#E8DCF0] text-[#4B3D6B]">Article</span>
+                                    <span class="text-sm text-[#687280]">{{ item.date ? item.date|date('d M H:i') : '' }}</span>
+                                </div>
+                                <h2 class="text-lg font-bold text-[#4B5563] mb-2 line-clamp-2">{{ article.titre ?: 'Article sans titre' }}</h2>
+                                <p class="text-[#687280] text-sm line-clamp-2">{{ article.contenu ?: 'Article sans contenu.' }}</p>
+                            </div>
+                            <div class="sm:text-right shrink-0 flex flex-col justify-center">
+                                {% if article.image %}<img src="{{ asset(article.image) }}" alt="{{ article.titre ?: 'Article' }}" class="w-20 h-20 rounded-xl object-cover border border-[#E8DED5]">{% endif %}
+                                <div class="mt-3 flex flex-col gap-2">
+                                    <a href="{{ path('user_blog_show_article', { id: article.id }) }}" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#A8BBA3] text-white text-sm font-semibold hover:bg-[#95B89E] transition-all">Lire <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg></a>
+                                    <form method="POST" action="{{ path('favoris_article_toggle', { id: article.id }) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('toggle_article_favori_' ~ article.id) }}">
+                                        <button type="submit" class="w-full px-4 py-2 rounded-xl border border-[#E8DED5] text-[#4B5563] text-sm font-medium hover:bg-[#F5F1EB]">Retirer</button>
+                                    </form>
                                 </div>
                             </div>
-                            <h2 class="text-2xl font-bold leading-tight mb-2 text-[#4B5563] line-clamp-2">{{ module.titre }}</h2>
-                            <p class="text-[#6B7280] leading-relaxed line-clamp-2 mb-1">
-                                {{ module.description ?: 'Module sans description.' }}
-                            </p>
-                            <div class="mt-4 flex items-center gap-2">
-                                <form method="POST" action="{{ path('favoris_module_toggle', { id: module.id }) }}">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('toggle_module_favori_' ~ module.id) }}">
-                                    <button type="submit" class="px-3 py-2 rounded-lg bg-white border border-[#E5E0D8] text-[#6B7280] text-sm hover:bg-[#F5F1EB] transition-colors">
-                                        Retirer
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </article>
+                        </li>
+                    {% endif %}
                 {% endfor %}
-            </div>
+            </ul>
         {% else %}
-            <div class="px-5 md:px-8 py-16 text-center">
-                <div class="w-20 h-20 mx-auto mb-5 rounded-2xl bg-[#F5F1EB] border border-[#E5E0D8] flex items-center justify-center">
-                    <svg class="w-10 h-10 text-[#A7C7E7]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3-7 3V5z" />
-                    </svg>
+            <div class="bg-[#FAEDE8] rounded-2xl border border-[#E8DED5] p-12 text-center">
+                <div class="w-20 h-20 mx-auto mb-5 rounded-2xl bg-[#E8DCF0] border-2 border-[#CDB4DB] flex items-center justify-center">
+                    <svg class="w-10 h-10 text-[#CDB4DB]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/></svg>
                 </div>
-                <p class="text-[#4B5563] text-lg font-semibold mb-2">Aucun favori enregistré</p>
-                <p class="text-[#6B7280] mb-6">Ajoute des articles ou des modules aux favoris pour les retrouver ici.</p>
-                <a href="{{ path('user_blog') }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#A7C7E7] text-white font-semibold hover:bg-[#B8D4ED] transition-colors">
-                    Explorer le blog
-                </a>
+                <p class="text-[#4B5563] text-lg font-semibold mb-2">Aucun favori</p>
+                <p class="text-sm text-[#687280] mb-6">Cliquez sur l'icône cœur (elle devient rose) sur un module ou un article pour l'ajouter aux favoris.</p>
+                <a href="{{ path('user_blog') }}" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#A8BBA3] text-white font-semibold hover:bg-[#95B89E] transition-all">Explorer le blog</a>
             </div>
         {% endif %}
-    {% elseif not hasSavedModules and not hasSavedProducts and not hasSavedArticles %}
-        <div class="px-5 md:px-8 py-16 text-center">
-            <div class="w-20 h-20 mx-auto mb-5 rounded-2xl bg-[#F5F1EB] border border-[#E5E0D8] flex items-center justify-center">
-                <svg class="w-10 h-10 text-[#A7C7E7]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3-7 3V5z" />
-                </svg>
+    {% elseif not hasBookmarkedModules and not hasLikedModules and not hasSavedArticles and not hasSavedProducts %}
+        <div class="bg-[#FAEDE8] rounded-2xl border border-[#E8DED5] p-12 text-center">
+            <div class="w-20 h-20 mx-auto mb-5 rounded-2xl bg-[#E8DCF0] border-2 border-[#CDB4DB] flex items-center justify-center">
+                <svg class="w-10 h-10 text-[#CDB4DB]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3-7 3V5z"/></svg>
             </div>
             <p class="text-[#4B5563] text-lg font-semibold mb-2">Aucun contenu enregistré</p>
-            <p class="text-[#6B7280] mb-6">Ajoute des articles, des modules ou des produits à tes favoris pour les retrouver ici.</p>
-            <a href="{{ path('user_blog') }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#A7C7E7] text-white font-semibold hover:bg-[#B8D4ED] transition-colors">
-                Découvrir les modules
-            </a>
+            <p class="text-sm text-[#687280] mb-6">Ajoute des articles, des modules ou des produits à tes favoris pour les retrouver ici.</p>
+            <a href="{{ path('user_blog') }}" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#A8BBA3] text-white font-semibold hover:bg-[#95B89E] transition-all">Découvrir les modules</a>
         </div>
     {% else %}
-        <div class="divide-y divide-[#E5E0D8]">
+        <ul class="space-y-5">
             {% for favoriModule in favorisModules %}
                 {% set module = favoriModule.module %}
-                <article class="px-5 md:px-8 py-5 hover:bg-[#F9F7F3] transition-colors">
-                    <div class="flex items-start gap-4">
-                        <div class="w-2 h-2 mt-2 rounded-full bg-[#A7C7E7] shrink-0"></div>
-                        <div class="min-w-0 flex-1 content-with-thumb">
-                            <div class="flex items-start justify-between gap-3 mb-2">
-                                <div class="text-sm text-[#6B7280] truncate">{{ module.categorie ? module.categorie.label : 'Module' }}</div>
-                                <div class="shrink-0 date-with-thumb">
-                                    <div class="text-sm text-[#9CA3AF]">{{ favoriModule.createdAt|date('d M') }}</div>
-                                    {% if module.image %}
-                                        <img src="{{ asset(module.image) }}" alt="{{ module.titre }}" class="thumb-under-date">
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <h2 class="text-2xl font-bold leading-tight mb-2 text-[#4B5563] line-clamp-2">{{ module.titre }}</h2>
-                            <p class="text-[#6B7280] leading-relaxed line-clamp-2 mb-1">
-                                {{ module.description ?: 'Module sans description.' }}
-                            </p>
-                            <div class="mt-4 flex items-center gap-2">
-                                <form method="POST" action="{{ path('favoris_module_toggle', { id: module.id }) }}">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('toggle_module_favori_' ~ module.id) }}">
-                                    <button type="submit" class="px-3 py-2 rounded-lg bg-white border border-[#E5E0D8] text-[#6B7280] text-sm hover:bg-[#F5F1EB] transition-colors">
-                                        Retirer
-                                    </button>
-                                </form>
-                            </div>
+                <li class="bg-[#FBF7F4] rounded-2xl shadow-sm border border-[#E8DED5] p-6 flex flex-col sm:flex-row gap-6 hover:shadow-md hover:ring-2 hover:ring-[#A7C7E7]/30 transition-all duration-200">
+                    <div class="flex items-center justify-center w-14 h-14 rounded-full bg-[#D4E5D0] border-2 border-[#A8BBA3] shrink-0">
+                        <svg class="w-7 h-7 text-[#A8BBA3]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.256A8.967 8.967 0 016 18c2.295 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.256A8.967 8.967 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex flex-wrap items-center gap-2 mb-2">
+                            <span class="px-3 py-1 rounded-full text-xs font-medium bg-[#D4E5D0] text-[#2D5A2A]">{{ module.categorie ? module.categorie.label : 'Module' }}</span>
+                            <span class="text-sm text-[#687280]">{{ favoriModule.createdAt|date('d M') }}</span>
                         </div>
-                        <div class="w-24 h-24 md:w-28 md:h-28 rounded-xl overflow-hidden bg-[#F5F1EB] border border-[#E5E0D8] shrink-0">
-                            {% if module.image %}
-                                <img src="{{ asset(module.image) }}" alt="{{ module.titre }}" class="w-full h-full object-cover">
-                            {% endif %}
+                        <h2 class="text-lg font-bold text-[#4B5563] mb-2 line-clamp-2">{{ module.titre }}</h2>
+                        <p class="text-[#687280] text-sm line-clamp-2 mb-3">{{ module.description ?: 'Module sans description.' }}</p>
+                        <div class="flex flex-wrap gap-2">
+                            <a href="{{ path('user_blog_module', { id: module.id }) }}" class="inline-flex items-center gap-1 px-4 py-2 rounded-xl bg-[#A8BBA3] text-white text-sm font-semibold hover:bg-[#95B89E]">Voir</a>
+                            <form method="POST" action="{{ path('favoris_module_toggle', { id: module.id }) }}" class="inline">
+                                <input type="hidden" name="_token" value="{{ csrf_token('toggle_module_favori_' ~ module.id) }}">
+                                <button type="submit" class="px-4 py-2 rounded-xl border border-[#E8DED5] text-[#4B5563] text-sm font-medium hover:bg-[#F5F1EB]">Retirer</button>
+                            </form>
                         </div>
                     </div>
-                </article>
+                    {% if module.image %}<img src="{{ asset(module.image) }}" alt="" class="w-20 h-20 rounded-xl object-cover border border-[#E8DED5] shrink-0">{% endif %}
+                </li>
             {% endfor %}
             {% for favoriArticle in favorisArticles|default([]) %}
                 {% set article = favoriArticle.blog %}
-                <article class="px-5 md:px-8 py-5 hover:bg-[#F9F7F3] transition-colors">
-                    <div class="flex items-start gap-4">
-                        <div class="w-2 h-2 mt-2 rounded-full bg-pink-500 shrink-0"></div>
-                        <div class="min-w-0 flex-1 content-with-thumb">
-                            <div class="flex items-start justify-between gap-3 mb-2">
-                                <div class="text-sm text-[#6B7280] truncate">Article</div>
-                                <div class="shrink-0 date-with-thumb">
-                                    <div class="text-sm text-[#9CA3AF]">{{ favoriArticle.createdAt|date('d M') }}</div>
-                                    {% if article.image %}
-                                        <img src="{{ asset(article.image) }}" alt="{{ article.titre ?: 'Article' }}" class="thumb-under-date">
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <h2 class="text-2xl font-bold leading-tight mb-2 text-[#4B5563] line-clamp-2">{{ article.titre ?: 'Article sans titre' }}</h2>
-                            <p class="text-[#6B7280] leading-relaxed line-clamp-2 mb-1">
-                                {{ article.contenu ?: 'Article sans contenu.' }}
-                            </p>
-                            <div class="mt-4 flex items-center gap-2">
-                                <form method="POST" action="{{ path('favoris_article_toggle', { id: article.id }) }}">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('toggle_article_favori_' ~ article.id) }}">
-                                    <button type="submit" class="px-3 py-2 rounded-lg bg-white border border-[#E5E0D8] text-[#6B7280] text-sm hover:bg-[#F5F1EB] transition-colors">
-                                        Retirer
-                                    </button>
-                                </form>
-                            </div>
+                <li class="bg-[#FBF7F4] rounded-2xl shadow-sm border border-[#E8DED5] p-6 flex flex-col sm:flex-row gap-6 hover:shadow-md hover:ring-2 hover:ring-[#A7C7E7]/30 transition-all duration-200">
+                    <div class="flex items-center justify-center w-14 h-14 rounded-full bg-[#E8DCF0] border-2 border-[#CDB4DB] shrink-0">
+                        <svg class="w-7 h-7 text-[#CDB4DB]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6m4-4h-1.5a1.5 1.5 0 00-1.5 1.5v3H7v-3A1.5 1.5 0 005.5 4h-1.5a1.5 1.5 0 00-1.5 1.5v3H3v-3A1.5 1.5 0 003.5 4H2"/></svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex flex-wrap items-center gap-2 mb-2">
+                            <span class="px-3 py-1 rounded-full text-xs font-medium bg-[#E8DCF0] text-[#4B3D6B]">Article</span>
+                            <span class="text-sm text-[#687280]">{{ favoriArticle.createdAt|date('d M') }}</span>
+                        </div>
+                        <h2 class="text-lg font-bold text-[#4B5563] mb-2 line-clamp-2">{{ article.titre ?: 'Article sans titre' }}</h2>
+                        <p class="text-[#687280] text-sm line-clamp-2 mb-3">{{ article.contenu ?: 'Article sans contenu.' }}</p>
+                        <div class="flex flex-wrap gap-2">
+                            <a href="{{ path('user_blog_show_article', { id: article.id }) }}" class="inline-flex items-center gap-1 px-4 py-2 rounded-xl bg-[#A8BBA3] text-white text-sm font-semibold hover:bg-[#95B89E]">Lire</a>
+                            <form method="POST" action="{{ path('favoris_article_toggle', { id: article.id }) }}" class="inline">
+                                <input type="hidden" name="_token" value="{{ csrf_token('toggle_article_favori_' ~ article.id) }}">
+                                <button type="submit" class="px-4 py-2 rounded-xl border border-[#E8DED5] text-[#4B5563] text-sm font-medium hover:bg-[#F5F1EB]">Retirer</button>
+                            </form>
                         </div>
                     </div>
-                </article>
+                    {% if article.image %}<img src="{{ asset(article.image) }}" alt="" class="w-20 h-20 rounded-xl object-cover border border-[#E8DED5] shrink-0">{% endif %}
+                </li>
             {% endfor %}
             {% for favori in favoris %}
                 {% set produit = favori.produit %}
-                <article class="px-5 md:px-8 py-5 hover:bg-[#F9F7F3] transition-colors">
-                    <div class="flex items-start gap-4">
-                        <div class="w-2 h-2 mt-2 rounded-full bg-orange-400 shrink-0"></div>
-
-                        <div class="min-w-0 flex-1">
-                            <div class="flex items-center justify-between gap-3 mb-2">
-                                <div class="text-sm text-[#6B7280] truncate">{{ produit.categorie ? produit.categorie.label : 'Produit' }}</div>
-                                <div class="text-sm text-[#9CA3AF] shrink-0">{{ favori.createdAt|date('d M') }}</div>
-                            </div>
-
-                            <h2 class="text-2xl font-bold leading-tight mb-2 text-[#4B5563] line-clamp-2">{{ produit.nom }}</h2>
-                            <p class="text-[#6B7280] leading-relaxed line-clamp-2 mb-1">
-                                {{ produit.description ?: 'Aucune description disponible.' }}
-                            </p>
-
-                            <div class="flex items-center gap-4 text-sm text-[#6B7280]">
-                                <span>{{ produit.prix|number_format(2, ',', ' ') }} د.ت</span>
-                                <span class="inline-flex items-center gap-1">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                                    </svg>
-                                    Enregistré
-                                </span>
-                            </div>
-
-                            <div class="mt-4 flex items-center gap-2">
-                                <form method="POST" action="{{ path('cart_add', {id: produit.id}) }}">
-                                    <button type="submit" class="px-4 py-2 rounded-lg bg-[#A7C7E7] text-white text-sm font-semibold hover:bg-[#B8D4ED] transition-colors">
-                                        Ajouter au panier
-                                    </button>
-                                </form>
-                                <form method="POST" action="{{ path('favoris_remove', {id: produit.id}) }}">
-                                    <button type="submit" class="px-3 py-2 rounded-lg bg-white border border-[#E5E0D8] text-[#6B7280] text-sm hover:bg-[#F5F1EB] transition-colors">
-                                        Retirer
-                                    </button>
-                                </form>
-                            </div>
+                <li class="bg-[#FBF7F4] rounded-2xl shadow-sm border border-[#E8DED5] p-6 flex flex-col sm:flex-row gap-6 hover:shadow-md hover:ring-2 hover:ring-[#A7C7E7]/30 transition-all duration-200">
+                    <div class="flex items-center justify-center w-14 h-14 rounded-full bg-[#FAEDE8] border-2 border-[#E8DED5] shrink-0">
+                        <svg class="w-7 h-7 text-[#A8BBA3]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex flex-wrap items-center gap-2 mb-2">
+                            <span class="px-3 py-1 rounded-full text-xs font-medium bg-[#D4E5D0] text-[#2D5A2A]">{{ produit.categorie ? produit.categorie.label : 'Produit' }}</span>
+                            <span class="text-sm text-[#687280]">{{ favori.createdAt|date('d M') }}</span>
                         </div>
-
-                        <div class="w-24 h-24 md:w-28 md:h-28 rounded-xl overflow-hidden bg-[#F5F1EB] border border-[#E5E0D8] shrink-0">
-                            {% if produit.image %}
-                                <img src="{{ asset(produit.image) }}" alt="{{ produit.nom }}" class="w-full h-full object-cover">
-                            {% endif %}
+                        <h2 class="text-lg font-bold text-[#4B5563] mb-2 line-clamp-2">{{ produit.nom }}</h2>
+                        <p class="text-[#687280] text-sm line-clamp-2 mb-2">{{ produit.description ?: 'Aucune description disponible.' }}</p>
+                        <p class="text-sm font-semibold text-[#4B5563] mb-3">{{ produit.prix|number_format(2, ',', ' ') }} د.ت</p>
+                        <div class="flex flex-wrap gap-2">
+                            <form method="POST" action="{{ path('cart_add', {id: produit.id}) }}" class="inline">
+                                <input type="hidden" name="_token" value="{{ csrf_token('cart_add_' ~ produit.id) }}">
+                                <button type="submit" class="px-4 py-2 rounded-xl bg-[#A8BBA3] text-white text-sm font-semibold hover:bg-[#95B89E]">Ajouter au panier</button>
+                            </form>
+                            <form method="POST" action="{{ path('favoris_remove', {id: produit.id}) }}" class="inline">
+                                <input type="hidden" name="_token" value="{{ csrf_token('favoris_remove_' ~ produit.id) }}">
+                                <button type="submit" class="px-4 py-2 rounded-xl border border-[#E8DED5] text-[#4B5563] text-sm font-medium hover:bg-[#F5F1EB]">Retirer</button>
+                            </form>
                         </div>
                     </div>
-                </article>
+                    {% if produit.image %}<img src="{{ asset(produit.image) }}" alt="" class="w-20 h-20 rounded-xl object-cover border border-[#E8DED5] shrink-0">{% endif %}
+                </li>
             {% endfor %}
-        </div>
+        </ul>
     {% endif %}
-</section>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+{% if activeTab == 'bibliotheque' %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('book-detail-modal');
+    const content = document.getElementById('book-detail-content');
+    const detailUrl = '{{ path('favoris_books_detail', { id: '__ID__' }) }}';
+
+    function closeModal() {
+        if (modal) modal.classList.add('hidden');
+    }
+
+    document.querySelectorAll('.book-detail-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const id = this.dataset.bookId;
+            if (!id) return;
+            modal.classList.remove('hidden');
+            content.innerHTML = '<p class="text-[#687280] animate-pulse">Chargement…</p>';
+            fetch(detailUrl.replace('__ID__', encodeURIComponent(id)))
+                .then(function(r) {
+                    if (!r.ok) throw new Error('Livre non trouvé');
+                    return r.json();
+                })
+                .then(function(book) {
+                    let html = '';
+                    if (book.thumbnail) {
+                        html += '<div class="flex gap-6 flex-wrap"><img src="' + escapeHtml(book.thumbnail) + '" alt="" class="w-32 h-48 object-cover rounded-xl shadow">';
+                    }
+                    html += '<div class="flex-1 min-w-0"><h4 class="text-xl font-bold text-[#4B5563] mb-2">' + escapeHtml(book.title) + '</h4>';
+                    if (book.authors && book.authors.length) html += '<p class="text-[#687280] mb-1"><strong>Auteur(s) :</strong> ' + escapeHtml(book.authors.join(', ')) + '</p>';
+                    if (book.publisher) html += '<p class="text-[#687280] mb-1"><strong>Éditeur :</strong> ' + escapeHtml(book.publisher) + '</p>';
+                    if (book.publishedDate) html += '<p class="text-[#687280] mb-1"><strong>Date de publication :</strong> ' + escapeHtml(book.publishedDate) + '</p>';
+                    if (book.isbn) html += '<p class="text-[#687280] mb-1"><strong>ISBN :</strong> ' + escapeHtml(book.isbn) + '</p>';
+                    if (book.pageCount) html += '<p class="text-[#687280] mb-1"><strong>Pages :</strong> ' + book.pageCount + '</p>';
+                    if (book.infoLink) html += '<a href="' + escapeHtml(book.infoLink) + '" target="_blank" rel="noopener" class="inline-flex items-center gap-1 mt-2 px-4 py-2 rounded-xl bg-[#A8BBA3] text-white text-sm font-semibold hover:bg-[#95B89E]">Voir sur Google Books</a>';
+                    html += '</div></div>';
+                    if (book.description) html += '<div class="mt-4"><p class="text-[#687280] text-sm leading-relaxed">' + escapeHtml(book.description) + '</p></div>';
+                    content.innerHTML = html || '<p class="text-[#687280]">Aucun détail disponible.</p>';
+                })
+                .catch(function() {
+                    content.innerHTML = '<p class="text-red-600 dark:text-red-400">Impossible de charger les détails.</p>';
+                });
+        });
+    });
+
+    document.querySelectorAll('[data-close-modal]').forEach(function(el) {
+        el.addEventListener('click', closeModal);
+    });
+    modal && modal.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+});
+
+function escapeHtml(s) {
+    if (!s) return '';
+    const div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
+}
+</script>
+{% endif %}
 {% endblock %}

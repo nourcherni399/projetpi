@@ -12,6 +12,7 @@ use App\Repository\RessourceRepository;
 use App\Enum\CategorieModule;
 use App\Service\GroqModuleGeneratorService;
 use App\Service\PexelsService;
+use App\Service\YoutubeVideoService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -32,6 +33,7 @@ final class ModuleController extends AbstractController
         private readonly ActionHistoryRepository $actionHistoryRepository,
         private readonly SluggerInterface $slugger,
         private readonly PexelsService $pexelsService,
+        private readonly YoutubeVideoService $youtubeVideoService,
     ) {
     }
 
@@ -45,6 +47,24 @@ final class ModuleController extends AbstractController
         $ressources = $selectedResourceModule instanceof Module
             ? $this->ressourceRepository->findByModuleOrdered($selectedResourceModule)
             : $this->ressourceRepository->findAllOrdered();
+
+        $youtubePlaylistVideos = [];
+        foreach ($ressources as $ressource) {
+            if ($ressource->getTypeRessource() !== 'video') {
+                continue;
+            }
+            $contenu = trim((string) $ressource->getContenu());
+            if ($contenu === '' || !$this->youtubeVideoService->isYoutubeUrl($contenu)) {
+                continue;
+            }
+            $videoId = $this->youtubeVideoService->extractVideoId($contenu);
+            if ($videoId !== null) {
+                $youtubePlaylistVideos[] = [
+                    'id' => $videoId,
+                    'titre' => $ressource->getTitre(),
+                ];
+            }
+        }
 
         $statsByType = [
             'recommandation' => 0,
@@ -72,10 +92,14 @@ final class ModuleController extends AbstractController
             ];
         }
 
+        $youtubePlaylistIds = implode(',', array_map(static fn (array $v) => $v['id'], $youtubePlaylistVideos));
+
         return $this->render('admin/module/index.html.twig', [
             'modules' => $modules,
             'ressources' => $ressources,
             'selectedResourceModule' => $selectedResourceModule,
+            'youtubePlaylistVideos' => $youtubePlaylistVideos,
+            'youtubePlaylistIds' => $youtubePlaylistIds,
             'actionHistory' => $actionHistory,
             'statsByType' => $statsByType,
             'statsByModule' => $statsByModule,
